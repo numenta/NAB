@@ -24,8 +24,8 @@ world timeseries containing anomalous periods of behavior.
 To use the code in this repository you must have the following installed on
 your system.
 
-- Python 2.7
-- NuPIC
+- [Python 2.7](https://www.python.org/download/)
+- [NuPIC](http://www.github.com/numenta/nupic)
 
 ### Installation
 
