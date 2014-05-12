@@ -29,6 +29,19 @@ your system.
 - [Git](http://git-scm.com/book/en/Getting-Started-Installing-Git)
 - [NuPIC Source](http://www.github.com/numenta/nupic)
 
+#### Optional Extras
+
+- [Plotly](https://plot.ly/)
+
+If you would like these tools to plot results you can sign up for a free Plot.ly
+account and install their Python library.
+
+After you have signed up you will need to add your username and API key to your
+environment.
+
+    export PLOTLY_USER_NAME='{YOUR PLOTLY USERNAME}'
+    export PLOTLY_API_KEY='{YOUR API KEY}'
+
 ### Installation
 
 ##### Update NuPIC to the correct commit to replicate the paper's results
