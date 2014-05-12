@@ -58,12 +58,14 @@ def runAnomaly(options):
   model.enableInference({'predictedField': 'value'})
   
   # Create path to results
+  inputFilename = os.path.basename(options.inputFile)
   if not options.outputFile:
-    outputFile = "anomaly_scores_" + options.inputFile
+    outputFile = "anomaly_scores_" + inputFilename
   else:
     outputFile = options.outputFile
   outputPath = os.path.join(options.outputDir,
                             outputFile)
+  
   
   # Run input
   with open (options.inputFile) as fin:
@@ -71,7 +73,11 @@ def runAnomaly(options):
     # Open file and setup headers
     reader = csv.reader(fin)
     csvWriter = csv.writer(open(outputPath,"wb"))
-    csvWriter.writerow(["timestamp", "value", "anomaly_score", "likelihood_score"])
+    csvWriter.writerow(["timestamp",
+                        "value",
+                        "anomaly_score",
+                        "likelihood_score",
+                        "label"])
     headers = reader.next()
     
     # Iterate through each record in the CSV file
@@ -93,14 +99,15 @@ def runAnomaly(options):
       csvWriter.writerow([inputData["dttm"],
                           inputData["value"],
                           anomalyScore,
-                          likelihoodScore])
+                          likelihoodScore,
+                          inputData["label"]])
       
       # Progress report
       if (i%500) == 0: print i,"records processed"
 
-  print "Completed processing",i,"records at",datetime.datetime.now()
-  print "Anomaly scores for",options.inputFile,
-  print "have been written to",options.outputFile
+  print "Completed processing",i,"records at", datetime.datetime.now()
+  print "Anomaly scores for", options.inputFile,
+  print "have been written to", outputPath
 
 
 if __name__ == "__main__":
@@ -128,7 +135,7 @@ if __name__ == "__main__":
                     dest="outputFile", default = None)
   parser.add_option("--outputDir",
                     help="Output Directory. Results files will be place here.",
-                    dest="outputDir", default="results/")
+                    dest="outputDir", default="results")
   parser.add_option("--max", default=100.0, type=float,
       help="Maximum number for the value field. [default: %default]")
   parser.add_option("--min", default=0.0, type=float,

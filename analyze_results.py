@@ -25,13 +25,21 @@ threshold value, and a step value. It will generate an ROC curve given the csv
 using each step between min and max. Finally it will find the point on that ROC
 curve which minimizes the cost function defined below. """
 
+import os
+import pandas
+import numpy
+
+from plotly import plotly
+from optparse import OptionParser
 from confusion_matrix import (WindowedConfusionMatrix,
                               pPrintMatrix)
+from gef.utils.plotting import plotROC
 
-def genConfusionMatrix(experiment,
+def genConfusionMatrix(results,
                        threshold = 0.99,
                        window = 30,
-                       windowStepSize = 5):
+                       windowStepSize = 5,
+                       costMatrix = None):
   '''
   Returns a confusion matrix object for the results of the
   given experiment and the ground truth labels.
@@ -43,15 +51,15 @@ def genConfusionMatrix(experiment,
     windowStepSize  - The ratio of minutes to records
   '''
   
-  results = getResultsFromExperiment(experiment)
-  
   labelName = 'label'
-  if labelName not in results.columns.tolist():
-    raise Exception('No labels found in %s. Expected a '
-                    'column named "%s"' % (resultsFile, labelName))
+  columnNames = results.columns.tolist()
+  if labelName not in columnNames:
+    print columnNames
+    raise Exception('No labels found. Expected a '
+                    'column named "%s"' % labelName)
   
   # If likelihood is ABOVE threshold, label it an anomaly, otherwise not
-  score = 'Likelihood Score'
+  score = 'likelihood_score'
   predicted = results[score].apply(lambda x: 1 if x > threshold else 0)
   actual = results[labelName]
 
@@ -61,17 +69,22 @@ def genConfusionMatrix(experiment,
   cMatrix = WindowedConfusionMatrix(predicted,
                                     actual,
                                     window,
-                                    windowStepSize)
+                                    windowStepSize,
+                                    costMatrix)
   
   return cMatrix
 
-def genCurveData(experiment, minThresh = 0, maxThresh = 1, step = .01):
+def genCurveData(results,
+                 minThresh = 0,
+                 maxThresh = 1,
+                 step = .01,
+                 costMatrix = None):
   '''
   Returns a dict containing lists of data for plotting
   
     experiment - expInfo dict
     minThresh - Where to start our threshold search
-    maxThresh - Where to stop the threshold search
+    maxThresh - Where to stop the threshold search (inclusive)
     step - The increment size between each threshold test
   '''
   
@@ -79,35 +92,78 @@ def genCurveData(experiment, minThresh = 0, maxThresh = 1, step = .01):
            'tprs': [],
            'fprs': [],
            'ppvs': [],
-           'thresholds': []}
-  while minThresh < maxThresh:
-    cMatrix = genConfusionMatrix(experiment, minThresh)
+           'thresholds': [],
+           'costs': []}
+  while minThresh <= maxThresh:
+    cMatrix = genConfusionMatrix(results, minThresh, costMatrix = costMatrix)
     vals['tps'].append(cMatrix.tp)
     vals['tprs'].append(cMatrix.tpr)
     vals['fprs'].append(cMatrix.fpr)
     vals['ppvs'].append(cMatrix.ppv)
     vals['thresholds'].append(minThresh)
+    vals['costs'].append(cMatrix.cost)
     minThresh += step
   
   return vals
 
-def getResultsFromExperiment(experiment):
-  '''
-  Returns a Pandas DataFrame containing the results from the experiment
-  '''
-  # Get the results
-  resultsFile = os.path.join(experiment['relativePath'],
-                             experiment['resultsFilename'])
-  with open(resultsFile, 'r') as fh:
-    results = pandas.read_csv(fh)
+def getCostMatrix():
+  """
+  Returns costs associated with each box in a confusion Matrix
   
-  return results
+  These matrix values have been picked to reflect realistic costs of reacting to
+  each type of event for the streaming server monitoring data which comprise the
+  NAB corpus.
+  
+  The cost matrix should be carefully considered for the given application
+  and data to which it is applied.
+  """
+  
+  costMatrix = {"tpCost": 0.0,
+                "fpCost": 50.0,
+                "fnCost": 100.0,
+                "tnCost": 0.0}
+
+  return costMatrix
 
 def analyzeResults(options):
   """
   Generate ROC curve and find optimum point given cost matrix
   """
-  pass
+  with open(options.inputFile, 'r') as fh:
+    results = pandas.read_csv(fh)
+  
+  costMatrix = getCostMatrix()
+  vals = genCurveData(results,
+                      options.min,
+                      options.max,
+                      options.step,
+                      costMatrix)
+  
+  costs = vals['costs']
+  print "The lowest expected cost with this ROC curve is: %s" % str(min(costs))
+  costsArray = numpy.array(costs)
+  minCostIndices = numpy.where(costsArray == costsArray.min())
+  
+  for minCostIndex in minCostIndices:
+    ind = minCostIndex[0]
+    print "A threshold that gives the minimum cost given the current cost matrix is: %s" % str(vals['thresholds'][ind])
+  
+  if options.plot:
+    # Get connection to plotly
+    try:
+      plotlyUser = os.environ['PLOTLY_USER_NAME']
+      plotlyAPIKey = os.environ['PLOTLY_API_KEY']
+    except KeyError:
+      raise Exception("Plotly user name and api key were not found in "
+            "your environment. Please add:\n"
+            "export PLOTLY_USER_NAME={username}\n"
+            "export PLOTLY_API_KEY={apikey}")
+    
+    py = plotly(username_or_email=plotlyUser,
+                key=plotlyAPIKey,
+                verbose = False)
+    
+    plotROC(py, vals)
 
 
 if __name__ == '__main__':
@@ -119,13 +175,15 @@ if __name__ == '__main__':
   parser.add_option("--outputFile",
                     help="Output file. Results will be written to this file."
                     " (default: %default)", 
-                    dest="outputFile", default="results.csv")
-  parser.add_option("--min", default=.9999, type=float,
+                    dest="outputFile", default="analysis.csv")
+  parser.add_option("--min", default=.99999, type=float,
       help="Minimum value for classification threshold [default: %default]")
   parser.add_option("--max", default=.999999, type=float,
       help="Maximum value for classification threshold [default: %default]")
   parser.add_option("--step", default=.000001, type=float,
-      help="How much to increment the classification threshold for each point on the ROC curve. [default: %default]") 
+      help="How much to increment the classification threshold for each point on the ROC curve. [default: %default]")
+  parser.add_option("--plot", default=False, action="store_true",
+                    help="Use the Plot.ly library to generate plots")
 
   options, args = parser.parse_args()
   

@@ -10,14 +10,14 @@
 import numpy
 
 class ConfusionMatrixBase(object):
-  '''
+  """
   Base class for the confusion matrices
-  '''
+  """
   
   def setPercentages(self):
-    '''
+    """
     Add in properties for percent representations of the confusion matrix
-    '''
+    """
     
     # Percent of total
     self.tpp = self.tp / self.count
@@ -26,9 +26,9 @@ class ConfusionMatrixBase(object):
     self.tnp = self.tn / self.count
   
   def setRates(self):
-    '''
+    """
     Add in properties for rates
-    '''
+    """
     # Rates
     if self.tp or self.fn:
       self.tpr = self.tp / float(self.tp + self.fn)
@@ -44,24 +44,21 @@ class ConfusionMatrixBase(object):
     else:
       self.ppv = self.fdr = 0.0
       
-  def setQualityScore(self,
-                      tpWeight=100.0,
-                      fpWeight=-50.0,
-                      fnWeight=-10.0,
-                      tnWeight=0.0):
-    '''
-    A heuristic to combine the confusion matrix into a single score.
-    '''
+  def setCost(self, costMatrix):
+    """
+    Determines and sets the total expected cost associated with a system
+    represented by this confusion matrix.
+    """
     
-    self.quality = ((self.tp * tpWeight) +
-                    (self.fp * fpWeight) +
-                    (self.fn * fnWeight) +
-                    (self.tn * tnWeight))
+    self.cost = ((self.tp * costMatrix['tpCost']) +
+                  (self.fp * costMatrix['fpCost']) +
+                  (self.fn * costMatrix['fnCost']) +
+                  (self.tn * costMatrix['tnCost']))
 
   def getTotal(self):
-    '''
+    """
     Total of counted records
-    '''
+    """
     
     return self.tp + self.fp + self.fn + self.tn + self.ignored
 
@@ -69,8 +66,13 @@ class ConfusionMatrixBase(object):
 
 class WindowedConfusionMatrix(ConfusionMatrixBase):
   
-  def __init__(self, predicted, actual, window, windowStepSize):
-    '''
+  def __init__(self,
+               predicted,
+               actual,
+               window,
+               windowStepSize,
+               costMatrix = None):
+    """
      Generate the confusion matrix using the windowed method
     
      True Positives - An anomalous record followed in the next window minutes
@@ -91,8 +93,17 @@ class WindowedConfusionMatrix(ConfusionMatrixBase):
     actual          - A list or numpy array
     window          - Number of minutes we should calculate stats over
     windowStepSize  - Minutes per record
-    '''
+    costMatrix      - A dict of costs for each quadrent of the confusion matrix
+    """
     self.tp = self.fp = self.fn = self.tn = self.ignored = 0.0
+    
+    # Default to even, zero-cost for each type of result
+    if costMatrix == None:
+      costMatrix = {"tpCost": 0.0,
+                    "fpCost": 0.0,
+                    "fnCost": 0.0,
+                    "tnCost": 0.0}
+      
     
     # Convert predicted and actual to numpy arrays if they are not
     predicted = numpy.array(predicted)
@@ -145,17 +156,17 @@ class WindowedConfusionMatrix(ConfusionMatrixBase):
 
     self.setPercentages()
     self.setRates()
-    self.setQualityScore()
+    self.setCost(costMatrix)
 
 
  
 def pPrintMatrix(matrix, title):
-  '''
+  """
   Prints a confusion matrix in a readable way
   
   matrix - A ConfusionMatrix object
   title - string - name to use for this matrix
-  '''
+  """
   
   width = 50
   
