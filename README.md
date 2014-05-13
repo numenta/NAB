@@ -11,19 +11,19 @@ We hope you will compare these results with your own anomaly detection methods
 and share those results so we can link to them here.
 
 Finally we hope you will help improve these results by contributing to the
-Numenta Platform for Intelligent Computing (NuPIC).
+[Numenta Platform for Intelligent Computing (NuPIC)](https://github.com/numenta/nupic).
 
 ### Corpus
 
 The NAB corpus of timeseries datasets is designed to provide data for research
 in streaming anomaly detection. It is comprised of both artificial and
-real-world timeseries containing labeled anomalous periods of behavior.
+real-world timeseries data containing labeled anomalous periods of behavior.
 
-All data are ordered, timestamped, single valued metrics collected at 5 minute
+All data are ordered, timestamped, single-valued metrics collected at 5 minute
 intervals.
 
 Data represent metric values from common AWS server metrics as collected by
-the Amazon Cloudwatch service. Example metrics include CPU Utilization, Network
+the [Amazon Cloudwatch service](https://aws.amazon.com/documentation/cloudwatch/). Example metrics include CPU Utilization, Network
 Bytes In, and Disk Read Bytes.
 
 #### Task
@@ -31,7 +31,7 @@ Bytes In, and Disk Read Bytes.
 Detect anomalous behavior in streaming data in real-time.
 
 As noted in the paper, the real-world task of streaming anomaly detection is
-challenging for several reasons and these place significant constraints on the
+challenging for several reasons, which place significant constraints on the
 allowable methods.
 
 You must be able to provide a reliable anomaly score with minimal prior
@@ -55,7 +55,7 @@ your anomaly detection method.
 
 ### Requirements
 
-We provide scripts that will allow you generate results under the same
+We provide scripts that will allow you to generate results under the same
 constraints used in the Numenta paper. To use that code you will need to have
 the following installed.
 
@@ -66,7 +66,7 @@ the following installed.
 In addition we provide all of the scripts we used to generate our results using
 CLA. To replicate those results you will also need to install:
 
-- [NuPIC Source](http://www.github.com/numenta/nupic)
+- [NuPIC](http://www.github.com/numenta/nupic)
 
 #### Optional Extras
 
@@ -90,7 +90,7 @@ You can then add the --plot option to any python script to visualize output.
     cd /path/to/nupic/
     git checkout -b nab 1ea2bf51b7a5d93673a4c5b80489b8f95d782028
 
-Then follow build directions in /path/to/nupic/README.md
+Then follow build directions in the NuPIC `README.md`.
 
 ##### Download this repository
 
@@ -105,8 +105,7 @@ Then follow build directions in /path/to/nupic/README.md
     cd /path/to/nab
     ./run_benchmark.sh
 
-This will PRINT OUT / PRODUCE CHART results which should match
-exactly to the values in the paper.
+This will print out or chart (depending on whether you installed Plotly) results which should match exactly to the values in the paper.
 
 #### Analyze Your Results
 
