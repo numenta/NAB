@@ -29,11 +29,15 @@ import os
 import pandas
 import numpy
 
-from plotly import plotly
 from optparse import OptionParser
 from confusion_matrix import (WindowedConfusionMatrix,
                               pPrintMatrix)
-from gef.utils.plotting import plotROC
+
+try:
+  from plotly import plotly
+  from gef.utils.plotting import plotROC
+except ImportError:
+  plot = False
 
 def genConfusionMatrix(results,
                        threshold = 0.99,
@@ -149,6 +153,7 @@ def analyzeResults(options):
     print "A threshold that gives the minimum cost given the current cost matrix is: %s" % str(vals['thresholds'][ind])
   
   if options.plot:
+    print "Generating ROC Curve Plot ..."
     # Get connection to plotly
     try:
       plotlyUser = os.environ['PLOTLY_USER_NAME']
@@ -163,7 +168,9 @@ def analyzeResults(options):
                 key=plotlyAPIKey,
                 verbose = False)
     
-    plotROC(py, vals)
+    fileName = os.path.basename(options.inputFile)
+    chartTitle = "ROC Curve: %s" % fileName
+    plotROC(py, vals, chartTitle)
 
 
 if __name__ == '__main__':
@@ -176,11 +183,11 @@ if __name__ == '__main__':
                     help="Output file. Results will be written to this file."
                     " (default: %default)", 
                     dest="outputFile", default="analysis.csv")
-  parser.add_option("--min", default=.99999, type=float,
+  parser.add_option("--min", default=.998, type=float,
       help="Minimum value for classification threshold [default: %default]")
-  parser.add_option("--max", default=.999999, type=float,
+  parser.add_option("--max", default=.999, type=float,
       help="Maximum value for classification threshold [default: %default]")
-  parser.add_option("--step", default=.000001, type=float,
+  parser.add_option("--step", default=.0001, type=float,
       help="How much to increment the classification threshold for each point on the ROC curve. [default: %default]")
   parser.add_option("--plot", default=False, action="store_true",
                     help="Use the Plot.ly library to generate plots")

@@ -1,1 +1,4 @@
 *.pyc
+
+# Generated files
+results/*.csv

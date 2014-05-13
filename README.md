@@ -53,6 +53,13 @@ Each of these constraints is handled explicitly by the code in this repository.
 We hope this will allow you to quickly get a useful, real-world evaluation of
 your anomaly detection method.
 
+### Supported Platforms
+
+- OSX 10.9 and higher
+
+Other platforms may work but are not tested. It is expected that several flavors
+of Linux will be supported. It is not expected that Windows will be supported.
+
 ### Requirements
 
 We provide scripts that will allow you to generate results under the same
@@ -72,8 +79,8 @@ CLA. To replicate those results you will also need to install:
 
 - [Plotly](https://plot.ly/)
 
-If you would like these scripts to plot results you can sign up for a free Plot.ly
-account and install their Python library.
+If you would like these scripts to plot results you can sign up for a free
+Plot.ly account and install their Python library.
 
 After you have signed up you will need to add your username and API key to your
 environment.
@@ -88,14 +95,14 @@ You can then add the --plot option to any python script to visualize output.
 ##### Update NuPIC to the correct commit to replicate the paper's results
 
     cd /path/to/nupic/
-    git checkout -b nab 1ea2bf51b7a5d93673a4c5b80489b8f95d782028
+    git checkout -b nab {TAG NAME}
 
 Then follow build directions in the NuPIC `README.md`.
 
 ##### Download this repository
 
     cd ~/
-    git clone git@github.com:numenta/nab.git
+    git clone https://github.com/numenta/NAB.git
 
 ### Usage
 
@@ -103,7 +110,7 @@ Then follow build directions in the NuPIC `README.md`.
 #### Replicate Our Results
 
     cd /path/to/nab
-    ./run_benchmark.sh
+    python run_benchmark.py
 
 This will print out or chart (depending on whether you installed Plotly) results which should match exactly to the values in the paper.
 
@@ -127,11 +134,13 @@ or not.
 
 ## TODO
 
-- Update commit sha with final
-- Decide what the output of runBenchmark.py should be
-  - This will be a results.csv file which will then be passed to analyze_results.py
-- Expand detailed description of corpus
-- Separate script to take in results and threshold
-  - Others will want to use our code for results calc, but theirs for anomaly_score generation
+- Make note of best tag to use
 - Try both brute force and log based sampling for ROC curves
 - Add in threshold and adaptive threshold based measures for comparison
+<<<<<<< Updated upstream
+=======
+- NOTE: required results.csv format should probably require original timestamps to align their results with underlying data.
+- Further note, should we allow for automatic comparison if they use the same filenames?
+- Code is duplicated between GEF and analyze_results - decide where it belongs
+
+>>>>>>> Stashed changes
