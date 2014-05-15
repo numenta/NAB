@@ -210,7 +210,7 @@ def analyzeResults(options):
                   key=plotlyAPIKey,
                   verbose = False)
       
-      fileName = os.path.basename(options.inputFile)
+      fileName = os.path.basename(resultsFile)
       chartTitle = "ROC Curve: %s" % fileName
       plotROC(py, vals, chartTitle)
 
@@ -241,17 +241,17 @@ def analyzeResults(options):
 if __name__ == '__main__':
   # All the command line options
   parser = OptionParser(helpString)
-  parser.add_option("--resultsFile",
+  parser.add_option("-f", "--resultsFile",
                     help="Path to a single results file to analyze.")
-  parser.add_option("--resultsDir",
+  parser.add_option("-d", "--resultsDir",
                     help="Path to results files. (default: %default)")
-  parser.add_option("--outputFile",
+  parser.add_option("-o", "--outputFile",
                     help="Output file. Results will be written to this file."
                     " (default: %default)", 
                     default="resultsSummary.csv")
-  parser.add_option("--min", default=.9, type=float,
+  parser.add_option("--min", default=.1, type=float,
       help="Minimum value for classification threshold [default: %default]")
-  parser.add_option("--max", default=.99, type=float,
+  parser.add_option("--max", default=.999, type=float,
       help="Maximum value for classification threshold [default: %default]")
   parser.add_option("--step", default=.005, type=float,
       help="How much to increment the classification threshold for each point on the ROC curve. [default: %default]")

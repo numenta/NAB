@@ -1,0 +1,105 @@
+{
+    "aggregationInfo": {
+        "days": 0,
+        "fields": [
+            [
+                "c1",
+                "sum"
+            ],
+            [
+                "c0",
+                "first"
+            ]
+        ],
+        "hours": 1,
+        "microseconds": 0,
+        "milliseconds": 0,
+        "minutes": 0,
+        "months": 0,
+        "seconds": 0,
+        "weeks": 0,
+        "years": 0
+    },
+    "model": "CLA",
+    "modelParams": {
+        "anomalyParams": {
+            "anomalyCacheRecords": null,
+            "autoDetectThreshold": null,
+            "autoDetectWaitRecords": 2184
+        },
+        "clParams": {
+            "alpha": 0.035828933612158,
+            "clVerbosity": 0,
+            "implementation": "cpp",
+            "regionName": "CLAClassifierRegion",
+            "steps": "1"
+        },
+        "inferenceType": "TemporalAnomaly",
+        "sensorParams": {
+            "encoders": {
+                "dttm_timeOfDay": {
+                    "fieldname": "dttm",
+                    "name": "timestamp_timeOfDay",
+                    "timeOfDay": [
+                        21,
+                        9.5
+                    ],
+                    "type": "DateEncoder"
+                },
+                "timestamp_dayOfWeek": null,
+                "timestamp_weekend": null,
+                "value": {
+                    "clipInput": true,
+                    "fieldname": "value",
+                    "maxval": 100.0,
+                    "minval": 0.0,
+                    "n": 114,
+                    "name": "value",
+                    "type": "ScalarEncoder",
+                    "w": 21
+                }
+            },
+            "sensorAutoReset": null,
+            "verbosity": 0
+        },
+        "spEnable": true,
+        "spParams": {
+            "columnCount": 2048,
+            "globalInhibition": 1,
+            "inputWidth": 0,
+            "maxBoost": 1.0,
+            "numActiveColumnsPerInhArea": 40,
+            "potentialPct": 0.8,
+            "seed": 1956,
+            "spVerbosity": 0,
+            "spatialImp": "cpp",
+            "synPermActiveInc": 0.0015,
+            "synPermConnected": 0.1,
+            "synPermInactiveDec": 0.0005
+        },
+        "tpEnable": true,
+        "tpParams": {
+            "activationThreshold": 13,
+            "cellsPerColumn": 32,
+            "columnCount": 2048,
+            "globalDecay": 0.0,
+            "initialPerm": 0.21,
+            "inputWidth": 2048,
+            "maxAge": 0,
+            "maxSegmentsPerCell": 128,
+            "maxSynapsesPerSegment": 32,
+            "minThreshold": 10,
+            "newSynapseCount": 20,
+            "outputType": "normal",
+            "pamLength": 3,
+            "permanenceDec": 0.1,
+            "permanenceInc": 0.1,
+            "seed": 1960,
+            "temporalImp": "cpp",
+            "verbosity": 0
+        },
+        "trainSPNetOnlyIfRequested": false
+    },
+    "predictAheadTime": null,
+    "version": 1
+}

@@ -25,11 +25,11 @@ import sys
 import csv
 import datetime
 import dateutil.parser
+import simplejson as json
 
 from optparse import OptionParser
 from nupic.frameworks.opf.modelfactory import ModelFactory
 
-import model_params
 import anomaly_likelihood
 
 
@@ -197,12 +197,16 @@ class CLADetector(AnomalyDetector):
 
   def __init__(self, minVal, maxVal, *args, **kwargs):
 
+    # Load the model params JSON
+    with open("model_params.json") as fp:
+      modelParams = json.load(fp)
+
     # Update the min/max value for the encoder
-    self.sensorParams = model_params.MODEL_PARAMS['modelParams']['sensorParams']
+    self.sensorParams = modelParams['modelParams']['sensorParams']
     self.sensorParams['encoders']['value']['minval'] = minVal
     self.sensorParams['encoders']['value']['maxval'] = maxVal
     
-    self.model = self._createModel()
+    self.model = ModelFactory.create(modelParams)
     self.model.enableInference({'predictedField': 'value'})
 
     # The anomaly likelihood object
@@ -234,12 +238,6 @@ class CLADetector(AnomalyDetector):
                                                         inputData["dttm"])
 
     return anomalyScore, likelihoodScore
-
-  def _createModel(self):
-    """
-    Returns a CLA model instance
-    """
-    return ModelFactory.create(model_params.MODEL_PARAMS)
 
 #############################################################################
 
