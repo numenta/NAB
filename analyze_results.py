@@ -28,6 +28,8 @@ curve which minimizes the cost function defined below. """
 import os
 import pandas
 import numpy
+import sys
+import csv
 
 from optparse import OptionParser
 from confusion_matrix import (WindowedConfusionMatrix,
@@ -43,7 +45,8 @@ def genConfusionMatrix(results,
                        threshold = 0.99,
                        window = 30,
                        windowStepSize = 5,
-                       costMatrix = None):
+                       costMatrix = None,
+                       verbosity = 0):
   '''
   Returns a confusion matrix object for the results of the
   given experiment and the ground truth labels.
@@ -75,6 +78,9 @@ def genConfusionMatrix(results,
                                     window,
                                     windowStepSize,
                                     costMatrix)
+
+  if verbosity > 0:
+    pPrintMatrix(cMatrix, threshold)
   
   return cMatrix
 
@@ -82,28 +88,28 @@ def genCurveData(results,
                  minThresh = 0,
                  maxThresh = 1,
                  step = .01,
-                 costMatrix = None):
+                 costMatrix = None,
+                 verbosity = 0):
   '''
   Returns a dict containing lists of data for plotting
   
-    experiment - expInfo dict
-    minThresh - Where to start our threshold search
-    maxThresh - Where to stop the threshold search (inclusive)
-    step - The increment size between each threshold test
+  experiment - expInfo dict
+  minThresh - Where to start our threshold search
+  maxThresh - Where to stop the threshold search (inclusive)
+  step - The increment size between each threshold test
   '''
   
-  vals = {'tps': [],
-           'tprs': [],
+  vals = {'tprs': [],
            'fprs': [],
-           'ppvs': [],
            'thresholds': [],
            'costs': []}
   while minThresh <= maxThresh:
-    cMatrix = genConfusionMatrix(results, minThresh, costMatrix = costMatrix)
-    vals['tps'].append(cMatrix.tp)
+    cMatrix = genConfusionMatrix(results,
+                                 minThresh, 
+                                 costMatrix = costMatrix,
+                                 verbosity = verbosity)
     vals['tprs'].append(cMatrix.tpr)
     vals['fprs'].append(cMatrix.fpr)
-    vals['ppvs'].append(cMatrix.ppv)
     vals['thresholds'].append(minThresh)
     vals['costs'].append(cMatrix.cost)
     minThresh += step
@@ -114,8 +120,8 @@ def getCostMatrix():
   """
   Returns costs associated with each box in a confusion Matrix
   
-  These matrix values have been picked to reflect realistic costs of reacting to
-  each type of event for the streaming server monitoring data which comprise the
+  These values have been picked to reflect realistic costs of reacting to
+  each type of event for the server monitoring data which comprise the
   NAB corpus.
   
   The cost matrix should be carefully considered for the given application
@@ -133,69 +139,128 @@ def analyzeResults(options):
   """
   Generate ROC curve and find optimum point given cost matrix
   """
-  with open(options.inputFile, 'r') as fh:
-    results = pandas.read_csv(fh)
-  
-  costMatrix = getCostMatrix()
-  vals = genCurveData(results,
-                      options.min,
-                      options.max,
-                      options.step,
-                      costMatrix)
-  
-  costs = vals['costs']
-  print "The lowest expected cost with this ROC curve is: %s" % str(min(costs))
-  costsArray = numpy.array(costs)
-  minCostIndices = numpy.where(costsArray == costsArray.min())
-  
-  for minCostIndex in minCostIndices:
-    ind = minCostIndex[0]
-    print "A threshold that gives the minimum cost given the current cost matrix is: %s" % str(vals['thresholds'][ind])
-  
-  if options.plot:
-    print "Generating ROC Curve Plot ..."
-    # Get connection to plotly
-    try:
-      plotlyUser = os.environ['PLOTLY_USER_NAME']
-      plotlyAPIKey = os.environ['PLOTLY_API_KEY']
-    except KeyError:
-      raise Exception("Plotly user name and api key were not found in "
-            "your environment. Please add:\n"
-            "export PLOTLY_USER_NAME={username}\n"
-            "export PLOTLY_API_KEY={apikey}")
+
+  # Ensure at least one file and all files are csv
+  if not options.resultsFile and options.resultsDir is None:
+    print("Requires at least one argument of csv files to use.")
+    sys.exit(1)
+  elif options.resultsFile:
+    if (options.resultsFile.split('.') < 2 or 
+      options.resultsFile.split('.')[-1] != 'csv'):
+      print("File is not a csv.")
+      sys.exit(1)
+    else:
+      csvFiles = [options.resultsFile]
+  elif options.resultsDir:
+    # Search directory for csv files
+    items = os.listdir(options.resultsDir)
+    csvFiles = [os.path.join(options.resultsDir, item) for
+                item in items if item[-4:] == '.csv']
+
+  # Accumulate results
+  header = None
+  resultsSummary = []
+
+  # Loop over all specified results files
+  for resultsFile in csvFiles:
+
+    with open(resultsFile, 'r') as fh:
+      results = pandas.read_csv(fh)
     
-    py = plotly(username_or_email=plotlyUser,
-                key=plotlyAPIKey,
-                verbose = False)
+    costMatrix = getCostMatrix()
+    vals = genCurveData(results,
+                        options.min,
+                        options.max,
+                        options.step,
+                        costMatrix, 
+                        options.verbosity)
+
+    # First time through write out the headers
+    if not header:
+      header = ['Name']
+      thresholds = vals['thresholds']
+      header.extend(thresholds)
+      resultsSummary.append(header)
+
+    # Add a row for each file processed
+    resultRow = [resultsFile]
+    resultRow.extend(vals['costs'])
+    resultsSummary.append(resultRow)
     
-    fileName = os.path.basename(options.inputFile)
-    chartTitle = "ROC Curve: %s" % fileName
-    plotROC(py, vals, chartTitle)
+    costs = vals['costs']
+    costsArray = numpy.array(costs)
+    minCostIndices = numpy.where(costsArray == costsArray.min())
+    
+    for minCostIndex in minCostIndices:
+      ind = minCostIndex[0]
+    
+    if options.plot:
+      print "Generating ROC Curve Plot ..."
+      # Get connection to plotly
+      try:
+        plotlyUser = os.environ['PLOTLY_USER_NAME']
+        plotlyAPIKey = os.environ['PLOTLY_API_KEY']
+      except KeyError:
+        raise Exception("Plotly user name and api key were not found in "
+              "your environment. Please add:\n"
+              "export PLOTLY_USER_NAME={username}\n"
+              "export PLOTLY_API_KEY={apikey}")
+      
+      py = plotly(username_or_email=plotlyUser,
+                  key=plotlyAPIKey,
+                  verbose = False)
+      
+      fileName = os.path.basename(options.inputFile)
+      chartTitle = "ROC Curve: %s" % fileName
+      plotROC(py, vals, chartTitle)
+
+  # Sum all values
+  resultsSummaryArray = numpy.array(resultsSummary)
+  # Skip first row and column
+  summaryView = resultsSummaryArray[1:,1:].astype('float')
+  totalsArray = numpy.sum(summaryView, axis=0)
+  totalsList = totalsArray.tolist()
+  print "Minimum cost:",
+  lowestCost = totalsArray.min()
+  print lowestCost
+  minSummaryCostIndices = numpy.where(totalsArray == lowestCost)[0].tolist()
+  print "Best thresholds:"
+  for ind in minSummaryCostIndices:
+    print "\t" + str(thresholds[ind])
+
+  # Write out all our results
+  with open(options.outputFile, 'w') as outFile:
+
+    writer = csv.writer(outFile)
+    writer.writerows(resultsSummary)
+    totalsRow = ['Totals']
+    totalsRow.extend(totalsList)
+    writer.writerow(totalsRow)
 
 
 if __name__ == '__main__':
   # All the command line options
   parser = OptionParser(helpString)
-  parser.add_option("--inputFile",
-                    help="Path to data file. (default: %default)", 
-                    dest="inputFile")
+  parser.add_option("--resultsFile",
+                    help="Path to a single results file to analyze.")
+  parser.add_option("--resultsDir",
+                    help="Path to results files. (default: %default)")
   parser.add_option("--outputFile",
                     help="Output file. Results will be written to this file."
                     " (default: %default)", 
-                    dest="outputFile", default="analysis.csv")
-  parser.add_option("--min", default=.998, type=float,
+                    default="resultsSummary.csv")
+  parser.add_option("--min", default=.9, type=float,
       help="Minimum value for classification threshold [default: %default]")
-  parser.add_option("--max", default=.999, type=float,
+  parser.add_option("--max", default=.99, type=float,
       help="Maximum value for classification threshold [default: %default]")
-  parser.add_option("--step", default=.0001, type=float,
+  parser.add_option("--step", default=.005, type=float,
       help="How much to increment the classification threshold for each point on the ROC curve. [default: %default]")
   parser.add_option("--plot", default=False, action="store_true",
                     help="Use the Plot.ly library to generate plots")
+  parser.add_option("--verbosity", default=0, help="Increase the amount and "
+                    "detail of output by setting this greater than 0.")
 
   options, args = parser.parse_args()
   
   # Main
   analyzeResults(options)
-  
-  
-

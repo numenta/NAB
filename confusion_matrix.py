@@ -29,15 +29,19 @@ class ConfusionMatrixBase(object):
     """
     Add in properties for rates
     """
-    # Rates
+
+    # True Positive Rate / Sensitivity / Recall
     if self.tp or self.fn:
       self.tpr = self.tp / float(self.tp + self.fn)
     else:
       self.tpr = 0.0
+    # False Positive Rate
     if self.fp or self.tn:      
       self.fpr = self.fp / float(self.fp + self.tn)
     else:
       self.fpr = 0.0
+    # Positive Predictive Value / Precision
+    # False Discovery Rate
     if self.tp or self.fp:
       self.ppv = self.tp / float(self.tp + self.fp)
       self.fdr = self.fp / float(self.tp + self.fp)
@@ -73,7 +77,7 @@ class WindowedConfusionMatrix(ConfusionMatrixBase):
                windowStepSize,
                costMatrix = None):
     """
-     Generate the confusion matrix using the windowed method
+    Generate the confusion matrix using the windowed method
     
      True Positives - An anomalous record followed in the next window minutes
                       by at least one above threshold likelihood score
