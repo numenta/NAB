@@ -31,6 +31,12 @@ from optparse import OptionParser
 from nupic.frameworks.opf.modelfactory import ModelFactory
 
 import anomaly_likelihood
+from etsy_algorithms import (median_absolute_deviation,
+                             first_hour_average,
+                             stddev_from_average,
+                             stddev_from_moving_average,
+                             mean_subtraction_cumulation)
+
 
 
 def main(options):
@@ -44,6 +50,13 @@ def main(options):
                             options.outputDir,
                             options.outputFile)
   claDetector.run()
+
+  # #etsyDetector = EtsySkylineDetector(options.min,
+  #                                    options.max,
+  #                                    options.inputFile,
+  #                                    options.outputDir,
+  #                                    options.outputFile)
+  # #etsyDetector.run()
 
 #############################################################################
 
@@ -174,11 +187,11 @@ class AnomalyDetector(object):
         # Read the data and convert to a dict
         inputData = dict(zip(headers, record))
         inputData["value"] = float(inputData["value"])
-        inputData["dttm"] = dateutil.parser.parse(inputData["dttm"])
+        inputData["timestamp"] = dateutil.parser.parse(inputData["timestamp"])
               
         # Retrieve the anomaly score and write it to a file
         anomalyScore, likelihoodScore = self.handleRecord(inputData)
-        csvWriter.writerow([inputData["dttm"],
+        csvWriter.writerow([inputData["timestamp"],
                             inputData["value"],
                             anomalyScore,
                             likelihoodScore,
@@ -187,7 +200,7 @@ class AnomalyDetector(object):
         # Progress report
         if (i % 500) == 0: print i,"records processed"
 
-    print "Completed processing",i,"records at", datetime.datetime.now()
+    print "Completed processing", i, "records at", datetime.datetime.now()
     print "Anomaly scores for", self.inputFile,
     print "have been written to", self.outputPath
 
@@ -235,27 +248,49 @@ class CLADetector(AnomalyDetector):
     # Compute the Anomaly Likelihood
     likelihoodScore = self.anomalyLikelihood.likelihood(inputData["value"],
                                                         anomalyScore,
-                                                        inputData["dttm"])
+                                                        inputData["timestamp"])
 
     return anomalyScore, likelihoodScore
 
 #############################################################################
 
-class ThresholdDetector(AnomalyDetector):
+class EtsySkylineDetector(AnomalyDetector):
 
-  def handleRecord(inputData):
+  def __init__(self, probationaryPeriod, *args, **kwargs):
+    
+    # Store our running history
+    self.timeseries = []
+    self.recordCount = 0
+    self.probationaryPeriod = probationaryPeriod
+
+    Super(EtsySkylineDetector, self).__init__(*args, **kwargs)
+
+  def getOutputPrefix(self):
+    return "etsy_anomaly_scores_"
+
+  def handleRecord(self, inputData):
     """
     Returns a tuple (anomalyScore, likelihoodScore).
     """
 
-    probationPeriod = 24 * 12
-    probationValues = []
+    if self.recordCount < self.probationaryPeriod:
+      self.timeseries.append(inputData)
+      self.recordCount += 1
+      return 0.0, 0.0
 
-    while self.recordsSeen < probationPeriod:
-      probationValues.append(float(inputData["value"]))
-      self.recordsSeen += 1
-      # Return 0s during probation
-      return (0.0, 0.0)
+    print "median_absolute_deviation"
+    print median_absolute_deviation(self.timeseries)
+    print "first_hour_average"
+    print first_hour_average(self.timeseries)
+    print "stddev_from_average"
+    print stddev_from_average(self.timeseries)
+    print "stddev_from_moving_average"
+    print stddev_from_moving_average(self.timeseries)
+    print "mean_subtraction_cumulation"
+    print mean_subtraction_cumulation(self.timeseries)
+
+    return 0.0, 0.0
+
 
 if __name__ == "__main__":
   helpString = (
@@ -263,7 +298,7 @@ if __name__ == "__main__":
     "\n%prog --help"
     "\n"
     "\nRuns NuPIC anomaly detection on a csv file."
-    "\nWe assume the data files have a timestamp field called 'dttm' and"
+    "\nWe assume the data files have a timestamp field called 'timestamp' and"
     "\na value field called 'value'. All other fields are ignored."
     "\nNote: it is important to set min and max properly according to data."
   )

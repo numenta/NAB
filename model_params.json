@@ -37,8 +37,8 @@
         "inferenceType": "TemporalAnomaly",
         "sensorParams": {
             "encoders": {
-                "dttm_timeOfDay": {
-                    "fieldname": "dttm",
+                "timestamp_timeOfDay": {
+                    "fieldname": "timestamp",
                     "name": "timestamp_timeOfDay",
                     "timeOfDay": [
                         21,

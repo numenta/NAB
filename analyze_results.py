@@ -87,7 +87,7 @@ def genConfusionMatrix(results,
 def genCurveData(results,
                  minThresh = 0,
                  maxThresh = 1,
-                 step = .01,
+                 step = .1,
                  costMatrix = None,
                  verbosity = 0):
   '''
@@ -103,7 +103,9 @@ def genCurveData(results,
            'fprs': [],
            'thresholds': [],
            'costs': []}
-  while minThresh <= maxThresh:
+
+  incrementCount = 1.0
+  while minThresh < maxThresh and incrementCount < 60:
     cMatrix = genConfusionMatrix(results,
                                  minThresh, 
                                  costMatrix = costMatrix,
@@ -113,6 +115,10 @@ def genCurveData(results,
     vals['thresholds'].append(minThresh)
     vals['costs'].append(cMatrix.cost)
     minThresh += step
+    # Decrease step as we approach 1
+    if incrementCount % 9 == 0:
+      step /= 10.0
+    incrementCount += 1.0
   
   return vals
 
@@ -237,7 +243,6 @@ def analyzeResults(options):
     totalsRow.extend(totalsList)
     writer.writerow(totalsRow)
 
-
 if __name__ == '__main__':
   # All the command line options
   parser = OptionParser(helpString)
@@ -249,11 +254,11 @@ if __name__ == '__main__':
                     help="Output file. Results will be written to this file."
                     " (default: %default)", 
                     default="resultsSummary.csv")
-  parser.add_option("--min", default=.1, type=float,
+  parser.add_option("--min", default=0.0, type=float,
       help="Minimum value for classification threshold [default: %default]")
-  parser.add_option("--max", default=.999, type=float,
+  parser.add_option("--max", default=1, type=float,
       help="Maximum value for classification threshold [default: %default]")
-  parser.add_option("--step", default=.005, type=float,
+  parser.add_option("--step", default=.1, type=float,
       help="How much to increment the classification threshold for each point on the ROC curve. [default: %default]")
   parser.add_option("--plot", default=False, action="store_true",
                     help="Use the Plot.ly library to generate plots")

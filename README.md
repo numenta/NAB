@@ -7,8 +7,10 @@ This is the companion repository for the upcoming anomaly detection benchmark
 paper written by Numenta. It contains all of the relevant data and data
 processing scripts so that you can replicate the results in the paper.
 
-We hope you will compare these results with your own anomaly detection methods
-and share those results so we can link to them here.
+We hope you will compare these results with your own anomaly detection methods.
+
+If your methods are available as open source code we will publish your results
+on this page.
 
 Finally we hope you will help improve these results by contributing to the
 [Numenta Platform for Intelligent Computing (NuPIC)](https://github.com/numenta/nupic).
@@ -22,9 +24,9 @@ real-world timeseries data containing labeled anomalous periods of behavior.
 All data are ordered, timestamped, single-valued metrics collected at 5 minute
 intervals.
 
-Data represent values from common AWS server metrics as collected by
-the [Amazon Cloudwatch service](https://aws.amazon.com/documentation/cloudwatch/). Example metrics include CPU Utilization, Network
-Bytes In, and Disk Read Bytes.
+Data represent values from common AWS server metrics as collected by the [Amazon
+Cloudwatch service](https://aws.amazon.com/documentation/cloudwatch/). Example
+metrics include CPU Utilization, Network Bytes In, and Disk Read Bytes.
 
 #### Task
 
@@ -58,8 +60,10 @@ your anomaly detection method.
 - OSX 10.9 and higher
 
 Other platforms may work but are not tested. It is expected that several flavors
-of Linux will be supported. It is not expected that Windows will be supported.
-(NOTE: Is this true?)
+of Linux will be supported. Windows will not be supported for replicating
+results but will be supported for analyzing your own. This is because the code
+to replicate our results depends on NuPIC, which does not support Windows at
+this time.
 
 ### Requirements
 
@@ -68,7 +72,7 @@ constraints used in the Numenta paper. To use that code you will need to have
 the following installed.
 
 - [Python 2.7](https://www.python.org/download/)
-- [Numpy](http://www.numpy.org/)
+- [Numpy](http://www.numpy.org/num)
 - [Pandas](http://pandas.pydata.org/)
 - [Git](http://git-scm.com/book/en/Getting-Started-Installing-Git)
 
@@ -141,11 +145,71 @@ Skyline](https://github.com/etsy/skyline) anomaly detection library. This will
 also pass those results files to the analyze_results.py script as above to
 generate final scores.
 
+#### Data Format
+
+##### Input Data Files
+
+This is the file format for each dataset in the corpus.
+
+- All files MUST be in CSV format
+- All files MUST have exactly one header row
+- The header row MUST have the following fields
+    - "timestamp"
+        - The time of the end of the metric collection window
+        - e.g 2014-04-01 12:00:00.000000 is values collected between
+            - 2014-04-01 11:55:00.000000
+            - 2014-04-01 12:00:00.000000
+    - "value"
+        - The collected metric, e.g. CPUUtilization percent
+    - "label"
+        - This is ground truth for the class of a record.
+- Header rows MAY have other fields as well. These are ignored.
+- Values in the "timestamp" column MUST follow this format
+    - YYYY-MM-DD HH:MM:SS.s
+    - e.g. 2014-04-01 00:00:00.000000
+- Metric values in the "value" column MUST be either
+    - floats
+    - integers (these will be converted to floats internally)
+- Values in the "label" column MUST be either
+    - 0     - This record is known to be non-anomalous
+    - 0.5   - This record's class is indeterminate
+    - 1     - This record is known to be anomalous
+- Each record MUST represent an equal amount of time
+- Records MUST be in chronological order
+- Records MUST be continuous such that there are no missing time steps
+
+
+##### Results Files
+
+This is the file format that will be output by run_anomaly.py and can
+be consumed by analyze_results.py
+
+- All files MUST be in CSV format
+- All files MUST have exactly one header row
+- The header row MUST have the following fields
+    - "timestamp"
+        - This ties each result record to it's input record
+    - "anomaly_score"
+        - This is the output of your detection technique for each record
+    - "label"
+        - This is ground truth for the class of a record.
+- Header rows MAY have other fields as well. These are ignored.
+- Values in the "timestamp" column MUST follow this format
+    - YYYY-MM-DD HH:MM:SS.s
+    - e.g. 2014-04-01 00:00:00.000000
+- Values in the "anomaly_score" column MUST be
+    - floats between 0.0 and 1.0
+- Values in the "label" column MUST be either
+    - 0     - This record is known to be non-anomalous
+    - 0.5   - This record's class is indeterminate
+    - 1     - This record is known to be anomalous
+- Each record MUST correspond, one for one, to records in their input data file
+
+
 ## TODO
 
 - Make note of best tag to use
-- Try both brute force and log based sampling for ROC curves
 - Add in threshold and adaptive threshold based measures for comparison
-- NOTE: required results.csv format should probably require original timestamps to align their results with underlying data.
 - Further note, should we allow for automatic comparison if they use the same filenames?
 - Code is duplicated between GEF and analyze_results - decide where it belongs
+- Add in min/max detection to run_anomaly
