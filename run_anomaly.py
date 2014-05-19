@@ -28,6 +28,7 @@ import dateutil.parser
 import simplejson as json
 
 from optparse import OptionParser
+from pandas.io.parsers import read_csv
 from nupic.frameworks.opf.modelfactory import ModelFactory
 
 import anomaly_likelihood
@@ -35,28 +36,80 @@ from etsy_algorithms import (median_absolute_deviation,
                              first_hour_average,
                              stddev_from_average,
                              stddev_from_moving_average,
-                             mean_subtraction_cumulation)
+                             mean_subtraction_cumulation,
+                             least_squares,
+                             histogram_bins)
 
-
-
-def main(options):
+def runAnomaly(options):
   """
-  Runs each of the anomaly detectors in trun
+  Run selected detector on selected file
   """
 
-  claDetector = CLADetector(options.min,
-                            options.max,
-                            options.inputFile,
-                            options.outputDir,
-                            options.outputFile)
-  claDetector.run()
+  outputDir = getOutputDir(options)
 
-  # #etsyDetector = EtsySkylineDetector(options.min,
-  #                                    options.max,
-  #                                    options.inputFile,
-  #                                    options.outputDir,
-  #                                    options.outputFile)
-  # #etsyDetector.run()
+  if options.detector == "cla":
+
+    # If not set explicitly, calculate basic statistics up front
+    statsWindow = 24 * 12
+    with open(options.inputFile) as fh:
+      dataFrame = read_csv(fh);
+
+    if options.min == None:
+      inputMin = dataFrame.value[:statsWindow].min()
+    else:
+      inputMin = options.min
+
+    if options.max == None:
+      inputMax = dataFrame.value[:statsWindow].max()
+    else:
+      inputMax = options.max
+
+    # Catch the case where the file only has one value early on.
+    if inputMax == inputMin:
+      inputMax += 1
+
+
+    claDetector = CLADetector(inputMin,
+                              inputMax,
+                              options.inputFile,
+                              outputDir)
+    claDetector.run()
+
+  elif options.detector == "skyline":
+    # How many records to wait before generating results
+    probationaryPeriod = 600
+
+    etsyDetector = EtsySkylineDetector(probationaryPeriod,
+                                       options.inputFile,
+                                       outputDir)
+    etsyDetector.run()
+
+  else:
+    raise Exception("'%s' is not a recognized detector type." %
+                    options.detector)
+
+def getOutputDir(options):
+  """
+  Return the directory into which we should place results file based on
+  input options.
+
+  This will also *create* that directory if it does not already exist.
+  """
+
+  base = options.outputDir
+  detectorDir = options.detector
+  dataGroupDir = options.dataGroup
+  outputDir = os.path.join(base, detectorDir, dataGroupDir)
+
+  if not os.path.exists(outputDir):
+    # This is being run in parralel so watch out for race condition.
+    try:
+      os.makedirs(outputDir)
+    except OSError:
+      pass
+
+  return outputDir
+
 
 #############################################################################
 
@@ -129,23 +182,19 @@ class AnomalyDetector(object):
 
   def __init__(self,
                inputFile,
-               outputDir,
-               outputFilename):
+               outputDir):
     """
     inputFile - Path to the csv containing your timeseries data
-    outputDir - Name of directory to which results files will be written
-    outputFilename - Name of file to which results will be written
+    outputDir - Path to the directory into which results files should be placed.
     """
 
     self.inputFile = inputFile
 
     # Create path to results
     self.inputFilename = os.path.basename(self.inputFile)
-    if not outputFilename:
-      self.outputFilename = self.getOutputPrefix() + self.inputFilename
-    else:
-      self.outputFilename = outputFilename
-    self.outputPath = os.path.join(outputDir,
+    self.outputFilename = self.getOutputPrefix() + "_anomaly_scores_" + \
+                            self.inputFilename
+    self.outputFile = os.path.join(outputDir,
                               self.outputFilename)
 
   def getOutputPrefix():
@@ -172,7 +221,7 @@ class AnomalyDetector(object):
       
       # Open file and setup headers
       reader = csv.reader(fin)
-      csvWriter = csv.writer(open(self.outputPath, "wb"))
+      csvWriter = csv.writer(open(self.outputFile, "wb"))
       csvWriter.writerow(["timestamp",
                           "value",
                           "anomaly_score",
@@ -198,11 +247,11 @@ class AnomalyDetector(object):
                             inputData["label"]])
         
         # Progress report
-        if (i % 500) == 0: print i,"records processed"
+        if (i % 500) == 0: print i, "records processed"
 
     print "Completed processing", i, "records at", datetime.datetime.now()
     print "Anomaly scores for", self.inputFile,
-    print "have been written to", self.outputPath
+    print "have been written to", self.outputFile
 
 #############################################################################
 
@@ -232,7 +281,7 @@ class CLADetector(AnomalyDetector):
     """
     Returns the string to prepend to results files generated by this class
     """
-    return "cla_anomaly_scores_"
+    return "cla"
 
   def handleRecord(self, inputData):
     """
@@ -263,33 +312,37 @@ class EtsySkylineDetector(AnomalyDetector):
     self.recordCount = 0
     self.probationaryPeriod = probationaryPeriod
 
-    Super(EtsySkylineDetector, self).__init__(*args, **kwargs)
+    self.algorithms =    [median_absolute_deviation,
+                         first_hour_average,
+                         stddev_from_average,
+                         stddev_from_moving_average,
+                         mean_subtraction_cumulation,
+                         least_squares,
+                         histogram_bins]
+
+
+    super(EtsySkylineDetector, self).__init__(*args, **kwargs)
 
   def getOutputPrefix(self):
-    return "etsy_anomaly_scores_"
+    return "skyline"
 
   def handleRecord(self, inputData):
     """
     Returns a tuple (anomalyScore, likelihoodScore).
     """
 
+    inputRow = [inputData["timestamp"], inputData["value"]]
+    self.timeseries.append(inputRow)
     if self.recordCount < self.probationaryPeriod:
-      self.timeseries.append(inputData)
       self.recordCount += 1
       return 0.0, 0.0
 
-    print "median_absolute_deviation"
-    print median_absolute_deviation(self.timeseries)
-    print "first_hour_average"
-    print first_hour_average(self.timeseries)
-    print "stddev_from_average"
-    print stddev_from_average(self.timeseries)
-    print "stddev_from_moving_average"
-    print stddev_from_moving_average(self.timeseries)
-    print "mean_subtraction_cumulation"
-    print mean_subtraction_cumulation(self.timeseries)
+    score = 0.0
+    for algo in self.algorithms:
+      score += algo(self.timeseries)
 
-    return 0.0, 0.0
+    normalizedScore = score / len(self.algorithms)
+    return normalizedScore, normalizedScore
 
 
 if __name__ == "__main__":
@@ -309,24 +362,21 @@ if __name__ == "__main__":
   parser = OptionParser(helpString)
   parser.add_option("--inputFile",
                     help="Path to data file. (default: %default)", 
-                    dest="inputFile", default="data/hotgym.csv")
-  parser.add_option("--outputFile",
-                    help="Output file. Results will be written to this file."
-                    " By default 'anomaly_scores_' will be prepended to the "
-                    "input file name.", 
-                    dest="outputFile", default = None)
+                    dest="inputFile", default=None)
   parser.add_option("--outputDir",
                     help="Output Directory. Results files will be place here.",
-                    dest="outputDir", default="results")
-  parser.add_option("--max", default=100.0, type=float,
-      help="Maximum number for the value field. [default: %default]")
-  parser.add_option("--min", default=0.0, type=float,
-      help="Minimum number for the value field. [default: %default]")
-  
+                    dest="outputDir", default=None)
+  parser.add_option("--max", default=None,
+      help="Maximum number for the value field. If not set this value will be "
+          "calculated from the inputFile data.")
+  parser.add_option("--min", default=None,
+      help="Minimum number for the value field. If not set this value will be "
+          "calculated from the inputFile data.")
+
   options, args = parser.parse_args(sys.argv[1:])
 
   # Run it
-  main(options)
+  runAnomaly(options)
 
 
 

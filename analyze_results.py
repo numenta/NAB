@@ -20,8 +20,7 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-helpString = """ This script takes a csv, a minimum threshold value, a maximum
-threshold value, and a step value. It will generate an ROC curve given the csv
+helpString = """ This script takes a csvndgenerate an ROC curve given the csv
 using each step between min and max. Finally it will find the point on that ROC
 curve which minimizes the cost function defined below. """
 
@@ -41,127 +40,32 @@ try:
 except ImportError:
   plot = False
 
-def genConfusionMatrix(results,
-                       threshold = 0.99,
-                       window = 30,
-                       windowStepSize = 5,
-                       costMatrix = None,
-                       verbosity = 0):
-  '''
-  Returns a confusion matrix object for the results of the
-  given experiment and the ground truth labels.
-  
-    experiment      - an experiment info dict
-    threshold       - float - cutoff to be applied to Likelihood scores
-    window          - Use a WindowedConfusionMatrix and calculate stats over
-                      this many minutes.
-    windowStepSize  - The ratio of minutes to records
-  '''
-  
-  labelName = 'label'
-  columnNames = results.columns.tolist()
-  if labelName not in columnNames:
-    print columnNames
-    raise Exception('No labels found. Expected a '
-                    'column named "%s"' % labelName)
-  
-  # If likelihood is ABOVE threshold, label it an anomaly, otherwise not
-  score = 'likelihood_score'
-  predicted = results[score].apply(lambda x: 1 if x > threshold else 0)
-  actual = results[labelName]
-
-  if not windowStepSize:
-    raise Exception("windowStepSize must be at least 1")
-  
-  cMatrix = WindowedConfusionMatrix(predicted,
-                                    actual,
-                                    window,
-                                    windowStepSize,
-                                    costMatrix)
-
-  if verbosity > 0:
-    pPrintMatrix(cMatrix, threshold)
-  
-  return cMatrix
-
-def genCurveData(results,
-                 minThresh = 0,
-                 maxThresh = 1,
-                 step = .1,
-                 costMatrix = None,
-                 verbosity = 0):
-  '''
-  Returns a dict containing lists of data for plotting
-  
-  experiment - expInfo dict
-  minThresh - Where to start our threshold search
-  maxThresh - Where to stop the threshold search (inclusive)
-  step - The increment size between each threshold test
-  '''
-  
-  vals = {'tprs': [],
-           'fprs': [],
-           'thresholds': [],
-           'costs': []}
-
-  incrementCount = 1.0
-  while minThresh < maxThresh and incrementCount < 60:
-    cMatrix = genConfusionMatrix(results,
-                                 minThresh, 
-                                 costMatrix = costMatrix,
-                                 verbosity = verbosity)
-    vals['tprs'].append(cMatrix.tpr)
-    vals['fprs'].append(cMatrix.fpr)
-    vals['thresholds'].append(minThresh)
-    vals['costs'].append(cMatrix.cost)
-    minThresh += step
-    # Decrease step as we approach 1
-    if incrementCount % 9 == 0:
-      step /= 10.0
-    incrementCount += 1.0
-  
-  return vals
-
-def getCostMatrix():
-  """
-  Returns costs associated with each box in a confusion Matrix
-  
-  These values have been picked to reflect realistic costs of reacting to
-  each type of event for the server monitoring data which comprise the
-  NAB corpus.
-  
-  The cost matrix should be carefully considered for the given application
-  and data to which it is applied.
-  """
-  
-  costMatrix = {"tpCost": 0.0,
-                "fpCost": 50.0,
-                "fnCost": 100.0,
-                "tnCost": 0.0}
-
-  return costMatrix
 
 def analyzeResults(options):
   """
   Generate ROC curve and find optimum point given cost matrix
   """
 
-  # Ensure at least one file and all files are csv
-  if not options.resultsFile and options.resultsDir is None:
-    print("Requires at least one argument of csv files to use.")
-    sys.exit(1)
-  elif options.resultsFile:
-    if (options.resultsFile.split('.') < 2 or 
-      options.resultsFile.split('.')[-1] != 'csv'):
-      print("File is not a csv.")
-      sys.exit(1)
-    else:
-      csvFiles = [options.resultsFile]
-  elif options.resultsDir:
-    # Search directory for csv files
-    items = os.listdir(options.resultsDir)
-    csvFiles = [os.path.join(options.resultsDir, item) for
+  # Thresholds
+  threshMin = 0.0
+  threshMax = 1.0
+  initialThreshStep = .1
+
+  # Find sub directories of our results dir, e.g. results/cla/...
+  items = os.listdir(options.resultsDir)
+  subDirs = []
+  for item in items:
+    path = os.path.join(options.resultsDir, item)
+    if os.path.isdir(path):
+      subDirs.append(path)
+
+
+  csvFiles = []
+  for subDir in subDirs:
+    items = os.listdir(subDir)
+    files = [os.path.join(subDir, item) for
                 item in items if item[-4:] == '.csv']
+    csvFiles.extend(files)
 
   # Accumulate results
   header = None
@@ -170,14 +74,15 @@ def analyzeResults(options):
   # Loop over all specified results files
   for resultsFile in csvFiles:
 
+    print "Analyzing results file %s ..." % resultsFile
     with open(resultsFile, 'r') as fh:
       results = pandas.read_csv(fh)
     
     costMatrix = getCostMatrix()
     vals = genCurveData(results,
-                        options.min,
-                        options.max,
-                        options.step,
+                        threshMin,
+                        threshMax,
+                        initialThreshStep,
                         costMatrix, 
                         options.verbosity)
 
@@ -235,7 +140,8 @@ def analyzeResults(options):
     print "\t" + str(thresholds[ind])
 
   # Write out all our results
-  with open(options.outputFile, 'w') as outFile:
+  outputFile = os.path.join(options.resultsDir, "resultsSummary.csv")
+  with open(outputFile, 'w') as outFile:
 
     writer = csv.writer(outFile)
     writer.writerows(resultsSummary)
@@ -243,23 +149,113 @@ def analyzeResults(options):
     totalsRow.extend(totalsList)
     writer.writerow(totalsRow)
 
+def genConfusionMatrix(results,
+                       threshold = 0.99,
+                       window = 30,
+                       windowStepSize = 5,
+                       costMatrix = None,
+                       verbosity = 0):
+  '''
+  Returns a confusion matrix object for the results of the
+  given experiment and the ground truth labels.
+  
+    experiment      - an experiment info dict
+    threshold       - float - cutoff to be applied to Likelihood scores
+    window          - Use a WindowedConfusionMatrix and calculate stats over
+                      this many minutes.
+    windowStepSize  - The ratio of minutes to records
+  '''
+  
+  labelName = 'label'
+  columnNames = results.columns.tolist()
+  if labelName not in columnNames:
+    print columnNames
+    raise Exception('No labels found. Expected a '
+                    'column named "%s"' % labelName)
+  
+  # If likelihood is equal or above threshold, label it an anomaly, otherwise
+  # not
+  score = 'likelihood_score'
+  predicted = results[score].apply(lambda x: 1 if x >= threshold else 0)
+  actual = results[labelName]
+
+  if not windowStepSize:
+    raise Exception("windowStepSize must be at least 1")
+  
+  cMatrix = WindowedConfusionMatrix(predicted,
+                                    actual,
+                                    window,
+                                    windowStepSize,
+                                    costMatrix)
+
+  if verbosity > 0:
+    pPrintMatrix(cMatrix, threshold)
+  
+  return cMatrix
+
+def genCurveData(results,
+                 minThresh = 0,
+                 maxThresh = 1,
+                 step = .1,
+                 costMatrix = None,
+                 verbosity = 0):
+  '''
+  Returns a dict containing lists of data for plotting
+  
+  experiment  - expInfo dict
+  minThresh   - Where to start our threshold search
+  maxThresh   - Where to stop the threshold search (inclusive)
+  step        - The increment size between each threshold test. This will be
+                varied during the run to increase resolution near 1.0.
+  '''
+  
+  vals = {'tprs': [],
+           'fprs': [],
+           'thresholds': [],
+           'costs': []}
+
+  incrementCount = 1.0
+  while minThresh < maxThresh and incrementCount < 60:
+    cMatrix = genConfusionMatrix(results,
+                                 minThresh, 
+                                 costMatrix = costMatrix,
+                                 verbosity = verbosity)
+    vals['tprs'].append(cMatrix.tpr)
+    vals['fprs'].append(cMatrix.fpr)
+    vals['thresholds'].append(minThresh)
+    vals['costs'].append(cMatrix.cost)
+    minThresh += step
+    # Decrease step as we approach 1
+    if incrementCount % 9 == 0:
+      step /= 10.0
+    incrementCount += 1.0
+  
+  return vals
+
+def getCostMatrix():
+  """
+  Returns costs associated with each box in a confusion Matrix
+  
+  These values have been picked to reflect realistic costs of reacting to
+  each type of event for the server monitoring data which comprise the
+  NAB corpus.
+  
+  The cost matrix should be carefully considered for the given application
+  and data to which it is applied.
+  """
+  
+  costMatrix = {"tpCost": 0.0,
+                "fpCost": 50.0,
+                "fnCost": 100.0,
+                "tnCost": 0.0}
+
+  return costMatrix
+
 if __name__ == '__main__':
   # All the command line options
   parser = OptionParser(helpString)
-  parser.add_option("-f", "--resultsFile",
-                    help="Path to a single results file to analyze.")
   parser.add_option("-d", "--resultsDir",
                     help="Path to results files. (default: %default)")
-  parser.add_option("-o", "--outputFile",
-                    help="Output file. Results will be written to this file."
-                    " (default: %default)", 
-                    default="resultsSummary.csv")
-  parser.add_option("--min", default=0.0, type=float,
-      help="Minimum value for classification threshold [default: %default]")
-  parser.add_option("--max", default=1, type=float,
-      help="Maximum value for classification threshold [default: %default]")
-  parser.add_option("--step", default=.1, type=float,
-      help="How much to increment the classification threshold for each point on the ROC curve. [default: %default]")
   parser.add_option("--plot", default=False, action="store_true",
                     help="Use the Plot.ly library to generate plots")
   parser.add_option("--verbosity", default=0, help="Increase the amount and "

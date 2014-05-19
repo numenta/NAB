@@ -1,0 +1,16 @@
+# The data/ directory is subdivided into different groups of datasets which
+# you may want to run independently. You may specify any combination of
+# those groups here and run_benchmark.py will automatically use those datasets.
+DataGroups:
+    - artificialWithAnomaly
+    - artificialNoAnomaly
+    - real
+
+# We provide three anomaly detectors. You may want to use some or all of them
+# to generate results. You may also create your own detector as a subclass of
+# AnomalyDetector and then add it here to have run_benchmark.py use your
+# detector to generate results.
+AnomalyDetectors:
+    - cla
+    - skyline
+    #- basic

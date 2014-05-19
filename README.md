@@ -74,6 +74,7 @@ the following installed.
 - [Python 2.7](https://www.python.org/download/)
 - [Numpy](http://www.numpy.org/num)
 - [Pandas](http://pandas.pydata.org/)
+- [PyYaml]
 - [Git](http://git-scm.com/book/en/Getting-Started-Installing-Git)
 
 In addition we provide all of the scripts we used to generate our results using
@@ -212,4 +213,14 @@ be consumed by analyze_results.py
 - Add in threshold and adaptive threshold based measures for comparison
 - Further note, should we allow for automatic comparison if they use the same filenames?
 - Code is duplicated between GEF and analyze_results - decide where it belongs
-- Add in min/max detection to run_anomaly
+- grubbs requires use of the inverse survival function from SciPy
+Minimum cost: 113050.0
+Best thresholds:
+    0.3
+    0.4
+- Should the calculation of min/max be a part of each detector?
+- Remove likelihood score
+- for AnomalyDetector remove outputDir and infer it from outputFile which 
+  should be a path
+- gef charts of run_anomaly output need to reflect the proper lenght of the probationary period
+- stop calling out to the command line for analyzeResults
