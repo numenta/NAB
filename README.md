@@ -7,10 +7,7 @@ This is the companion repository for the upcoming anomaly detection benchmark
 paper written by Numenta. It contains all of the relevant data and data
 processing scripts so that you can replicate the results in the paper.
 
-We hope you will compare these results with your own anomaly detection methods.
-
-If your methods are available as open source code we will publish your results
-on this page.
+We hope you will compare these results with your own anomaly detection methods and if your methods are available as open source code we would also be happy to list your results on this page.
 
 Finally we hope you will help improve these results by contributing to the
 [Numenta Platform for Intelligent Computing (NuPIC)](https://github.com/numenta/nupic).
@@ -59,11 +56,11 @@ your anomaly detection method.
 
 - OSX 10.9 and higher
 
-Other platforms may work but are not tested. It is expected that several flavors
-of Linux will be supported. Windows will not be supported for replicating
-results but will be supported for analyzing your own. This is because the code
-to replicate our results depends on NuPIC, which does not support Windows at
-this time.
+Other platforms may work but have not been tested. It is expected that several
+flavors of Linux will be supported. Windows will not be supported for
+replicating results but will be supported for analyzing your own. This is
+because the code to replicate our results depends on NuPIC, which does not
+support Windows at this time.
 
 ### Requirements
 
@@ -71,11 +68,12 @@ We provide scripts that will allow you to generate results under the same
 constraints used in the Numenta paper. To use that code you will need to have
 the following installed.
 
+- [Git](http://git-scm.com/book/en/Getting-Started-Installing-Git)
 - [Python 2.7](https://www.python.org/download/)
+- [pip](https://pip.pypa.io/en/latest/installing.html)
 - [Numpy](http://www.numpy.org/num)
 - [Pandas](http://pandas.pydata.org/)
-- [PyYaml]
-- [Git](http://git-scm.com/book/en/Getting-Started-Installing-Git)
+- [PyYaml](http://pyyaml.org/)
 
 In addition we provide all of the scripts we used to generate our results using
 CLA. To replicate those results you will also need to install:
@@ -101,12 +99,21 @@ You can then add the --plot option to any python script to visualize output.
 
 #### To Analyze Your Results Only
 
+It is assumed you have git, python 2.7 and pip installed by this point.
+
 ##### Download this repository
 
     cd ~/
     git clone https://github.com/numenta/NAB.git
 
+##### Install Python Requirements
+
+    cd nab
+    (sudo) pip install -r requirements.txt
+
 #### To Replicate Our Results
+
+It is assumed you have NuPIC installed by this point.
 
 ##### Update NuPIC to the correct commit to replicate the paper's results
 
@@ -125,15 +132,7 @@ directly compare your results to ours with the provided script.
     cd /path/to/nab
     python analyze_results.py -i /path/to/your/results.csv
 
-Your results file should be a comma separated file with at least two
-columns
-
-    anomaly_score,  label
-
-Anomaly scores must be floating point values between 0.0 and 1.0.
-
-Labels must be an integer, 0 or 1, that indicates if the record is anomalous
-or not.
+Please see "Results Files" below for the expected format of these files.
 
 #### Replicate Our Results
 
@@ -214,13 +213,11 @@ be consumed by analyze_results.py
 - Further note, should we allow for automatic comparison if they use the same filenames?
 - Code is duplicated between GEF and analyze_results - decide where it belongs
 - grubbs requires use of the inverse survival function from SciPy
-Minimum cost: 113050.0
-Best thresholds:
-    0.3
-    0.4
 - Should the calculation of min/max be a part of each detector?
-- Remove likelihood score
+- Rename likelihood score
 - for AnomalyDetector remove outputDir and infer it from outputFile which 
   should be a path
 - gef charts of run_anomaly output need to reflect the proper lenght of the probationary period
 - stop calling out to the command line for analyzeResults
+- make sure --plot works for all scripts
+- add a requirements.txt file to install all python dependencies
