@@ -85,7 +85,8 @@ CLA. To replicate those results you will also need to install:
 - [Plotly](https://plot.ly/)
 
 If you would like these scripts to plot results you can sign up for a free
-Plot.ly account and install their Python library.
+Plot.ly account and install their Python library. (If you use pip to install
+from requirements.txt below this will be installed automatically.)
 
 After you have signed up you will need to add your username and API key to your
 environment.
@@ -220,4 +221,3 @@ be consumed by analyze_results.py
 - gef charts of run_anomaly output need to reflect the proper lenght of the probationary period
 - stop calling out to the command line for analyzeResults
 - make sure --plot works for all scripts
-- add a requirements.txt file to install all python dependencies

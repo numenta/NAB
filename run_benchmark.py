@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # ----------------------------------------------------------------------
-# Copyright (C) 2013, Numenta, Inc.  Unless you have an agreement
+# Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
 # with Numenta, Inc., for a separate license for this software code, the
 # following terms and conditions apply:
 #
@@ -106,18 +106,17 @@ def analyzeResults(resultsDir, plot = False):
 if __name__ == "__main__":
 
   parser = OptionParser()
-  parser.add_option("--outputDir",
-                    help="Output Directory. Results files will be place here.",
-                    dest="outputDir", default="results")
   parser.add_option("-a", "--analyzeOnly", help="Analyze results in the "
                     "results directory only.", dest="analyzeOnly",
                     default=False,
                     action="store_true")
-  parser.add_option("-r", "--resultsOnly", help="Generate detector results but do not analyze results files.",
+  parser.add_option("-r", "--resultsOnly", help="Generate detector results but "
+                    "do not analyze results files.",
                     dest="resultsOnly", default=False, action="store_true")
   parser.add_option("-p", "--plot", help="If you have Plotly installed "
-    "this option will plot results and ROC curves for each dataset.",
-    dest="plotResults", default=False, action="store_true")
+                    "this option will plot results and ROC curves for each "
+                    "dataset.",
+                    dest="plotResults", default=False, action="store_true")
   parser.add_option("--config", default="benchmark_config.yaml",
                     help="The configuration file to use while running the "
                     "benchmark.")
