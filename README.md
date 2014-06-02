@@ -123,6 +123,13 @@ It is assumed you have NuPIC installed by this point.
 
 Then follow build directions in the NuPIC `README.md`.
 
+### EC2 Image
+
+We also provide an Amazon Machine Image (AMI) from which you can launch
+an EC2 instance with all requirements and this repository pre-installed.
+
+ami-9faddeaf
+
 ### Usage
 
 #### Analyze Your Results
@@ -216,7 +223,9 @@ be consumed by analyze_results.py
     - grubbs requires use of the inverse survival function from SciPy
     - ks_test requires ks_2samp
 - Should the calculation of min/max be a part of each detector?
-- Rename likelihood score
 - for AnomalyDetector remove outputDir and infer it from outputFile which 
   should be a path
-- gef charts of run_anomaly output need to reflect the proper lenght of the probationary period
+- gef charts of run_anomaly output need to reflect the proper length of the probationary period
+- Update anomaly likelihood code to latest version in NuPIC
+- Remove results from AMI before creating final.
+

@@ -89,6 +89,10 @@ def analyzeResults(options):
                 item in items if item[-4:] == '.csv']
     csvFiles.extend(files)
 
+  if not csvFiles:
+    print("No files to analyze.")
+    sys.exit(0)
+
   # Accumulate results
   header = None
   resultsSummary = []

@@ -19,6 +19,7 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
+import sys
 import os
 import yaml
 
@@ -26,6 +27,12 @@ from optparse import OptionParser
 from multiprocessing import Pool, cpu_count
 from subprocess import call
 from copy import deepcopy
+
+try:
+  import nupic
+except ImportError:
+  print "Please install NuPIC before running this script."
+  sys.exit(1)
 
 from run_anomaly import runAnomaly
 from analyze_results import analyzeResults
@@ -37,6 +44,8 @@ try:
 except ImportError:
   print "Plotly not installed. Plots will not be available."
   pass
+
+
 
 def main(options):
   """
