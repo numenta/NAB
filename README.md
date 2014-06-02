@@ -1,13 +1,13 @@
 The Numenta Anomaly Benchmark
 -----------------------------
 
-### Introduction
-
 This is the companion repository for the upcoming anomaly detection benchmark
 paper written by Numenta. It contains all of the relevant data and data
-processing scripts so that you can replicate the results in the paper.
+processing scripts to replicate the results in the paper.
 
-We hope you will compare these results with your own anomaly detection methods and if your methods are available as open source code we would also be happy to list your results on this page.
+We hope you will compare these results with your own anomaly detection methods.
+Competative results tied to open source code will be listed here. Let us
+know about your work by submitting a pull request or emailing INSERT EMAIL LATER.
 
 Finally we hope you will help improve these results by contributing to the
 [Numenta Platform for Intelligent Computing (NuPIC)](https://github.com/numenta/nupic).
@@ -211,13 +211,12 @@ be consumed by analyze_results.py
 
 - Make note of best tag to use
 - Add in threshold and adaptive threshold based measures for comparison
-- Further note, should we allow for automatic comparison if they use the same filenames?
 - Code is duplicated between GEF and analyze_results - decide where it belongs
-- grubbs requires use of the inverse survival function from SciPy
+- Two skyline algorithms use scipy code
+    - grubbs requires use of the inverse survival function from SciPy
+    - ks_test requires ks_2samp
 - Should the calculation of min/max be a part of each detector?
 - Rename likelihood score
 - for AnomalyDetector remove outputDir and infer it from outputFile which 
   should be a path
 - gef charts of run_anomaly output need to reflect the proper lenght of the probationary period
-- stop calling out to the command line for analyzeResults
-- make sure --plot works for all scripts

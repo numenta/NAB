@@ -97,7 +97,10 @@ def getOutputDir(options):
 
   base = options.outputDir
   detectorDir = options.detector
-  dataGroupDir = options.dataGroup
+  if options.inputFile:
+    dataGroupDir = os_path_split_asunder(options.inputFile)[1]
+  else:
+    dataGroupDir = options.dataGroup
   outputDir = os.path.join(base, detectorDir, dataGroupDir)
 
   if not os.path.exists(outputDir):
@@ -108,6 +111,23 @@ def getOutputDir(options):
       pass
 
   return outputDir
+
+def os_path_split_asunder(path, debug=False):
+  """
+  From http://stackoverflow.com/questions/4579908/cross-platform-splitting-of-path-in-python
+  """
+  parts = []
+  while True:
+      newpath, tail = os.path.split(path)
+      if debug: print repr(path), (newpath, tail)
+      if newpath == path:
+          assert not tail
+          if path: parts.append(path)
+          break
+      parts.append(tail)
+      path = newpath
+  parts.reverse()
+  return parts
 
 
 #############################################################################
@@ -196,7 +216,7 @@ class AnomalyDetector(object):
     self.outputFile = os.path.join(outputDir,
                               self.outputFilename)
 
-  def getOutputPrefix():
+  def getOutputPrefix(self):
     """
     Returns a string to use as a prefix to output file names.
 
@@ -204,10 +224,24 @@ class AnomalyDetector(object):
     """
 
     return ""
+
+  def getAdditionalHeaders(self):
+    """
+    Returns a list of strings. Subclasses can add in additional columns per 
+    record. 
+
+    This method must be overridden to provide the names for those
+    columns.
+    """
+
+    return []
     
   def handleRecord(inputData):
     """
-    Returns a tuple (anomalyScore, likelihoodScore). 
+    Returns a list [anomalyScore, *]. It is required that the first
+    element of the list is the anomalyScore. The other elements may
+    be anything, but should correspond to the names returned by
+    getAdditionalHeaders(). 
 
     This method must be overridden by subclasses
     """
@@ -221,11 +255,14 @@ class AnomalyDetector(object):
       # Open file and setup headers
       reader = csv.reader(fin)
       csvWriter = csv.writer(open(self.outputFile, "wb"))
-      csvWriter.writerow(["timestamp",
-                          "value",
-                          "anomaly_score",
-                          "likelihood_score",
-                          "label"])
+      outputHeaders = ["timestamp",
+                        "value",
+                        "label",
+                        "anomaly_score"]
+
+      # Add in any additional headers
+      outputHeaders.extend(self.getAdditionalHeaders())
+      csvWriter.writerow(outputHeaders)
       headers = reader.next()
       
       # Iterate through each record in the CSV file
@@ -237,13 +274,13 @@ class AnomalyDetector(object):
         inputData["value"] = float(inputData["value"])
         inputData["timestamp"] = dateutil.parser.parse(inputData["timestamp"])
               
-        # Retrieve the anomaly score and write it to a file
-        anomalyScore, likelihoodScore = self.handleRecord(inputData)
-        csvWriter.writerow([inputData["timestamp"],
-                            inputData["value"],
-                            anomalyScore,
-                            likelihoodScore,
-                            inputData["label"]])
+        # Retrieve the detector output and write it to a file
+        outputRow = [inputData["timestamp"],
+                     inputData["value"],
+                     inputData["label"]]
+        detectorValues = self.handleRecord(inputData)
+        outputRow.extend(detectorValues)
+        csvWriter.writerow(outputRow)
         
         # Progress report
         if (i % 500) == 0: print i, "records processed"
@@ -282,23 +319,33 @@ class CLADetector(AnomalyDetector):
     """
     return "cla"
 
+  def getAdditionalHeaders(self):
+    """
+    Returns a list of strings.
+    """
+
+    return ["_raw_score"]
+
   def handleRecord(self, inputData):
     """
-    Returns a tuple (anomalyScore, likelihoodScore).
+    Returns a list [anomalyScore, rawScore].
+
+    Internally to NuPIC "anomalyScore" corresponds to "likelihood_score"
+    and "rawScore" corresponds to "anomaly_score". Sorry about that.
     """
 
     # Send it to the CLA and get back the results
     result = self.model.run(inputData)
     
     # Retrieve the anomaly score and write it to a file
-    anomalyScore = result.inferences['anomalyScore']
+    rawScore = result.inferences['anomalyScore']
 
     # Compute the Anomaly Likelihood
-    likelihoodScore = self.anomalyLikelihood.likelihood(inputData["value"],
-                                                        anomalyScore,
-                                                        inputData["timestamp"])
+    anomalyScore = self.anomalyLikelihood.likelihood(inputData["value"],
+                                                     rawScore,
+                                                     inputData["timestamp"])
 
-    return anomalyScore, likelihoodScore
+    return [anomalyScore, rawScore]
 
 #############################################################################
 
@@ -327,21 +374,20 @@ class EtsySkylineDetector(AnomalyDetector):
 
   def handleRecord(self, inputData):
     """
-    Returns a tuple (anomalyScore, likelihoodScore).
+    Returns a list [anomalyScore].
     """
 
+    score = 0.0
     inputRow = [inputData["timestamp"], inputData["value"]]
     self.timeseries.append(inputRow)
     if self.recordCount < self.probationaryPeriod:
       self.recordCount += 1
-      return 0.0, 0.0
-
-    score = 0.0
-    for algo in self.algorithms:
-      score += algo(self.timeseries)
+    else:
+      for algo in self.algorithms:
+        score += algo(self.timeseries)
 
     normalizedScore = score / len(self.algorithms)
-    return normalizedScore, normalizedScore
+    return [normalizedScore]
 
 
 if __name__ == "__main__":
@@ -364,13 +410,20 @@ if __name__ == "__main__":
                     dest="inputFile", default=None)
   parser.add_option("--outputDir",
                     help="Output Directory. Results files will be place here.",
-                    dest="outputDir", default=None)
+                    dest="outputDir", default="results")
   parser.add_option("--max", default=None,
       help="Maximum number for the value field. If not set this value will be "
           "calculated from the inputFile data.")
   parser.add_option("--min", default=None,
       help="Minimum number for the value field. If not set this value will be "
           "calculated from the inputFile data.")
+  parser.add_option("--verbosity", default=0, help="Increase the amount and "
+                    "detail of output by setting this greater than 0.")
+  parser.add_option("--plot", default=False, action="store_true",
+                    help="Use the Plot.ly library to generate plots")
+  parser.add_option("--detector", help="Which Anomaly Detector class to use.")
+  parser.add_option("--dataGroup", help="Which data group to run.")
+
 
   options, args = parser.parse_args(sys.argv[1:])
 

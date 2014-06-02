@@ -19,7 +19,7 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-helpString = """ This script takes a csvndgenerate an ROC curve given the csv
+helpString = """ This script takes a csv and generates an ROC curve given the csv
 using each step between min and max. Finally it will find the point on that ROC
 curve which minimizes the cost function defined below. """
 
@@ -28,6 +28,7 @@ import pandas
 import numpy
 import sys
 import csv
+import yaml
 
 from optparse import OptionParser
 from confusion_matrix import (WindowedConfusionMatrix,
@@ -36,7 +37,7 @@ from confusion_matrix import (WindowedConfusionMatrix,
 
 gPlotsAvailable = False
 try:
-  import plotly
+  from plotly import plotly
   from gef.utils.plotting import plotROC
   gPlotsAvailable = True
 except ImportError:
@@ -60,6 +61,14 @@ def analyzeResults(options):
   for item in items:
     path = os.path.join(options.resultsDir, item)
     if os.path.isdir(path):
+      for d in options.detectors:
+        if d == item: 
+          print("ERROR: It looks like you're trying to analyze results from "
+                "multiple detectors at once. \nThis script generates results "
+                "summaries which are only meaningful on a per-detector basis.\n"
+                "Please specify a single detector results directory. e.g. "
+                "python analyze_results.py -d results/cla")
+          sys.exit(1)
       subDirs.append(path)
 
 
@@ -158,7 +167,7 @@ def genConfusionMatrix(results,
                        windowStepSize = 5,
                        costMatrix = None,
                        verbosity = 0):
-  '''
+  """
   Returns a confusion matrix object for the results of the
   given experiment and the ground truth labels.
   
@@ -167,7 +176,7 @@ def genConfusionMatrix(results,
     window          - Use a WindowedConfusionMatrix and calculate stats over
                       this many minutes.
     windowStepSize  - The ratio of minutes to records
-  '''
+  """
   
   labelName = 'label'
   columnNames = results.columns.tolist()
@@ -178,7 +187,7 @@ def genConfusionMatrix(results,
   
   # If likelihood is equal or above threshold, label it an anomaly, otherwise
   # not
-  score = 'likelihood_score'
+  score = 'anomaly_score'
   predicted = results[score].apply(lambda x: 1 if x >= threshold else 0)
   actual = results[labelName]
 
@@ -202,7 +211,7 @@ def genCurveData(results,
                  step = .1,
                  costMatrix = None,
                  verbosity = 0):
-  '''
+  """
   Returns a dict containing lists of data for plotting
   
   experiment  - expInfo dict
@@ -210,7 +219,7 @@ def genCurveData(results,
   maxThresh   - Where to stop the threshold search (inclusive)
   step        - The increment size between each threshold test. This will be
                 varied during the run to increase resolution near 1.0.
-  '''
+  """
   
   vals = {'tprs': [],
            'fprs': [],
@@ -227,13 +236,25 @@ def genCurveData(results,
     vals['fprs'].append(cMatrix.fpr)
     vals['thresholds'].append(minThresh)
     vals['costs'].append(cMatrix.cost)
-    minThresh += step
-    # Decrease step as we approach 1
-    if incrementCount % 9 == 0:
-      step /= 10.0
+
+    minThresh, step = updateThreshold(minThresh, step, incrementCount)
     incrementCount += 1.0
+
   
   return vals
+
+def updateThreshold(thresh, step, incrementCount):
+  """
+  One method of updating our threshold to generate the ROC curve. Here as soon
+  as we reach .9 we begin decreasing the threshold increment in a logarithmic
+  fashion, asymptotically approaching 1
+  """
+  thresh += step
+  # Decrease step as we approach 1
+  if incrementCount % 9 == 0:
+    step /= 10.0
+
+  return thresh, step
 
 def getCostMatrix():
   """
@@ -258,13 +279,26 @@ if __name__ == '__main__':
   # All the command line options
   parser = OptionParser(helpString)
   parser.add_option("-d", "--resultsDir",
-                    help="Path to results files. (default: %default)")
+                    help="Path to results files. Single detector only!")
   parser.add_option("--plot", default=False, action="store_true",
                     help="Use the Plot.ly library to generate plots")
   parser.add_option("--verbosity", default=0, help="Increase the amount and "
                     "detail of output by setting this greater than 0.")
+  parser.add_option("--config", default="benchmark_config.yaml",
+                    help="The configuration file to use while running the "
+                    "benchmark.")
 
   options, args = parser.parse_args()
+
+  # Load the config file
+  with open(options.config) as configHandle:
+    config = yaml.load(configHandle)
+
+  # Update any missing config values from global config file
+  if not options.resultsDir:
+    options.resultsDir = config["ResultsDirectory"]
+
+  options.detectors = config["AnomalyDetectors"]
   
   # Main
   analyzeResults(options)

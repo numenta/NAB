@@ -28,10 +28,11 @@ from subprocess import call
 from copy import deepcopy
 
 from run_anomaly import runAnomaly
+from analyze_results import analyzeResults
 
 gPlotsAvailable = False
 try:
-  import plotly
+  from plotly import plotly
   gPlotsAvailable = True
 except ImportError:
   print "Plotly not installed. Plots will not be available."
@@ -43,7 +44,7 @@ def main(options):
   """
 
   # Load the config file
-  with open("benchmark_config.yaml") as configHandle:
+  with open(options.config) as configHandle:
     config = yaml.load(configHandle)
 
   # Use as many CPUs as are available
@@ -54,6 +55,7 @@ def main(options):
   if gPlotsAvailable and options.plotResults:
     plot = True
 
+  # Run the data analysis portion unless asked not to
   if not options.analyzeOnly:
 
     pool = Pool(processes=numCPUs)
@@ -72,7 +74,7 @@ def main(options):
         dirContents = os.listdir(dataPath)
         csvNames = [name for name in dirContents if ".csv" in name]
 
-        # Loop over csv's in that directory
+        # Loop over csvs in that directory
         for fileName in csvNames:
           subOpt = deepcopy(options)
           subOpt.inputFile = os.path.join(dataPath, fileName)
@@ -82,6 +84,7 @@ def main(options):
           subOpt.min = None
           subOpt.max = None
           subOpt.outputFile = None
+          subOpt.outputDir = config['ResultsDirectory']
           tasks.append(subOpt)
 
     print "Running %d tasks using %d cores ..." % (len(tasks), numCPUs)
@@ -89,19 +92,25 @@ def main(options):
     # Process those files in parallel
     pool.map(runAnomaly, tasks)
 
-  # Results have been generated. Analyze them.
-  for detector in config["AnomalyDetectors"]:
-    if not options.resultsOnly:
+  # Results have been generated. Analyze them unless asked not to.
+  if not options.resultsOnly:
 
-      resultsDir = os.path.join(options.outputDir, detector)
-      analyzeResults(resultsDir, plot)
+    tasks = []
+    for detector in config["AnomalyDetectors"]:
+      subOpt = deepcopy(options)
+      subOpt.plot = plot
+      resultsDir = os.path.join(config['ResultsDirectory'], detector)
+      subOpt.resultsDir = resultsDir
+      # Plotting in parallel fails, so don't use pool
+      if plot:
+        analyzeResults(subOpt)
+      else:
+        tasks.append(subOpt)
 
-def analyzeResults(resultsDir, plot = False):
+    if tasks:
+      pool = Pool(processes=numCPUs)
+      pool.map(analyzeResults, tasks)
 
-  cmd = "python analyze_results.py --resultsDir %s " % resultsDir
-  if plot:
-    cmd += "--plot"
-  call(cmd, shell=True)
 
 if __name__ == "__main__":
 
@@ -117,6 +126,8 @@ if __name__ == "__main__":
                     "this option will plot results and ROC curves for each "
                     "dataset.",
                     dest="plotResults", default=False, action="store_true")
+  parser.add_option("--verbosity", default=0, help="Increase the amount and "
+                    "detail of output by setting this greater than 0.")
   parser.add_option("--config", default="benchmark_config.yaml",
                     help="The configuration file to use while running the "
                     "benchmark.")
