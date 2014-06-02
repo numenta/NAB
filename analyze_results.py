@@ -50,6 +50,16 @@ def analyzeResults(options):
   Generate ROC curve and find optimum point given cost matrix
   """
 
+  # Load the config file
+  with open(options.config) as configHandle:
+    config = yaml.load(configHandle)
+
+  # Update any missing config values from global config file
+  if not options.resultsDir:
+    options.resultsDir = config["ResultsDirectory"]
+
+  options.detectors = config["AnomalyDetectors"]
+
   # Thresholds
   threshMin = 0.0
   threshMax = 1.0
@@ -289,16 +299,6 @@ if __name__ == '__main__':
                     "benchmark.")
 
   options, args = parser.parse_args()
-
-  # Load the config file
-  with open(options.config) as configHandle:
-    config = yaml.load(configHandle)
-
-  # Update any missing config values from global config file
-  if not options.resultsDir:
-    options.resultsDir = config["ResultsDirectory"]
-
-  options.detectors = config["AnomalyDetectors"]
   
   # Main
   analyzeResults(options)
