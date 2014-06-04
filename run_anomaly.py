@@ -283,8 +283,11 @@ class AnomalyDetector(object):
         csvWriter.writerow(outputRow)
         
         # Progress report
-        if (i % 500) == 0: print i, "records processed"
+        if (i % 500) == 0: 
+          print ".",
+          sys.stdout.flush()
 
+    print "\n"
     print "Completed processing", i, "records at", datetime.datetime.now()
     print "Anomaly scores for", self.inputFile,
     print "have been written to", self.outputFile
@@ -423,7 +426,6 @@ if __name__ == "__main__":
                     help="Use the Plot.ly library to generate plots")
   parser.add_option("--detector", help="Which Anomaly Detector class to use.",
                     default="cla")
-  parser.add_option("--dataGroup", help="Which data group to run.")
 
 
   options, args = parser.parse_args(sys.argv[1:])
