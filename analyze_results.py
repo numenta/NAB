@@ -157,10 +157,48 @@ def analyzeResults(options):
 
   # Skip first row and column
   summaryView = resultsSummaryArray[1:,1:].astype('float')
+  
+  # Summarize data for file writing
   totalsArray = numpy.sum(summaryView, axis=0)
   totalsList = totalsArray.tolist()
   lowestCost = totalsArray.min()
   minSummaryCostIndices = numpy.where(totalsArray == lowestCost)[0].tolist()
+  bestThresholds = [thresholds[ind] for ind in minSummaryCostIndices]
+
+  # Re-run all files with lowest "best" threshold
+  minThresh = bestThresholds[0]
+  detailedResults = []
+  headers = ["Results File",
+             "True Positives",
+             "False Positives",
+             "False Negatives",
+             "True Negatives",
+             "Cost"]
+  detailedResults.append(headers)
+  for resultsFile in csvFiles:
+
+    with open(resultsFile, 'r') as fh:
+      results = pandas.read_csv(fh)
+    
+    costMatrix = getCostMatrix()
+    cMatrix = genConfusionMatrix(results,
+                                 minThresh, 
+                                 costMatrix = costMatrix)
+
+    detailedResults.append([resultsFile,
+                            cMatrix.tp, 
+                            cMatrix.fp,
+                            cMatrix.fn,
+                            cMatrix.tn,
+                            cMatrix.cost])
+
+  # Write out detailed results
+  detailedOutput = os.path.join(options.resultsDir, "detailedResults.csv")
+  with open(detailedOutput, 'w') as outFile:
+
+    writer = csv.writer(outFile)
+    writer.writerows(detailedResults)
+
 
   # Write out all our results
   outputFile = os.path.join(options.resultsDir, "resultsSummary.csv")
@@ -181,15 +219,15 @@ def analyzeResults(options):
   print lowestCost
 
   print "Best thresholds:"
-  for ind in minSummaryCostIndices:
-    print "\t" + str(thresholds[ind])
+  for thresh in bestThresholds:
+    print "\t" + str(thresh)
 
   print "Summary file for all thresholds:", outputFile
 
 
 def inferDetector(options):
   """
-  Returns a string which is either a known detector name or "Unknown." if 
+  Returns a string which is either a known detector name or "Unknown" if 
   the infered detector does not match one we know.
   """
 
