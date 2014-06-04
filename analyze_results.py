@@ -80,6 +80,8 @@ def analyzeResults(options):
           sys.exit(1)
       subDirs.append(path)
 
+  # Infer which detector generated these results from the path
+  detector = inferDetector(options)
 
   csvFiles = []
   for subDir in subDirs:
@@ -152,17 +154,13 @@ def analyzeResults(options):
 
   # Sum all values
   resultsSummaryArray = numpy.array(resultsSummary)
+
   # Skip first row and column
   summaryView = resultsSummaryArray[1:,1:].astype('float')
   totalsArray = numpy.sum(summaryView, axis=0)
   totalsList = totalsArray.tolist()
-  print "Minimum cost:",
   lowestCost = totalsArray.min()
-  print lowestCost
   minSummaryCostIndices = numpy.where(totalsArray == lowestCost)[0].tolist()
-  print "Best thresholds:"
-  for ind in minSummaryCostIndices:
-    print "\t" + str(thresholds[ind])
 
   # Write out all our results
   outputFile = os.path.join(options.resultsDir, "resultsSummary.csv")
@@ -173,6 +171,35 @@ def analyzeResults(options):
     totalsRow = ['Totals']
     totalsRow.extend(totalsList)
     writer.writerow(totalsRow)
+
+  # Console output
+
+  print "#" * 70
+  print "Detector: ", detector
+
+  print "Minimum cost:",
+  print lowestCost
+
+  print "Best thresholds:"
+  for ind in minSummaryCostIndices:
+    print "\t" + str(thresholds[ind])
+
+  print "Summary file for all thresholds:", outputFile
+
+
+def inferDetector(options):
+  """
+  Returns a string which is either a known detector name or "Unknown." if 
+  the infered detector does not match one we know.
+  """
+
+  guess = os.path.split(options.resultsDir)[1]
+
+  if guess in options.detectors:
+    return guess
+  else:
+    return "Unknown"
+
 
 def genConfusionMatrix(results,
                        threshold = 0.99,
