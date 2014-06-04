@@ -421,7 +421,8 @@ if __name__ == "__main__":
                     "detail of output by setting this greater than 0.")
   parser.add_option("--plot", default=False, action="store_true",
                     help="Use the Plot.ly library to generate plots")
-  parser.add_option("--detector", help="Which Anomaly Detector class to use.")
+  parser.add_option("--detector", help="Which Anomaly Detector class to use.",
+                    default="cla")
   parser.add_option("--dataGroup", help="Which data group to run.")
 
 
