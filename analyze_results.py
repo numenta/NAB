@@ -38,7 +38,6 @@ from confusion_matrix import (WindowedConfusionMatrix,
 gPlotsAvailable = False
 try:
   from plotly import plotly
-  from gef.utils.plotting import plotROC
   gPlotsAvailable = True
 except ImportError:
   print "Plotly not installed. Plots will not be available."
@@ -256,6 +255,38 @@ def genCurveData(results,
 
   
   return vals
+
+def plotROC(py, curveData, chartTitle = "ROC Curve"):
+  """
+  Returns a URL to a plot of an ROC curve for the given data.
+  
+    py        - Connection to Plotly
+    curveData - dict - Must contain a list of true positive rates and
+                       false positive rates.
+  """
+    
+  # Default layout
+  layout = {"title": chartTitle,
+            "xaxis": {
+              "title": "False Positive Rate",
+              "range": [0,1]
+            },
+            "yaxis":{
+              "title": "True Positive Rate",
+              "type": "linear",
+              "range": [0,1]
+            },
+            "showlegend": False
+        }
+  
+  # PLOT THAT STUFF!
+  rocData = { 'x': curveData['fprs'],
+              'y': curveData['tprs']}
+
+  response = py.plot([rocData],
+                     layout=layout)
+  
+  return response["url"]
 
 def updateThreshold(thresh, step, incrementCount):
   """
