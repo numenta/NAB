@@ -31,8 +31,10 @@ import csv
 import yaml
 
 from optparse import OptionParser
+from pprint import pprint
 from confusion_matrix import (WindowedConfusionMatrix,
                               pPrintMatrix)
+
 
 
 gPlotsAvailable = False
@@ -46,7 +48,8 @@ except ImportError:
 
 def analyzeResults(options):
   """
-  Generate ROC curve and find optimum point given cost matrix
+  Generate ROC curve and find optimum point given cost matrix. Results of
+  this analysis will be put into a detailed and a summary results file.
   """
 
   # Load the config file
@@ -200,7 +203,7 @@ def analyzeResults(options):
     writer.writerows(detailedResults)
 
 
-  # Write out all our results
+  # Write out summary results
   outputFile = os.path.join(options.resultsDir, "resultsSummary.csv")
   with open(outputFile, 'w') as outFile:
 
@@ -210,9 +213,18 @@ def analyzeResults(options):
     totalsRow.extend(totalsList)
     writer.writerow(totalsRow)
 
+  # Load and compare results to leaderboard
+  with open("leaderboard.yaml") as fh:
+    leaderboard = yaml.load(fh)
+
+  print "#" * 70
+  print "LEADERBOARD"
+  pprint(leaderboard)
+
   # Console output
 
   print "#" * 70
+  print "YOUR RESULTS"
   print "Detector: ", detector
 
   print "Minimum cost:",
@@ -223,6 +235,20 @@ def analyzeResults(options):
     print "\t" + str(thresh)
 
   print "Summary file for all thresholds:", outputFile
+
+  congrats(lowestCost, leaderboard)
+
+
+def congrats(currentCost, leaderboard):
+  """
+  Prints a congratulatory note if the measured results are better than
+  known values.
+  """
+  bestKnownCost = leaderboard["FullCorpus"]["Cost"]
+  if currentCost < bestKnownCost:
+    print "Congratulations! These results improve on the state of the art."
+    print "Your minimum cost (%d) is less than the best known value (%d)" % \
+           (currentCost, bestKnownCost)
 
 
 def inferDetector(options):
@@ -373,9 +399,6 @@ def getCostMatrix():
   These values have been picked to reflect realistic costs of reacting to
   each type of event for the server monitoring data which comprise the
   NAB corpus.
-  
-  The cost matrix should be carefully considered for the given application
-  and data to which it is applied.
   """
   
   costMatrix = {"tpCost": 0.0,

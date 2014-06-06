@@ -4,7 +4,7 @@
 DataGroups:
     - artificialWithAnomaly
     #- artificialNoAnomaly
-    #- real
+    #- realAWSCloudwatch
 
 # We provide three anomaly detectors. You may want to use some or all of them
 # to generate results. You may also create your own detector as a subclass of
@@ -12,6 +12,6 @@ DataGroups:
 # detector to generate results.
 AnomalyDetectors:
     - cla
-    #- skyline
+    - skyline
 
 ResultsDirectory: "results"

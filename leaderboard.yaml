@@ -1,0 +1,9 @@
+
+# Each DataGroup should have its own scores. For now we'll just list the
+# total.
+FullCorpus: 
+    Detector: "cla"
+    Notes: ""
+    CorpusVersion: "0.1.0"
+    Cost: 115900.0
+    Reference: "http://www.numenta.org/nab.pdf"
