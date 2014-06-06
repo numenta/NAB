@@ -176,7 +176,9 @@ def analyzeResults(options):
              "False Positives",
              "False Negatives",
              "True Negatives",
-             "Cost"]
+             "Cost",
+             "Total Normal",
+             "Total Anomalous"]
   detailedResults.append(headers)
   for resultsFile in csvFiles:
 
@@ -188,19 +190,33 @@ def analyzeResults(options):
                                  minThresh, 
                                  costMatrix = costMatrix)
 
+    # TODO - Calculate the total norm vs anomalous directly from labels
     detailedResults.append([resultsFile,
                             cMatrix.tp, 
                             cMatrix.fp,
                             cMatrix.fn,
                             cMatrix.tn,
-                            cMatrix.cost])
+                            cMatrix.cost,
+                            cMatrix.tn + cMatrix.fp,
+                            cMatrix.tp + cMatrix.fn])
 
   # Write out detailed results
+  detailedResultsArray = numpy.array(detailedResults)
+
+  # Skip first row and column
+  detailedView = detailedResultsArray[1:,1:].astype('float')
+  
+  # Summarize data for file writing
+  detailedTotalsArray = numpy.sum(detailedView, axis=0)
+  detailedTotalsList = detailedTotalsArray.tolist()
   detailedOutput = os.path.join(options.resultsDir, "detailedResults.csv")
   with open(detailedOutput, 'w') as outFile:
 
     writer = csv.writer(outFile)
     writer.writerows(detailedResults)
+    totalsRow = ['Totals']
+    totalsRow.extend(detailedTotalsList)
+    writer.writerow(totalsRow)
 
 
   # Write out summary results
@@ -235,6 +251,7 @@ def analyzeResults(options):
     print "\t" + str(thresh)
 
   print "Summary file for all thresholds:", outputFile
+  print "Detailed summary file for the best threshold:", detailedOutput
 
   congrats(lowestCost, leaderboard)
 

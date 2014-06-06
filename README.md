@@ -21,9 +21,13 @@ real-world timeseries data containing labeled anomalous periods of behavior.
 All data are ordered, timestamped, single-valued metrics collected at 5 minute
 intervals.
 
-Data represent values from common AWS server metrics as collected by the [Amazon
+Realworld data are values from common AWS server metrics as collected by the [Amazon
 Cloudwatch service](https://aws.amazon.com/documentation/cloudwatch/). Example
 metrics include CPU Utilization, Network Bytes In, and Disk Read Bytes.
+
+#### Download
+
+[numenta_anomaly_benchmark_corpus.zip](https://aws.amazon.com/documentation/cloudwatch/)
 
 #### Task
 
@@ -225,7 +229,11 @@ be consumed by analyze_results.py
 - Should the calculation of min/max be a part of each detector?
 - for AnomalyDetector remove outputDir and infer it from outputFile which 
   should be a path
-- gef charts of run_anomaly output need to reflect the proper length of the probationary period
+- gef charts of run_anomaly output need to reflect the proper length of the 
+  probationary period
 - Update anomaly likelihood code to latest version in NuPIC
 - Remove results from AMI before creating final.
+- Move to CentOS AMI starting from stage 2
+- Upload a zipped version of data to S3 for quick download.
+    - Update link in README above
 
