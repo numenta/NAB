@@ -29,8 +29,8 @@ import simplejson as json
 from optparse import OptionParser
 from pandas.io.parsers import read_csv
 from nupic.frameworks.opf.modelfactory import ModelFactory
+from nupic.algorithms import anomaly_likelihood
 
-import anomaly_likelihood
 from skyline.algorithms import (median_absolute_deviation,
                                 first_hour_average,
                                 stddev_from_average,
