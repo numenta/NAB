@@ -21,7 +21,7 @@ real-world timeseries data containing labeled anomalous periods of behavior.
 All data are ordered, timestamped, single-valued metrics collected at 5 minute
 intervals.
 
-Realworld data are values from common AWS server metrics as collected by the [Amazon
+Realworld data are values from AWS server metrics as collected by the [Amazon
 Cloudwatch service](https://aws.amazon.com/documentation/cloudwatch/). Example
 metrics include CPU Utilization, Network Bytes In, and Disk Read Bytes.
 
@@ -231,9 +231,36 @@ be consumed by analyze_results.py
   should be a path
 - gef charts of run_anomaly output need to reflect the proper length of the 
   probationary period
-- Update anomaly likelihood code to latest version in NuPIC
 - Remove results from AMI before creating final.
 - Move to CentOS AMI starting from stage 2
 - Upload a zipped version of data to S3 for quick download.
     - Update link in README above
+- Update realAWSCloudwatch data to proper NAB format
+- Label viewing of NAB input file type is not behaving properly
+- Add 0.5s as probationary period to all datasets
+- Data processing script
+  - verify input data format
+  - adjust probationary period length
+  - adjust transition period length
+  - expand acronyms?
+
+#### Labeling Rules
+
+- Point anomalies are labeled
+  - PA
+- Anomalous periods are labeled
+  - APB - Anomalous Period Begins
+  - APE - Anomalous Period Ends
+- Transition periods are labeled
+  - If a new, stable pattern looks like is being established, this transition noted
+    - TPB - Transition Period Begins
+  - If an expected transition does *not* occur, then the transition period still applies (e.g. art_daily_nojump.csv)
+  - The first two hours of a new, stable pattern will be labeled anomalous
+  - After two hours (24 records) the end of the transition period will be noted
+    - TPE - Transition Period Ends
+
+##### Anomalous Periods
+
+- A new pattern is no longer anomalous after 2 hours
+  - 24 records
 
