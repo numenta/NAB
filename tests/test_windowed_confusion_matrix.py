@@ -253,6 +253,32 @@ class TestWindowedConfusionMatrix(unittest.TestCase):
         expectedCost = self.costMatrix['fpCost'] * 2
         self.assertEqual(cMatrix.cost, expectedCost)
 
+    def testPlateauAnomaly(self):
+        """
+        A plateau less than two hours long. Caught immediately.
+        """
+
+        mName = inspect.stack()[0][3]
+        cMatrix = self.getMatrix(mName)
+
+        self.assertEqual(cMatrix.tp, 1)
+        self.assertEqual(cMatrix.fp, 0)
+        self.assertEqual(cMatrix.cost, 0)
+
+    def testLongPlateauAnomaly(self):
+        """
+        A long plateau. This becomes the new normal and is not flagged.
+        The drop off should also not be flagged.
+        """
+
+        mName = inspect.stack()[0][3]
+        cMatrix = self.getMatrix(mName)
+
+        self.assertEqual(cMatrix.tp, 1)
+        self.assertEqual(cMatrix.fp, 0)
+        self.assertEqual(cMatrix.cost, 0)
+
+
 
     def getMatrix(self, mName):
         """
