@@ -19,12 +19,14 @@ class ConfusionMatrixBase(object):
     """
     Add in properties for percent representations of the confusion matrix
     """
-    
+
+    self._verifyState()
+
     # Percent of total
-    self.tpp = self.tp / self.count
-    self.fpp = self.fp / self.count
-    self.fnp = self.fn / self.count
-    self.tnp = self.tn / self.count
+    self.tpp = float(self.tp) / self.count
+    self.fpp = float(self.fp) / self.count
+    self.fnp = float(self.fn) / self.count
+    self.tnp = float(self.tn) / self.count
   
   def setRates(self):
     """
@@ -72,8 +74,26 @@ class ConfusionMatrixBase(object):
     
     return self.tp + self.fp + self.fn + self.tn + self.ignored
 
+  def _verifyState(self):
+    """
+    Make sure the matrix is in a reasonable state before doing
+    calcualtions.
+    """
 
-class WindowedConfusionMatrixV2(ConfusionMatrixBase):
+    baseValues = [self.tp, self.fp, self.fn, self.tn, self.ignored]
+
+    for val in baseValues:
+      if val > self.count:
+        raise Exception("ERROR: Invalid Matrix. No count can be greater than the "
+                        "total count.")
+
+    total = sum(baseValues)
+    if total != self.count:
+        raise Exception("ERROR: Invalid Matrix. The sum of all values must be "
+                        "equal to count")
+
+
+class WindowedConfusionMatrix(ConfusionMatrixBase):
   
   def __init__(self,
                predicted,
@@ -230,103 +250,6 @@ class WindowedConfusionMatrixV2(ConfusionMatrixBase):
     self.setPercentages()
     self.setRates()
     self.setCost(costMatrix, math.floor(latePenaltyTotal))
-
-
-class WindowedConfusionMatrix(ConfusionMatrixBase):
-  
-  def __init__(self,
-               predicted,
-               actual,
-               window,
-               windowStepSize,
-               costMatrix = None):
-    """
-    Generate the confusion matrix using the windowed method
-    
-     True Positives - An anomalous record followed in the next window minutes
-                      by at least one above threshold likelihood score
-                                           OR
-                     Any likelihood score above threshold preceeded by an
-                     an anomalous record within the last window minutes.
-                     NOTE: We intentionally ignore this type of TP as we
-                     don't want to optimize for it.
-     False Negatives - Any anomalous record without an above threshold
-                      likelihood score within the next window minutes
-     False Positives - Any above threshold likelihood score preceeded by window
-                       minutes without an anomalous record
-     True Negatives - Any below threshold likelihood score preceeded by window
-                      minutes without an anomalous record
-                      
-    predicted       - A list or numpy array
-    actual          - A list or numpy array
-    window          - Number of minutes we should calculate stats over
-    windowStepSize  - Minutes per record
-    costMatrix      - A dict of costs for each quadrent of the confusion matrix
-    """
-    self.tp = self.fp = self.fn = self.tn = self.ignored = 0.0
-    
-    # Default to even, zero-cost for each type of result
-    if costMatrix == None:
-      costMatrix = {"tpCost": 0.0,
-                    "fpCost": 0.0,
-                    "fnCost": 0.0,
-                    "tnCost": 0.0}
-      
-    
-    # Convert predicted and actual to numpy arrays if they are not
-    predicted = numpy.array(predicted)
-    actual = numpy.array(actual)
-    
-    # Label numbers and names
-    aTypes = {1: 'handLabeledAnomaly',
-              2: 'injectedAnomaly'}
-    ignoreTypes = {0.5: 'unclearRecord'}
-    
-    # How many records are in our window
-    recordCount = window / windowStepSize
-    
-    # Go through all the results
-
-    self.count = len(actual)
-    for i, label in enumerate(actual):
-      # This record is labeled as an anomaly
-      # Look forward to see if it was caught
-      if label in aTypes.keys():
-        end = i + recordCount + 1
-        if end > self.count:
-          end = None
-        # Are any results above threshold in the window?
-        if any(predicted[i:end]):
-          self.tp += 1
-        else:
-          self.fn += 1
-      # Skip these records as they are ambiguous
-      elif label in ignoreTypes.keys():
-        self.ignored += 1
-      # Look backward to see if there was an anomaly
-      else:
-        start = i - recordCount
-        if start < 0:
-          start = 0
-        # Were any of the past window results anomalies?
-        if any(actual[start:i] >= 1):
-          # Ignore these cases as they are handled by forward looking logic
-          # above
-          self.ignored += 1
-        else:
-          # No anomaly in past window records, but above threshold
-          if predicted[i]:
-            self.fp += 1
-          else:
-            self.tn += 1
-      
-    assert self.getTotal() == self.count
-
-    self.setPercentages()
-    self.setRates()
-    self.setCost(costMatrix)
-
-
  
 def pPrintMatrix(matrix, title):
   """
@@ -349,4 +272,8 @@ def pPrintMatrix(matrix, title):
   print 'A  Anomaly\tFN:%.4f\tTP:%.4f'  % (matrix.fn, matrix.tp)
   print 'L'
   print '-' * width
+  print "Total Cost:", matrix.cost
   print '*' * width
+
+
+

@@ -221,12 +221,12 @@ be consumed by analyze_results.py
 ## TODO
 
 - Make note of best tag to use
-- Add in threshold and adaptive threshold based measures for comparison
 - Code is duplicated between GEF and analyze_results - decide where it belongs
 - Two skyline algorithms use scipy code
     - grubbs requires use of the inverse survival function from SciPy
     - ks_test requires ks_2samp
-- Should the calculation of min/max be a part of each detector?
+- Min/Max calculation for CLA is the first day of records
+  - Verify with Subutai this is ok
 - for AnomalyDetector remove outputDir and infer it from outputFile which 
   should be a path
 - gef charts of run_anomaly output need to reflect the proper length of the 
@@ -235,17 +235,20 @@ be consumed by analyze_results.py
 - Move to CentOS AMI starting from stage 2
 - Upload a zipped version of data to S3 for quick download.
     - Update link in README above
-- Update realAWSCloudwatch data to proper NAB format
-- Label viewing of NAB input file type is not behaving properly
-- Add 0.5s as probationary period to all datasets
 - Data processing script
   - verify input data format
-  - adjust probationary period length
   - adjust transition period length
   - expand acronyms?
+- Write unit tests for windowed confusion matrix
+- Remove references to scalar in run_anomaly.py
+- rename model_params_rdse_94.json to model_params
+
+### Evalutation
+
+Anomaly detection has to work in real time, but is evaluated in retrospect
 
 #### Labeling Rules
-
+ 
 - Point anomalies are labeled
   - PA
 - Anomalous periods are labeled
@@ -256,11 +259,27 @@ be consumed by analyze_results.py
     - TPB - Transition Period Begins
   - If an expected transition does *not* occur, then the transition period still applies (e.g. art_daily_nojump.csv)
   - The first two hours of a new, stable pattern will be labeled anomalous
+    - However if the stable pattern is one we have seen before it will
+      NOT be labeled.
   - After two hours (24 records) the end of the transition period will be noted
     - TPE - Transition Period Ends
 
-##### Anomalous Periods
+#### Scoring Rules
 
-- A new pattern is no longer anomalous after 2 hours
-  - 24 records
+- For each record check if it is labeled (ground truth) as an anomaly
+- If it is an anomaly
+  - A detector has ALLOWED records to catch the anomaly
+  - For each record that follows the start of the anomaly where the anomaly is not caught, there is a small penalty (LATE)
+  - If the detector catches the anomaly, this is a True Positive
+    - Once an anomaly has been flagged there is a SUPRESSION period
+    - To avoid spamming the end users a detector should not flag other records as anomalous during the SUPPRESSION period
+    - If a detector flags one *or more* additional records during a SUPPRESSION period, it is a False Positive (SPAM)
+      - This reflects the binary nature of Spam. Once the useful detection has been made everything else is spam. Lots of spam is only marginally worse than any spam.
+    - If a record is not flagged as an anomaly in the SUPPRESSION period this is a True Negative
+  - If ALLOWED records ellapse without the anomaly being caught it is a False Negative
+- If it is not an anomaly, and we're not in an ALLOWED period or in a SUPRESSION period
+  - If it is flagged as an anomaly it is a False Positive
+  - Otherwise it is a True Negative
+
+
 

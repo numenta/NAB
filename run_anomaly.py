@@ -53,6 +53,23 @@ def runAnomaly(options):
     with open(options.inputFile) as fh:
       dataFrame = read_csv(fh);
 
+    # If we know stats for this data type use them (unless set explicitly by
+    # options.min/max)
+    for k, v in knownDataTypes.iteritems():
+      if k in options.inputFile:
+        calcMin = v['min']
+        calcMax = v['max']
+        calcRange = abs(calcMax - calcMin)
+        calcPad = 0 #calcRange * .2
+        break
+    # Otherwise our range will be the range of the first statsWindow records
+    # plus some padding
+    else:
+      calcMin = dataFrame.value[:statsWindow].min()
+      calcMax = dataFrame.value[:statsWindow].max()
+      calcRange = abs(calcMax - calcMin)
+      calcPad = calcRange * .2
+
     if options.min == None:
       inputMin = dataFrame.value[:statsWindow].min()
     else:

@@ -27,3 +27,12 @@ git clone https://github.com/numenta/NAB.git
 
 # Now install the rest of the requirements
 sudo pip install -r NAB/requirements.txt
+
+
+#####
+# CentOS
+
+sudo yum update
+sudo yum install nano
+sudo yum install nupic-py27-numenta
+export PYTHONPATH=$PYTHONPATH:/opt/numenta/nupic/
