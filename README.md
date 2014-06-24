@@ -46,9 +46,9 @@ You must minimize the cost of using your detection technique.
 It is insufficient to just catch all anomalies. A high false-positive rate will
 reduce or eliminate an institution's willingness to use your technique.
 
-Cost scoring is [covered in detail](#scoring-rules) below. It is *highly* recommended that you
-understand the scoring logic and code as it is essential to good performance
-on this benchmark.
+Cost scoring is [covered in detail](#scoring-rules) below. It is *highly*
+recommended that you understand the scoring logic and code as it is essential to
+good performance on this benchmark.
 
 ### EC2 Image
 
@@ -197,10 +197,10 @@ be consumed by analyze_results.py
 - APB - Anomalous Period Begins
 - APE - Anomalous Period Ends
 - TPB - Transition Period Begins
-  - If a new, stable pattern looks like is being established the first two hours
-    will be labeled AMBIGUOUS
+  - If a new, stable pattern looks like is being established the first two 
+    hours will be labeled ambiguous.
     - However if the stable pattern is one we have seen before it will
-      be labeled NORMAL.
+      be labeled non-anomalous.
 - TPE - Transition Period Ends
 
 #### Scoring Rules
@@ -231,11 +231,12 @@ requirements for a production anomaly detection system.
   - If it is flagged as an anomaly it is a False Positive
   - Otherwise it is a True Negative
 
+
 ## TODO
 
-- Make note of best tag to use
+- Make note of best NuPIC tag to use
 - Code is duplicated between GEF and analyze_results - decide where it belongs
-- Two skyline algorithms use scipy code
+- Two skyline algorithms use scipy code and are omitted, re-impliment
     - grubbs requires use of the inverse survival function from SciPy
     - ks_test requires ks_2samp
 - for AnomalyDetector remove outputDir and infer it from outputFile which 
@@ -253,3 +254,4 @@ requirements for a production anomaly detection system.
 - Rescore transition period records as .5
 - Find out What happens if during suppression period a record is 0.5
 - Anomaly detection has to work in real time, but is evaluated in retrospect
+- make sure terms are aligned between readme and code

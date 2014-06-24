@@ -278,8 +278,6 @@ class TestWindowedConfusionMatrix(unittest.TestCase):
         self.assertEqual(cMatrix.fp, 0)
         self.assertEqual(cMatrix.cost, 0)
 
-
-
     def getMatrix(self, mName):
         """
         Returns the confusion matrix by loading mName.csv and instantiating
