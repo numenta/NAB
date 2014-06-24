@@ -1,16 +1,12 @@
 The Numenta Anomaly Benchmark
 -----------------------------
 
-This is the companion repository for the upcoming anomaly detection benchmark
-paper written by Numenta. It contains all of the relevant data and data
-processing scripts to replicate the results in the paper.
+This repository contains the data and scripts neccessary to replicate the
+results in the Numenta Anomaly Benchmark paper.
 
 We hope you will compare these results with your own anomaly detection methods.
-Competative results tied to open source code will be listed here. Let us
-know about your work by submitting a pull request or emailing INSERT EMAIL LATER.
-
-Finally we hope you will help improve these results by contributing to the
-[Numenta Platform for Intelligent Computing (NuPIC)](https://github.com/numenta/nupic).
+Competative results tied to open source code will be listed here. Let us know
+about your work by submitting a pull request.
 
 ### Corpus
 
@@ -21,50 +17,52 @@ real-world timeseries data containing labeled anomalous periods of behavior.
 All data are ordered, timestamped, single-valued metrics collected at 5 minute
 intervals.
 
-Realworld data are values from AWS server metrics as collected by the [Amazon
+Real-world data are values from AWS server metrics as collected by the [Amazon
 Cloudwatch service](https://aws.amazon.com/documentation/cloudwatch/). Example
 metrics include CPU Utilization, Network Bytes In, and Disk Read Bytes.
 
 #### Download
 
-[numenta_anomaly_benchmark_corpus.zip](https://aws.amazon.com/documentation/cloudwatch/)
+[numenta_anomaly_benchmark_corpus.zip](https://s3.amazonaws.com/numenta.datasets/nab/numenta_anomaly_benchmark_corpus.zip)
 
 #### Task
 
-Detect anomalous behavior in streaming data in real-time.
+Detect anomalous behavior in streaming data in real-time and provide *useful*
+alerts.
 
-As noted in the paper, the task of streaming anomaly detection is challenging
-for several reasons which place significant constraints on the allowable
-methods.
+You must be able to handle streaming data.
 
-You must be able to provide a reliable anomaly score with minimal prior
-knowledge of the data. There is hardly ever a single 'normal' set of statistics
-for a streaming dataset and those statistics change constantly.
+Post-hoc analysis is insufficient for this task. All classifications must
+be done as if the data is being presented for the first time, in real time.
 
-You must be able to provide a classification in a reasonable amount of time.
-This benchmark is representative of a task in human time-scales. Microsecond
-responses are not required, but hour-long determinations are unacceptable. Here
-it is expected that record classification should take place in far less than 5
-minutes. (NOTE: Should we include this? We do well here, but its not primary.)
+You must be able to provide a response in a reasonable amount of time.
 
-You must minimize the impact, which is often financial, on the institution
-making use of your detection technique. It is insufficient to just catch all
-anomalies as a high false-positive rate can reduce or eliminate an institution's
-willingness to use your technique.
+This benchmark is representative of a task in human time-scales. Per-record
+classification should take place in less than 5 minutes. Anomaly detection
+should happen as quickly as possible following the onset of an anomaly.
 
-Each of these constraints is handled explicitly by the code in this repository.
-We hope this will allow you to quickly get a useful, real-world evaluation of
-your anomaly detection method.
+You must minimize the cost of using your detection technique. 
 
-### Supported Platforms
+It is insufficient to just catch all anomalies. A high false-positive rate will
+reduce or eliminate an institution's willingness to use your technique.
+
+Cost scoring is [covered in detail](#scoring-rules) below. It is *highly* recommended that you
+understand the scoring logic and code as it is essential to good performance
+on this benchmark.
+
+### EC2 Image
+
+We provide an Amazon Machine Image (AMI) from which you can launch
+an EC2 instance with all requirements and this repository pre-installed.
+
+ami-9faddeaf
+
+### Supported Platforms for Local Install
 
 - OSX 10.9 and higher
+- Cent OS
 
-Other platforms may work but have not been tested. It is expected that several
-flavors of Linux will be supported. Windows will not be supported for
-replicating results but will be supported for analyzing your own. This is
-because the code to replicate our results depends on NuPIC, which does not
-support Windows at this time.
+Other platforms may work but have not been tested.
 
 ### Requirements
 
@@ -78,11 +76,7 @@ the following installed.
 - [Numpy](http://www.numpy.org/num)
 - [Pandas](http://pandas.pydata.org/)
 - [PyYaml](http://pyyaml.org/)
-
-In addition we provide all of the scripts we used to generate our results using
-CLA. To replicate those results you will also need to install:
-
-- [NuPIC](http://www.github.com/numenta/nupic)
+- [NuPIC](http://www.github.com/numenta/nupic) (Source Required)
 
 #### Optional Extras
 
@@ -100,11 +94,11 @@ environment.
 
 You can then add the --plot option to any python script to visualize output.
 
-### Installation
-
-#### To Analyze Your Results Only
+### Local Installation
 
 It is assumed you have git, python 2.7 and pip installed by this point.
+
+It is also assumed you have a full checkout of the NuPIC source by this point.
 
 ##### Download this repository
 
@@ -116,35 +110,14 @@ It is assumed you have git, python 2.7 and pip installed by this point.
     cd nab
     (sudo) pip install -r requirements.txt
 
-#### To Replicate Our Results
-
-It is assumed you have NuPIC installed by this point.
-
-##### Update NuPIC to the correct commit to replicate the paper's results
+##### Update NuPIC to the correct commit
 
     cd /path/to/nupic/
     git checkout -b nab {TAG NAME}
 
 Then follow build directions in the NuPIC `README.md`.
 
-### EC2 Image
-
-We also provide an Amazon Machine Image (AMI) from which you can launch
-an EC2 instance with all requirements and this repository pre-installed.
-
-ami-9faddeaf
-
 ### Usage
-
-#### Analyze Your Results
-
-If you have used the NAB corpus with your own anomaly detection method you can
-directly compare your results to ours with the provided script.
-
-    cd /path/to/nab
-    python analyze_results.py -i /path/to/your/results.csv
-
-Please see "Results Files" below for the expected format of these files.
 
 #### Replicate Our Results
 
@@ -154,7 +127,7 @@ Please see "Results Files" below for the expected format of these files.
 This will produce results files for the CLA anomaly detection method as well as
 baseline results using methods from the [Etsy
 Skyline](https://github.com/etsy/skyline) anomaly detection library. This will
-also pass those results files to the analyze_results.py script as above to
+also pass those results files to the analyze_results.py script to
 generate final scores.
 
 #### Data Format
@@ -184,12 +157,11 @@ This is the file format for each dataset in the corpus.
     - integers (these will be converted to floats internally)
 - Values in the "label" column MUST be either
     - 0     - This record is known to be non-anomalous
-    - 0.5   - This record's class is indeterminate
+    - 0.5   - This record's class is ambiguous
     - 1     - This record is known to be anomalous
 - Each record MUST represent an equal amount of time
 - Records MUST be in chronological order
 - Records MUST be continuous such that there are no missing time steps
-
 
 ##### Results Files
 
@@ -213,10 +185,51 @@ be consumed by analyze_results.py
     - floats between 0.0 and 1.0
 - Values in the "label" column MUST be either
     - 0     - This record is known to be non-anomalous
-    - 0.5   - This record's class is indeterminate
+    - 0.5   - This record's class is ambiguous
     - 1     - This record is known to be anomalous
 - Each record MUST correspond, one for one, to records in their input data file
 
+### Evalutation
+
+#### Labeling Key
+ 
+- PA - Point anomaly
+- APB - Anomalous Period Begins
+- APE - Anomalous Period Ends
+- TPB - Transition Period Begins
+  - If a new, stable pattern looks like is being established the first two hours
+    will be labeled AMBIGUOUS
+    - However if the stable pattern is one we have seen before it will
+      be labeled NORMAL.
+- TPE - Transition Period Ends
+
+#### Scoring Rules
+
+These rules are implemented in confusion_matrix.py. They reflect real-world
+requirements for a production anomaly detection system.
+
+- For each record check if it is labeled (ground truth) as an anomaly
+- If it is an anomaly
+  - A detector has ALLOWED records to catch the anomaly
+  - For each record that follows the start of the anomaly where the anomaly is 
+    not caught, there is a small penalty (LAG)
+  - If the detector catches the anomaly, this is a True Positive
+    - Once an anomaly has been flagged there is a SUPRESSION period
+    - To avoid spamming the end user a detector should not flag other records 
+      as anomalous during the SUPPRESSION period
+    - If a detector flags one *or more* additional records during a SUPPRESSION 
+      period, it is a False Positive (SPAM)
+      - This reflects the binary nature of Spam. Once the useful detection has 
+        been made everything else is spam. Lots of spam is only marginally 
+        worse than any spam.
+    - If a record is not flagged as an anomaly in the SUPPRESSION period this 
+      is a True Negative
+  - If ALLOWED records ellapse without the anomaly being caught it is a 
+    False Negative
+- If it is not an anomaly, and we're not in an ALLOWED period or in a 
+  SUPRESSION period then:
+  - If it is flagged as an anomaly it is a False Positive
+  - Otherwise it is a True Negative
 
 ## TODO
 
@@ -225,61 +238,18 @@ be consumed by analyze_results.py
 - Two skyline algorithms use scipy code
     - grubbs requires use of the inverse survival function from SciPy
     - ks_test requires ks_2samp
-- Min/Max calculation for CLA is the first day of records
-  - Verify with Subutai this is ok
 - for AnomalyDetector remove outputDir and infer it from outputFile which 
   should be a path
 - gef charts of run_anomaly output need to reflect the proper length of the 
   probationary period
 - Remove results from AMI before creating final.
 - Move to CentOS AMI starting from stage 2
-- Upload a zipped version of data to S3 for quick download.
-    - Update link in README above
 - Data processing script
   - verify input data format
   - adjust transition period length
   - expand acronyms?
-- Write unit tests for windowed confusion matrix
 - Remove references to scalar in run_anomaly.py
 - rename model_params_rdse_94.json to model_params
-
-### Evalutation
-
-Anomaly detection has to work in real time, but is evaluated in retrospect
-
-#### Labeling Rules
- 
-- Point anomalies are labeled
-  - PA
-- Anomalous periods are labeled
-  - APB - Anomalous Period Begins
-  - APE - Anomalous Period Ends
-- Transition periods are labeled
-  - If a new, stable pattern looks like is being established, this transition noted
-    - TPB - Transition Period Begins
-  - If an expected transition does *not* occur, then the transition period still applies (e.g. art_daily_nojump.csv)
-  - The first two hours of a new, stable pattern will be labeled anomalous
-    - However if the stable pattern is one we have seen before it will
-      NOT be labeled.
-  - After two hours (24 records) the end of the transition period will be noted
-    - TPE - Transition Period Ends
-
-#### Scoring Rules
-
-- For each record check if it is labeled (ground truth) as an anomaly
-- If it is an anomaly
-  - A detector has ALLOWED records to catch the anomaly
-  - For each record that follows the start of the anomaly where the anomaly is not caught, there is a small penalty (LATE)
-  - If the detector catches the anomaly, this is a True Positive
-    - Once an anomaly has been flagged there is a SUPRESSION period
-    - To avoid spamming the end users a detector should not flag other records as anomalous during the SUPPRESSION period
-    - If a detector flags one *or more* additional records during a SUPPRESSION period, it is a False Positive (SPAM)
-      - This reflects the binary nature of Spam. Once the useful detection has been made everything else is spam. Lots of spam is only marginally worse than any spam.
-    - If a record is not flagged as an anomaly in the SUPPRESSION period this is a True Negative
-  - If ALLOWED records ellapse without the anomaly being caught it is a False Negative
-- If it is not an anomaly, and we're not in an ALLOWED period or in a SUPRESSION period
-  - If it is flagged as an anomaly it is a False Positive
-  - Otherwise it is a True Negative
-
-
-
+- Rescore transition period records as .5
+- Find out What happens if during suppression period a record is 0.5
+- Anomaly detection has to work in real time, but is evaluated in retrospect
