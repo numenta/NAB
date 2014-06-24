@@ -318,19 +318,21 @@ class CLADetector(AnomalyDetector):
   def __init__(self, minVal, maxVal, *args, **kwargs):
 
     # Load the model params JSON
-    with open("model_params.json") as fp:
+    with open("model_params_rdse_94.json") as fp:
       modelParams = json.load(fp)
 
+    self.sensorParams = modelParams['modelParams']['sensorParams']\
+                                   ['encoders']['value']
+    
     # # RDSE - resolution calculation
-    # self.sensorParams = modelParams['modelParams']['sensorParams']['encoders']['value']
-    # resolution = max(0.001,
-    #                  (maxVal - minVal) / self.sensorParams.pop('numBuckets')
-    #                 )
-    # self.sensorParams['resolution'] = resolution
+    resolution = max(0.001,
+                     (maxVal - minVal) / self.sensorParams.pop('numBuckets')
+                    )
+    self.sensorParams['resolution'] = resolution
 
     # Scalar - update the min/max value for the encoder
-    self.sensorParams['minval'] = minVal
-    self.sensorParams['maxval'] = maxVal
+    # self.sensorParams['minval'] = minVal
+    # self.sensorParams['maxval'] = maxVal
     
     self.model = ModelFactory.create(modelParams)
 
