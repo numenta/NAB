@@ -27,6 +27,7 @@ import dateutil.parser
 import simplejson as json
 
 from optparse import OptionParser
+from pprint import pprint
 from pandas.io.parsers import read_csv
 from nupic.frameworks.opf.modelfactory import ModelFactory
 from nupic.algorithms import anomaly_likelihood
@@ -46,37 +47,40 @@ def runAnomaly(options):
 
   outputDir = getOutputDir(options)
 
+  # Align our initial window from which we are allowed to collect statistics
+  # with the window in which detectors will not return any results.
+  statsWindow = probationaryPeriod = 600
+
   if options.detector == "cla":
 
-    # If not set explicitly, calculate basic statistics up front
-    statsWindow = 24 * 12
+    # Calculate basic statistics up front
     with open(options.inputFile) as fh:
       dataFrame = read_csv(fh);
 
-    # If we know stats for this data type use them (unless set explicitly by
-    # options.min/max)
-    for k, v in knownDataTypes.iteritems():
-      if k in options.inputFile:
-        calcMin = v['min']
-        calcMax = v['max']
-        calcRange = abs(calcMax - calcMin)
-        calcPad = 0 #calcRange * .2
-        break
+    # # If we know stats for this data type use them (unless set explicitly by
+    # # options.min/max)
+    # for k, v in knownDataTypes.iteritems():
+    #   if k in options.inputFile:
+    #     calcMin = v['min']
+    #     calcMax = v['max']
+    #     calcRange = abs(calcMax - calcMin)
+    #     calcPad = 0 #calcRange * .2
+    #     break
     # Otherwise our range will be the range of the first statsWindow records
     # plus some padding
-    else:
-      calcMin = dataFrame.value[:statsWindow].min()
-      calcMax = dataFrame.value[:statsWindow].max()
-      calcRange = abs(calcMax - calcMin)
-      calcPad = calcRange * .2
+    # else:
+    calcMin = dataFrame.value[:statsWindow].min()
+    calcMax = dataFrame.value[:statsWindow].max()
+    calcRange = abs(calcMax - calcMin)
+    calcPad = calcRange * .2
 
     if options.min == None:
-      inputMin = dataFrame.value[:statsWindow].min()
+      inputMin = calcMin - calcPad
     else:
       inputMin = options.min
 
     if options.max == None:
-      inputMax = dataFrame.value[:statsWindow].max()
+      inputMax = calcMax + calcPad
     else:
       inputMax = options.max
 
@@ -84,7 +88,7 @@ def runAnomaly(options):
     if inputMax == inputMin:
       inputMax += 1
 
-
+    # Instantiate our detector
     claDetector = CLADetector(inputMin,
                               inputMax,
                               options.inputFile,
@@ -92,8 +96,6 @@ def runAnomaly(options):
     claDetector.run()
 
   elif options.detector == "skyline":
-    # How many records to wait before generating results
-    probationaryPeriod = 600
 
     etsyDetector = EtsySkylineDetector(probationaryPeriod,
                                        options.inputFile,
@@ -319,12 +321,19 @@ class CLADetector(AnomalyDetector):
     with open("model_params.json") as fp:
       modelParams = json.load(fp)
 
-    # Update the min/max value for the encoder
-    self.sensorParams = modelParams['modelParams']['sensorParams']
-    self.sensorParams['encoders']['value']['minval'] = minVal
-    self.sensorParams['encoders']['value']['maxval'] = maxVal
+    # # RDSE - resolution calculation
+    # self.sensorParams = modelParams['modelParams']['sensorParams']['encoders']['value']
+    # resolution = max(0.001,
+    #                  (maxVal - minVal) / self.sensorParams.pop('numBuckets')
+    #                 )
+    # self.sensorParams['resolution'] = resolution
+
+    # Scalar - update the min/max value for the encoder
+    self.sensorParams['minval'] = minVal
+    self.sensorParams['maxval'] = maxVal
     
     self.model = ModelFactory.create(modelParams)
+
     self.model.enableInference({'predictedField': 'value'})
 
     # The anomaly likelihood object
