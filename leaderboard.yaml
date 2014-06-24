@@ -5,5 +5,5 @@ FullCorpus:
     Detector: "cla"
     Notes: ""
     CorpusVersion: "0.1.0"
-    Cost: 115900.0
+    Cost: 7605.0
     Reference: "http://www.numenta.org/nab.pdf"
