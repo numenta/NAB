@@ -23,7 +23,7 @@ metrics include CPU Utilization, Network Bytes In, and Disk Read Bytes.
 
 #### Download
 
-[numenta_anomaly_benchmark_corpus.zip](https://s3.amazonaws.com/numenta.datasets/nab/numenta_anomaly_benchmark_corpus.zip)
+[numenta_anomaly_benchmark_corpus.zip](https://s3.amazonaws.com/numenta.datasets/nab/numenta_anomaly_benchmark_corpus_c97b56.zip)
 
 #### Task
 
