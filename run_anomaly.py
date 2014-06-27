@@ -29,16 +29,8 @@ import simplejson as json
 from optparse import OptionParser
 from pprint import pprint
 from pandas.io.parsers import read_csv
-from nupic.frameworks.opf.modelfactory import ModelFactory
-from nupic.algorithms import anomaly_likelihood
 
-from skyline.algorithms import (median_absolute_deviation,
-                                first_hour_average,
-                                stddev_from_average,
-                                stddev_from_moving_average,
-                                mean_subtraction_cumulation,
-                                least_squares,
-                                histogram_bins)
+from detectors import (CLADetector, EtsySkylineDetector)
 
 def runAnomaly(options):
   """
@@ -51,29 +43,19 @@ def runAnomaly(options):
   # with the window in which detectors will not return any results.
   statsWindow = probationaryPeriod = 600
 
+  # CLA Detector
   if options.detector == "cla":
 
     # Calculate basic statistics up front
     with open(options.inputFile) as fh:
       dataFrame = read_csv(fh);
 
-    # # If we know stats for this data type use them (unless set explicitly by
-    # # options.min/max)
-    # for k, v in knownDataTypes.iteritems():
-    #   if k in options.inputFile:
-    #     calcMin = v['min']
-    #     calcMax = v['max']
-    #     calcRange = abs(calcMax - calcMin)
-    #     calcPad = 0 #calcRange * .2
-    #     break
-    # Otherwise our range will be the range of the first statsWindow records
-    # plus some padding
-    # else:
     calcMin = dataFrame.value[:statsWindow].min()
     calcMax = dataFrame.value[:statsWindow].max()
     calcRange = abs(calcMax - calcMin)
     calcPad = calcRange * .2
 
+    # Use supplied or calculated min/max
     if options.min == None:
       inputMin = calcMin - calcPad
     else:
@@ -95,12 +77,16 @@ def runAnomaly(options):
                               outputDir)
     claDetector.run()
 
+  # SKYLINE detector
   elif options.detector == "skyline":
 
     etsyDetector = EtsySkylineDetector(probationaryPeriod,
                                        options.inputFile,
                                        outputDir)
     etsyDetector.run()
+
+  # ADD ADITIONAL DETECTORS HERE
+
 
   else:
     raise Exception("'%s' is not a recognized detector type." %
@@ -119,7 +105,8 @@ def getOutputDir(options):
   if options.inputFile:
     dataGroupDir = os_path_split_asunder(options.inputFile)[1]
   else:
-    dataGroupDir = options.dataGroup
+    print("ERROR: You must specify an --inputFile")
+    sys.exit(1)
   outputDir = os.path.join(base, detectorDir, dataGroupDir)
 
   if not os.path.exists(outputDir):
@@ -151,297 +138,18 @@ def os_path_split_asunder(path, debug=False):
 
 #############################################################################
 
-class AnomalyLikelihood(object):
-  """
-  Helper class for running anomaly likelihood computation.
-  """
-  
-  def __init__(self, probationaryPeriod = 600, CLALearningPeriod = 300):
-    """
-    CLALearningPeriod - the number of iterations required for the CLA to
-    learn some of the patterns in the dataset.
-    
-    probationaryPeriod - no anomaly scores are reported for this many
-    iterations.  This should be CLALearningPeriod + some number of records
-    for getting a decent likelihood estimation.
-    
-    """
-    self._iteration          = 0
-    self._historicalScores   = []
-    self._distribution       = None
-    self._probationaryPeriod = probationaryPeriod
-    self._CLALearningPeriod  = CLALearningPeriod
-
-
-  def _computeLogLikelihood(self, likelihood):
-    """
-    Compute a log scale representation of the likelihood value. Since the
-    likelihood computations return low probabilities that often go into 4 9's or
-    5 9's, a log value is more useful for visualization, thresholding, etc.
-    """
-    # The log formula is:
-    # Math.log(1.0000000001 - likelihood) / Math.log(1.0 - 0.9999999999);
-    return math.log(1.0000000001 - likelihood) / -23.02585084720009
-
-
-  def likelihood(self, value, anomalyScore, dttm):
-    """
-    Given the current metric value, plus the current anomaly
-    score, output the anomalyLikelihood for this record.
-    """
-    dataPoint = (dttm, value, anomalyScore)
-    # We ignore the first probationaryPeriod data points
-    if len(self._historicalScores) < self._probationaryPeriod:
-      likelihood = 0.5
-    else:
-      # On a rolling basis we re-estimate the distribution every 100 iterations
-      if self._distribution is None or (self._iteration % 100 == 0): 
-        _, _, self._distribution = (
-          anomaly_likelihood.estimateAnomalyLikelihoods(
-            self._historicalScores,
-            skipRecords = self._CLALearningPeriod)
-          )
-        
-      likelihoods, _, self._distribution = (
-        anomaly_likelihood.updateAnomalyLikelihoods([dataPoint],
-          self._distribution)
-      )
-      likelihood = 1.0 - likelihoods[0]
-      
-    # Before we exit update historical scores and iteration
-    self._historicalScores.append(dataPoint)
-    self._iteration += 1
-
-    return likelihood
-
-#############################################################################
-
-class AnomalyDetector(object):
-
-  def __init__(self,
-               inputFile,
-               outputDir):
-    """
-    inputFile - Path to the csv containing your timeseries data
-    outputDir - Path to the directory into which results files should be placed.
-    """
-
-    self.inputFile = inputFile
-
-    # Create path to results
-    self.inputFilename = os.path.basename(self.inputFile)
-    self.outputFilename = self.getOutputPrefix() + "_anomaly_scores_" + \
-                            self.inputFilename
-    self.outputFile = os.path.join(outputDir,
-                              self.outputFilename)
-
-  def getOutputPrefix(self):
-    """
-    Returns a string to use as a prefix to output file names.
-
-    This method must be overridden by subclasses.
-    """
-
-    return ""
-
-  def getAdditionalHeaders(self):
-    """
-    Returns a list of strings. Subclasses can add in additional columns per 
-    record. 
-
-    This method must be overridden to provide the names for those
-    columns.
-    """
-
-    return []
-    
-  def handleRecord(inputData):
-    """
-    Returns a list [anomalyScore, *]. It is required that the first
-    element of the list is the anomalyScore. The other elements may
-    be anything, but should correspond to the names returned by
-    getAdditionalHeaders(). 
-
-    This method must be overridden by subclasses
-    """
-    pass
-
-  def run(self):
-    
-    # Run input
-    with open (self.inputFile) as fin:
-      
-      # Open file and setup headers
-      reader = csv.reader(fin)
-      csvWriter = csv.writer(open(self.outputFile, "wb"))
-      outputHeaders = ["timestamp",
-                        "value",
-                        "label",
-                        "anomaly_score"]
-
-      # Add in any additional headers
-      outputHeaders.extend(self.getAdditionalHeaders())
-      csvWriter.writerow(outputHeaders)
-      headers = reader.next()
-      
-      # Iterate through each record in the CSV file
-      print "Starting processing at", datetime.datetime.now()
-      for i, record in enumerate(reader, start=1):
-        
-        # Read the data and convert to a dict
-        inputData = dict(zip(headers, record))
-        inputData["value"] = float(inputData["value"])
-        inputData["timestamp"] = dateutil.parser.parse(inputData["timestamp"])
-              
-        # Retrieve the detector output and write it to a file
-        outputRow = [inputData["timestamp"],
-                     inputData["value"],
-                     inputData["label"]]
-        detectorValues = self.handleRecord(inputData)
-        outputRow.extend(detectorValues)
-        csvWriter.writerow(outputRow)
-        
-        # Progress report
-        if (i % 500) == 0: 
-          print ".",
-          sys.stdout.flush()
-
-    print "\n"
-    print "Completed processing", i, "records at", datetime.datetime.now()
-    print "Anomaly scores for", self.inputFile,
-    print "have been written to", self.outputFile
-
-#############################################################################
-
-class CLADetector(AnomalyDetector):
-
-  def __init__(self, minVal, maxVal, *args, **kwargs):
-
-    # Load the model params JSON
-    with open("model_params_rdse_94.json") as fp:
-      modelParams = json.load(fp)
-
-    self.sensorParams = modelParams['modelParams']['sensorParams']\
-                                   ['encoders']['value']
-    
-    # # RDSE - resolution calculation
-    resolution = max(0.001,
-                     (maxVal - minVal) / self.sensorParams.pop('numBuckets')
-                    )
-    self.sensorParams['resolution'] = resolution
-
-    # Scalar - update the min/max value for the encoder
-    # self.sensorParams['minval'] = minVal
-    # self.sensorParams['maxval'] = maxVal
-    
-    self.model = ModelFactory.create(modelParams)
-
-    self.model.enableInference({'predictedField': 'value'})
-
-    # The anomaly likelihood object
-    self.anomalyLikelihood = AnomalyLikelihood()
-
-    # Init the super class
-    super(CLADetector, self).__init__(*args, **kwargs)
-
-  def getOutputPrefix(self):
-    """
-    Returns the string to prepend to results files generated by this class
-    """
-    return "cla"
-
-  def getAdditionalHeaders(self):
-    """
-    Returns a list of strings.
-    """
-
-    return ["_raw_score"]
-
-  def handleRecord(self, inputData):
-    """
-    Returns a list [anomalyScore, rawScore].
-
-    Internally to NuPIC "anomalyScore" corresponds to "likelihood_score"
-    and "rawScore" corresponds to "anomaly_score". Sorry about that.
-    """
-
-    # Send it to the CLA and get back the results
-    result = self.model.run(inputData)
-    
-    # Retrieve the anomaly score and write it to a file
-    rawScore = result.inferences['anomalyScore']
-
-    # Compute the Anomaly Likelihood
-    anomalyScore = self.anomalyLikelihood.likelihood(inputData["value"],
-                                                     rawScore,
-                                                     inputData["timestamp"])
-
-    return [anomalyScore, rawScore]
-
-#############################################################################
-
-class EtsySkylineDetector(AnomalyDetector):
-
-  def __init__(self, probationaryPeriod, *args, **kwargs):
-    
-    # Store our running history
-    self.timeseries = []
-    self.recordCount = 0
-    self.probationaryPeriod = probationaryPeriod
-
-    self.algorithms =    [median_absolute_deviation,
-                         first_hour_average,
-                         stddev_from_average,
-                         stddev_from_moving_average,
-                         mean_subtraction_cumulation,
-                         least_squares,
-                         histogram_bins]
-
-
-    super(EtsySkylineDetector, self).__init__(*args, **kwargs)
-
-  def getOutputPrefix(self):
-    return "skyline"
-
-  def handleRecord(self, inputData):
-    """
-    Returns a list [anomalyScore].
-    """
-
-    score = 0.0
-    inputRow = [inputData["timestamp"], inputData["value"]]
-    self.timeseries.append(inputRow)
-    if self.recordCount < self.probationaryPeriod:
-      self.recordCount += 1
-    else:
-      for algo in self.algorithms:
-        score += algo(self.timeseries)
-
-    normalizedScore = score / len(self.algorithms)
-    return [normalizedScore]
-
-
 if __name__ == "__main__":
-  helpString = (
-    "\n%prog [options] [uid]"
-    "\n%prog --help"
-    "\n"
-    "\nRuns NuPIC anomaly detection on a csv file."
-    "\nWe assume the data files have a timestamp field called 'timestamp' and"
-    "\na value field called 'value'. All other fields are ignored."
-    "\nNote: it is important to set min and max properly according to data."
-  )
 
-  resultsPathDefault = os.path.join("results", "anomaly_scores.csv");
+  usage = "usage: %prog --inputFile <path_to/file.csv> [options]"
 
   # All the command line options
-  parser = OptionParser(helpString)
+  parser = OptionParser(usage)
   parser.add_option("--inputFile",
-                    help="Path to data file. (default: %default)", 
+                    help="Path to data file. (REQUIRED)", 
                     dest="inputFile", default=None)
   parser.add_option("--outputDir",
                     help="Output Directory. Results files will be place here.",
-                    dest="outputDir", default="results")
+                    dest="outputDir", default="results/cla")
   parser.add_option("--max", default=None,
       help="Maximum number for the value field. If not set this value will be "
           "calculated from the inputFile data.")
@@ -450,13 +158,15 @@ if __name__ == "__main__":
           "calculated from the inputFile data.")
   parser.add_option("--verbosity", default=0, help="Increase the amount and "
                     "detail of output by setting this greater than 0.")
-  parser.add_option("--plot", default=False, action="store_true",
-                    help="Use the Plot.ly library to generate plots")
   parser.add_option("--detector", help="Which Anomaly Detector class to use.",
                     default="cla")
 
 
   options, args = parser.parse_args(sys.argv[1:])
+
+  if not options.inputFile:
+    parser.print_help()
+    sys.exit(1)
 
   # Run it
   runAnomaly(options)

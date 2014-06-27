@@ -78,22 +78,6 @@ the following installed.
 - [PyYaml](http://pyyaml.org/)
 - [NuPIC](http://www.github.com/numenta/nupic) (Source Required)
 
-#### Optional Extras
-
-- [Plotly](https://plot.ly/)
-
-If you would like these scripts to plot results you can sign up for a free
-Plot.ly account and install their Python library. (If you use pip to install
-from requirements.txt below this will be installed automatically.)
-
-After you have signed up you will need to add your username and API key to your
-environment.
-
-    export PLOTLY_USER_NAME='{YOUR PLOTLY USERNAME}'
-    export PLOTLY_API_KEY='{YOUR API KEY}'
-
-You can then add the --plot option to any python script to visualize output.
-
 ### Local Installation
 
 It is assumed you have git, python 2.7 and pip installed by this point.
