@@ -55,7 +55,7 @@ good performance on this benchmark.
 We provide an Amazon Machine Image (AMI) from which you can launch
 an EC2 instance with all requirements and this repository pre-installed.
 
-ami-9faddeaf
+ami-b73d4287
 
 ### Supported Platforms for Local Install
 
@@ -231,27 +231,3 @@ requirements for a production anomaly detection system.
   - If it is flagged as an anomaly it is a False Positive
   - Otherwise it is a True Negative
 
-
-## TODO
-
-- Make note of best NuPIC tag to use
-- Code is duplicated between GEF and analyze_results - decide where it belongs
-- Two skyline algorithms use scipy code and are omitted, re-impliment
-    - grubbs requires use of the inverse survival function from SciPy
-    - ks_test requires ks_2samp
-- for AnomalyDetector remove outputDir and infer it from outputFile which 
-  should be a path
-- gef charts of run_anomaly output need to reflect the proper length of the 
-  probationary period
-- Remove results from AMI before creating final.
-- Move to CentOS AMI starting from stage 2
-- Data processing script
-  - verify input data format
-  - adjust transition period length
-  - expand acronyms?
-- Remove references to scalar in run_anomaly.py
-- rename model_params_rdse_94.json to model_params
-- Rescore transition period records as .5
-- Find out What happens if during suppression period a record is 0.5
-- Anomaly detection has to work in real time, but is evaluated in retrospect
-- make sure terms are aligned between readme and code
