@@ -55,7 +55,9 @@ good performance on this benchmark.
 We provide an Amazon Machine Image (AMI) from which you can launch
 an EC2 instance with all requirements and this repository pre-installed.
 
-ami-b73d4287
+ami-299be419
+
+On an m3.2xlarge the full benchmark takes around 8 minutes to run.
 
 ### Supported Platforms for Local Install
 
