@@ -104,20 +104,6 @@ class WindowedConfusionMatrix(ConfusionMatrixBase):
                verbosity = 0):
     """
     Generate the confusion matrix using the windowed method
-    
-     True Positives - An anomalous record followed in the next window minutes
-                      by at least one above threshold likelihood score
-                                           OR
-                     Any likelihood score above threshold preceeded by an
-                     an anomalous record within the last window minutes.
-                     NOTE: We intentionally ignore this type of TP as we
-                     don't want to optimize for it.
-     False Negatives - Any anomalous record without an above threshold
-                      likelihood score within the next window minutes
-     False Positives - Any above threshold likelihood score preceeded by window
-                       minutes without an anomalous record
-     True Negatives - Any below threshold likelihood score preceeded by window
-                      minutes without an anomalous record
                       
     predicted       - A list or numpy array
     actual          - A list or numpy array
