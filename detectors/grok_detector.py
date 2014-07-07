@@ -1,4 +1,5 @@
 import os
+import math
 import simplejson as json
 
 from nupic.algorithms import anomaly_likelihood

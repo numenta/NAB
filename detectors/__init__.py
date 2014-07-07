@@ -1,2 +1,2 @@
-from cla_detector import CLADetector
-from etsy_skyline_detector import EtsySkylineDetector
+from grok_detector import GrokDetector
+from skyline_detector import SkylineDetector

@@ -42,29 +42,24 @@ def runAnomaly(options):
   # with the window in which detectors will not return any results.
   probationaryPeriod = 600
 
-  # Grok Detector
-  if options.detector == "grok":
-
-    # Instantiate our detector
-    grokDetector = GrokDetector(probationaryPeriod
-                                options.inputFile,
-                                outputDir)
-    grokDetector.run()
-
-  # SKYLINE detector
-  elif options.detector == "skyline":
-
-    etsyDetector = SkylineDetector(probationaryPeriod,
-                                   options.inputFile,
-                                   outputDir)
-    etsyDetector.run()
-
-  # ADD ADITIONAL DETECTORS HERE
-
-
+  # If the detector is 'detector', the detector class must be named
+  # DetectorDetector
+  detector = options.detector[0].upper() + options.detector[1:]
+  className = detector + "Detector"
+  if className not in globals():
+    print("ERROR: The provided detector was not recognized. Please add a class "
+          "in the detectors/ dir. Add that class to the detectors/__init__.py "
+          "file and finally add that class to the list of detectors imported "
+          "in this file. ... Sorry!")
+    sys.exit(1)
   else:
-    raise Exception("'%s' is not a recognized detector type." %
-                    options.detector)
+    detectorClass = globals()[className](probationaryPeriod,
+                                          options.inputFile,
+                                          outputDir)
+  try:
+    detectorClass.run()
+  except RuntimeError, e:
+    print "Error: %s" % (e)
 
 def getOutputDir(options):
   """
@@ -125,7 +120,7 @@ if __name__ == "__main__":
                     dest="inputFile", default=None)
   parser.add_option("--outputDir",
                     help="Output Directory. Results files will be place here.",
-                    dest="outputDir", default="results/grok")
+                    dest="outputDir", default="results/")
   parser.add_option("--max", default=None,
       help="Maximum number for the value field. If not set this value will be "
           "calculated from the inputFile data.")
