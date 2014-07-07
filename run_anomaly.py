@@ -21,13 +21,8 @@
 
 import os
 import sys
-import csv
-import datetime
-import dateutil.parser
-import simplejson as json
 
 from optparse import OptionParser
-from pprint import pprint
 
 from detectors import (GrokDetector, SkylineDetector)
 
