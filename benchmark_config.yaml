@@ -12,7 +12,7 @@ DataGroups:
 # detector to generate results.
 AnomalyDetectors:
     - grok
-    - skyline
+    #- skyline
 
 ResultsDirectory: "results"
 
@@ -27,3 +27,13 @@ CostMatrix:
     fnCost: 200.0
     fpCost: 50.0
     tnCost: 0.0
+
+# The probationary period is the number of records at the begining of each
+# dataset for which a detector will not be scored. This period is allowed
+# to provide a consistent amount of time for each detector to stabilize 
+# and collect initial statistics.
+ProbationaryPeriod: 600
+
+# Scoring window - Minutes
+# Please see the 'Scoring' wiki page for a full explanation of this value.
+ScoringWindow: 120

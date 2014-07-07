@@ -19,9 +19,10 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-helpString = """ This script takes a csv and generates an ROC curve given the csv
-using each step between min and max. Finally it will find the point on that ROC
-curve which minimizes the cost function defined below. """
+helpString = """ This script takes a batch of csvs and generates an ROC curve
+given the csvs using steps between thresholds of 0.0 and 1.0. Finally it will
+find the point on that ROC curve which minimizes the cost function defined
+below. """
 
 import os
 import pandas
@@ -34,22 +35,27 @@ from optparse import OptionParser
 from pprint import pprint
 from confusion_matrix import (WindowedConfusionMatrix,
                               pPrintMatrix)
-
-
+from helpers import (getDataGroupDirs,
+                     inferDetector)
 
 gPlotsAvailable = False
 try:
-  from plotly import plotly
+  from plotly import plotly as py
+  from plotly.graph_objs import (Data,
+                                 Layout,
+                                 Figure,
+                                 Trace,
+                                 XAxis,
+                                 YAxis)
   gPlotsAvailable = True
 except ImportError:
   print "Plotly not installed. Plots will not be available."
-  pass
 
 
-def analyzeResults(options):
+def optimizeThreshold(options):
   """
   Generate ROC curve and find optimum point given cost matrix. Results of
-  this analysis will be put into a detailed and a summary results file.
+  this analysis will be put into a best and a summary results file.
   """
 
   # Load the config file
@@ -67,29 +73,18 @@ def analyzeResults(options):
   threshMax = 1.0
   initialThreshStep = .1
 
-  # Find sub directories of our results dir, e.g. results/cla/...
-  items = os.listdir(options.resultsDir)
-  subDirs = []
-  for item in items:
-    path = os.path.join(options.resultsDir, item)
-    if os.path.isdir(path):
-      for d in options.detectors:
-        if d == item: 
-          print("ERROR: It looks like you're trying to analyze results from "
-                "multiple detectors at once. \nThis script generates results "
-                "summaries which are only meaningful on a per-detector basis.\n"
-                "Please specify a single detector results directory. e.g. "
-                "python analyze_results.py -d results/cla")
-          sys.exit(1)
-      subDirs.append(path)
+  dataGroupDirs = getDataGroupDirs(options.resultsDir, options.detectors)
+
+  print dataGroupDirs
 
   # Infer which detector generated these results from the path
-  detector = inferDetector(options)
+  detector = inferDetector(options.resultsDir, options.detectors)
 
   csvFiles = []
-  for subDir in subDirs:
-    items = os.listdir(subDir)
-    files = [os.path.join(subDir, item) for
+  for dataGroupDir in dataGroupDirs:
+    rawDir = os.path.join(dataGroupDir, 'raw')
+    items = os.listdir(rawDir)
+    files = [os.path.join(rawDir, item) for
                 item in items if item[-4:] == '.csv']
     csvFiles.extend(files)
 
@@ -108,12 +103,13 @@ def analyzeResults(options):
     with open(resultsFile, 'r') as fh:
       results = pandas.read_csv(fh)
     
-    costMatrix = getCostMatrix()
+    costMatrix = getCostMatrix(config)
     vals = genCurveData(results,
                         threshMin,
                         threshMax,
                         initialThreshStep,
-                        costMatrix, 
+                        config['ScoringWindow'],
+                        costMatrix,
                         options.verbosity)
 
     # First time through write out the headers
@@ -147,9 +143,7 @@ def analyzeResults(options):
               "export PLOTLY_USER_NAME={username}\n"
               "export PLOTLY_API_KEY={apikey}")
       
-      py = plotly(username_or_email=plotlyUser,
-                  key=plotlyAPIKey,
-                  verbose = False)
+      py.sign_in(plotlyUser, plotlyAPIKey)
       
       fileName = os.path.basename(resultsFile)
       chartTitle = "ROC Curve: %s" % fileName
@@ -185,9 +179,10 @@ def analyzeResults(options):
     with open(resultsFile, 'r') as fh:
       results = pandas.read_csv(fh)
     
-    costMatrix = getCostMatrix()
+    costMatrix = getCostMatrix(config)
     cMatrix = genConfusionMatrix(results,
-                                 minThresh, 
+                                 minThresh,
+                                 window = config['ScoringWindow'],
                                  costMatrix = costMatrix)
 
     # TODO - Calculate the total norm vs anomalous directly from labels
@@ -209,7 +204,8 @@ def analyzeResults(options):
   # Summarize data for file writing
   detailedTotalsArray = numpy.sum(detailedView, axis=0)
   detailedTotalsList = detailedTotalsArray.tolist()
-  detailedOutput = os.path.join(options.resultsDir, "detailedResults.csv")
+  detailedOutput = os.path.join(options.resultsDir,
+                                "optimizationBestResults.csv")
   with open(detailedOutput, 'w') as outFile:
 
     writer = csv.writer(outFile)
@@ -218,9 +214,8 @@ def analyzeResults(options):
     totalsRow.extend(detailedTotalsList)
     writer.writerow(totalsRow)
 
-
   # Write out summary results
-  outputFile = os.path.join(options.resultsDir, "resultsSummary.csv")
+  outputFile = os.path.join(options.resultsDir, "optimizationSummary.csv")
   with open(outputFile, 'w') as outFile:
 
     writer = csv.writer(outFile)
@@ -229,16 +224,7 @@ def analyzeResults(options):
     totalsRow.extend(totalsList)
     writer.writerow(totalsRow)
 
-  # Load and compare results to leaderboard
-  with open("leaderboard.yaml") as fh:
-    leaderboard = yaml.load(fh)
-
-  print "#" * 70
-  print "LEADERBOARD"
-  pprint(leaderboard)
-
   # Console output
-
   print "#" * 70
   print "YOUR RESULTS"
   print "Detector: ", detector
@@ -252,34 +238,6 @@ def analyzeResults(options):
 
   print "Summary file for all thresholds:", outputFile
   print "Detailed summary file for the best threshold:", detailedOutput
-
-  congrats(lowestCost, leaderboard)
-
-
-def congrats(currentCost, leaderboard):
-  """
-  Prints a congratulatory note if the measured results are better than
-  known values.
-  """
-  bestKnownCost = leaderboard["FullCorpus"]["Cost"]
-  if currentCost < bestKnownCost:
-    print "Congratulations! These results improve on the state of the art."
-    print "Your minimum cost (%d) is less than the best known value (%d)" % \
-           (currentCost, bestKnownCost)
-
-
-def inferDetector(options):
-  """
-  Returns a string which is either a known detector name or "Unknown" if 
-  the infered detector does not match one we know.
-  """
-
-  guess = os.path.split(options.resultsDir)[1]
-
-  if guess in options.detectors:
-    return guess
-  else:
-    return "Unknown"
 
 
 def genConfusionMatrix(results,
@@ -330,6 +288,7 @@ def genCurveData(results,
                  minThresh = 0,
                  maxThresh = 1,
                  step = .1,
+                 window = 30,
                  costMatrix = None,
                  verbosity = 0):
   """
@@ -350,7 +309,8 @@ def genCurveData(results,
   incrementCount = 1.0
   while minThresh < maxThresh and incrementCount < 60:
     cMatrix = genConfusionMatrix(results,
-                                 minThresh, 
+                                 minThresh,
+                                 window = window,
                                  costMatrix = costMatrix,
                                  verbosity = verbosity)
     vals['tprs'].append(cMatrix.tpr)
@@ -374,27 +334,26 @@ def plotROC(py, curveData, chartTitle = "ROC Curve"):
   """
     
   # Default layout
-  layout = {"title": chartTitle,
-            "xaxis": {
-              "title": "False Positive Rate",
-              "range": [0,1]
-            },
-            "yaxis":{
-              "title": "True Positive Rate",
-              "type": "linear",
-              "range": [0,1]
-            },
-            "showlegend": False
-        }
+  layout = Layout(title=chartTitle,
+                  xaxis=XAxis(title="False Positive Rate",
+                              range=[0,1]),
+                  yaxis=YAxis(title="True Positive Rate",
+                              type="linear",
+                              range=[0,1]),
+                  showlegend=False
+            )
   
   # PLOT THAT STUFF!
-  rocData = { 'x': curveData['fprs'],
-              'y': curveData['tprs']}
+  rocTrace = Trace(x=curveData['fprs'],
+                   y=curveData['tprs'])
 
-  response = py.plot([rocData],
-                     layout=layout)
+  data = Data([rocTrace])
+
+  fig = Figure(data=data, layout=layout)
+
+  plot_url = py.plot(fig, filename="ROC Curve")
   
-  return response["url"]
+  return plot_url
 
 def updateThreshold(thresh, step, incrementCount):
   """
@@ -409,21 +368,12 @@ def updateThreshold(thresh, step, incrementCount):
 
   return thresh, step
 
-def getCostMatrix():
+def getCostMatrix(config):
   """
   Returns costs associated with each box in a confusion Matrix
-  
-  These values have been picked to reflect realistic costs of reacting to
-  each type of event for the server monitoring data which comprise the
-  NAB corpus.
   """
   
-  costMatrix = {"tpCost": 0.0,
-                "fpCost": 50.0,
-                "fnCost": 100.0,
-                "tnCost": 0.0}
-
-  return costMatrix
+  return config['CostMatrix']
 
 if __name__ == '__main__':
   # All the command line options
@@ -441,4 +391,4 @@ if __name__ == '__main__':
   options, args = parser.parse_args()
   
   # Main
-  analyzeResults(options)
+  optimizeThreshold(options)

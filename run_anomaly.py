@@ -21,6 +21,7 @@
 
 import os
 import sys
+import yaml
 
 from optparse import OptionParser
 
@@ -31,11 +32,15 @@ def runAnomaly(options):
   Run selected detector on selected file
   """
 
+  # Load the config file
+  with open(options.config) as configHandle:
+    config = yaml.load(configHandle)
+
   outputDir = getOutputDir(options)
 
   # Align our initial window from which we are allowed to collect statistics
   # with the window in which detectors will not return any results.
-  probationaryPeriod = 600
+  probationaryPeriod = config['ProbationaryPeriod']
 
   # If the detector is 'detector', the detector class must be named
   # DetectorDetector
@@ -118,6 +123,9 @@ if __name__ == "__main__":
                     dest="outputDir", default="results/")
   parser.add_option("--detector", help="Which Anomaly Detector class to use.",
                     default="grok")
+  parser.add_option("--config", default="benchmark_config.yaml",
+                    help="The configuration file to use while running the "
+                    "benchmark.")
   parser.add_option("--verbosity", default=0, help="Increase the amount and "
                     "detail of output by setting this greater than 0.")
 

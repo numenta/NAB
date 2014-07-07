@@ -8,6 +8,10 @@ from copy import copy
 from pandas.io.parsers import read_csv
 
 class AnomalyDetector(object):
+  """
+  Base class for all anomaly detectors. When inheriting from this class please
+  take note of which methods MUST be overridden, as documented below.
+  """
 
   def __init__(self,
                probationaryPeriod,
