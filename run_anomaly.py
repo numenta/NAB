@@ -121,17 +121,10 @@ if __name__ == "__main__":
   parser.add_option("--outputDir",
                     help="Output Directory. Results files will be place here.",
                     dest="outputDir", default="results/")
-  parser.add_option("--max", default=None,
-      help="Maximum number for the value field. If not set this value will be "
-          "calculated from the inputFile data.")
-  parser.add_option("--min", default=None,
-      help="Minimum number for the value field. If not set this value will be "
-          "calculated from the inputFile data.")
-  parser.add_option("--verbosity", default=0, help="Increase the amount and "
-                    "detail of output by setting this greater than 0.")
   parser.add_option("--detector", help="Which Anomaly Detector class to use.",
                     default="grok")
-
+  parser.add_option("--verbosity", default=0, help="Increase the amount and "
+                    "detail of output by setting this greater than 0.")
 
   options, args = parser.parse_args(sys.argv[1:])
 
