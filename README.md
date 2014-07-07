@@ -110,7 +110,7 @@ Then follow build directions in the NuPIC `README.md`.
     cd /path/to/nab
     python run_benchmark.py
 
-This will produce results files for the CLA anomaly detection method as well as
+This will produce results files for the Grok anomaly detection method as well as
 baseline results using methods from the [Etsy
 Skyline](https://github.com/etsy/skyline) anomaly detection library. This will
 also pass those results files to the analyze_results.py script to

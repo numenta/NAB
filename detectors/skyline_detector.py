@@ -29,6 +29,14 @@ class SkylineDetector(AnomalyDetector):
   def getOutputPrefix(self):
     return "skyline"
 
+  def getThreshold(self):
+    """
+    Returns a known good threshold for the dataset. Discovered by using the
+    optimize_threshold.py script.
+    """
+
+    return 0.9
+
   def handleRecord(self, inputData):
     """
     Returns a list [anomalyScore].

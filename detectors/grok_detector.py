@@ -54,6 +54,14 @@ class GrokDetector(AnomalyDetector):
 
     return ["_raw_score"]
 
+  def getThreshold(self):
+    """
+    Returns a known good threshold for the dataset. Discovered by using the
+    optimize_threshold.py script.
+    """
+
+    return 0.99996
+
   def handleRecord(self, inputData):
     """
     Returns a list [anomalyScore, rawScore].
