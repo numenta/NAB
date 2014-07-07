@@ -55,12 +55,14 @@ good performance on this benchmark.
 We provide an Amazon Machine Image (AMI) from which you can launch
 an EC2 instance with all requirements and this repository pre-installed.
 
-ami-b73d4287
+ami-299be419
 
-### Supported Platforms for Local Install
+On an m3.2xlarge the full benchmark takes around 8 minutes to run.
+
+### Supported Platforms
 
 - OSX 10.9 and higher
-- Cent OS
+- Amazon Linux (via AMI)
 
 Other platforms may work but have not been tested.
 
@@ -108,7 +110,7 @@ Then follow build directions in the NuPIC `README.md`.
     cd /path/to/nab
     python run_benchmark.py
 
-This will produce results files for the CLA anomaly detection method as well as
+This will produce results files for the Grok anomaly detection method as well as
 baseline results using methods from the [Etsy
 Skyline](https://github.com/etsy/skyline) anomaly detection library. This will
 also pass those results files to the analyze_results.py script to
