@@ -60,7 +60,7 @@ def main(options):
   if not options.numCPUs:
     numCPUs = cpu_count()
   else:
-    numCPUs = options.numCPUs
+    numCPUs = int(options.numCPUs)
 
   # Decide if plots are an option
   plot = False

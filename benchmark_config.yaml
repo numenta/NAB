@@ -6,12 +6,24 @@ DataGroups:
     - artificialNoAnomaly
     - realAWSCloudwatch
 
-# We provide three anomaly detectors. You may want to use some or all of them
+# We provide two anomaly detectors. You may want to use one or both of them
 # to generate results. You may also create your own detector as a subclass of
 # AnomalyDetector and then add it here to have run_benchmark.py use your
 # detector to generate results.
 AnomalyDetectors:
-    - cla
+    - grok
     - skyline
 
 ResultsDirectory: "results"
+
+# These values have been picked to reflect realistic costs of reacting to
+# each type of event for the server monitoring data which comprise the
+# NAB corpus. 
+#
+# NOTE: Results from running the benchmark with modified costs are NOT directly
+# comparable to those on the leaderboard.
+CostMatrix:
+    tpCost: 0.0
+    fnCost: 200.0
+    fpCost: 50.0
+    tnCost: 0.0

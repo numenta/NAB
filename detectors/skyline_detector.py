@@ -8,25 +8,23 @@ from skyline.algorithms import (median_absolute_deviation,
                                 least_squares,
                                 histogram_bins)
 
-class EtsySkylineDetector(AnomalyDetector):
+class SkylineDetector(AnomalyDetector):
 
-  def __init__(self, probationaryPeriod, *args, **kwargs):
+  def __init__(self, *args, **kwargs):
     
+    # Initialize the parent
+    super(SkylineDetector, self).__init__(*args, **kwargs)
+
     # Store our running history
     self.timeseries = []
     self.recordCount = 0
-    self.probationaryPeriod = probationaryPeriod
-
-    self.algorithms =    [median_absolute_deviation,
+    self.algorithms =   [median_absolute_deviation,
                          first_hour_average,
                          stddev_from_average,
                          stddev_from_moving_average,
                          mean_subtraction_cumulation,
                          least_squares,
                          histogram_bins]
-
-
-    super(EtsySkylineDetector, self).__init__(*args, **kwargs)
 
   def getOutputPrefix(self):
     return "skyline"

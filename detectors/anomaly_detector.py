@@ -4,9 +4,12 @@ import sys
 import dateutil
 import datetime
 
+from pandas.io.parsers import read_csv
+
 class AnomalyDetector(object):
 
   def __init__(self,
+               probationaryPeriod,
                inputFile,
                outputDir):
     """
@@ -15,6 +18,23 @@ class AnomalyDetector(object):
     """
 
     self.inputFile = inputFile
+    self.probationaryPeriod = probationaryPeriod
+
+    # Allowed statistics. Anything within probationary period.
+    with open(self.inputFile) as fh:
+      dataFrame = read_csv(fh);
+
+    calcMin = dataFrame.value[:self.probationaryPeriod].min()
+    calcMax = dataFrame.value[:self.probationaryPeriod].max()
+    calcRange = abs(calcMax - calcMin)
+    calcPad = calcRange * .2
+
+    self.inputMin = calcMin - calcPad
+    self.inputMax = calcMax + calcPad
+
+    # Catch the case where the file only has one value early on.
+    if self.inputMax == self.inputMin:
+      self.inputMax += 1
 
     # Create path to results
     self.inputFilename = os.path.basename(self.inputFile)

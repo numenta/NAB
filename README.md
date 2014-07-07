@@ -59,10 +59,10 @@ ami-299be419
 
 On an m3.2xlarge the full benchmark takes around 8 minutes to run.
 
-### Supported Platforms for Local Install
+### Supported Platforms
 
 - OSX 10.9 and higher
-- Cent OS
+- Amazon Linux (via AMI)
 
 Other platforms may work but have not been tested.
 

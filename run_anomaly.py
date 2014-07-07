@@ -28,9 +28,8 @@ import simplejson as json
 
 from optparse import OptionParser
 from pprint import pprint
-from pandas.io.parsers import read_csv
 
-from detectors import (CLADetector, EtsySkylineDetector)
+from detectors import (GrokDetector, SkylineDetector)
 
 def runAnomaly(options):
   """
@@ -41,48 +40,23 @@ def runAnomaly(options):
 
   # Align our initial window from which we are allowed to collect statistics
   # with the window in which detectors will not return any results.
-  statsWindow = probationaryPeriod = 600
+  probationaryPeriod = 600
 
-  # CLA Detector
-  if options.detector == "cla":
-
-    # Calculate basic statistics up front
-    with open(options.inputFile) as fh:
-      dataFrame = read_csv(fh);
-
-    calcMin = dataFrame.value[:statsWindow].min()
-    calcMax = dataFrame.value[:statsWindow].max()
-    calcRange = abs(calcMax - calcMin)
-    calcPad = calcRange * .2
-
-    # Use supplied or calculated min/max
-    if options.min == None:
-      inputMin = calcMin - calcPad
-    else:
-      inputMin = options.min
-
-    if options.max == None:
-      inputMax = calcMax + calcPad
-    else:
-      inputMax = options.max
-
-    # Catch the case where the file only has one value early on.
-    if inputMax == inputMin:
-      inputMax += 1
+  # Grok Detector
+  if options.detector == "grok":
 
     # Instantiate our detector
-    claDetector = CLADetector(inputMin,
-                              inputMax,
-                              options.inputFile,
-                              outputDir)
-    claDetector.run()
+    grokDetector = GrokDetector(probationaryPeriod
+                                options.inputFile,
+                                outputDir)
+    grokDetector.run()
 
   # SKYLINE detector
   elif options.detector == "skyline":
 
-    etsyDetector = EtsySkylineDetector(probationaryPeriod,
-                                       options.inputFile,
-                                       outputDir)
+    etsyDetector = SkylineDetector(probationaryPeriod,
+                                   options.inputFile,
+                                   outputDir)
     etsyDetector.run()
 
   # ADD ADITIONAL DETECTORS HERE
@@ -125,10 +99,12 @@ def os_path_split_asunder(path, debug=False):
   parts = []
   while True:
       newpath, tail = os.path.split(path)
-      if debug: print repr(path), (newpath, tail)
+      if debug: 
+          print repr(path), (newpath, tail)
       if newpath == path:
           assert not tail
-          if path: parts.append(path)
+          if path: 
+              parts.append(path)
           break
       parts.append(tail)
       path = newpath
@@ -149,7 +125,7 @@ if __name__ == "__main__":
                     dest="inputFile", default=None)
   parser.add_option("--outputDir",
                     help="Output Directory. Results files will be place here.",
-                    dest="outputDir", default="results/cla")
+                    dest="outputDir", default="results/grok")
   parser.add_option("--max", default=None,
       help="Maximum number for the value field. If not set this value will be "
           "calculated from the inputFile data.")
@@ -159,7 +135,7 @@ if __name__ == "__main__":
   parser.add_option("--verbosity", default=0, help="Increase the amount and "
                     "detail of output by setting this greater than 0.")
   parser.add_option("--detector", help="Which Anomaly Detector class to use.",
-                    default="cla")
+                    default="grok")
 
 
   options, args = parser.parse_args(sys.argv[1:])
