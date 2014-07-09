@@ -1,3 +1,7 @@
+### Under Construction
+
+#### This repo is under heavy, active revision. Browse, but don't judge. :)
+
 The Numenta Anomaly Benchmark
 -----------------------------
 
