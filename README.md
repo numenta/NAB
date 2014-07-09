@@ -5,11 +5,11 @@
 The Numenta Anomaly Benchmark
 -----------------------------
 
-This repository contains the data and scripts neccessary to replicate the
+This repository contains the data and scripts necessary to replicate the
 results in the Numenta Anomaly Benchmark paper.
 
 We hope you will compare these results with your own anomaly detection methods.
-Competative results tied to open source code will be listed here. Let us know
+Competitive results tied to open source code will be listed here. Let us know
 about your work by submitting a pull request.
 
 ### Corpus
@@ -179,7 +179,7 @@ be consumed by analyze_results.py
     - 1     - This record is known to be anomalous
 - Each record MUST correspond, one for one, to records in their input data file
 
-### Evalutation
+### Evaluation
 
 #### Labeling Key
  
@@ -214,7 +214,7 @@ requirements for a production anomaly detection system.
         worse than any spam.
     - If a record is not flagged as an anomaly in the SUPPRESSION period this 
       is a True Negative
-  - If ALLOWED records ellapse without the anomaly being caught it is a 
+  - If ALLOWED records elapse without the anomaly being caught it is a 
     False Negative
 - If it is not an anomaly, and we're not in an ALLOWED period or in a 
   SUPRESSION period then:
