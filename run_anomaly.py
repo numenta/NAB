@@ -122,7 +122,7 @@ if __name__ == "__main__":
                     help="Output Directory. Results files will be place here.",
                     dest="outputDir", default="results/")
   parser.add_option("--detector", help="Which Anomaly Detector class to use.",
-                    default="grok")
+                    default="numenta")
   parser.add_option("--config", default="benchmark_config.yaml",
                     help="The configuration file to use while running the "
                     "benchmark.")

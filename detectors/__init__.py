@@ -1,2 +1,2 @@
-from grok_detector import GrokDetector
+from numenta_detector import NumentaDetector
 from skyline_detector import SkylineDetector

@@ -2,7 +2,7 @@ import os
 import sys
 
 def getDataGroupDirs(resultPath, detectors):
-  # Find sub directories of our results dir, e.g. results/grok/...
+  # Find sub directories of our results dir, e.g. results/numenta/...
   items = os.listdir(resultPath)
 
   dataGroupDirs = []
@@ -15,7 +15,7 @@ def getDataGroupDirs(resultPath, detectors):
                 "multiple detectors at once. \nThis script generates results "
                 "summaries which are only meaningful on a per-detector basis.\n"
                 "Please specify a single detector results directory. e.g. "
-                "python analyze_results.py -d results/grok")
+                "python analyze_results.py -d results/numenta")
           sys.exit(1)
       dataGroupDirs.append(path)
 

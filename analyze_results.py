@@ -52,7 +52,7 @@ def analyzeResults(options):
 
   options.detectors = config["AnomalyDetectors"]
 
-  # Find sub directories of our results dir, e.g. results/grok/...
+  # Find sub directories of our results dir, e.g. results/numenta/...
   dataGroupDirs = getDataGroupDirs(options.resultsDir, options.detectors)
 
   # Infer which detector generated these results from the path
