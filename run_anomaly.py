@@ -25,7 +25,7 @@ import yaml
 
 from optparse import OptionParser
 
-from detectors import (GrokDetector, SkylineDetector)
+from detectors import (NumentaDetector, SkylineDetector)
 
 def runAnomaly(options):
   """
@@ -115,13 +115,13 @@ if __name__ == "__main__":
 
   # All the command line options
   parser = OptionParser(usage)
-  parser.add_option("--inputFile",
+  parser.add_option("-i", "--inputFile",
                     help="Path to data file. (REQUIRED)", 
                     dest="inputFile", default=None)
   parser.add_option("--outputDir",
                     help="Output Directory. Results files will be place here.",
                     dest="outputDir", default="results/")
-  parser.add_option("--detector", help="Which Anomaly Detector class to use.",
+  parser.add_option("-d", "--detector", help="Which Anomaly Detector class to use.",
                     default="numenta")
   parser.add_option("--config", default="benchmark_config.yaml",
                     help="The configuration file to use while running the "
