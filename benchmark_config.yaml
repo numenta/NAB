@@ -3,8 +3,8 @@
 # those groups here and run_benchmark.py will automatically use those datasets.
 DataGroups:
     - artificialWithAnomaly
-    - artificialNoAnomaly
-    - realAWSCloudwatch
+    #- artificialNoAnomaly
+    #- realAWSCloudwatch
 
 # We provide two anomaly detectors. You may want to use one or both of them
 # to generate results. You may also create your own detector as a subclass of
@@ -12,28 +12,12 @@ DataGroups:
 # detector to generate results.
 AnomalyDetectors:
     - numenta
-    #- skyline
+    - skyline
 
 ResultsDirectory: "results"
-
-# These values have been picked to reflect realistic costs of reacting to
-# each type of event for the server monitoring data which comprise the
-# NAB corpus. 
-#
-# NOTE: Results from running the benchmark with modified costs are NOT directly
-# comparable to those on the leaderboard.
-CostMatrix:
-    tpCost: 0.0
-    fnCost: 200.0
-    fpCost: 50.0
-    tnCost: 0.0
 
 # The probationary period is the number of records at the begining of each
 # dataset for which a detector will not be scored. This period is allowed
 # to provide a consistent amount of time for each detector to stabilize 
-# and collect initial statistics.
+# and collect initial statistics. Best not to modify.
 ProbationaryPeriod: 600
-
-# Scoring window - Minutes
-# Please see the 'Scoring' wiki page for a full explanation of this value.
-ScoringWindow: 120
