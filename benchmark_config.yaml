@@ -5,6 +5,7 @@ DataGroups:
     - artificialWithAnomaly
     - artificialNoAnomaly
     - realAWSCloudwatch
+    - realKnownCause
 
 # We provide two anomaly detectors. You may want to use one or both of them
 # to generate results. You may also create your own detector as a subclass of
