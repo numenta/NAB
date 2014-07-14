@@ -29,84 +29,36 @@ import sys
 import csv
 import yaml
 
+from collections import OrderedDict
 from optparse import OptionParser
 from pprint import pprint
 from confusion_matrix import (WindowedConfusionMatrix,
                               pPrintMatrix)
 
-from helpers import (getDataGroupDirs,
-                     inferDetector)
+from helpers import (sharedSetup,
+                     getCSVFiles,
+                     getDetailedResults)
 
 def analyzeResults(options):
   """
   Score the output of detectors.
   """
 
-  # Load the config file
-  with open(options.config) as configHandle:
-    config = yaml.load(configHandle)
+  # Setup
+  config, profiles, dataGroupDirs, detector = sharedSetup(options)
 
-  # Update any missing config values from global config file
-  if not options.resultsDir:
-    options.resultsDir = config["ResultsDirectory"]
-
-  options.detectors = config["AnomalyDetectors"]
-
-  # Find sub directories of our results dir, e.g. results/numenta/...
-  dataGroupDirs = getDataGroupDirs(options.resultsDir, options.detectors)
-
-  # Infer which detector generated these results from the path
-  detector = inferDetector(options.resultsDir, options.detectors)
-
-  csvFiles = []
-  for dataGroupDir in dataGroupDirs:
-    alertsDir = os.path.join(dataGroupDir, 'alerts')
-    items = os.listdir(alertsDir)
-    files = [os.path.join(alertsDir, item) for
-                item in items if item[-4:] == '.csv']
-    csvFiles.extend(files)
-
-  if not csvFiles:
-    print("No files to analyze.")
-    sys.exit(0)
+  csvType = 'alerts'
+  csvFiles = getCSVFiles(dataGroupDirs, csvType)
 
   # Analyze all files
-  detailedResults = []
-  headers = ["Alert Log File",
-             "True Positives",
-             "False Positives",
-             "False Negatives",
-             "True Negatives",
-             "Cost",
-             "Total Normal",
-             "Total Anomalous"]
-
-  costIndex = headers.index("Cost")
-  detailedResults.append(headers)
-  for resultsFile in csvFiles:
-
-    with open(resultsFile, 'r') as fh:
-      results = pandas.read_csv(fh)
-    
-    costMatrix = getCostMatrix(config)
-    cMatrix = genConfusionMatrix(results,
-                                 window=config['ScoringWindow'],
-                                 costMatrix = costMatrix)
-
-    detailedResults.append([resultsFile,
-                            cMatrix.tp, 
-                            cMatrix.fp,
-                            cMatrix.fn,
-                            cMatrix.tn,
-                            cMatrix.cost,
-                            cMatrix.tn + cMatrix.fp,
-                            cMatrix.tp + cMatrix.fn])
+  detailedResults = getDetailedResults(csvType, csvFiles, profiles)
+  costIndex = detailedResults[0].index("Cost")
 
   # Write out detailed results
   detailedResultsArray = numpy.array(detailedResults)
 
-  # Skip first row and column
-  detailedView = detailedResultsArray[1:,1:].astype('float')
+  # Skip first row and first two columns
+  detailedView = detailedResultsArray[1:,2:].astype('float')
   
   # Summarize data for file writing
   detailedTotalsArray = numpy.sum(detailedView, axis=0)
@@ -116,7 +68,7 @@ def analyzeResults(options):
 
     writer = csv.writer(outFile)
     writer.writerows(detailedResults)
-    totalsRow = ['Totals']
+    totalsRow = ['Totals', '']
     totalsRow.extend(detailedTotalsList)
     writer.writerow(totalsRow)
 
@@ -151,55 +103,6 @@ def congrats(currentCost, leaderboard):
     print "Your minimum cost (%d) is less than the best known value (%d)" % \
            (currentCost, bestKnownCost)
 
-
-def genConfusionMatrix(results,
-                       window = 30,
-                       windowStepSize = 5,
-                       costMatrix = None,
-                       verbosity = 0):
-  """
-  Returns a confusion matrix object for the results of the
-  given experiment and the ground truth labels.
-  
-    experiment      - an experiment info dict
-    threshold       - float - cutoff to be applied to Likelihood scores
-    window          - Use a WindowedConfusionMatrix and calculate stats over
-                      this many minutes.
-    windowStepSize  - The ratio of minutes to records
-  """
-  
-  labelName = 'label'
-  columnNames = results.columns.tolist()
-  if labelName not in columnNames:
-    print columnNames
-    raise Exception('No labels found. Expected a '
-                    'column named "%s"' % labelName)
-  
-  alertName = 'alert'
-  predicted = results[alertName]
-  actual = results[labelName]
-
-  if not windowStepSize:
-    raise Exception("windowStepSize must be at least 1")
-  
-  cMatrix = WindowedConfusionMatrix(predicted,
-                                    actual,
-                                    window,
-                                    windowStepSize,
-                                    costMatrix)
-
-  if verbosity > 0:
-    pPrintMatrix(cMatrix, threshold)
-  
-  return cMatrix
-
-def getCostMatrix(config):
-  """
-  Returns costs associated with each box in a confusion Matrix
-  """
-  
-  return config['CostMatrix']
-
 if __name__ == '__main__':
   # All the command line options
   parser = OptionParser(helpString)
@@ -208,6 +111,9 @@ if __name__ == '__main__':
   parser.add_option("--verbosity", default=0, help="Increase the amount and "
                     "detail of output by setting this greater than 0.")
   parser.add_option("--config", default="benchmark_config.yaml",
+                    help="The configuration file to use while running the "
+                    "benchmark.")
+  parser.add_option("--profiles", default="user_profiles.yaml",
                     help="The configuration file to use while running the "
                     "benchmark.")
 

@@ -21,36 +21,19 @@
 
 helpString = """ This script takes a batch of csvs and generates an ROC curve
 given the csvs using steps between thresholds of 0.0 and 1.0. Finally it will
-find the point on that ROC curve which minimizes the cost function defined
-below. """
+find the point on that ROC curve which minimizes the average cost over
+multiple user profiles. """
 
 import os
 import pandas
 import numpy
-import sys
 import csv
-import yaml
 
 from optparse import OptionParser
-from pprint import pprint
-from confusion_matrix import (WindowedConfusionMatrix,
-                              pPrintMatrix)
-from helpers import (getDataGroupDirs,
-                     inferDetector)
-
-gPlotsAvailable = False
-try:
-  from plotly import plotly as py
-  from plotly.graph_objs import (Data,
-                                 Layout,
-                                 Figure,
-                                 Trace,
-                                 XAxis,
-                                 YAxis)
-  gPlotsAvailable = True
-except ImportError:
-  print "Plotly not installed. Plots will not be available."
-
+from helpers import (sharedSetup,
+                     getCSVFiles,
+                     getDetailedResults,
+                     genConfusionMatrix)
 
 def optimizeThreshold(options):
   """
@@ -58,39 +41,16 @@ def optimizeThreshold(options):
   this analysis will be put into a best and a summary results file.
   """
 
-  # Load the config file
-  with open(options.config) as configHandle:
-    config = yaml.load(configHandle)
+  # Setup
+  config, profiles, dataGroupDirs, detector = sharedSetup(options)
 
-  # Update any missing config values from global config file
-  if not options.resultsDir:
-    options.resultsDir = config["ResultsDirectory"]
-
-  options.detectors = config["AnomalyDetectors"]
+  # Files to loop over
+  csvFiles = getCSVFiles(dataGroupDirs, 'raw')
 
   # Thresholds
   threshMin = 0.0
   threshMax = 1.0
   initialThreshStep = .1
-
-  dataGroupDirs = getDataGroupDirs(options.resultsDir, options.detectors)
-
-  print dataGroupDirs
-
-  # Infer which detector generated these results from the path
-  detector = inferDetector(options.resultsDir, options.detectors)
-
-  csvFiles = []
-  for dataGroupDir in dataGroupDirs:
-    rawDir = os.path.join(dataGroupDir, 'raw')
-    items = os.listdir(rawDir)
-    files = [os.path.join(rawDir, item) for
-                item in items if item[-4:] == '.csv']
-    csvFiles.extend(files)
-
-  if not csvFiles:
-    print("No files to analyze.")
-    sys.exit(0)
 
   # Accumulate results
   header = None
@@ -103,57 +63,37 @@ def optimizeThreshold(options):
     with open(resultsFile, 'r') as fh:
       results = pandas.read_csv(fh)
     
-    costMatrix = getCostMatrix(config)
-    vals = genCurveData(results,
-                        threshMin,
-                        threshMax,
-                        initialThreshStep,
-                        config['ScoringWindow'],
-                        costMatrix,
-                        options.verbosity)
-
-    # First time through write out the headers
-    if not header:
-      header = ['Name']
-      thresholds = vals['thresholds']
-      header.extend(thresholds)
-      resultsSummary.append(header)
-
-    # Add a row for each file processed
-    resultRow = [resultsFile]
-    resultRow.extend(vals['costs'])
-    resultsSummary.append(resultRow)
-    
-    costs = vals['costs']
-    costsArray = numpy.array(costs)
-    minCostIndices = numpy.where(costsArray == costsArray.min())
-    
-    for minCostIndex in minCostIndices:
-      ind = minCostIndex[0]
-    
-    if options.plot:
-      print "Generating ROC Curve Plot ..."
-      # Get connection to plotly
-      try:
-        plotlyUser = os.environ['PLOTLY_USER_NAME']
-        plotlyAPIKey = os.environ['PLOTLY_API_KEY']
-      except KeyError:
-        raise Exception("Plotly user name and api key were not found in "
-              "your environment. Please add:\n"
-              "export PLOTLY_USER_NAME={username}\n"
-              "export PLOTLY_API_KEY={apikey}")
+    for profileName, profile in profiles.iteritems():
       
-      py.sign_in(plotlyUser, plotlyAPIKey)
+      costMatrix = profile['CostMatrix']
+      vals = genCurveData(results,
+                          threshMin,
+                          threshMax,
+                          initialThreshStep,
+                          profile['ScoringWindow'],
+                          costMatrix,
+                          options.verbosity)
+
+      # First time through write out the headers
+      if not header:
+        header = ['Name', 'User Profile']
+        thresholds = vals['thresholds']
+        header.extend(thresholds)
+        resultsSummary.append(header)
+
+      # Add a row for each file processed
+      resultRow = [resultsFile, profileName]
+      resultRow.extend(vals['costs'])
+      resultsSummary.append(resultRow)
       
-      fileName = os.path.basename(resultsFile)
-      chartTitle = "ROC Curve: %s" % fileName
-      plotROC(py, vals, chartTitle)
+      costs = vals['costs']
+      costsArray = numpy.array(costs)
 
   # Sum all values
   resultsSummaryArray = numpy.array(resultsSummary)
 
-  # Skip first row and column
-  summaryView = resultsSummaryArray[1:,1:].astype('float')
+  # Skip first row and two columns
+  summaryView = resultsSummaryArray[1:,2:].astype('float')
   
   # Summarize data for file writing
   totalsArray = numpy.sum(summaryView, axis=0)
@@ -164,42 +104,16 @@ def optimizeThreshold(options):
 
   # Re-run all files with lowest "best" threshold
   minThresh = bestThresholds[0]
-  detailedResults = []
-  headers = ["Results File",
-             "True Positives",
-             "False Positives",
-             "False Negatives",
-             "True Negatives",
-             "Cost",
-             "Total Normal",
-             "Total Anomalous"]
-  detailedResults.append(headers)
-  for resultsFile in csvFiles:
 
-    with open(resultsFile, 'r') as fh:
-      results = pandas.read_csv(fh)
-    
-    costMatrix = getCostMatrix(config)
-    cMatrix = genConfusionMatrix(results,
-                                 minThresh,
-                                 window = config['ScoringWindow'],
-                                 costMatrix = costMatrix)
-
-    # TODO - Calculate the total norm vs anomalous directly from labels
-    detailedResults.append([resultsFile,
-                            cMatrix.tp, 
-                            cMatrix.fp,
-                            cMatrix.fn,
-                            cMatrix.tn,
-                            cMatrix.cost,
-                            cMatrix.tn + cMatrix.fp,
-                            cMatrix.tp + cMatrix.fn])
+  csvType = 'raw'
+  detailedResults = getDetailedResults(csvType, csvFiles, profiles)
+  costIndex = detailedResults[0].index("Cost")
 
   # Write out detailed results
   detailedResultsArray = numpy.array(detailedResults)
 
-  # Skip first row and column
-  detailedView = detailedResultsArray[1:,1:].astype('float')
+  # Skip first row and two columns
+  detailedView = detailedResultsArray[1:,2:].astype('float')
   
   # Summarize data for file writing
   detailedTotalsArray = numpy.sum(detailedView, axis=0)
@@ -210,7 +124,7 @@ def optimizeThreshold(options):
 
     writer = csv.writer(outFile)
     writer.writerows(detailedResults)
-    totalsRow = ['Totals']
+    totalsRow = ['Totals', '']
     totalsRow.extend(detailedTotalsList)
     writer.writerow(totalsRow)
 
@@ -220,7 +134,7 @@ def optimizeThreshold(options):
 
     writer = csv.writer(outFile)
     writer.writerows(resultsSummary)
-    totalsRow = ['Totals']
+    totalsRow = ['Totals', '']
     totalsRow.extend(totalsList)
     writer.writerow(totalsRow)
 
@@ -239,54 +153,9 @@ def optimizeThreshold(options):
   print "Summary file for all thresholds:", outputFile
   print "Detailed summary file for the best threshold:", detailedOutput
 
-
-def genConfusionMatrix(results,
-                       threshold = 0.99,
-                       window = 30,
-                       windowStepSize = 5,
-                       costMatrix = None,
-                       verbosity = 0):
-  """
-  Returns a confusion matrix object for the results of the
-  given experiment and the ground truth labels.
-  
-    experiment      - an experiment info dict
-    threshold       - float - cutoff to be applied to Likelihood scores
-    window          - Use a WindowedConfusionMatrix and calculate stats over
-                      this many minutes.
-    windowStepSize  - The ratio of minutes to records
-  """
-  
-  labelName = 'label'
-  columnNames = results.columns.tolist()
-  if labelName not in columnNames:
-    print columnNames
-    raise Exception('No labels found. Expected a '
-                    'column named "%s"' % labelName)
-  
-  # If likelihood is equal or above threshold, label it an anomaly, otherwise
-  # not
-  score = 'anomaly_score'
-  predicted = results[score].apply(lambda x: 1 if x >= threshold else 0)
-  actual = results[labelName]
-
-  if not windowStepSize:
-    raise Exception("windowStepSize must be at least 1")
-  
-  cMatrix = WindowedConfusionMatrix(predicted,
-                                    actual,
-                                    window,
-                                    windowStepSize,
-                                    costMatrix)
-
-  if verbosity > 0:
-    pPrintMatrix(cMatrix, threshold)
-  
-  return cMatrix
-
 def genCurveData(results,
-                 minThresh = 0,
-                 maxThresh = 1,
+                 minThresh = 0.0,
+                 maxThresh = 1.0,
                  step = .1,
                  window = 30,
                  costMatrix = None,
@@ -309,10 +178,15 @@ def genCurveData(results,
   incrementCount = 1.0
   while minThresh < maxThresh and incrementCount < 60:
     cMatrix = genConfusionMatrix(results,
-                                 minThresh,
-                                 window = window,
-                                 costMatrix = costMatrix,
+                                 'anomaly_score',
+                                 'label',
+                                 window,
+                                 5,
+                                 costMatrix,
+                                 threshold = minThresh,
                                  verbosity = verbosity)
+
+
     vals['tprs'].append(cMatrix.tpr)
     vals['fprs'].append(cMatrix.fpr)
     vals['thresholds'].append(minThresh)
@@ -321,39 +195,7 @@ def genCurveData(results,
     minThresh, step = updateThreshold(minThresh, step, incrementCount)
     incrementCount += 1.0
 
-  
   return vals
-
-def plotROC(py, curveData, chartTitle = "ROC Curve"):
-  """
-  Returns a URL to a plot of an ROC curve for the given data.
-  
-    py        - Connection to Plotly
-    curveData - dict - Must contain a list of true positive rates and
-                       false positive rates.
-  """
-    
-  # Default layout
-  layout = Layout(title=chartTitle,
-                  xaxis=XAxis(title="False Positive Rate",
-                              range=[0,1]),
-                  yaxis=YAxis(title="True Positive Rate",
-                              type="linear",
-                              range=[0,1]),
-                  showlegend=False
-            )
-  
-  # PLOT THAT STUFF!
-  rocTrace = Trace(x=curveData['fprs'],
-                   y=curveData['tprs'])
-
-  data = Data([rocTrace])
-
-  fig = Figure(data=data, layout=layout)
-
-  plot_url = py.plot(fig, filename="ROC Curve")
-  
-  return plot_url
 
 def updateThreshold(thresh, step, incrementCount):
   """
@@ -368,23 +210,18 @@ def updateThreshold(thresh, step, incrementCount):
 
   return thresh, step
 
-def getCostMatrix(config):
-  """
-  Returns costs associated with each box in a confusion Matrix
-  """
-  
-  return config['CostMatrix']
 
 if __name__ == '__main__':
   # All the command line options
   parser = OptionParser(helpString)
   parser.add_option("-d", "--resultsDir",
                     help="Path to results files. Single detector only!")
-  parser.add_option("--plot", default=False, action="store_true",
-                    help="Use the Plot.ly library to generate plots")
   parser.add_option("--verbosity", default=0, help="Increase the amount and "
                     "detail of output by setting this greater than 0.")
   parser.add_option("--config", default="benchmark_config.yaml",
+                    help="The configuration file to use while running the "
+                    "benchmark.")
+  parser.add_option("--profiles", default="user_profiles.yaml",
                     help="The configuration file to use while running the "
                     "benchmark.")
 

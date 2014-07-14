@@ -143,6 +143,9 @@ if __name__ == "__main__":
   parser.add_option("--config", default="benchmark_config.yaml",
                     help="The configuration file to use while running the "
                     "benchmark.")
+  parser.add_option("--profiles", default="user_profiles.yaml",
+                    help="The configuration file to use while running the "
+                    "benchmark.")
   parser.add_option("--numCPUs", help="The number of CPUs to use to run the "
                     "benchmark. If not specified all CPUs will be used.")
 
