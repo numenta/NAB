@@ -69,8 +69,8 @@ class AnomalyDetector(object):
 
   def getAdditionalHeaders(self):
     """
-    Returns a list of strings. Subclasses can add in additional columns per 
-    record. 
+    Returns a list of strings. Subclasses can add in additional columns per
+    record.
 
     This method MAY be overridden to provide the names for those
     columns.
@@ -86,13 +86,13 @@ class AnomalyDetector(object):
     This method MUST be overridden by child classes.
     """
     pass
-    
+
   def handleRecord(inputData):
     """
     Returns a list [anomalyScore, *]. It is required that the first
     element of the list is the anomalyScore. The other elements may
     be anything, but should correspond to the names returned by
-    getAdditionalHeaders(). 
+    getAdditionalHeaders().
 
     This method MUST be overridden by subclasses
     """
@@ -111,10 +111,10 @@ class AnomalyDetector(object):
         pass
 
   def run(self):
-    
+
     # Run input
-    with open (self.inputFile) as fin:
-      
+    with open (self.inputFile, 'rU') as fin:
+
       # Open files and setup headers
       reader = csv.reader(fin)
       alertWriter = csv.writer(open(self.alertOutputFile, "wb"))
@@ -135,16 +135,16 @@ class AnomalyDetector(object):
 
       # Process the input files
       inHeaders = reader.next()
-      
+
       # Iterate through each record in the CSV file
       print "Starting processing at", datetime.datetime.now()
       for i, record in enumerate(reader, start=1):
-        
+
         # Read the data and convert to a dict
         inputData = dict(zip(inHeaders, record))
         inputData["value"] = float(inputData["value"])
         inputData["timestamp"] = dateutil.parser.parse(inputData["timestamp"])
-              
+
         # Retrieve the detector output and write it to a file
         outputRow = [inputData["timestamp"],
                      inputData["value"],
@@ -158,9 +158,9 @@ class AnomalyDetector(object):
         alertOutputRow = copy(outputRow)
         alertOutputRow.extend(thresholdedValues)
         alertWriter.writerow(alertOutputRow)
-        
+
         # Progress report
-        if (i % 500) == 0: 
+        if (i % 500) == 0:
           print ".",
           sys.stdout.flush()
 

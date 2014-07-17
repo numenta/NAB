@@ -3,5 +3,4 @@
 *.pyc
 
 # Generated files
-results/*.csv
 *resultsSummary*
