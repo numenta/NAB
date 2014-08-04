@@ -27,7 +27,7 @@ class AnomalyDetector(object):
 
     # Allowed statistics. Anything within probationary period.
     with open(self.inputFile) as fh:
-      dataFrame = read_csv(fh);
+      dataFrame = read_csv(fh)
 
     calcMin = dataFrame.value[:self.probationaryPeriod].min()
     calcMax = dataFrame.value[:self.probationaryPeriod].max()
@@ -86,6 +86,13 @@ class AnomalyDetector(object):
     This method MUST be overridden by child classes.
     """
     pass
+
+  def setThreshold(self):
+    if self.threshold:
+      return self.threshold
+    print 'Error: No threshold set'
+    sys.exit()
+
 
   def handleRecord(inputData):
     """

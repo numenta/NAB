@@ -2,8 +2,8 @@
 # you may want to run independently. You may specify any combination of
 # those groups here and run_benchmark.py will automatically use those datasets.
 DataGroups:
-    - artificialWithAnomaly
-    # - artificialNoAnomaly
+    # - artificialWithAnomaly
+    - artificialNoAnomaly
     # - realAWSCloudwatch
     # - realKnownCause
 
@@ -12,7 +12,7 @@ DataGroups:
 # AnomalyDetector and then add it here to have run_benchmark.py use your
 # detector to generate results.
 AnomalyDetectors:
-    - numenta
+    # - numenta
     - skyline
 
 ResultsDirectory: "results"

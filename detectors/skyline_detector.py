@@ -11,7 +11,7 @@ from skyline.algorithms import (median_absolute_deviation,
 class SkylineDetector(AnomalyDetector):
 
   def __init__(self, *args, **kwargs):
-    
+
     # Initialize the parent
     super(SkylineDetector, self).__init__(*args, **kwargs)
 
@@ -51,5 +51,5 @@ class SkylineDetector(AnomalyDetector):
       for algo in self.algorithms:
         score += algo(self.timeseries)
 
-    normalizedScore = score / len(self.algorithms)
-    return [normalizedScore]
+    averageScore = score / len(self.algorithms)
+    return [averageScore]
