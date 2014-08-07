@@ -2,45 +2,53 @@
 # maximum tolerable delay.
 
 # A user for whom missing an anomaly is 10x as costly as each false positive
-UserA:
-    CostMatrix:
-        tpCost: 0.0
-        fnCost: 500.0
-        fpCost: 50.0
-        tnCost: 0.0
-    ScoringWindow: 120
-# A user for whom false positives are very costly. Only very anomalous events
-# should be flagged.
-UserB:
-    CostMatrix:
-        tpCost: 0.0
-        fnCost: 50.0
-        fpCost: 100.0
-        tnCost: 0.0
-    ScoringWindow: 120
-# A user for whom dealing with false positives and the consequences of a missed
-# anomaly are equal.
-UserC:
-    CostMatrix:
-        tpCost: 0.0
-        fnCost: 50.0
-        fpCost: 50.0
-        tnCost: 0.0
-    ScoringWindow: 120
+Jay_Gokhale:
+  CostMatrix:
+    tpCost: 500.0
+    fnCost: 1.0
+    fpCost: 1.0
+    tnCost: 1.0
+  ScoringWindow: 120
 
-# Users who require alerts more quickly from the onset of anomalies.
-UserD:
-    CostMatrix:
-        tpCost: 0.0
-        fnCost: 500.0
-        fpCost: 50.0
-        tnCost: 0.0
-    ScoringWindow: 15
+# UserA:
+#     CostMatrix:
+#         tpCost: 0.0
+#         fnCost: 500.0
+#         fpCost: 50.0
+#         tnCost: 0.0
+#     ScoringWindow: 120
+# # A user for whom false positives are very costly. Only very anomalous events
+# # should be flagged.
+# UserB:
+#     CostMatrix:
+#         tpCost: 0.0
+#         fnCost: 50.0
+#         fpCost: 100.0
+#         tnCost: 0.0
+#     ScoringWindow: 120
+# # A user for whom dealing with false positives and the consequences of a missed
+# # anomaly are equal.
+# UserC:
+#     CostMatrix:
+#         tpCost: 0.0
+#         fnCost: 50.0
+#         fpCost: 50.0
+#         tnCost: 0.0
+#     ScoringWindow: 120
 
-UserE:
-    CostMatrix:
-        tpCost: 0.0
-        fnCost: 500.0
-        fpCost: 50.0
-        tnCost: 0.0
-    ScoringWindow: 30
+# # Users who require alerts more quickly from the onset of anomalies.
+# UserD:
+#     CostMatrix:
+#         tpCost: 0.0
+#         fnCost: 500.0
+#         fpCost: 50.0
+#         tnCost: 0.0
+#     ScoringWindow: 15
+
+# UserE:
+#     CostMatrix:
+#         tpCost: 0.0
+#         fnCost: 500.0
+#         fpCost: 50.0
+#         tnCost: 0.0
+#     ScoringWindow: 30

@@ -46,7 +46,6 @@ except ImportError:
   pass
 
 
-
 def main(options):
   """
   Run the NAB corpus according to user options selected
@@ -148,6 +147,9 @@ if __name__ == "__main__":
                     "benchmark.")
   parser.add_option("--numCPUs", help="The number of CPUs to use to run the "
                     "benchmark. If not specified all CPUs will be used.")
+
+  parser.add_option("--labelDir", default="labels",
+                    help="This holds all the label windows for the corpus.")
 
   options, args = parser.parse_args()
 

@@ -72,9 +72,9 @@ def getOutputDir(options):
   base = options.outputDir
   detectorDir = options.detector
   if options.inputFile:
-    dataGroupDir = os_path_split_asunder(options.inputFile)[1]
+    dataGroupDir = osPathSplit(options.inputFile)[1]
   else:
-    print("ERROR: You must specify an --inputFile")
+    print "ERROR: You must specify an --inputFile"
     sys.exit(1)
   outputDir = os.path.join(base, detectorDir, dataGroupDir)
 
@@ -87,22 +87,23 @@ def getOutputDir(options):
 
   return outputDir
 
-def os_path_split_asunder(path, debug=False):
+def osPathSplit(path, debug=False):
   """
-  From http://stackoverflow.com/questions/4579908/cross-platform-splitting-of-path-in-python
+  os_path_split_asunder
+  http://stackoverflow.com/questions/4579908/cross-platform-splitting-of-path-in-python
   """
   parts = []
   while True:
-      newpath, tail = os.path.split(path)
-      if debug: 
-          print repr(path), (newpath, tail)
-      if newpath == path:
-          assert not tail
-          if path: 
-              parts.append(path)
-          break
-      parts.append(tail)
-      path = newpath
+    newpath, tail = os.path.split(path)
+    if debug:
+      print repr(path), (newpath, tail)
+    if newpath == path:
+      assert not tail
+      if path:
+        parts.append(path)
+      break
+    parts.append(tail)
+    path = newpath
   parts.reverse()
   return parts
 
@@ -116,12 +117,13 @@ if __name__ == "__main__":
   # All the command line options
   parser = OptionParser(usage)
   parser.add_option("-i", "--inputFile",
-                    help="Path to data file. (REQUIRED)", 
+                    help="Path to data file. (REQUIRED)",
                     dest="inputFile", default=None)
   parser.add_option("--outputDir",
                     help="Output Directory. Results files will be place here.",
                     dest="outputDir", default="results/")
-  parser.add_option("-d", "--detector", help="Which Anomaly Detector class to use.",
+  parser.add_option("-d", "--detector",
+                    help="Which Anomaly Detector class to use.",
                     default="numenta")
   parser.add_option("--config", default="benchmark_config.yaml",
                     help="The configuration file to use while running the "

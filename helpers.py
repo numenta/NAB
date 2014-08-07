@@ -3,13 +3,15 @@ import sys
 import yaml
 import pandas
 
+from scoring import Scorer
+
 from collections import OrderedDict
 
-from confusion_matrix import (WindowedConfusionMatrix,
-                              pPrintMatrix)
+# from confusion_matrix import (WindowedConfusionMatrix,
+#                               pPrintMatrix)
 
-def sharedSetup(options):   
-  """   
+def parseConfigFile(options):
+  """
   Returns several values used by both
   analyze_results.py and optimize_threshold.py
   """
@@ -30,13 +32,11 @@ def sharedSetup(options):
 
   options.detectors = config["AnomalyDetectors"]
 
-  # Find sub directories of our results dir, e.g. results/numenta/...
-  dataGroupDirs = getDataGroupDirs(options.resultsDir, options.detectors)
 
   # Infer which detector generated these results from the path
   detector = inferDetector(options.resultsDir, options.detectors)
 
-  return config, profiles, dataGroupDirs, detector
+  return profiles, detector
 
 def getCSVFiles(dataGroupDirs, csvType):
   """
@@ -59,140 +59,71 @@ def getCSVFiles(dataGroupDirs, csvType):
 
   return csvFiles
 
-def getDetailedResults(csvType, csvFiles, profiles, threshold = None):
+def getDetailedResults(resultsCorpus, corpusLabel, profiles, threshold = None):
   """
   Returns a list of lists suitable for writing to a csv or additional processes.
 
-  csvType - String
-  csvFiles - A list of paths to csv files to process
-  profiles - A dict mapping profile names to user profiles
-  threshold - A value cutoff to apply if working with 'raw' data.
   """
+  def convertResultsPathToDataPath(path):
+    path = path.split('/')
+    detector = path[0]
+    path = path[1:]
+    path.remove('alerts')
 
-  # Make sure inputs are valid
-  if csvType == 'alerts':
-    headers = ["Alert Log File"]
-    predictedHeader = 'alert'
-  elif csvType == 'raw':
-    headers = ["Results File"]
-    predictedHeader = 'anomaly_score'
-  else:
-    raise Exception("Unknown csvType.")
+    filename = path[-1]
+    toRemove = detector + '_alerts_'
+    i = filename.index(toRemove)
+    filename = filename[:i] + filename[i+len(toRemove):]
+
+    path[-1] = filename
+    path = '/'.join(path)
+    return path
 
   # Analyze all files
   detailedResults = []
-  additionalHeaders = ["User Scenario",
-                       "True Positives",
-                       "False Positives",
-                       "False Negatives",
-                       "True Negatives",
-                       "Cost",
-                       "Total Normal",
-                       "Possible True Positives"]
-  headers.extend(additionalHeaders)
+  headers = ["File"
+             "User Scenario",
+             "True Positives",
+             "False Positives",
+             "False Negatives",
+             "True Negatives",
+             "Cost",
+             "Total Normal",
+             "Possible True Positives"]
 
   detailedResults.append(headers)
 
-  # Loop over all specified results files
-  for resultsFile in csvFiles:
+  dataSets = resultsCorpus.getDataSubset('/alerts/')
 
-    with open(resultsFile, 'r') as fh:
-      results = pandas.read_csv(fh)
-    
+  print dataSets
+
+  # Loop over all specified results files
+
+  for relativePath in dataSets.keys():
+
+    predicted = dataSets[relativePath].data['alert']
+
+    relativePath = convertResultsPathToDataPath(relativePath)
+    windows = corpusLabel.windows[relativePath]
+    labels = corpusLabel.labels[relativePath]
+
     # Loop over user profiles
     for profileName, profile in profiles.iteritems():
       costMatrix = profile['CostMatrix']
-      cMatrix = genConfusionMatrix(results,
-                                   predictedHeader,
-                                   'label',
-                                   profile['ScoringWindow'],
-                                   5,
-                                   costMatrix,
-                                   threshold,
-                                   verbosity = 0)
 
-      detailedResults.append([resultsFile,
+      score = Scorer(predicted=predicted, labels=labels, windowLimits=windows, costMatrix=costMatrix)
+
+      costMatrix = score.costMatrix
+
+      detailedResults.append([relativePath,
                               profileName,
-                              cMatrix.tp, 
-                              cMatrix.fp,
-                              cMatrix.fn,
-                              cMatrix.tn,
-                              cMatrix.cost,
-                              cMatrix.tn + cMatrix.fp,
-                              cMatrix.tp + cMatrix.fn])
+                              score.score])
 
   return detailedResults
 
-def genConfusionMatrix(results,
-                       predictedHeader,
-                       labelHeader,
-                       window,
-                       windowStepSize,
-                       costMatrix,
-                       threshold = None,
-                       verbosity = 0):
-  """
-  Returns a confusion matrix object for the results of the
-  given experiment and the ground truth labels.
-  
-    experiment      - an experiment info dict
-    threshold       - float - cutoff to be applied to Likelihood scores
-    window          - Use a WindowedConfusionMatrix and calculate stats over
-                      this many minutes.
-    windowStepSize  - The ratio of minutes to records
-  """
-  
-  columnNames = results.columns.tolist()
-  if labelHeader not in columnNames:
-    print columnNames
-    raise Exception('No labels found. Expected a '
-                    'column named "%s"' % labelHeader)
-  
-  if threshold != None:
-    # If predicted val is equal or above threshold, label it an anomaly
-    predicted = results[predictedHeader].apply(lambda x: 1 if x >= threshold else 0)
-  else:
-    predicted = results[predictedHeader]
-
-  actual = results[labelHeader]
-
-  if windowStepSize < 1:
-    raise Exception("windowStepSize must be at least 1")
-  
-  cMatrix = WindowedConfusionMatrix(predicted,
-                                    actual,
-                                    window,
-                                    windowStepSize,
-                                    costMatrix)
-
-  if verbosity > 0:
-    pPrintMatrix(cMatrix, threshold)
-  
-  return cMatrix
-
-def getDataGroupDirs(resultPath, detectors):
-  # Find sub directories of our results dir, e.g. results/numenta/...
-  items = os.listdir(resultPath)
-
-  dataGroupDirs = []
-  for item in items:
-    path = os.path.join(resultPath, item)
-    if os.path.isdir(path):
-      for d in detectors:
-        if d == item: 
-          print("ERROR: It looks like you're trying to analyze results from "
-                "multiple detectors at once. \nThis script generates results "
-                "summaries which are only meaningful on a per-detector basis.\n"
-                "Please specify a single detector results directory. e.g. "
-                "python analyze_results.py -d results/numenta")
-          sys.exit(1)
-      dataGroupDirs.append(path)
-
-  return dataGroupDirs
-
 def inferDetector(path, detectors):
   """
-  Returns a string which is either a known detector name or "Unknown" if 
+  Returns a string which is either a known detector name or "Unknown" if
   the infered detector does not match one we know.
   """
 

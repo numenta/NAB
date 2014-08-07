@@ -1,0 +1,276 @@
+(dp0
+S'artificialWithAnomaly/art_daily_nojump.csv'
+p1
+(lp2
+(lp3
+S'2014-04-11 09:00:00.000000'
+p4
+aS'2014-04-11 09:00:00.000000'
+p5
+aasS'artificialNoAnomaly/art_daily_perfect_square_wave.csv'
+p6
+(lp7
+sS'realAWSCloudwatch/ec2_cpu_utilization_5f5533.csv'
+p8
+(lp9
+(lp10
+S'2014-02-19 00:22:00.000000'
+p11
+aS'2014-02-19 00:22:00.000000'
+p12
+aa(lp13
+S'2014-02-24 18:17:00.000000'
+p14
+aS'2014-02-24 18:17:00.000000'
+p15
+aa(lp16
+S'2014-02-24 21:47:00.000000'
+p17
+aS'2014-02-24 21:57:00.000000'
+p18
+aasS'realAWSCloudwatch/rds_cpu_utilization_cc0c53.csv'
+p19
+(lp20
+(lp21
+S'2014-02-25 07:15:00.000000'
+p22
+aS'2014-02-25 08:20:00.000000'
+p23
+aasS'realAWSCloudwatch/rds_cpu_utilization_e47b3b.csv'
+p24
+(lp25
+(lp26
+S'2014-04-13 06:52:00.000000'
+p27
+aS'2014-04-13 07:02:00.000000'
+p28
+aa(lp29
+S'2014-04-18 23:27:00.000000'
+p30
+aS'2014-04-18 23:27:00.000000'
+p31
+aa(lp32
+S'2014-04-22 11:32:00.000000'
+p33
+aS'2014-04-22 11:32:00.000000'
+p34
+aasS'realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv'
+p35
+(lp36
+(lp37
+S'2014-02-17 05:42:00.000000'
+p38
+aS'2014-02-17 08:02:00.000000'
+p39
+aa(lp40
+S'2014-02-22 06:07:00.000000'
+p41
+aS'2014-02-22 06:57:00.000000'
+p42
+aasS'realAWSCloudwatch/ec2_cpu_utilization_ac20cd.csv'
+p43
+(lp44
+(lp45
+S'2014-04-14 00:49:00.000000'
+p46
+aS'2014-04-14 00:49:00.000000'
+p47
+aasS'artificialWithAnomaly/art_daily_jumpsdown.csv'
+p48
+(lp49
+(lp50
+S'2014-04-11 09:00:00.000000'
+p51
+aS'2014-04-11 11:55:00.000000'
+p52
+aa(lp53
+S'2014-04-11 18:00:00.000000'
+p54
+aS'2014-04-11 18:55:00.000000'
+p55
+aasS'realAWSCloudwatch/ec2_cpu_utilization_24ae8d.csv'
+p56
+(lp57
+(lp58
+S'2014-02-26 22:05:00.000000'
+p59
+aS'2014-02-26 22:05:00.000000'
+p60
+aasS'artificialWithAnomaly/art_daily_flatmiddle.csv'
+p61
+(lp62
+(lp63
+S'2014-04-10 00:00:00.000000'
+p64
+aS'2014-04-10 00:00:00.000000'
+p65
+aa(lp66
+S'2014-04-11 23:00:00.000000'
+p67
+aS'2014-04-11 23:55:00.000000'
+p68
+aasS'artificialNoAnomaly/art_flatline.csv'
+p69
+(lp70
+sS'realKnownCause/machine_temperature_system_failure.csv'
+p71
+(lp72
+sS'artificialWithAnomaly/art_load_balancer_spikes.csv'
+p73
+(lp74
+(lp75
+S'2014-04-10 21:25:00.000000'
+p76
+aS'2014-04-10 21:50:00.000000'
+p77
+aa(lp78
+S'2014-04-11 00:00:00.000000'
+p79
+aS'2014-04-11 00:20:00.000000'
+p80
+aa(lp81
+S'2014-04-11 23:35:00.000000'
+p82
+aS'2014-04-12 00:35:00.000000'
+p83
+aasS'realAWSCloudwatch/ec2_cpu_utilization_77c1ca.csv'
+p84
+(lp85
+(lp86
+S'2014-04-09 01:20:00.000000'
+p87
+aS'2014-04-09 03:20:00.000000'
+p88
+aa(lp89
+S'2014-04-10 12:40:00.000000'
+p90
+aS'2014-04-10 13:25:00.000000'
+p91
+aa(lp92
+S'2014-04-12 18:00:00.000000'
+p93
+aS'2014-04-12 19:00:00.000000'
+p94
+aasS'realAWSCloudwatch/ec2_cpu_utilization_c6585a.csv'
+p95
+(lp96
+sS'realAWSCloudwatch/elb_request_count_8c0756.csv'
+p97
+(lp98
+(lp99
+S'2014-04-12 17:14:00.000000'
+p100
+aS'2014-04-12 18:04:00.000000'
+p101
+aa(lp102
+S'2014-04-16 20:54:00.000000'
+p103
+aS'2014-04-16 20:54:00.000000'
+p104
+aa(lp105
+S'2014-04-22 19:34:00.000000'
+p106
+aS'2014-04-22 19:34:00.000000'
+p107
+aasS'realKnownCause/ec2_request_latency_system_failure.csv'
+p108
+(lp109
+sS'artificialNoAnomaly/art_daily_small_noise.csv'
+p110
+(lp111
+sS'realKnownCause/cpu_utilization_asg_misconfiguration.csv'
+p112
+(lp113
+sS'realAWSCloudwatch/ec2_cpu_utilization_825cc2.csv'
+p114
+(lp115
+(lp116
+S'2014-04-15 15:44:00.000000'
+p117
+aS'2014-04-15 15:59:00.000000'
+p118
+aa(lp119
+S'2014-04-16 03:34:00.000000'
+p120
+aS'2014-04-16 04:04:00.000000'
+p121
+aasS'artificialNoAnomaly/art_daily_no_noise.csv'
+p122
+(lp123
+sS'artificialNoAnomaly/art_noisy.csv'
+p124
+(lp125
+sS'realKnownCause/ambient_temperature_system_failure.csv'
+p126
+(lp127
+sS'realAWSCloudwatch/ec2_disk_write_bytes_c0d644.csv'
+p128
+(lp129
+(lp130
+S'2014-04-08 21:35:00.000000'
+p131
+aS'2014-04-08 23:25:00.000000'
+p132
+aa(lp133
+S'2014-04-09 01:25:00.000000'
+p134
+aS'2014-04-09 01:25:00.000000'
+p135
+aasS'artificialWithAnomaly/art_increase_spike_density.csv'
+p136
+(lp137
+(lp138
+S'2014-04-07 23:05:00.000000'
+p139
+aS'2014-04-07 23:55:00.000000'
+p140
+aasS'realAWSCloudwatch/ec2_network_in_257a54.csv'
+p141
+(lp142
+(lp143
+S'2014-04-15 16:54:00.000000'
+p144
+aS'2014-04-15 17:19:00.000000'
+p145
+aa(lp146
+S'2014-04-15 20:29:00.000000'
+p147
+aS'2014-04-15 20:29:00.000000'
+p148
+aa(lp149
+S'2014-04-15 21:19:00.000000'
+p150
+aS'2014-04-15 21:19:00.000000'
+p151
+aasS'realAWSCloudwatch/ec2_cpu_utilization_53ea38.csv'
+p152
+(lp153
+(lp154
+S'2014-02-19 19:20:00.000000'
+p155
+aS'2014-02-19 21:10:00.000000'
+p156
+aa(lp157
+S'2014-02-20 14:25:00.000000'
+p158
+aS'2014-02-20 15:10:00.000000'
+p159
+aa(lp160
+S'2014-02-23 20:25:00.000000'
+p161
+aS'2014-02-23 23:05:00.000000'
+p162
+aasS'artificialWithAnomaly/art_daily_jumpsup.csv'
+p163
+(lp164
+(lp165
+S'2014-04-11 09:00:00.000000'
+p166
+aS'2014-04-11 09:55:00.000000'
+p167
+aa(lp168
+S'2014-04-11 18:00:00.000000'
+p169
+aS'2014-04-11 18:55:00.000000'
+p170
+aas.
