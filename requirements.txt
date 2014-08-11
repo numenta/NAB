@@ -1,5 +1,4 @@
-openpyxl==1.8.2 # Newer versions cause pandas problems
+plotly
 pandas
 pyyaml
-plotly
 simplejson
