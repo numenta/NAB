@@ -88,7 +88,7 @@ class Corpus(object):
     newCorpus = Corpus(newRoot)
     for relativePath in self.dataSets.keys():
       newCorpus.addDataSet(relativePath, self.dataSets[relativePath])
-    print type(newCorpus)
+      print 'adding %s' % os.path.join(newRoot, relativePath)
     return newCorpus
 
   def addDataSet(self, relativePath, dataSet):
