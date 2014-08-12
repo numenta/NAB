@@ -1,18 +1,11 @@
-# import corpus
-# from label import CorpusLabel
-# import math
 from collections import defaultdict
 import math
-
-# labelRoot = '/Users/jgokhale/Desktop/NAB_local/current_labels'
-# dataRoot  = '/Users/jgokhale/Desktop/NAB_local/current_data'
-
-# labels = CorpusLabel()
-
-# def score(dataSet, label):
+import sys
 
 class CostMatrix(object):
   def __init__(self, dictionary):
+    print 'got here'
+    print dictionary
     self.tp = dictionary['tpCost']
     self.tn = dictionary['tnCost']
     self.fp = dictionary['fpCost']
@@ -47,28 +40,33 @@ class Window(object):
 
 
 class Scorer(object):
-  def __init__(self, predicted, labels, windowLimits, costMatrix, options=None):
+  def __init__(self, predicted, labels, windowLimits, costMatrix, probationaryPeriod, options=None):
     self.predicted = predicted
     self.labels = labels
     self.count = defaultdict(int)
-    self.getLabelTypes()
+    self.probationaryPeriod = probationaryPeriod
     self.windows = self.getWindows(windowLimits)
     self.options = options
     self.costMatrix = CostMatrix(costMatrix)
     self.score = self.getScore()
-    print self.count
 
 
   def getWindows(self, limits):
     #SORT WINDOWS BEFORE PUTTING THEM IN LIST
-
+    self.getLabelTypes()
     return [Window(i,limits[i],self.labels) for i in range(len(limits))]
 
 
   def getLabelTypes(self):
     types = []
+
     for i, row in self.labels.iterrows():
-      diff = abs(self.predicted[i] - row['label'])
+      if i < self.probationaryPeriod:
+        types.append('probationaryPeriod')
+        continue
+
+      pred = self.predicted[i]
+      diff = abs(pred - row['label'])
       category = ''
       category += 'f' if bool(diff) else 't'
       category += 'p' if bool(self.predicted[i]) else 'n'
@@ -87,7 +85,6 @@ class Scorer(object):
         tpScore -= 100
       else:
         dist = (window.indices[-1] - tpIndex)/window.length
-        # print dist, self.costMatrix.tp
         tpScore += (2*sigmoid(dist) - 0.5)*self.costMatrix.tp
 
 
@@ -123,9 +120,3 @@ class Scorer(object):
 
 def sigmoid(x):
   return 1 / (1 + math.exp(-x))
-
-
-
-
-
-

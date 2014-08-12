@@ -1,6 +1,7 @@
 import csv
 import os
 import sys
+import math
 import datetime
 import multiprocessing
 from copy import copy
@@ -35,8 +36,6 @@ class AnomalyDetector(object):
     self.labels = labels
     self.name = name
     self.probationaryPercent = probationaryPercent
-    # print outputDir
-    # sys.exit()
     self.outputDir = os.path.join(outputDir,self.name)
     self.numCPUs = numCPUs
     self.threshold = self.getThreshold()
@@ -109,11 +108,12 @@ class AnomalyDetector(object):
 
   def runCorpus(self):
     p = multiprocessing.Pool(self.numCPUs)
+
     for relativePath in self.corpus.dataSets:
       print relativePath
       self.runFile(relativePath)
 
-    p.map(self.runFile, self.corpus.dataSets.keys())
+    # p.map(self.runFile, self.corpus.dataSets.keys())
 
 
   def getWriters(self, relativePath, filename):
@@ -150,7 +150,11 @@ class AnomalyDetector(object):
   def runFile(self, relativePath):
     dataSet = self.corpus.dataSets[relativePath]
 
-    probationaryPeriod = self.probationaryPercent * dataSet.data.shape[0]
+    print 'in detector',
+    print self.probationaryPercent,
+    print dataSet.data.shape[0],
+    probationaryPeriod = math.floor(self.probationaryPercent * dataSet.data.shape[0])
+    print probationaryPeriod
 
     self.configure(dataSet.data['value'].loc[:probationaryPeriod])
 

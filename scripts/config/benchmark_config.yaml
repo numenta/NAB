@@ -12,7 +12,7 @@ DataGroups:
 # AnomalyDetector and then add it here to have run_benchmark.py use your
 # detector to generate results.
 AnomalyDetectors:
-    - numenta
+    # - numenta
     - skyline
 
 ResultsDirectory: "results"

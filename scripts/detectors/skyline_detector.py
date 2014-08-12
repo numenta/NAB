@@ -45,11 +45,11 @@ class SkylineDetector(AnomalyDetector):
     score = 0.0
     inputRow = [inputData["timestamp"], inputData["value"]]
     self.timeseries.append(inputRow)
-    if self.recordCount < self.probationaryPeriod:
-      self.recordCount += 1
-    else:
-      for algo in self.algorithms:
-        score += algo(self.timeseries)
+    for algo in self.algorithms:
+      score += algo(self.timeseries)
 
     averageScore = score / len(self.algorithms)
     return [averageScore]
+
+  def configureDetector(self, ProbationaryPeriodData):
+    pass

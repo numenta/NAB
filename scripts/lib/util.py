@@ -42,6 +42,7 @@ def osPathSplit(path, debug=False):
   return parts
 
 def convertResultsPathToDataPath(path):
+  # print path
   path = path.split('/')
   detector = path[0]
   path = path[1:]
@@ -49,9 +50,11 @@ def convertResultsPathToDataPath(path):
 
   filename = path[-1]
   toRemove = detector + '_alerts_'
+
   i = filename.index(toRemove)
   filename = filename[:i] + filename[i+len(toRemove):]
 
   path[-1] = filename
   path = '/'.join(path)
+  # print path
   return path

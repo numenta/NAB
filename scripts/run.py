@@ -35,6 +35,7 @@ from detectors import (NumentaDetector, SkylineDetector)
 
 from collections import defaultdict
 import pandas
+import math
 
 
 class Runner(object):
@@ -58,9 +59,6 @@ class Runner(object):
     self.numCPUs = self.getNumCPUs()
     self.plot = options.plotResults
 
-    # if not options.resultsOnly:
-    self.results = self.getResults()
-    # elif not options.analyzeOnly:
     self.analysis = self.getAnalysis()
 
   def getResults(self):
@@ -80,40 +78,46 @@ class Runner(object):
       detectorClass.runCorpus()
 
 
-  def analyzeResults(self):
-
+  def getAnalysis(self):
+    analysis = defaultdict(list)
     for detector in self.detectors:
+
       resultsDetectorDir = os.path.join(self.resultsDir, detector)
       resultsCorpus = Corpus(resultsDetectorDir)
 
-      detailedResults = defaultdict(list)
-
       dataSets = resultsCorpus.getDataSubset('/alerts/')
 
-      for relativePath in dataSets.keys():
+      for profileName, profile in self.profiles.iteritems():
 
-        predicted = dataSets[relativePath].data['alert']
+        costMatrix = profile['CostMatrix']
 
-        relativePath = convertResultsPathToDataPath(relativePath)
-        windows = self.corpusLabel.windows[relativePath]
-        labels = self.corpusLabel.labels[relativePath]
+        for relativePath in dataSets.keys():
 
-        # Loop over user profiles
-        for profileName, profile in self.profiles.iteritems():
-          costMatrix = profile['CostMatrix']
+          predicted = dataSets[relativePath].data['alert']
 
-          score = Scorer(predicted=predicted, labels=labels, windowLimits=windows, costMatrix=costMatrix)
+          relativePath = convertResultsPathToDataPath(os.path.join(detector, relativePath))
+          windows = self.corpusLabel.windows[relativePath]
+          labels = self.corpusLabel.labels[relativePath]
 
-          costMatrix = score.costMatrix
+          probationaryPeriod = math.floor(self.probationaryPercent*labels.shape[0])
 
-          detailedResults["File"].extend(relativePath)
-          detailedResults["Username"].extend(profileName)
-          detailedResults["Score"].extend(score.score)
+          score = Scorer(
+            predicted=predicted,
+            labels=labels,
+            windowLimits=windows,
+            costMatrix=costMatrix,
+            probationaryPeriod=probationaryPeriod)
 
-      detailedResults = pandas.DataFrame(detailedResults)
+          analysis["Detector"].append(detector)
+          analysis["Username"].append(profileName)
+          analysis["File"].append(relativePath)
+          analysis["Score"].append(score.score)
 
-      detailedResultsPath = os.path.join(resultsDetectorDir, "detailedResults.csv")
-      detailedResults.to_csv(detailedResultsPath)
+
+      analysis = pandas.DataFrame(analysis)
+
+    analysisPath = os.path.join(resultsDetectorDir, "analysis.csv")
+    analysis.to_csv(analysisPath)
 
   def getCorpusLabel(self):
     return CorpusLabel(self.labelDir, None, self.corp)
@@ -156,18 +160,17 @@ if __name__ == "__main__":
                     default=False,
                     action="store_true")
 
-  parser.add_option("--verbosity",
+  parser.add_option("-v", "--verbosity",
                     default=0,
                     help="Increase the amount and detail of output by setting \
                     this greater than 0.")
 
-  parser.add_option("--config",
+  parser.add_option("-c", "--config",
                     default="scripts/config/benchmark_config.yaml",
                     help="The configuration file to use while running the "
                     "benchmark.")
 
-  parser.add_option(
-                    "--profiles",
+  parser.add_option("--profiles",
                     default="scripts/config/user_profiles.yaml",
                     help="The configuration file to use while running the "
                     "benchmark.")
@@ -183,8 +186,6 @@ if __name__ == "__main__":
   parser.add_option("--dataDir",
                     default="data",
                     help="This holds all the label windows for the corpus.")
-
-
 
 
   options, args = parser.parse_args()
