@@ -100,11 +100,6 @@ class LabelCombiner(object):
       timestampsHolder = []
       labelHolder = []
 
-      # for l in self.userLabels:
-      #   print relativePath
-      #   print l.windows[relativePath]
-      #   print
-
       for i, row in dataSet.data.iterrows():
         t = row['timestamp']
 
@@ -120,12 +115,7 @@ class LabelCombiner(object):
 
       labels[relativePath] = pandas.DataFrame({'timestamp':timestampsHolder,
           'label': labelHolder})
- # for relativePath, obj in labels.iteritems():
- #      print relativePath
- #      print obj[obj['label'] == 1]
 
-
-    # sys.exit()
     return labels
 
   def getCombinedWindows(self):

@@ -79,6 +79,7 @@ class Runner(object):
 
 
   def getAnalysis(self):
+    print "Analyzing Results"
     analysis = defaultdict(list)
     for detector in self.detectors:
 

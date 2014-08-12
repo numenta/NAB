@@ -4,7 +4,6 @@ import sys
 
 class CostMatrix(object):
   def __init__(self, dictionary):
-    print 'got here'
     print dictionary
     self.tp = dictionary['tpCost']
     self.tn = dictionary['tnCost']
