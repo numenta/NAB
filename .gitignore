@@ -2,5 +2,7 @@
 .DS_Store
 *.pyc
 
+data_test/
+
 # Generated files
 *resultsSummary*
