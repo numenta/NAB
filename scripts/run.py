@@ -21,16 +21,20 @@
 
 import os
 import yaml
-import copy
 
 from optparse import OptionParser
-from multiprocessing import Pool, cpu_count
 
-from lib
-from run_anomaly import runAnomaly
-from analyze_results import analyzeResults
+import multiprocessing
+
+import lib
+
+# from analyze_results import analyzeResults
 
 from detectors import (NumentaDetector, SkylineDetector)
+
+from collections import defaultdict
+import pandas
+
 
 class Runner(object):
 
@@ -39,9 +43,9 @@ class Runner(object):
     self.root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     self.config = self.getConfig()
     self.detectors = self.config["AnomalyDetectors"]
-    self.dataGroups = self.config["DataGroups"]
     self.resultsDir = os.path.join(self.root, self.config["ResultsDirectory"])
-    self.labels = self.getLabels()
+    self.probationaryPercent = self.config["ProbationaryPercent"]
+    self.corpusLabel = self.getCorpusLabel()
     self.profiles = self.getProfiles()
     self.numCPUs = self.getNumCPUs()
     self.plot = options.plotResults
@@ -50,59 +54,60 @@ class Runner(object):
 
 
   def getResults(self):
-    pool = Pool(processes=self.numCPUs)
+    dataPath = os.path.join(self.root, "data")
+    corp = lib.corpus.Corpus(dataPath)
 
-    tasks = []
     for detector in self.detectors:
 
-      for dataGroup in self.DataGroups:
+      detectorClassName = lib.util.getDetectorClassName(detector)
 
-        dataPath = os.path.join(self.root, "data", dataGroup)
-        groupCorpus = lib.corpus.Corpus(dataPath)
+      detectorClass = globals()[detectorClassName](
+        corpus=corp,
+        labels=self.labels,
+        name=detector,
+        probationaryPercent=self.probationaryPercent,
+        outputDir=self.resultsDir,
+        numCPUs=self.numCPUs)
 
+      detectorClass.runCorpus()
 
+  def analyzeResults(self):
 
-
-        # fileNames = util.absoluteFilePaths(dataPath)
-
-        # for fileName in fileNames:
-        #   subOpt = copy.deepcopy(options)
-
-        #   subOpt.detector = detector
-        #   subOpt.dataGroup = dataGroup
-        #   subOpt.inputFile = fileName
-        #   subOpt.outputFile = None
-
-        #   # Add in options used when running run_anomaly.py stand-alone
-        #   subOpt.min = None
-        #   subOpt.max = None
-
-        #   subOpt.outputDir = os.path.join(self.resultsDir, detector)
-        #   tasks.append(subOpt)
-
-    print "Running %d tasks using %d cores ..." % (len(tasks), self.numCPUs)
-
-    pool.map(runAnomaly, tasks)
-
-  def getAnalysis(self):
-    tasks = []
     for detector in self.detectors:
-      subOpt = copy.deepcopy(options)
-      subOpt.plot = self.plot
       resultsDetectorDir = os.path.join(self.resultsDir, detector)
-      subOpt.resultsDir = resultsDetectorDir
-      # Plotting in parallel fails, so don't use pool
-      if self.plot:
-        analyzeResults(subOpt)
-      else:
-        tasks.append(subOpt)
+      resultsCorpus = lib.corpus.Corpus(resultsDetectorDir)
 
-    if tasks:
-      pool = Pool(processes=self.numCPUs)
-      pool.map(analyzeResults, tasks)
+      detailedResults = defaultdict(list)
 
-  def getLabels(self):
-    return label(options.labelsDir)
+      dataSets = resultsCorpus.getDataSubset('/alerts/')
+
+      for relativePath in dataSets.keys():
+
+        predicted = dataSets[relativePath].data['alert']
+
+        relativePath = lib.util.convertResultsPathToDataPath(relativePath)
+        windows = self.corpusLabel.windows[relativePath]
+        labels = self.corpusLabel.labels[relativePath]
+
+        # Loop over user profiles
+        for profileName, profile in self.profiles.iteritems():
+          costMatrix = profile['CostMatrix']
+
+          score = lib.scorer.Scorer(predicted=predicted, labels=labels, windowLimits=windows, costMatrix=costMatrix)
+
+          costMatrix = score.costMatrix
+
+          detailedResults["File"].extend(relativePath)
+          detailedResults["Username"].extend(profileName)
+          detailedResults["Score"].extend(score.score)
+
+      detailedResults = pandas.DataFrame(detailedResults)
+
+      detailedResultsPath = os.path.join(resultsDetectorDir, "detailedResults.csv")
+      detailedResults.to_csv(detailedResultsPath)
+
+  def getCorpusLabel(self):
+    return lib.labeler.CorpusLabel(options.labelsDir)
 
   def getConfig(self):
     f = open(os.path.join(self.root, options.config))
@@ -114,85 +119,8 @@ class Runner(object):
 
   def getNumCPUs(self):
     if not self.options.numCPUs:
-      return cpu_count()
+      return multiprocessing.cpu_count()
     return int(self.options.numCPUs)
-
-
-  def runAnomaly(self, corpus, outputDir):
-    """
-    Run selected detector on selected file
-    """
-    outputDir = getOutputDir(options)
-
-    detectorClass = getDetectorClass(self, detector)
-
-    detectorClass.runCorpus()
-
-
-def getOutputDir(options):
-  """
-  Return the directory into which we should place results file based on
-  input options.
-
-  This will also *create* that directory if it does not already exist.
-  """
-
-  base = options.outputDir
-  detectorDir = options.detector
-  if options.inputFile:
-    dataGroupDir = osPathSplit(options.inputFile)[1]
-  else:
-    print "ERROR: You must specify an --inputFile"
-    sys.exit(1)
-  outputDir = os.path.join(base, detectorDir, dataGroupDir)
-
-  if not os.path.exists(outputDir):
-    # This is being run in parralel so watch out for race condition.
-    try:
-      os.makedirs(outputDir)
-    except OSError:
-      pass
-
-  return outputDir
-
-def getDetectorHandle(detector):
-  # If the detector is 'detector', the detector class must be named
-    # DetectorDetector# If the detector is 'detector', the detector class must be named
-  detector = detector[0].upper() + detector[1:]
-
-  className = detector + "Detector"
-  if className not in globals():
-    print("ERROR: The provided detector was not recognized. Please add a class "
-          "in the detectors/ dir. Add that class to the detectors/__init__.py "
-          "file and finally add that class to the list of detectors imported "
-          "in this file. ... Sorry!")
-    sys.exit(1)
-  else:
-    detectorClass = globals()[className](probationaryPeriod,
-                                          options.inputFile,
-                                          outputDir)
-  return detectorClass
-
-
-def osPathSplit(path, debug=False):
-  """
-  os_path_split_asunder
-  http://stackoverflow.com/questions/4579908/cross-platform-splitting-of-path-in-python
-  """
-  parts = []
-  while True:
-    newpath, tail = os.path.split(path)
-    if debug:
-      print repr(path), (newpath, tail)
-    if newpath == path:
-      assert not tail
-      if path:
-        parts.append(path)
-      break
-    parts.append(tail)
-    path = newpath
-  parts.reverse()
-  return parts
 
 
 if __name__ == "__main__":
@@ -242,6 +170,7 @@ if __name__ == "__main__":
   parser.add_option("--labelDir",
                     default="labels",
                     help="This holds all the label windows for the corpus.")
+
 
   options, args = parser.parse_args()
 
