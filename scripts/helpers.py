@@ -3,7 +3,9 @@ import sys
 import yaml
 import pandas
 
-from scoring import Scorer
+print os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
+from lib.scoring import Scorer
 
 from collections import OrderedDict
 

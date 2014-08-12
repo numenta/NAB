@@ -1,7 +1,7 @@
 import os
 import copy
 import pandas
-import sys
+import util
 
 class DataSet(object):
 
@@ -52,7 +52,7 @@ class Corpus(object):
     self.numDataSets = len(self.dataSets)
 
   def getDataSets(self):
-    filePaths = absoluteFilePaths(self.srcRoot)
+    filePaths = util.absoluteFilePaths(self.srcRoot)
     dataSets = [DataSet(path) for path in filePaths]
 
     def getRelativePath(srcRoot, srcPath):
@@ -84,7 +84,7 @@ class Corpus(object):
       print 'directory already exists'
       return None
     else:
-      createPath(newRoot)
+      util.createPath(newRoot)
     newCorpus = Corpus(newRoot)
     for relativePath in self.dataSets.keys():
       newCorpus.addDataSet(relativePath, self.dataSets[relativePath])
@@ -94,7 +94,7 @@ class Corpus(object):
   def addDataSet(self, relativePath, dataSet):
     self.dataSets[relativePath] = copy.deepcopy(dataSet)
     newPath = self.srcRoot + relativePath
-    createPath(newPath)
+    util.createPath(newPath)
     self.dataSets[relativePath].srcPath = newPath
     self.dataSets[relativePath].write()
     self.numDataSets = len(self.dataSets)
@@ -105,15 +105,3 @@ class Corpus(object):
       if query in relativePath:
         ans[relativePath] = self.dataSets[relativePath]
     return ans
-
-def createPath(path):
-  dirname = os.path.dirname(path)
-  if not os.path.exists(dirname):
-    os.makedirs(dirname)
-
-def absoluteFilePaths(directory):
-  for dirpath,_,filenames in os.walk(directory):
-    filenames = [f for f in filenames if not f[0] == "."]
-    for f in filenames:
-      yield os.path.abspath(os.path.join(dirpath, f))
-

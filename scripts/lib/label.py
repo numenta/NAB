@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
-import yaml
-import argparse
+
 import os
-import corpus
+import yaml
 import datetime
-import re
 import dateutil.parser
-import sys
 import pandas
 import pickle
+
+import corpus
+import util
 
 
 class UserLabel(object):
@@ -92,7 +92,7 @@ class LabelCombiner(object):
 
 
   def getUserLabels(self):
-    labelPaths = absoluteFilePaths(self.labelRoot)
+    labelPaths = util.absoluteFilePaths(self.labelRoot)
     userLabels = [UserLabel(path, corp=self.corpus) for path in labelPaths]
     return userLabels
 
@@ -170,19 +170,14 @@ class LabelCombiner(object):
     return allWindows
 
 
-def absoluteFilePaths(directory):
-  for dirpath,_,filenames in os.walk(directory):
-    filenames = [f for f in filenames if not f[0] == '.']
-    for f in filenames:
-      yield os.path.abspath(os.path.join(dirpath, f))
-
-
 class CorpusLabel(object):
-  def __init__(self, path, dataRoot):
+  def __init__(self, path, dataRoot, corpus=None):
     self.path = path
     self.dataRoot = dataRoot
-
-    self.corpus = corpus.Corpus(dataRoot)
+    if not corpus:
+      self.corpus = corpus.Corpus(dataRoot)
+    else:
+      self.corpus = corpus
 
     self.windows = pickle.load(open(os.path.join(self.path, 'corpus_windows.pkl'), 'r'))
     self.labels  = pickle.load(open(os.path.join(self.path, 'corpus_labels.pkl'), 'r'))

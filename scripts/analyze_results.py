@@ -26,13 +26,13 @@ import os
 import numpy
 import csv
 import yaml
-from corpus import Corpus as ResultsCorpus
-from label import CorpusLabel
+from lib.corpus import Corpus as ResultsCorpus
+from lib.label import CorpusLabel
 
 from optparse import OptionParser
 
 from pprint import pprint
-from confusion_matrix import pPrintMatrix
+# from confusion_matrix import pPrintMatrix
 
 from helpers import (parseConfigFile,
                      getCSVFiles,
