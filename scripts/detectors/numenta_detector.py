@@ -5,7 +5,7 @@ import simplejson as json
 from nupic.algorithms import anomaly_likelihood
 from nupic.frameworks.opf.modelfactory import ModelFactory
 
-from anomaly_detector import AnomalyDetector
+from base import AnomalyDetector
 
 class NumentaDetector(AnomalyDetector):
 
@@ -23,14 +23,14 @@ class NumentaDetector(AnomalyDetector):
 
     self.sensorParams = modelParams['modelParams']['sensorParams']\
                                    ['encoders']['value']
-    
+
     # RDSE - resolution calculation
     resolution = max(0.001,
                      (self.inputMax - self.inputMin) / \
                      self.sensorParams.pop('numBuckets')
                     )
     self.sensorParams['resolution'] = resolution
-    
+
     self.model = ModelFactory.create(modelParams)
 
     self.model.enableInference({'predictedField': 'value'})
@@ -72,7 +72,7 @@ class NumentaDetector(AnomalyDetector):
 
     # Send it to Numenta detector and get back the results
     result = self.model.run(inputData)
-    
+
     # Retrieve the anomaly score and write it to a file
     rawScore = result.inferences['anomalyScore']
 
@@ -89,15 +89,15 @@ class AnomalyLikelihood(object):
   """
   Helper class for running anomaly likelihood computation.
   """
-  
+
   def __init__(self, probationaryPeriod = 600, numentaLearningPeriod = 300):
     """
     probationaryPeriod - no anomaly scores are reported for this many
     iterations.  This should be numentaLearningPeriod + some number of records
     for getting a decent likelihood estimation.
 
-    numentaLearningPeriod - the number of iterations required for the Numenta 
-    detector to learn some of the patterns in the dataset.    
+    numentaLearningPeriod - the number of iterations required for the Numenta
+    detector to learn some of the patterns in the dataset.
     """
     self._iteration          = 0
     self._historicalScores   = []
@@ -128,19 +128,19 @@ class AnomalyLikelihood(object):
       likelihood = 0.5
     else:
       # On a rolling basis we re-estimate the distribution every 100 iterations
-      if self._distribution is None or (self._iteration % 100 == 0): 
+      if self._distribution is None or (self._iteration % 100 == 0):
         _, _, self._distribution = (
           anomaly_likelihood.estimateAnomalyLikelihoods(
             self._historicalScores,
             skipRecords = self._numentaLearningPeriod)
           )
-        
+
       likelihoods, _, self._distribution = (
         anomaly_likelihood.updateAnomalyLikelihoods([dataPoint],
           self._distribution)
       )
       likelihood = 1.0 - likelihoods[0]
-      
+
     # Before we exit update historical scores and iteration
     self._historicalScores.append(dataPoint)
     self._iteration += 1

@@ -27,9 +27,6 @@ from optparse import OptionParser
 import multiprocessing
 
 import lib
-
-# from analyze_results import analyzeResults
-
 from detectors import (NumentaDetector, SkylineDetector)
 
 from collections import defaultdict
@@ -49,11 +46,13 @@ class Runner(object):
     self.profiles = self.getProfiles()
     self.numCPUs = self.getNumCPUs()
     self.plot = options.plotResults
-    self.results = self.getResults()
-    self.analysis = self.getAnalysis()
+    if options.resultsOnly:
+      self.results()
+    elif options.analysisOnly:
+      self.analysis = self.getAnalysis()
 
 
-  def getResults(self):
+  def results(self):
     dataPath = os.path.join(self.root, "data")
     corp = lib.corpus.Corpus(dataPath)
 
@@ -93,7 +92,7 @@ class Runner(object):
         for profileName, profile in self.profiles.iteritems():
           costMatrix = profile['CostMatrix']
 
-          score = lib.scorer.Scorer(predicted=predicted, labels=labels, windowLimits=windows, costMatrix=costMatrix)
+          score = lib.score.Scorer(predicted=predicted, labels=labels, windowLimits=windows, costMatrix=costMatrix)
 
           costMatrix = score.costMatrix
 
@@ -107,7 +106,7 @@ class Runner(object):
       detailedResults.to_csv(detailedResultsPath)
 
   def getCorpusLabel(self):
-    return lib.labeler.CorpusLabel(options.labelsDir)
+    return lib.label.CorpusLabel(options.labelsDir)
 
   def getConfig(self):
     f = open(os.path.join(self.root, options.config))

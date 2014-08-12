@@ -1,23 +1,21 @@
 import csv
 import os
 import sys
-import dateutil
 import datetime
 import multiprocessing
 from copy import copy
-from pandas.io.parsers import read_csv
 
 def makeDirsExist(path):
-    """
-    Makes sure a given path exists
-    """
+  """
+  Makes sure a given path exists
+  """
 
-    if not os.path.exists(path):
-      # This is being run in parralel so watch out for race condition.
-      try:
-        os.makedirs(path)
-      except OSError:
-        pass
+  if not os.path.exists(path):
+    # This is being run in parralel so watch out for race condition.
+    try:
+      os.makedirs(path)
+    except OSError:
+      pass
 
 
 class AnomalyDetector(object):
@@ -32,7 +30,7 @@ class AnomalyDetector(object):
               name,
               probationaryPercent,
               outputDir,
-              numCPUs):
+              numCPUs,):
     self.corpus = corpus
     self.labels = labels
     self.probationaryPercent = probationaryPercent
@@ -138,16 +136,14 @@ class AnomalyDetector(object):
 
     rawWriter, alertWriter = self.getWriters(data.filename)
 
-    # Iterate through each record in the CSV file
-    print "Starting processing at", datetime.datetime.now()
     for i, row in data.iterrows():
       # Retrieve the detector output and write it to a file
       row = list(row) + [self.labels.labels[relativePath][i]]
       detectorValues = self.handleRecord(row)
       thresholdedValues = [1.0] if detectorValues[0] >= self.threshold else [0.0]
 
-      rawOutputRow = copy(row) + [detectorValues]
-      alertOutputRow = copy(row) + [thresholdedValues]
+      rawOutputRow = copy(row).extend(detectorValues)
+      alertOutputRow = copy(row).extend(thresholdedValues)
 
       rawWriter.writerow(rawOutputRow)
       alertWriter.writerow(alertOutputRow)

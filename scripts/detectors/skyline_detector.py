@@ -1,4 +1,4 @@
-from anomaly_detector import AnomalyDetector
+from base import AnomalyDetector
 
 from skyline.algorithms import (median_absolute_deviation,
                                 first_hour_average,
