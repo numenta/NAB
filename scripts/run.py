@@ -26,7 +26,11 @@ from optparse import OptionParser
 
 import multiprocessing
 
-import lib
+from lib.corpus import Corpus
+from lib.score import Scorer
+from lib.util import (getDetectorClassName, convertResultsPathToDataPath)
+from lib.label import CorpusLabel
+
 from detectors import (NumentaDetector, SkylineDetector)
 
 from collections import defaultdict
@@ -38,31 +42,36 @@ class Runner(object):
   def __init__(self, options):
     self.options = options
     self.root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
+    self.dataDir = os.path.join(self.root, self.options.dataDir)
+    self.corp = Corpus(self.dataDir)
+
     self.config = self.getConfig()
     self.detectors = self.config["AnomalyDetectors"]
     self.resultsDir = os.path.join(self.root, self.config["ResultsDirectory"])
     self.probationaryPercent = self.config["ProbationaryPercent"]
+
+    self.labelDir = os.path.join(self.root, self.options.labelDir)
     self.corpusLabel = self.getCorpusLabel()
+
     self.profiles = self.getProfiles()
     self.numCPUs = self.getNumCPUs()
     self.plot = options.plotResults
-    if options.resultsOnly:
-      self.results()
-    elif options.analysisOnly:
-      self.analysis = self.getAnalysis()
 
+    # if not options.resultsOnly:
+    self.results = self.getResults()
+    # elif not options.analyzeOnly:
+    self.analysis = self.getAnalysis()
 
-  def results(self):
-    dataPath = os.path.join(self.root, "data")
-    corp = lib.corpus.Corpus(dataPath)
-
+  def getResults(self):
+    print "Obtaining Results"
     for detector in self.detectors:
-
-      detectorClassName = lib.util.getDetectorClassName(detector)
+      print detector
+      detectorClassName = getDetectorClassName(detector)
 
       detectorClass = globals()[detectorClassName](
-        corpus=corp,
-        labels=self.labels,
+        corpus=self.corp,
+        labels=self.corpusLabel,
         name=detector,
         probationaryPercent=self.probationaryPercent,
         outputDir=self.resultsDir,
@@ -70,11 +79,12 @@ class Runner(object):
 
       detectorClass.runCorpus()
 
+
   def analyzeResults(self):
 
     for detector in self.detectors:
       resultsDetectorDir = os.path.join(self.resultsDir, detector)
-      resultsCorpus = lib.corpus.Corpus(resultsDetectorDir)
+      resultsCorpus = Corpus(resultsDetectorDir)
 
       detailedResults = defaultdict(list)
 
@@ -84,7 +94,7 @@ class Runner(object):
 
         predicted = dataSets[relativePath].data['alert']
 
-        relativePath = lib.util.convertResultsPathToDataPath(relativePath)
+        relativePath = convertResultsPathToDataPath(relativePath)
         windows = self.corpusLabel.windows[relativePath]
         labels = self.corpusLabel.labels[relativePath]
 
@@ -92,7 +102,7 @@ class Runner(object):
         for profileName, profile in self.profiles.iteritems():
           costMatrix = profile['CostMatrix']
 
-          score = lib.score.Scorer(predicted=predicted, labels=labels, windowLimits=windows, costMatrix=costMatrix)
+          score = Scorer(predicted=predicted, labels=labels, windowLimits=windows, costMatrix=costMatrix)
 
           costMatrix = score.costMatrix
 
@@ -106,7 +116,7 @@ class Runner(object):
       detailedResults.to_csv(detailedResultsPath)
 
   def getCorpusLabel(self):
-    return lib.label.CorpusLabel(options.labelsDir)
+    return CorpusLabel(self.labelDir, None, self.corp)
 
   def getConfig(self):
     f = open(os.path.join(self.root, options.config))
@@ -169,6 +179,12 @@ if __name__ == "__main__":
   parser.add_option("--labelDir",
                     default="labels",
                     help="This holds all the label windows for the corpus.")
+
+  parser.add_option("--dataDir",
+                    default="data",
+                    help="This holds all the label windows for the corpus.")
+
+
 
 
   options, args = parser.parse_args()

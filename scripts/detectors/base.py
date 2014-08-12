@@ -33,8 +33,11 @@ class AnomalyDetector(object):
               numCPUs,):
     self.corpus = corpus
     self.labels = labels
+    self.name = name
     self.probationaryPercent = probationaryPercent
-    self.outputDir = outputDir
+    # print outputDir
+    # sys.exit()
+    self.outputDir = os.path.join(outputDir,self.name)
     self.numCPUs = numCPUs
     self.threshold = self.getThreshold()
 
@@ -68,11 +71,23 @@ class AnomalyDetector(object):
     """
     pass
 
-  def ConfigureDetector(self, probationaryPeriodData):
+  def configureDetector(self, probationaryPeriodData):
     """
     Takes the probationary period data and is allowed to do any statistical
     calculation with it in order to configure itself
     """
+    pass
+
+  def configure(self, probationaryPeriodData):
+    calcMin = probationaryPeriodData.min()
+    calcMax = probationaryPeriodData.max()
+    calcRange = abs(calcMax - calcMin)
+    calcPad = calcRange * .2
+
+    self.inputMin = calcMin - calcPad
+    self.inputMax = calcMax + calcPad
+    self.configureDetector(probationaryPeriodData)
+
 
   def setThreshold(self):
     if self.threshold:
@@ -93,22 +108,25 @@ class AnomalyDetector(object):
     pass
 
   def runCorpus(self):
-    p = multiprocessing.Pool(self.numCpu)
+    p = multiprocessing.Pool(self.numCPUs)
     for relativePath in self.corpus.dataSets:
+      print relativePath
       self.runFile(relativePath)
 
     p.map(self.runFile, self.corpus.dataSets.keys())
 
 
-  def getWriters(self, filename):
+  def getWriters(self, relativePath, filename):
+    relativeDir = os.path.split(relativePath)[0]
+
     rawFilename = self.getOutputPrefix() + "_raw_scores_" + filename
-    rawOutPath = os.path.join(self.outputDir, 'raw')
+    rawOutPath = os.path.join(self.outputDir, relativeDir, 'raw')
     rawOutputFile = os.path.join(rawOutPath, rawFilename)
     makeDirsExist(rawOutPath)
     rawWriter = csv.writer(open(rawOutputFile, "wb"))
 
     alertFilename = self.getOutputPrefix() + "_alerts_" + filename
-    alertOutPath = os.path.join(self.outputDir, 'alerts')
+    alertOutPath = os.path.join(self.outputDir, relativeDir, 'alerts')
     alertOutputFile = os.path.join(alertOutPath, alertFilename)
     makeDirsExist(alertOutPath)
     alertWriter = csv.writer(open(alertOutputFile, "wb"))
@@ -127,26 +145,38 @@ class AnomalyDetector(object):
     rawHeaders.extend(self.getAdditionalHeaders())
     rawWriter.writerow(rawHeaders)
 
-    return rawWriter, alertWriter
+    return [rawWriter, alertWriter],[rawOutputFile, alertOutputFile]
 
   def runFile(self, relativePath):
-    data = self.corpus.dataSets[relativePath]
+    dataSet = self.corpus.dataSets[relativePath]
 
-    probationaryPeriod = self.probationaryPercent * data.shape[0]
+    probationaryPeriod = self.probationaryPercent * dataSet.data.shape[0]
 
-    rawWriter, alertWriter = self.getWriters(data.filename)
+    self.configure(dataSet.data['value'].loc[:probationaryPeriod])
 
-    for i, row in data.iterrows():
+    [rawWriter, alertWriter],[rawOutputFile, alertOutputFile] = self.getWriters(relativePath, dataSet.fileName)
+
+    rawWriter
+
+    for i, row in dataSet.data.iterrows():
       # Retrieve the detector output and write it to a file
-      row = list(row) + [self.labels.labels[relativePath][i]]
-      detectorValues = self.handleRecord(row)
+      # print self.labels.labels[relativePath]['label'][i]
+      label = self.labels.labels[relativePath]['label'][i]
+      inputData = row.to_dict()
+
+      row = list(row) + [label]
+
+      detectorValues = self.handleRecord(inputData)
       thresholdedValues = [1.0] if detectorValues[0] >= self.threshold else [0.0]
 
-      rawOutputRow = copy(row).extend(detectorValues)
-      alertOutputRow = copy(row).extend(thresholdedValues)
+      rawOutputRow = copy(row)
+      rawOutputRow.extend(detectorValues)
+      alertOutputRow = copy(row)
+      alertOutputRow.extend(thresholdedValues)
 
       rawWriter.writerow(rawOutputRow)
       alertWriter.writerow(alertOutputRow)
+
 
       # Progress report
       if (i % 500) == 0:
@@ -154,5 +184,5 @@ class AnomalyDetector(object):
         sys.stdout.flush()
 
     print "\nCompleted processing", i, "records at", datetime.datetime.now()
-    print "Alerts for", self.inputFile,
-    print "have been written to", self.alertOutputFile
+    print "Alerts for", dataSet.fileName,
+    print "have been written to %s and %s" %(alertOutputFile, rawOutputFile)

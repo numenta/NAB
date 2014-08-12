@@ -21,4 +21,4 @@ ResultsDirectory: "results"
 # dataset for which a detector will not be scored. This period is allowed
 # to provide a consistent amount of time for each detector to stabilize
 # and collect initial statistics. Best not to modify.
-ProbationaryPeriod: 600
+ProbationaryPercent: 0.1

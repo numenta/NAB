@@ -16,16 +16,9 @@ def getDetectorClassName(detector):
   # If the detector is 'detector', the detector class must be named
     # DetectorDetector# If the detector is 'detector', the detector class must be named
   detector = detector[0].upper() + detector[1:]
-
+  print detector
   className = detector + "Detector"
-  if className not in globals():
-    print("ERROR: The provided detector was not recognized. Please add a class "
-          "in the detectors/ dir. Add that class to the detectors/__init__.py "
-          "file and finally add that class to the list of detectors imported "
-          "in this file. ... Sorry!")
-    sys.exit(1)
-  else:
-    return className
+  return className
 
 
 def osPathSplit(path, debug=False):
