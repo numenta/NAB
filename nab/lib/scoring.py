@@ -11,6 +11,7 @@ class CostMatrix(object):
     self.fn = dictionary['fnCost']
     self.values = dictionary
 
+
 class Window(object):
 
   def __init__(self, windowId, limits, labels):

@@ -1,12 +1,12 @@
-from base import AnomalyDetector
+from nab.detectors.base import AnomalyDetector
 
-from skyline.algorithms import (median_absolute_deviation,
-                                first_hour_average,
-                                stddev_from_average,
-                                stddev_from_moving_average,
-                                mean_subtraction_cumulation,
-                                least_squares,
-                                histogram_bins)
+from nab.detectors.skyline.algorithms import (  median_absolute_deviation,
+                                                first_hour_average,
+                                                stddev_from_average,
+                                                stddev_from_moving_average,
+                                                mean_subtraction_cumulation,
+                                                least_squares,
+                                                histogram_bins)
 
 class SkylineDetector(AnomalyDetector):
 
