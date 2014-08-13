@@ -22,3 +22,5 @@ ResultsDirectory: "results"
 # to provide a consistent amount of time for each detector to stabilize
 # and collect initial statistics. Best not to modify.
 ProbationaryPercent: 0.1
+
+numCPUs: None

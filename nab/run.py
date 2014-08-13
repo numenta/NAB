@@ -20,49 +20,63 @@
 # ----------------------------------------------------------------------
 
 import os
-import yaml
-import sys
-
-sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/lib')
-
-
-
-import multiprocessing
-
-from lib.corpus import Corpus
-from lib.score import Scorer
-from lib.util import (getDetectorClassName, convertResultsPathToDataPath)
-from lib.label import CorpusLabel
-
 from optparse import OptionParser
 
-from detectors import (NumentaDetector, SkylineDetector)
-
-from collections import defaultdict
-import pandas
-import math
+from nab.lib.running import Runner
 
 
-sys.path.append(os.path.dirname(os.path.realpath(__file__)))
+def main(options):
+  root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+  runner = Runner(root, options)
+  print 'got here'
+
+  if options.detect:
+    runner.getAlerts()
+
+  elif options.score:
+    runner.getScores()
 
 
 if __name__ == "__main__":
 
   parser = OptionParser()
-  parser.add_option("-a", "--analyzeOnly",
-                    help="Analyze results in the results directory only.",
-                    dest="analyzeOnly",
-                    default=False,
-                    action="store_true")
 
-  parser.add_option("-r", "--resultsOnly",
+  parser.add_option("--dataDir",
+                    default="data",
+                    help="This holds all the label windows for the corpus.")
+
+  parser.add_option("--labelDir",
+                    default="labels",
+                    help="This holds all the label windows for the corpus.")
+
+  parser.add_option("-r", "--detect",
                     help="Generate detector results but do not analyze results \
                     files.",
-                    dest="resultsOnly",
+                    dest="detect",
                     default=False,
                     action="store_true")
 
-  parser.add_option("-p", "--plot",
+  parser.add_option("-a", "--score",
+                    help="Analyze results in the results directory",
+                    dest="score",
+                    default=False,
+                    action="store_true")
+
+  parser.add_option("-c", "--config",
+                    default="config/benchmark_config.yaml",
+                    help="The configuration file to use while running the "
+                    "benchmark.")
+
+  parser.add_option("-p", "--profiles",
+                    default="config/user_profiles.yaml",
+                    help="The configuration file to use while running the "
+                    "benchmark.")
+
+  parser.add_option("--numCPUs",
+                    help="The number of CPUs to use to run the "
+                    "benchmark. If not specified all CPUs will be used.")
+
+  parser.add_option("--plot",
                     help="If you have Plotly installed "
                     "this option will plot results and ROC curves for each \
                     dataset.",
@@ -75,29 +89,6 @@ if __name__ == "__main__":
                     help="Increase the amount and detail of output by setting \
                     this greater than 0.")
 
-  parser.add_option("-c", "--config",
-                    default="scripts/config/benchmark_config.yaml",
-                    help="The configuration file to use while running the "
-                    "benchmark.")
-
-  parser.add_option("--profiles",
-                    default="scripts/config/user_profiles.yaml",
-                    help="The configuration file to use while running the "
-                    "benchmark.")
-
-  parser.add_option("--numCPUs",
-                    help="The number of CPUs to use to run the "
-                    "benchmark. If not specified all CPUs will be used.")
-
-  parser.add_option("--labelDir",
-                    default="labels",
-                    help="This holds all the label windows for the corpus.")
-
-  parser.add_option("--dataDir",
-                    default="data",
-                    help="This holds all the label windows for the corpus.")
-
-
   options, args = parser.parse_args()
 
-  Runner(options)
+  main(options)

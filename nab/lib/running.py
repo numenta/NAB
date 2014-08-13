@@ -1,41 +1,42 @@
 import os
-from nab.corpus import Corpus
-from nab.score import Scorer
-from nab.util import (getDetectorClassName, convertResultsPathToDataPath)
-from nab.label import CorpusLabel
+import math
+import pandas
+import yaml
+import multiprocessing
 
-from optparse import OptionParser
+from nab.lib.corpus import Corpus
+from nab.lib.score import Scorer
+from nab.lib.util import (getDetectorClassName, convertResultsPathToDataPath)
+from nab.lib.label import CorpusLabel
 
-from detectors import (NumentaDetector, SkylineDetector)
+from nab.detectors.numenta.numenta_detector import NumentaDetector
+from nab.detectors.skyline.skyline_detector import SkylineDetector
 
 from collections import defaultdict
 
 class Runner(object):
 
   def __init__(self, root, options):
+    self.root = root
     self.options = options
-    self.root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
     self.dataDir = os.path.join(self.root, self.options.dataDir)
     self.corp = Corpus(self.dataDir)
+
+    self.labelDir = os.path.join(self.root, self.options.labelDir)
+    self.corpusLabel = self.getCorpusLabel()
 
     self.config = self.getConfig()
     self.detectors = self.config["AnomalyDetectors"]
     self.resultsDir = os.path.join(self.root, self.config["ResultsDirectory"])
     self.probationaryPercent = self.config["ProbationaryPercent"]
 
-    self.labelDir = os.path.join(self.root, self.options.labelDir)
-    self.corpusLabel = self.getCorpusLabel()
-
     self.profiles = self.getProfiles()
     self.numCPUs = self.getNumCPUs()
     self.plot = options.plotResults
 
-    self.results = self.getResults()
-    self.analysis = self.getAnalysis()
-
-  def getResults(self):
-    print "Obtaining Results"
+  def getAlerts(self):
+    print "Obtaining Alerts"
     for detector in self.detectors:
       print detector
       detectorClassName = getDetectorClassName(detector)
@@ -51,8 +52,8 @@ class Runner(object):
       detectorClass.runCorpus()
 
 
-  def getAnalysis(self):
-    print "Analyzing Results"
+  def getScores(self):
+    print "Obtaining Scores"
     analysis = defaultdict(list)
     for detector in self.detectors:
 
@@ -75,18 +76,19 @@ class Runner(object):
 
           probationaryPeriod = math.floor(self.probationaryPercent*labels.shape[0])
 
-          score = Scorer(
+          scorer = Scorer(
             predicted=predicted,
             labels=labels,
             windowLimits=windows,
             costMatrix=costMatrix,
             probationaryPeriod=probationaryPeriod)
 
+          scorer.score()
+
           analysis["Detector"].append(detector)
           analysis["Username"].append(profileName)
           analysis["File"].append(relativePath)
-          analysis["Score"].append(score.score)
-
+          analysis["Score"].append(scorer.score)
 
       analysis = pandas.DataFrame(analysis)
 
@@ -97,11 +99,11 @@ class Runner(object):
     return CorpusLabel(self.labelDir, None, self.corp)
 
   def getConfig(self):
-    f = open(os.path.join(self.root, options.config))
+    f = open(os.path.join(self.root, self.options.config))
     return yaml.load(f)
 
   def getProfiles(self):
-    f = open(os.path.join(self.root, options.profiles))
+    f = open(os.path.join(self.root, self.options.profiles))
     return yaml.load(f)
 
   def getNumCPUs(self):

@@ -5,7 +5,7 @@ import simplejson as json
 from nupic.algorithms import anomaly_likelihood
 from nupic.frameworks.opf.modelfactory import ModelFactory
 
-from base import AnomalyDetector
+from nab.detectors.base import AnomalyDetector
 
 class NumentaDetector(AnomalyDetector):
 
