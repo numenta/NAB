@@ -5,9 +5,9 @@ import yaml
 import multiprocessing
 
 from nab.lib.corpus import Corpus
-from nab.lib.score import Scorer
+from nab.lib.scoring import Scorer
 from nab.lib.util import (getDetectorClassName, convertResultsPathToDataPath)
-from nab.lib.label import CorpusLabel
+from nab.lib.labeling import CorpusLabel
 
 from nab.detectors.numenta.numenta_detector import NumentaDetector
 from nab.detectors.skyline.skyline_detector import SkylineDetector
