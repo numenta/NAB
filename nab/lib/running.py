@@ -25,6 +25,7 @@ class Runner(object):
 
     self.labelDir = os.path.join(self.root, self.options.labelDir)
     self.corpusLabel = self.getCorpusLabel()
+    self.corpusLabel.getEverything()
 
     self.config = self.getConfig()
     self.detectors = self.config["AnomalyDetectors"]
@@ -35,8 +36,8 @@ class Runner(object):
     self.numCPUs = self.getNumCPUs()
     self.plot = options.plotResults
 
-  def getAlerts(self):
-    print "Obtaining Alerts"
+  def detect(self):
+    print "Obtaining detections"
     for detector in self.detectors:
       print detector
       detectorClassName = getDetectorClassName(detector)
@@ -51,12 +52,11 @@ class Runner(object):
 
       detectorClass.runCorpus()
 
-
-  def getScores(self):
+  def score(self):
     print "Obtaining Scores"
-    analysis = defaultdict(list)
-    for detector in self.detectors:
 
+    for detector in self.detectors:
+      ans = defaultdict(list)
       resultsDetectorDir = os.path.join(self.resultsDir, detector)
       resultsCorpus = Corpus(resultsDetectorDir)
 
@@ -69,8 +69,8 @@ class Runner(object):
         for relativePath in dataSets.keys():
 
           predicted = dataSets[relativePath].data['alert']
-
           relativePath = convertResultsPathToDataPath(os.path.join(detector, relativePath))
+
           windows = self.corpusLabel.windows[relativePath]
           labels = self.corpusLabel.labels[relativePath]
 
@@ -85,15 +85,22 @@ class Runner(object):
 
           scorer.getScore()
 
-          analysis["Detector"].append(detector)
-          analysis["Username"].append(profileName)
-          analysis["File"].append(relativePath)
-          analysis["Score"].append(scorer.score)
+          counts = scorer.counts
 
-      analysis = pandas.DataFrame(analysis)
+          ans["Detector"].append(detector)
+          ans["Username"].append(profileName)
+          ans["File"].append(relativePath)
+          ans["Score"].append(scorer.score)
+          ans["tp"].append(counts['tp'])
+          ans["tn"].append(counts['tn'])
+          ans["fp"].append(counts['fp'])
+          ans["fn"].append(counts['fn'])
+          ans["Total Count"].append(scorer.totalCount)
 
-    analysisPath = os.path.join(resultsDetectorDir, "analysis.csv")
-    analysis.to_csv(analysisPath)
+      ans = pandas.DataFrame(ans)
+
+      scorePath = os.path.join(resultsDetectorDir, detector+"_scores.csv")
+      ans.to_csv(scorePath)
 
   def getCorpusLabel(self):
     return CorpusLabel(self.labelDir, None, self.corp)

@@ -13,7 +13,7 @@
 # detector to generate results.
 AnomalyDetectors:
     - numenta
-    # - skyline
+    - skyline
 
 ResultsDirectory: "results"
 

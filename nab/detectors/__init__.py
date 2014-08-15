@@ -1,2 +1,0 @@
-from numenta_detector import NumentaDetector
-from skyline_detector import SkylineDetector

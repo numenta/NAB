@@ -150,11 +150,11 @@ class AnomalyDetector(object):
   def runFile(self, relativePath):
     dataSet = self.corpus.dataSets[relativePath]
 
-    print 'in detector',
-    print self.probationaryPercent,
-    print dataSet.data.shape[0],
+    # print 'in detector',
+    # print self.probationaryPercent,
+    # print dataSet.data.shape[0],
     probationaryPeriod = math.floor(self.probationaryPercent * dataSet.data.shape[0])
-    print probationaryPeriod
+    # print probationaryPeriod
 
     self.configure(dataSet.data['value'].loc[:probationaryPeriod])
 

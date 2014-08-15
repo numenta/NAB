@@ -1,10 +1,8 @@
-from collections import defaultdict
 import math
 import sys
 
 class CostMatrix(object):
   def __init__(self, dictionary):
-    print dictionary
     self.tp = dictionary['tpCost']
     self.tn = dictionary['tnCost']
     self.fp = dictionary['fpCost']
@@ -40,16 +38,27 @@ class Window(object):
 
 
 class Scorer(object):
-  def __init__(self, predicted, labels, windowLimits, costMatrix, probationaryPeriod, options=None):
+  def __init__(self, predicted, labels, windowLimits, costMatrix, probationaryPeriod):
     self.predicted = predicted
     self.labels = labels
-    self.count = defaultdict(int)
     self.probationaryPeriod = probationaryPeriod
-    self.windows = self.getWindows(windowLimits)
-    self.options = options
     self.costMatrix = CostMatrix(costMatrix)
+    self.counts = None
+    self.totalCount = None
     self.score = None
 
+    self.initCount()
+    self.windows = self.getWindows(windowLimits)
+
+
+  def initCount(self):
+    self.counts = {
+    'tp': 0,
+    'tn': 0,
+    'fp': 0,
+    'fn': 0}
+
+    self.totalCount = len(self.predicted)
 
   def getWindows(self, limits):
     #SORT WINDOWS BEFORE PUTTING THEM IN LIST
@@ -70,7 +79,7 @@ class Scorer(object):
       category = ''
       category += 'f' if bool(diff) else 't'
       category += 'p' if bool(self.predicted[i]) else 'n'
-      self.count[category] += 1
+      self.counts[category] += 1
       types.append(category)
 
     self.labels['type'] = types

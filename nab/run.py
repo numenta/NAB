@@ -24,17 +24,25 @@ import sys
 import argparse
 
 from nab.lib.running import Runner
-from os.path import dirname, realpath
+from nab.lib.util import recur
+import os
+
+depth = 2
+
+root = recur(os.path.dirname, os.path.realpath(__file__), depth)
 
 def main(args):
-  root = dirname(dirname(realpath(__file__)))
   runner = Runner(root, args)
 
-  if args.detect:
-    runner.getAlerts()
+  if args.detectOnly:
+    runner.detect()
 
-  if args.score:
-    runner.getScores()
+  elif args.scoreOnly:
+    runner.score()
+
+  else:
+    runner.detect()
+    runner.score()
 
 
 if __name__ == "__main__":

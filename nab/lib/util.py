@@ -1,4 +1,7 @@
 import os
+import datetime
+import dateutil
+import sys
 
 def absoluteFilePaths(directory):
   for dirpath,_,filenames in os.walk(directory):
@@ -68,3 +71,31 @@ def flattenDict(dictionary, files={}, head=''):
       files[concat] = dictionary[key]
 
   return files
+
+def strf(t):
+  return datetime.datetime.strftime(t, '%Y-%m-%d %H:%M:%S.%f')
+
+def strp(t):
+  return dateutil.parser.parse(t)
+
+def recur(function, value, n):
+  if n < 0 or int(n) != n:
+    print "incorrect input"
+    sys.exit()
+
+  elif n == 0:
+    return value
+
+  elif n == 1:
+    return function(value)
+
+  else:
+    return recur(function, function(value), n-1)
+
+def deepmap(f, datum):
+    """Deeply applies f across the datum."""
+    if type(datum) == list:
+        return [deepmap(f, x) for x in datum]
+    else:
+        return f(datum)
+
