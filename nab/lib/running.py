@@ -83,7 +83,7 @@ class Runner(object):
             costMatrix=costMatrix,
             probationaryPeriod=probationaryPeriod)
 
-          scorer.score()
+          scorer.getScore()
 
           analysis["Detector"].append(detector)
           analysis["Username"].append(profileName)

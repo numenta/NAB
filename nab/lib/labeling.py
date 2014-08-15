@@ -4,10 +4,9 @@ import yaml
 import datetime
 import dateutil.parser
 import pandas
-import pickle
 
-import corpus
-import util
+from nab.lib.corpus import Corpus
+from nab.lib.util import absoluteFilePaths, flattenDict
 
 
 class UserLabel(object):
@@ -20,11 +19,10 @@ class UserLabel(object):
     self.yaml = yaml.load(open(self.path,'r'))
     self.pathDict = flattenDict(yaml.load(open(self.path,'r')))
     if corp == None:
-      self.corpus = corpus.Corpus(dataRoot)
+      self.corpus = Corpus(dataRoot)
     else:
       self.corpus = corp
     self.windows = self.getWindows()
-    self.labels = self.getLabels()
 
 
   def getWindows(self):
@@ -39,41 +37,20 @@ class UserLabel(object):
     return windows
 
 
-  def getLabels(self):
-    labels = {}
-    for key in self.windows.keys():
-      l = []
-      for [t1, t2] in self.windows[key]:
-        l.extend(self.corpus.dataSets[key].getTimestampRange(t1, t2))
-      labels[key] = l
-
-    return labels
-
-
-def flattenDict(dictionary, files={}, head=''):
-  for key in dictionary.keys():
-    concat = head + '/' + key if head != '' else key
-    if type(dictionary[key]) is dict:
-      flattenDict(dictionary[key], files, concat)
-    else:
-      files[concat] = dictionary[key]
-
-  return files
-
-
 class LabelCombiner(object):
 
-  def __init__(self, labelRoot, dataRoot, destPath, threshold=1):
+  def __init__(self, labelRoot, dataRoot, threshold=1):
     self.labelRoot = labelRoot
     self.dataRoot = dataRoot
-    self.destPath = destPath
-    self.corpus = corpus.Corpus(dataRoot)
-    self.userLabels = self.getUserLabels()
-    self.nlabelers = len(self.userLabels)
     self.threshold = threshold
-    self.combinedLabels = self.getCombinedLabels()
-    self.combinedWindows = self.getCombinedWindows()
-    self.write()
+    self.corpus = Corpus(dataRoot)
+
+    self.userLabels = None
+    self.nlabelers = None
+
+    self.combinedLabels = None
+    self.combinedWindows = None
+
 
   def __str__(self):
     ans = ''
@@ -84,23 +61,37 @@ class LabelCombiner(object):
     ans += 'threshold:           %d\n' % self.threshold
     return ans
 
-  def write(self):
-    pickle.dump(self.combinedWindows, open(os.path.join(self.destPath, 'corpus_windows.pkl'), 'w'))
-    pickle.dump(self.combinedLabels, open(os.path.join(self.destPath, 'corpus_labels.pkl'), 'w'))
+
+  def write(self, destDir):
+    windows = yaml.dump(self.combinedWindows, default_flow_style=True)
+    windowWriter = open(os.path.join(destDir, 'corpus_windows.yml'), 'w')
+    windowWriter.writer(windows)
+
+    labels = yaml.dump(self.combinedLabels, default_flow_style=True)
+    labelWriter = open(os.path.join(destDir, 'corpus_labels.yml'), 'w')
+    labelWriter.writer(labels)
+
+
+  def combine(self):
+    self.userLabels = self.getUserLabels()
+    self.combineLabels()
+    self.combineWindows()
 
 
   def getUserLabels(self):
-    labelPaths = util.absoluteFilePaths(self.labelRoot)
+    labelPaths = absoluteFilePaths(self.labelRoot)
     userLabels = [UserLabel(path, corp=self.corpus) for path in labelPaths]
-    return userLabels
+    self.userLabels = userLabels
+    self.nlabelers = len(self.userLabels)
 
-  def getCombinedLabels(self):
+
+  def combineLabels(self):
     labels = {}
     for relativePath, dataSet in self.corpus.dataSets.iteritems():
       timestampsHolder = []
       labelHolder = []
 
-      for i, row in dataSet.data.iterrows():
+      for _, row in dataSet.data.iterrows():
         t = row['timestamp']
 
         count = 0
@@ -116,9 +107,10 @@ class LabelCombiner(object):
       labels[relativePath] = pandas.DataFrame({'timestamp':timestampsHolder,
           'label': labelHolder})
 
-    return labels
+    self.combinedLabels = labels
 
-  def getCombinedWindows(self):
+
+  def combineWindows(self):
     allWindows = {}
 
     def strf(t):
@@ -137,7 +129,7 @@ class LabelCombiner(object):
         curr = None
         prev = None
 
-        for i, row in labels.iterrows():
+        for _, row in labels.iterrows():
           curr = row['timestamp']
           if not prev:
             currentWindow = [strf(curr)]
@@ -155,7 +147,7 @@ class LabelCombiner(object):
       allWindows[relativePath] = dataSetWindows
 
 
-    return allWindows
+    self.combinedWindows = allWindows
 
 
 class CorpusLabel(object):
@@ -166,6 +158,15 @@ class CorpusLabel(object):
       self.corpus = corpus.Corpus(dataRoot)
     else:
       self.corpus = corpus
+    self.windows = None
+    self.labels = None
 
-    self.windows = pickle.load(open(os.path.join(self.path, 'corpus_windows.pkl'), 'r'))
-    self.labels  = pickle.load(open(os.path.join(self.path, 'corpus_labels.pkl'), 'r'))
+
+  def getWindows(self):
+    windowFile = open(os.path.join(self.path, 'corpus_windows.yml'), 'r')
+    self.windows = yaml.load(windowFile)
+
+
+  def getLabels(self):
+    labelFile = open(os.path.join(self.path, 'corpus_labels.yml'), 'r')
+    self.labels  = yaml.load(labelFile)

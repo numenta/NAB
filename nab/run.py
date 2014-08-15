@@ -19,64 +19,65 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-import os
-from optparse import OptionParser
+
+import sys
+import argparse
 
 from nab.lib.running import Runner
+from os.path import dirname, realpath
 
+def main(args):
+  root = dirname(dirname(realpath(__file__)))
+  runner = Runner(root, args)
 
-def main(options):
-  root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-  runner = Runner(root, options)
-  print 'got here'
-
-  if options.detect:
+  if args.detect:
     runner.getAlerts()
 
-  elif options.score:
+  if args.score:
     runner.getScores()
 
 
 if __name__ == "__main__":
 
-  parser = OptionParser()
+  parser = argparse.ArgumentParser()
 
-  parser.add_option("--dataDir",
+  parser.add_argument("--dataDir",
                     default="data",
                     help="This holds all the label windows for the corpus.")
 
-  parser.add_option("--labelDir",
+  parser.add_argument("--labelDir",
                     default="labels",
                     help="This holds all the label windows for the corpus.")
 
-  parser.add_option("-r", "--detect",
+  parser.add_argument("--detect",
                     help="Generate detector results but do not analyze results \
                     files.",
                     dest="detect",
                     default=False,
                     action="store_true")
 
-  parser.add_option("-a", "--score",
+  parser.add_argument("--score",
                     help="Analyze results in the results directory",
                     dest="score",
                     default=False,
                     action="store_true")
 
-  parser.add_option("-c", "--config",
+  parser.add_argument("-c", "--config",
                     default="config/benchmark_config.yaml",
                     help="The configuration file to use while running the "
                     "benchmark.")
 
-  parser.add_option("-p", "--profiles",
+  parser.add_argument("-p", "--profiles",
                     default="config/user_profiles.yaml",
                     help="The configuration file to use while running the "
                     "benchmark.")
 
-  parser.add_option("--numCPUs",
+  parser.add_argument("--numCPUs",
+                    default=None,
                     help="The number of CPUs to use to run the "
                     "benchmark. If not specified all CPUs will be used.")
 
-  parser.add_option("--plot",
+  parser.add_argument("--plot",
                     help="If you have Plotly installed "
                     "this option will plot results and ROC curves for each \
                     dataset.",
@@ -84,11 +85,6 @@ if __name__ == "__main__":
                     default=False,
                     action="store_true")
 
-  parser.add_option("-v", "--verbosity",
-                    default=0,
-                    help="Increase the amount and detail of output by setting \
-                    this greater than 0.")
+  args = parser.parse_args()
 
-  options, args = parser.parse_args()
-
-  main(options)
+  main(args)

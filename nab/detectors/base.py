@@ -107,7 +107,7 @@ class AnomalyDetector(object):
     pass
 
   def runCorpus(self):
-    p = multiprocessing.Pool(self.numCPUs)
+    # p = multiprocessing.Pool(self.numCPUs)
 
     for relativePath in self.corpus.dataSets:
       print relativePath

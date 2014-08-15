@@ -48,7 +48,7 @@ class Scorer(object):
     self.windows = self.getWindows(windowLimits)
     self.options = options
     self.costMatrix = CostMatrix(costMatrix)
-    self.score = self.getScore()
+    self.score = None
 
 
   def getWindows(self, limits):
@@ -103,6 +103,7 @@ class Scorer(object):
 
     score = tpScore + fpScore
     # print tpScore, fpScore, score
+    self.score = score
     return score
 
   def getClosestPrecedingWindow(self, index):

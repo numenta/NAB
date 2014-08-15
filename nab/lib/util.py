@@ -1,5 +1,4 @@
 import os
-import sys
 
 def absoluteFilePaths(directory):
   for dirpath,_,filenames in os.walk(directory):
@@ -16,8 +15,9 @@ def getDetectorClassName(detector):
   # If the detector is 'detector', the detector class must be named
     # DetectorDetector# If the detector is 'detector', the detector class must be named
   detector = detector[0].upper() + detector[1:]
-  print detector
+
   className = detector + "Detector"
+
   return className
 
 
@@ -58,3 +58,13 @@ def convertResultsPathToDataPath(path):
   path = '/'.join(path)
   # print path
   return path
+
+def flattenDict(dictionary, files={}, head=''):
+  for key in dictionary.keys():
+    concat = head + '/' + key if head != '' else key
+    if type(dictionary[key]) is dict:
+      flattenDict(dictionary[key], files, concat)
+    else:
+      files[concat] = dictionary[key]
+
+  return files
