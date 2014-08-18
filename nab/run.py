@@ -19,12 +19,16 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-
 import sys
+import yaml
 import argparse
 
 from nab.lib.running import Runner
-from nab.lib.util import recur
+from nab.lib.util import recur, detectorNameToClass
+
+from nab.detectors.numenta.numenta_detector import NumentaDetector
+from nab.detectors.skyline.skyline_detector import SkylineDetector
+
 import os
 
 depth = 2
@@ -32,7 +36,8 @@ depth = 2
 root = recur(os.path.dirname, os.path.realpath(__file__), depth)
 
 def main(args):
-  runner = Runner(root, args)
+  constructors = getDetectorClassConstructors(args.config)
+  runner = Runner(root, args, constructors)
 
   if args.detectOnly:
     runner.detect()
@@ -44,6 +49,17 @@ def main(args):
     runner.detect()
     runner.score()
 
+
+def getDetectorClassConstructors(relativeConfigPath):
+  f = open(os.path.join(root, relativeConfigPath))
+
+  config = yaml.load(f)
+
+  detectorClassNames = [detectorNameToClass(detector) for detector in config["AnomalyDetectors"]]
+
+  detectorConstructors = [globals()[className] for className in detectorClassNames]
+
+  return detectorConstructors
 
 if __name__ == "__main__":
 
@@ -57,16 +73,14 @@ if __name__ == "__main__":
                     default="labels",
                     help="This holds all the label windows for the corpus.")
 
-  parser.add_argument("--detect",
+  parser.add_argument("--detectOnly",
                     help="Generate detector results but do not analyze results \
                     files.",
-                    dest="detect",
                     default=False,
                     action="store_true")
 
-  parser.add_argument("--score",
+  parser.add_argument("--scoreOnly",
                     help="Analyze results in the results directory",
-                    dest="score",
                     default=False,
                     action="store_true")
 

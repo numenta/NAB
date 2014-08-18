@@ -58,9 +58,9 @@ class Corpus(object):
     def getRelativePath(srcRoot, srcPath):
       return srcPath[srcPath.index(srcRoot)+len(srcRoot):].strip('/')
 
-    self.dataSets = {getRelativePath(self.srcRoot, d.srcPath) : d \
+    dataSets = {getRelativePath(self.srcRoot, d.srcPath) : d \
                                                             for d in dataSets}
-    return self.dataSets
+    return dataSets
 
   def addColumn(self, columnName, data, write=False, newRoot=None):
     corp = self.copy(newRoot) if newRoot else self

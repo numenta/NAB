@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import os
 import yaml
-import datetime
 import dateutil.parser
 import pandas
 import json
@@ -162,13 +161,17 @@ class LabelCombiner(object):
 
 
 class CorpusLabel(object):
-  def __init__(self, path, dataRoot, corpus=None):
-    self.path = path
-    self.dataRoot = dataRoot
-    if not corpus:
-      self.corpus = Corpus(dataRoot)
+  def __init__(self, labelDir, dataDir=None, corpus=None):
+    self.labelDir = labelDir
+    self.dataDir = dataDir
+
+    if self.dataDir:
+      self.corpus = Corpus(self.dataDir)
     else:
       self.corpus = corpus
+
+    self.rawWindows = None
+    self.rawLabels = None
     self.windows = None
     self.labels = None
 
@@ -177,15 +180,17 @@ class CorpusLabel(object):
     self.getLabels()
 
   def getWindows(self):
-    windowFile = open(os.path.join(self.path, 'corpus_windows.json'), 'r')
+    windowFile = open(os.path.join(self.labelDir, 'corpus_windows.json'), 'r')
     windows = json.load(windowFile)
+    self.rawWindows = windows
     self.windows = {}
     for relativePath in windows.keys():
       self.windows[relativePath] = deepmap(strp, windows[relativePath])
 
   def getLabels(self):
-    labelFile = open(os.path.join(self.path, 'corpus_labels.json'), 'r')
+    labelFile = open(os.path.join(self.labelDir, 'corpus_labels.json'), 'r')
     labels  = json.load(labelFile)
+    self.rawLabels = labels
     self.labels = {}
 
     for relativePath, value in labels.iteritems():

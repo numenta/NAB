@@ -107,86 +107,117 @@ class AnomalyDetector(object):
     pass
 
   def runCorpus(self):
-    # p = multiprocessing.Pool(self.numCPUs)
+    p = multiprocessing.Pool(self.numCPUs)
 
-    for relativePath in self.corpus.dataSets:
-      print relativePath
-      self.runFile(relativePath)
+    tasks = []
+    for relativePath, dataSet in self.corpus.dataSets.iteritems():
+      arguments = []
+      # print relativePath
+      arguments.append(self)
+      arguments.append(relativePath)
+      arguments.append(dataSet)
+      arguments.append(self.labels.labels[relativePath]['label'])
 
-    # p.map(self.runFile, self.corpus.dataSets.keys())
+    tasks.append(arguments)
+
+    p.map(runFile, tasks)
 
 
-  def getWriters(self, relativePath, filename):
-    relativeDir = os.path.split(relativePath)[0]
+  def getWriter(self, relativePath):
+    relativeDir, fileName = os.path.split(relativePath)
 
-    rawFilename = self.getOutputPrefix() + "_raw_scores_" + filename
-    rawOutPath = os.path.join(self.outputDir, relativeDir, 'raw')
-    rawOutputFile = os.path.join(rawOutPath, rawFilename)
-    makeDirsExist(rawOutPath)
-    rawWriter = csv.writer(open(rawOutputFile, "wb"))
+    fileName = self.getOutputPrefix() + "_" + fileName
+    outputDir = os.path.join(self.outputDir, relativeDir)
+    makeDirsExist(outputDir)
+    outputPath = os.path.join(outputDir, fileName)
 
-    alertFilename = self.getOutputPrefix() + "_alerts_" + filename
-    alertOutPath = os.path.join(self.outputDir, relativeDir, 'alerts')
-    alertOutputFile = os.path.join(alertOutPath, alertFilename)
-    makeDirsExist(alertOutPath)
-    alertWriter = csv.writer(open(alertOutputFile, "wb"))
+    writer = csv.writer(open(outputPath, 'wb'))
 
     headers = ["timestamp",
                 "value",
-                "label"]
+                "label",
+                "anomaly_score"]
 
-    alertHeaders = copy(headers)
-    alertHeaders.append("alert")
-    rawHeaders = copy(headers)
-    rawHeaders.append("anomaly_score")
+    headers.extend(self.getAdditionalHeaders())
+
+    headers.append("alerts")
+
+
+    writer.writerow(headers)
+    # rawFilename = self.getOutputPrefix() + "_raw_scores_" + filename
+    # rawOutPath = os.path.join(self.outputDir, relativeDir, 'raw')
+
+    # rawOutputFile = os.path.join(rawOutPath, rawFilename)
+    # print rawOutputFile
+    # makeDirsExist(rawOutPath)
+    # rawWriter = csv.writer(open(rawOutputFile, "wb"))
+
+    # alertFilename = self.getOutputPrefix() + "_alerts_" + filename
+    # alertOutPath = os.path.join(self.outputDir, relativeDir, 'alerts')
+    # alertOutputFile = os.path.join(alertOutPath, alertFilename)
+    # print alertOutputFile
+    # makeDirsExist(alertOutPath)
+    # alertWriter = csv.writer(open(alertOutputFile, "wb"))
+
+    # headers = ["timestamp",
+    #             "value",
+    #             "label"]
+
+    # alertHeaders = copy(headers)
+    # alertHeaders.append("alert")
+    # rawHeaders = copy(headers)
+    # rawHeaders.append("anomaly_score")
 
     # Add in any additional headers (if any)
-    alertWriter.writerow(alertHeaders)
-    rawHeaders.extend(self.getAdditionalHeaders())
-    rawWriter.writerow(rawHeaders)
+    # alertWriter.writerow(alertHeaders)
+    # rawHeaders.extend(self.getAdditionalHeaders())
+    # rawWriter.writerow(rawHeaders)
 
-    return [rawWriter, alertWriter],[rawOutputFile, alertOutputFile]
+    return writer, outputPath
 
-  def runFile(self, relativePath):
-    dataSet = self.corpus.dataSets[relativePath]
+def runFile(args):
 
-    # print 'in detector',
-    # print self.probationaryPercent,
-    # print dataSet.data.shape[0],
-    probationaryPeriod = math.floor(self.probationaryPercent * dataSet.data.shape[0])
-    # print probationaryPeriod
+  detector, relativePath, dataSet, labels = args
 
-    self.configure(dataSet.data['value'].loc[:probationaryPeriod])
+  # print 'in detector',
+  # print self.probationaryPercent,
+  # print dataSet.data.shape[0],
+  probationaryPeriod = math.floor(detector.probationaryPercent * dataSet.data.shape[0])
+  # print probationaryPeriod
 
-    [rawWriter, alertWriter],[rawOutputFile, alertOutputFile] = self.getWriters(relativePath, dataSet.fileName)
+  detector.configure(dataSet.data['value'].loc[:probationaryPeriod])
 
-    rawWriter
+  writer, outputPath = detector.getWriter(relativePath)
 
-    for i, row in dataSet.data.iterrows():
-      # Retrieve the detector output and write it to a file
-      # print self.labels.labels[relativePath]['label'][i]
-      label = self.labels.labels[relativePath]['label'][i]
-      inputData = row.to_dict()
+  for i, row in dataSet.data.iterrows():
+    # Retrieve the detector output and write it to a file
+    # print self.labels.labels[relativePath]['label'][i]
+    label = labels[i]
+    inputData = row.to_dict()
 
-      row = list(row) + [label]
+    detectorValues = detector.handleRecord(inputData)
+    thresholdedValues = [1.0] if detectorValues[0] >= detector.threshold else [0.0]
 
-      detectorValues = self.handleRecord(inputData)
-      thresholdedValues = [1.0] if detectorValues[0] >= self.threshold else [0.0]
+    outputRow = list(row) + [label]
+    outputRow.extend(detectorValues)
+    outputRow.extend(thresholdedValues)
 
-      rawOutputRow = copy(row)
-      rawOutputRow.extend(detectorValues)
-      alertOutputRow = copy(row)
-      alertOutputRow.extend(thresholdedValues)
+    # rawOutputRow = copy(row)
+    # rawOutputRow.extend(detectorValues)
+    # alertOutputRow = copy(row)
+    # alertOutputRow.extend(thresholdedValues)
 
-      rawWriter.writerow(rawOutputRow)
-      alertWriter.writerow(alertOutputRow)
+    # rawWriter.writerow(rawOutputRow)
+    # alertWriter.writerow(alertOutputRow)
+
+    writer.writerow(outputRow)
 
 
-      # Progress report
-      if (i % 500) == 0:
-        print ".",
-        sys.stdout.flush()
+    # Progress report
+    if (i % 500) == 0:
+      print ".",
+      sys.stdout.flush()
 
-    print "\nCompleted processing", i, "records at", datetime.datetime.now()
-    print "Alerts for", dataSet.fileName,
-    print "have been written to %s and %s" %(alertOutputFile, rawOutputFile)
+  print "\nCompleted processing", i, "records at", datetime.datetime.now()
+  print "Results for", dataSet.fileName,
+  print "have been written to %s" %(outputPath)

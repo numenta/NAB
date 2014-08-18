@@ -6,58 +6,56 @@ import multiprocessing
 
 from nab.lib.corpus import Corpus
 from nab.lib.scoring import Scorer
-from nab.lib.util import (getDetectorClassName, convertResultsPathToDataPath)
+from nab.lib.util import (detectorClassToName, convertResultsPathToDataPath)
 from nab.lib.labeling import CorpusLabel
-
-from nab.detectors.numenta.numenta_detector import NumentaDetector
-from nab.detectors.skyline.skyline_detector import SkylineDetector
 
 from collections import defaultdict
 
 class Runner(object):
 
-  def __init__(self, root, options):
-    self.root = root
+  def __init__(self, rootDir, options, detectorClasses):
+    self.rootDir = rootDir
     self.options = options
 
-    self.dataDir = os.path.join(self.root, self.options.dataDir)
+    self.dataDir = os.path.join(self.rootDir, self.options.dataDir)
     self.corp = Corpus(self.dataDir)
 
-    self.labelDir = os.path.join(self.root, self.options.labelDir)
+    self.labelDir = os.path.join(self.rootDir, self.options.labelDir)
     self.corpusLabel = self.getCorpusLabel()
     self.corpusLabel.getEverything()
 
     self.config = self.getConfig()
-    self.detectors = self.config["AnomalyDetectors"]
-    self.resultsDir = os.path.join(self.root, self.config["ResultsDirectory"])
+    self.getDetectors(detectorClasses)
+    self.resultsDir = \
+    os.path.join(self.rootDir, self.config["ResultsDirectory"])
     self.probationaryPercent = self.config["ProbationaryPercent"]
 
     self.profiles = self.getProfiles()
     self.numCPUs = self.getNumCPUs()
     self.plot = options.plotResults
 
+
   def detect(self):
     print "Obtaining detections"
-    for detector in self.detectors:
-      print detector
-      detectorClassName = getDetectorClassName(detector)
-
-      detectorClass = globals()[detectorClassName](
+    print self.detectors
+    for detectorName, detectorConstructor in self.detectors.iteritems():
+      print detectorName
+      instance = detectorConstructor(
         corpus=self.corp,
         labels=self.corpusLabel,
-        name=detector,
+        name=detectorName,
         probationaryPercent=self.probationaryPercent,
         outputDir=self.resultsDir,
         numCPUs=self.numCPUs)
 
-      detectorClass.runCorpus()
+      instance.runCorpus()
 
   def score(self):
     print "Obtaining Scores"
 
-    for detector in self.detectors:
+    for detectorName in self.detectors.keys():
       ans = defaultdict(list)
-      resultsDetectorDir = os.path.join(self.resultsDir, detector)
+      resultsDetectorDir = os.path.join(self.resultsDir, detectorName)
       resultsCorpus = Corpus(resultsDetectorDir)
 
       dataSets = resultsCorpus.getDataSubset('/alerts/')
@@ -69,7 +67,7 @@ class Runner(object):
         for relativePath in dataSets.keys():
 
           predicted = dataSets[relativePath].data['alert']
-          relativePath = convertResultsPathToDataPath(os.path.join(detector, relativePath))
+          relativePath = convertResultsPathToDataPath(os.path.join(detectorName, relativePath))
 
           windows = self.corpusLabel.windows[relativePath]
           labels = self.corpusLabel.labels[relativePath]
@@ -87,7 +85,7 @@ class Runner(object):
 
           counts = scorer.counts
 
-          ans["Detector"].append(detector)
+          ans["Detector"].append(detectorName)
           ans["Username"].append(profileName)
           ans["File"].append(relativePath)
           ans["Score"].append(scorer.score)
@@ -99,18 +97,28 @@ class Runner(object):
 
       ans = pandas.DataFrame(ans)
 
-      scorePath = os.path.join(resultsDetectorDir, detector+"_scores.csv")
-      ans.to_csv(scorePath)
+      scorePath = os.path.join(resultsDetectorDir, detectorName+"_scores.csv")
+      ans.to_csv(scorePath, index=False)
+
+  def getDetectors(self, constructors):
+    self.detectors = {}
+    for c in constructors:
+      print 'in getDetectors'
+      print c
+      print detectorClassToName(c)
+      self.detectors[detectorClassToName(c)] = c
+
+    return self.detectors
 
   def getCorpusLabel(self):
     return CorpusLabel(self.labelDir, None, self.corp)
 
   def getConfig(self):
-    f = open(os.path.join(self.root, self.options.config))
+    f = open(os.path.join(self.rootDir, self.options.config))
     return yaml.load(f)
 
   def getProfiles(self):
-    f = open(os.path.join(self.root, self.options.profiles))
+    f = open(os.path.join(self.rootDir, self.options.profiles))
     return yaml.load(f)
 
   def getNumCPUs(self):

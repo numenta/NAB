@@ -11,6 +11,7 @@
 # to generate results. You may also create your own detector as a subclass of
 # AnomalyDetector and then add it here to have run_benchmark.py use your
 # detector to generate results.
+
 AnomalyDetectors:
     - numenta
     - skyline

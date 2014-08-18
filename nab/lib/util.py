@@ -14,12 +14,14 @@ def createPath(path):
   if not os.path.exists(dirname):
     os.makedirs(dirname)
 
-def getDetectorClassName(detector):
-  # If the detector is 'detector', the detector class must be named
-    # DetectorDetector# If the detector is 'detector', the detector class must be named
-  detector = detector[0].upper() + detector[1:]
 
-  className = detector + "Detector"
+def detectorClassToName(obj):
+  name = obj.__name__[:-8].lower()
+  return name
+
+def detectorNameToClass(name):
+  name = name[0].upper() + name[1:]
+  className = name + "Detector"
 
   return className
 
