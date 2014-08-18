@@ -24,7 +24,8 @@ class DataSet(object):
     if data:
       self.data[columnName] = data
     else:
-      del self.data[columnName]
+      if columnName in self.data:
+        del self.data[columnName]
 
     if write:
       self.write()
