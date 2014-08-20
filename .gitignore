@@ -7,4 +7,5 @@ deprecated/
 nab.egg-info/
 
 # Generated files
+filePaths.txt
 *resultsSummary*
