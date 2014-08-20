@@ -29,7 +29,6 @@ import pandas
 import numpy
 import csv
 
-from optparse import OptionParser
 from helpers import (sharedSetup,
                      getCSVFiles,
                      getDetailedResults,
@@ -45,7 +44,7 @@ def optimizeThreshold(options):
   config, profiles, dataGroupDirs, detector = sharedSetup(options)
 
   # Files to loop over
-  csvFiles = getCSVFiles(dataGroupDirs, 'raw')
+  csvFiles = getCSVFiles(dataGroupDirs, "raw")
 
   # Thresholds
   threshMin = 0.0
@@ -60,41 +59,41 @@ def optimizeThreshold(options):
   for resultsFile in csvFiles:
 
     print "Analyzing results file %s ..." % resultsFile
-    with open(resultsFile, 'r') as fh:
+    with open(resultsFile, "r") as fh:
       results = pandas.read_csv(fh)
-    
+
     for profileName, profile in profiles.iteritems():
-      
-      costMatrix = profile['CostMatrix']
+
+      costMatrix = profile["CostMatrix"]
       vals = genCurveData(results,
                           threshMin,
                           threshMax,
                           initialThreshStep,
-                          profile['ScoringWindow'],
+                          profile["ScoringWindow"],
                           costMatrix,
                           options.verbosity)
 
       # First time through write out the headers
       if not header:
-        header = ['Name', 'User Profile']
-        thresholds = vals['thresholds']
+        header = ["Name", "User Profile"]
+        thresholds = vals["thresholds"]
         header.extend(thresholds)
         resultsSummary.append(header)
 
       # Add a row for each file processed
       resultRow = [resultsFile, profileName]
-      resultRow.extend(vals['costs'])
+      resultRow.extend(vals["costs"])
       resultsSummary.append(resultRow)
-      
-      costs = vals['costs']
+
+      costs = vals["costs"]
       costsArray = numpy.array(costs)
 
   # Sum all values
   resultsSummaryArray = numpy.array(resultsSummary)
 
   # Skip first row and two columns
-  summaryView = resultsSummaryArray[1:,2:].astype('float')
-  
+  summaryView = resultsSummaryArray[1:,2:].astype("float")
+
   # Summarize data for file writing
   totalsArray = numpy.sum(summaryView, axis=0)
   totalsList = totalsArray.tolist()
@@ -105,7 +104,7 @@ def optimizeThreshold(options):
   # Re-run all files with lowest "best" threshold
   minThresh = bestThresholds[0]
 
-  csvType = 'raw'
+  csvType = "raw"
   detailedResults = getDetailedResults(csvType, csvFiles, profiles)
   costIndex = detailedResults[0].index("Cost")
 
@@ -113,28 +112,28 @@ def optimizeThreshold(options):
   detailedResultsArray = numpy.array(detailedResults)
 
   # Skip first row and two columns
-  detailedView = detailedResultsArray[1:,2:].astype('float')
-  
+  detailedView = detailedResultsArray[1:,2:].astype("float")
+
   # Summarize data for file writing
   detailedTotalsArray = numpy.sum(detailedView, axis=0)
   detailedTotalsList = detailedTotalsArray.tolist()
   detailedOutput = os.path.join(options.resultsDir,
                                 "optimizationBestResults.csv")
-  with open(detailedOutput, 'w') as outFile:
+  with open(detailedOutput, "w") as outFile:
 
     writer = csv.writer(outFile)
     writer.writerows(detailedResults)
-    totalsRow = ['Totals', '']
+    totalsRow = ["Totals", ""]
     totalsRow.extend(detailedTotalsList)
     writer.writerow(totalsRow)
 
   # Write out summary results
   outputFile = os.path.join(options.resultsDir, "optimizationSummary.csv")
-  with open(outputFile, 'w') as outFile:
+  with open(outputFile, "w") as outFile:
 
     writer = csv.writer(outFile)
     writer.writerows(resultsSummary)
-    totalsRow = ['Totals', '']
+    totalsRow = ["Totals", ""]
     totalsRow.extend(totalsList)
     writer.writerow(totalsRow)
 
@@ -162,24 +161,24 @@ def genCurveData(results,
                  verbosity = 0):
   """
   Returns a dict containing lists of data for plotting
-  
+
   experiment  - expInfo dict
   minThresh   - Where to start our threshold search
   maxThresh   - Where to stop the threshold search (inclusive)
   step        - The increment size between each threshold test. This will be
                 varied during the run to increase resolution near 1.0.
   """
-  
-  vals = {'tprs': [],
-           'fprs': [],
-           'thresholds': [],
-           'costs': []}
+
+  vals = {"tprs": [],
+           "fprs": [],
+           "thresholds": [],
+           "costs": []}
 
   incrementCount = 1.0
   while minThresh < maxThresh and incrementCount < 60:
     cMatrix = genConfusionMatrix(results,
-                                 'anomaly_score',
-                                 'label',
+                                 "anomaly_score",
+                                 "label",
                                  window,
                                  5,
                                  costMatrix,
@@ -187,10 +186,10 @@ def genCurveData(results,
                                  verbosity = verbosity)
 
 
-    vals['tprs'].append(cMatrix.tpr)
-    vals['fprs'].append(cMatrix.fpr)
-    vals['thresholds'].append(minThresh)
-    vals['costs'].append(cMatrix.cost)
+    vals["tprs"].append(cMatrix.tpr)
+    vals["fprs"].append(cMatrix.fpr)
+    vals["thresholds"].append(minThresh)
+    vals["costs"].append(cMatrix.cost)
 
     minThresh, step = updateThreshold(minThresh, step, incrementCount)
     incrementCount += 1.0
@@ -211,7 +210,7 @@ def updateThreshold(thresh, step, incrementCount):
   return thresh, step
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
   # All the command line options
   parser = OptionParser(helpString)
   parser.add_option("-d", "--resultsDir",
@@ -226,6 +225,6 @@ if __name__ == '__main__':
                     "benchmark.")
 
   options, args = parser.parse_args()
-  
+
   # Main
   optimizeThreshold(options)

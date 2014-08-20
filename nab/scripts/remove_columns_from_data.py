@@ -20,7 +20,7 @@ def main(args):
     corpus.removeColumn(name, write=True, newRoot=args.destDir)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
   parser = argparse.ArgumentParser()
 
   parser.add_argument("--dataDir",
@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
   parser.add_argument("--columnNames",
                       help="All the names of the columns which must be removed",
-                      nargs='+',
+                      nargs="+",
                       type=str)
 
   args = parser.parse_args()

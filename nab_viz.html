@@ -24,7 +24,7 @@
 <body>
 
 <div class="selectors">
-<input type="text", name="query", id="query", placeholder='type in query and press enter', onkeydown="render()",
+<input type="text", name="query", id="query", placeholder="type in query and press enter", onkeydown="render()",
 size="50">
 </div>
 
@@ -35,45 +35,45 @@ size="50">
 var graphs = [];
 
 filePaths =
-['data/artificialNoAnomaly/art_daily_no_noise.csv',
-'data/artificialNoAnomaly/art_daily_perfect_square_wave.csv',
-'data/artificialNoAnomaly/art_daily_small_noise.csv',
-'data/artificialNoAnomaly/art_flatline.csv',
-'data/artificialNoAnomaly/art_noisy.csv',
-'data/artificialWithAnomaly/art_daily_flatmiddle.csv',
-'data/artificialWithAnomaly/art_daily_jumpsdown.csv',
-'data/artificialWithAnomaly/art_daily_jumpsup.csv',
-'data/artificialWithAnomaly/art_daily_nojump.csv',
-'data/artificialWithAnomaly/art_increase_spike_density.csv',
-'data/artificialWithAnomaly/art_load_balancer_spikes.csv',
-'data/realAWSCloudwatch/ec2_cpu_utilization_24ae8d.csv',
-'data/realAWSCloudwatch/ec2_cpu_utilization_53ea38.csv',
-'data/realAWSCloudwatch/ec2_cpu_utilization_5f5533.csv',
-'data/realAWSCloudwatch/ec2_cpu_utilization_77c1ca.csv',
-'data/realAWSCloudwatch/ec2_cpu_utilization_825cc2.csv',
-'data/realAWSCloudwatch/ec2_cpu_utilization_ac20cd.csv',
-'data/realAWSCloudwatch/ec2_cpu_utilization_c6585a.csv',
-'data/realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv',
-'data/realAWSCloudwatch/ec2_disk_write_bytes_1ef3de.csv',
-'data/realAWSCloudwatch/ec2_disk_write_bytes_c0d644.csv',
-'data/realAWSCloudwatch/ec2_network_in_257a54.csv',
-'data/realAWSCloudwatch/ec2_network_in_5abac7.csv',
-'data/realAWSCloudwatch/elb_request_count_8c0756.csv',
-'data/realAWSCloudwatch/grok_asg_anomaly.csv',
-'data/realAWSCloudwatch/iio_us-east-1_i-a2eb1cd9_NetworkIn.csv',
-'data/realAWSCloudwatch/rds_cpu_utilization_cc0c53.csv',
-'data/realAWSCloudwatch/rds_cpu_utilization_e47b3b.csv',
-'data/realKnownCause/ambient_temperature_system_failure.csv',
-'data/realKnownCause/cpu_utilization_asg_misconfiguration.csv',
-'data/realKnownCause/ec2_request_latency_system_failure.csv',
-'data/realKnownCause/machine_temperature_system_failure.csv'];
+["data/artificialNoAnomaly/art_daily_no_noise.csv",
+"data/artificialNoAnomaly/art_daily_perfect_square_wave.csv",
+"data/artificialNoAnomaly/art_daily_small_noise.csv",
+"data/artificialNoAnomaly/art_flatline.csv",
+"data/artificialNoAnomaly/art_noisy.csv",
+"data/artificialWithAnomaly/art_daily_flatmiddle.csv",
+"data/artificialWithAnomaly/art_daily_jumpsdown.csv",
+"data/artificialWithAnomaly/art_daily_jumpsup.csv",
+"data/artificialWithAnomaly/art_daily_nojump.csv",
+"data/artificialWithAnomaly/art_increase_spike_density.csv",
+"data/artificialWithAnomaly/art_load_balancer_spikes.csv",
+"data/realAWSCloudwatch/ec2_cpu_utilization_24ae8d.csv",
+"data/realAWSCloudwatch/ec2_cpu_utilization_53ea38.csv",
+"data/realAWSCloudwatch/ec2_cpu_utilization_5f5533.csv",
+"data/realAWSCloudwatch/ec2_cpu_utilization_77c1ca.csv",
+"data/realAWSCloudwatch/ec2_cpu_utilization_825cc2.csv",
+"data/realAWSCloudwatch/ec2_cpu_utilization_ac20cd.csv",
+"data/realAWSCloudwatch/ec2_cpu_utilization_c6585a.csv",
+"data/realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv",
+"data/realAWSCloudwatch/ec2_disk_write_bytes_1ef3de.csv",
+"data/realAWSCloudwatch/ec2_disk_write_bytes_c0d644.csv",
+"data/realAWSCloudwatch/ec2_network_in_257a54.csv",
+"data/realAWSCloudwatch/ec2_network_in_5abac7.csv",
+"data/realAWSCloudwatch/elb_request_count_8c0756.csv",
+"data/realAWSCloudwatch/grok_asg_anomaly.csv",
+"data/realAWSCloudwatch/iio_us-east-1_i-a2eb1cd9_NetworkIn.csv",
+"data/realAWSCloudwatch/rds_cpu_utilization_cc0c53.csv",
+"data/realAWSCloudwatch/rds_cpu_utilization_e47b3b.csv",
+"data/realKnownCause/ambient_temperature_system_failure.csv",
+"data/realKnownCause/cpu_utilization_asg_misconfiguration.csv",
+"data/realKnownCause/ec2_request_latency_system_failure.csv",
+"data/realKnownCause/machine_temperature_system_failure.csv"];
 
 
 function createDiv(container, id){
-  id = 'graphdiv' + id
-  var div = document.createElement('div');
+  id = "graphdiv" + id
+  var div = document.createElement("div");
   div.id = id
-  div.className = 'graph'
+  div.className = "graph"
   container[0].appendChild(div)
   console.log ("constructing " + id);
   return div
@@ -86,11 +86,11 @@ function render() {
     return
 
   graphs = [];
-  var graphDiv = document.getElementsByClassName('graphContainer');
+  var graphDiv = document.getElementsByClassName("graphContainer");
 
   while(graphDiv[0].firstChild) graphDiv[0].removeChild(graphDiv[0].firstChild)
 
-  var query = document.getElementById('query').value;
+  var query = document.getElementById("query").value;
   var count = 0;
 
   for (var i = 0; i < filePaths.length; i++) {
@@ -102,15 +102,15 @@ function render() {
           {
             series: {
               timestamp: {
-                axis: 'x1',
+                axis: "x1",
                 //strokeWidth: 1,
               },
               value: {
-                axis: 'y1',
+                axis: "y1",
                 //strokeWidth: 1,
               }
             },
-            legend: 'always',
+            legend: "always",
             title: filePaths[i],
 
             drawCallback: function (me, initial) {

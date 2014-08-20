@@ -22,7 +22,7 @@ def main(args):
 
   params = [args.labelDir, args.dataDir]
 
-  if hasattr(args, 'threshold'):
+  if hasattr(args, "threshold"):
     params.append(args.threshold)
 
   print "Labels Directory: %s" % args.labelDir
@@ -48,7 +48,7 @@ def main(args):
   print "Success!"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
   parser = argparse.ArgumentParser()
 
   parser.add_argument("--labelDir",

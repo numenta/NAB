@@ -19,7 +19,7 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-import sys
+import os
 import yaml
 import argparse
 
@@ -29,7 +29,6 @@ from nab.lib.util import recur, detectorNameToClass
 from nab.detectors.numenta.numenta_detector import NumentaDetector
 from nab.detectors.skyline.skyline_detector import SkylineDetector
 
-import os
 
 depth = 2
 
@@ -65,14 +64,6 @@ if __name__ == "__main__":
 
   parser = argparse.ArgumentParser()
 
-  parser.add_argument("--dataDir",
-                    default="data",
-                    help="This holds all the label windows for the corpus.")
-
-  parser.add_argument("--labelDir",
-                    default="labels",
-                    help="This holds all the label windows for the corpus.")
-
   parser.add_argument("--detectOnly",
                     help="Generate detector results but do not analyze results \
                     files.",
@@ -84,6 +75,16 @@ if __name__ == "__main__":
                     default=False,
                     action="store_true")
 
+
+  parser.add_argument("--dataDir",
+                    default="data",
+                    help="This holds all the label windows for the corpus.")
+
+  parser.add_argument("--labelDir",
+                    default="labels",
+                    help="This holds all the label windows for the corpus.")
+
+
   parser.add_argument("-c", "--config",
                     default="config/benchmark_config.yaml",
                     help="The configuration file to use while running the "
@@ -94,18 +95,10 @@ if __name__ == "__main__":
                     help="The configuration file to use while running the "
                     "benchmark.")
 
-  parser.add_argument("--numCPUs",
+  parser.add_argument("-n", "--numCPUs",
                     default=None,
                     help="The number of CPUs to use to run the "
                     "benchmark. If not specified all CPUs will be used.")
-
-  parser.add_argument("--plot",
-                    help="If you have Plotly installed "
-                    "this option will plot results and ROC curves for each \
-                    dataset.",
-                    dest="plotResults",
-                    default=False,
-                    action="store_true")
 
   args = parser.parse_args()
 

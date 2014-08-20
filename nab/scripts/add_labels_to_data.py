@@ -22,12 +22,12 @@ def main(args):
 
   corpusLabel.getEverything()
 
-  corpus.addColumn('label', corpusLabel.rawLabels)
+  corpus.addColumn("label", corpusLabel.rawLabels)
 
   corpus.copy(args.destDir)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
   parser = argparse.ArgumentParser()
 
   parser.add_argument("--dataDir",

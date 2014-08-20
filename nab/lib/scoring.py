@@ -1,12 +1,11 @@
 import math
-import sys
 
 class CostMatrix(object):
   def __init__(self, dictionary):
-    self.tp = dictionary['tpCost']
-    self.tn = dictionary['tnCost']
-    self.fp = dictionary['fpCost']
-    self.fn = dictionary['fnCost']
+    self.tp = dictionary["tpCost"]
+    self.tn = dictionary["tnCost"]
+    self.fp = dictionary["fpCost"]
+    self.fn = dictionary["fnCost"]
     self.values = dictionary
 
 
@@ -22,19 +21,18 @@ class Window(object):
 
 
   def getIndices(self, labels):
-    tmp = labels[labels['timestamp'] >= self.t1]
-    windows = tmp[tmp['timestamp'] <= self.t2]
+    tmp = labels[labels["timestamp"] >= self.t1]
+    windows = tmp[tmp["timestamp"] <= self.t2]
     return windows.index
 
   def getFirstTP(self):
-    tp = self.labels[self.labels['type'] == 'tp']
+    tp = self.labels[self.labels["type"] == "tp"]
     if len(tp):
       return tp.iloc[0].name
     return -1
 
   def isInWindow(self, index):
     return index in self.indices
-
 
 
 class Scorer(object):
@@ -53,36 +51,41 @@ class Scorer(object):
 
   def initCount(self):
     self.counts = {
-    'tp': 0,
-    'tn': 0,
-    'fp': 0,
-    'fn': 0}
+    "tp": 0,
+    "tn": 0,
+    "fp": 0,
+    "fn": 0}
 
     self.totalCount = len(self.predicted)
 
+
   def getWindows(self, limits):
     #SORT WINDOWS BEFORE PUTTING THEM IN LIST
+
     self.getLabelTypes()
-    return [Window(i,limits[i],self.labels) for i in range(len(limits))]
+    ans = [Window(i,limits[i],self.labels) for i in range(len(limits))]
+    return ans
 
 
   def getLabelTypes(self):
+
     types = []
 
     for i, row in self.labels.iterrows():
       if i < self.probationaryPeriod:
-        types.append('probationaryPeriod')
+        types.append("probationaryPeriod")
         continue
 
-      pred = self.predicted[i]
-      diff = abs(pred - row['label'])
-      category = ''
-      category += 'f' if bool(diff) else 't'
-      category += 'p' if bool(self.predicted[i]) else 'n'
+      pred = self.predicted[int(i)]
+      diff = abs(pred - row["label"])
+      category = ""
+      category += "f" if bool(diff) else "t"
+      category += "p" if bool(self.predicted[int(i)]) else "n"
       self.counts[category] += 1
       types.append(category)
 
-    self.labels['type'] = types
+    self.labels["type"] = types
+
 
   def getScore(self):
 
@@ -98,7 +101,7 @@ class Scorer(object):
 
 
     # collect FP scores
-    fpLabels = self.labels[self.labels['type'] == 'fp']
+    fpLabels = self.labels[self.labels["type"] == "fp"]
     fpScore = 0
     for i, row in fpLabels.iterrows():
       windowId = self.getClosestPrecedingWindow(i)
@@ -109,14 +112,16 @@ class Scorer(object):
       window = self.windows[windowId]
       fpScore -= (sigmoid((window.indices[-1] - tpIndex)/window.length) - 0.5)*self.costMatrix.fp
 
-
     score = tpScore + fpScore
-    # print tpScore, fpScore, score
     self.score = score
+
     return score
 
+
+
+
   def getClosestPrecedingWindow(self, index):
-    minDistance = float('inf')
+    minDistance = float("inf")
     windowId = -1
     for window in self.windows:
       if window.indices[-1] < index:

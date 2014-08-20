@@ -15,9 +15,9 @@ class UserLabel(object):
 
     self.path = path
     self.dataRoot = dataRoot
-    self.yaml = yaml.load(open(self.path,'r'))
+    self.yaml = yaml.load(open(self.path,"r"))
 
-    self.pathDict = flattenDict(yaml.load(open(self.path,'r')))
+    self.pathDict = flattenDict(yaml.load(open(self.path,"r")))
 
     if corp == None:
       self.corpus = Corpus(dataRoot)
@@ -30,7 +30,7 @@ class UserLabel(object):
     windows = {}
 
     def convertKey(key):
-      return key + '.csv'
+      return key + ".csv"
 
     for key in self.pathDict.keys():
 
@@ -55,12 +55,12 @@ class LabelCombiner(object):
 
 
   def __str__(self):
-    ans = ''
-    ans += 'labelRoot:           %s\n' % self.labelRoot
-    ans += 'dataRoot:            %s\n' % self.dataRoot
-    ans += 'corpus:              %s\n' % self.corpus
-    ans += 'number of labels:    %d\n' % self.nlabelers
-    ans += 'threshold:           %d\n' % self.threshold
+    ans = ""
+    ans += "labelRoot:           %s\n" % self.labelRoot
+    ans += "dataRoot:            %s\n" % self.dataRoot
+    ans += "corpus:              %s\n" % self.corpus
+    ans += "number of labels:    %d\n" % self.nlabelers
+    ans += "threshold:           %d\n" % self.threshold
     return ans
 
 
@@ -68,20 +68,20 @@ class LabelCombiner(object):
 
 
     windows = json.dumps(self.combinedWindows)
-    windowWriter = open(os.path.join(destDir, 'corpus_windows.json'), 'w')
+    windowWriter = open(os.path.join(destDir, "corpus_windows.json"), "w")
     windowWriter.write(windows)
 
     fileFriendlyLabels = {}
 
     for relativePath, label in self.combinedLabels.iteritems():
       fileFriendlyLabels[relativePath] = label
-      fileFriendlyLabels[relativePath]['timestamp'] = \
-                      fileFriendlyLabels[relativePath]['timestamp'].apply(strf)
+      fileFriendlyLabels[relativePath]["timestamp"] = \
+                      fileFriendlyLabels[relativePath]["timestamp"].apply(strf)
 
       fileFriendlyLabels[relativePath] = fileFriendlyLabels[relativePath].to_json()
 
     labels = json.dumps(fileFriendlyLabels)
-    labelWriter = open(os.path.join(destDir, 'corpus_labels.json'), 'w')
+    labelWriter = open(os.path.join(destDir, "corpus_labels.json"), "w")
     labelWriter.write(labels)
 
 
@@ -105,7 +105,7 @@ class LabelCombiner(object):
       labelHolder = []
 
       for _, row in dataSet.data.iterrows():
-        t = row['timestamp']
+        t = row["timestamp"]
 
         count = 0
         for l in self.userLabels:
@@ -116,8 +116,8 @@ class LabelCombiner(object):
         timestampsHolder.append(t)
         labelHolder.append(label)
 
-      labels[relativePath] = pandas.DataFrame({'timestamp':timestampsHolder,
-          'label': labelHolder})
+      labels[relativePath] = pandas.DataFrame({"timestamp":timestampsHolder,
+          "label": labelHolder})
 
       # labels[relativePath] = labels[relativePath].to_dict()
 
@@ -128,9 +128,9 @@ class LabelCombiner(object):
     allWindows = {}
 
     for relativePath, labels in self.combinedLabels.iteritems():
-      delta = labels['timestamp'][1] - labels['timestamp'][0]
+      delta = labels["timestamp"][1] - labels["timestamp"][0]
 
-      labels = labels[labels['label'] == 1]
+      labels = labels[labels["label"] == 1]
       dataSetWindows = []
 
       if labels.shape[0] == 0:
@@ -141,7 +141,7 @@ class LabelCombiner(object):
         prev = None
 
         for _, row in labels.iterrows():
-          curr = row['timestamp']
+          curr = row["timestamp"]
           if not prev:
             currentWindow = [strf(curr)]
 
@@ -181,7 +181,7 @@ class CorpusLabel(object):
     self.getLabels()
 
   def getWindows(self):
-    windowFile = open(os.path.join(self.labelDir, 'corpus_windows.json'), 'r')
+    windowFile = open(os.path.join(self.labelDir, "corpus_windows.json"), "r")
     windows = json.load(windowFile)
     self.rawWindows = windows
     self.windows = {}
@@ -189,12 +189,12 @@ class CorpusLabel(object):
       self.windows[relativePath] = deepmap(strp, windows[relativePath])
 
   def getLabels(self):
-    labelFile = open(os.path.join(self.labelDir, 'corpus_labels.json'), 'r')
+    labelFile = open(os.path.join(self.labelDir, "corpus_labels.json"), "r")
     labels  = json.load(labelFile)
     self.rawLabels = labels
     self.labels = {}
 
     for relativePath, value in labels.iteritems():
       value = pandas.io.json.read_json(value)
-      value['timestamp'] = value['timestamp'].apply(strp)
+      value["timestamp"] = value["timestamp"].apply(strp)
       self.labels[relativePath] = value

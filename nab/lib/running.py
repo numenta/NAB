@@ -32,13 +32,12 @@ class Runner(object):
     self.probationaryPercent = self.config["ProbationaryPercent"]
 
     self.profiles = self.getProfiles()
-    self.pool = multiprocessing.Pool(self.getNumCPUs())
-    self.plot = options.plotResults
+    # self.pool = multiprocessing.Pool(self.getNumCPUs())
+    self.pool = multiprocessing.Pool(1)
 
 
   def detect(self):
     print "Obtaining detections"
-    multiprocessing.log_to_stderr(logging.DEBUG)
 
     for detector, DetectorConstructor in self.detectors.iteritems():
       args = []
@@ -55,14 +54,12 @@ class Runner(object):
           outputDir=self.resultsDir))
 
     print "calling multiprocessing pool"
-    # print args
 
     self.pool.map(detectHelper, args)
 
 
   def score(self):
     print "Obtaining Scores"
-    multiprocessing.log_to_stderr(logging.DEBUG)
     ans = pandas.DataFrame(columns=("Detector", "Username", "File",
       "Score", "tp", "tn", "fp", "fn", "Total_Count"))
 
@@ -72,13 +69,11 @@ class Runner(object):
 
       args = []
 
-      dataSets = resultsCorpus.getDataSubset('/alerts/')
-
       for username, profile in self.profiles.iteritems():
 
-        costMatrix = profile['CostMatrix']
+        costMatrix = profile["CostMatrix"]
 
-        for relativePath, dataSet in dataSets.keys.iteritems():
+        for relativePath, dataSet in resultsCorpus.dataSets.iteritems():
 
 
           relativePath = convertResultsPathToDataPath( \
@@ -100,10 +95,9 @@ class Runner(object):
              costMatrix,
              probationaryPeriod])
 
-      print 'calling multiprocessing pool'
+      print "calling multiprocessing pool"
       results = self.pool.map(scoreHelper, args)
 
-      print results
 
       for i in range(len(results)):
         ans.loc[i] = results[i]
@@ -114,9 +108,6 @@ class Runner(object):
   def getDetectors(self, constructors):
     self.detectors = {}
     for c in constructors:
-      # print 'in getDetectors'
-      # print c
-      # print detectorClassToName(c)
       self.detectors[detectorClassToName(c)] = c
 
     return self.detectors
@@ -144,10 +135,11 @@ def detectHelper(detectorInstance):
   detectorInstance.run()
 
 def scoreHelper(args):
+
   detector, username, relativePath, dataSet, windows, labels, \
   costMatrix, probationaryPeriod = args
 
-  predicted = dataSet.data['alert']
+  predicted = dataSet.data["alerts"]
 
   scorer = Scorer(
     predicted=predicted,
@@ -161,5 +153,5 @@ def scoreHelper(args):
   counts = scorer.counts
 
   return detector, username, relativePath, scorer.score, \
-  counts['tp'], counts['tn'], counts['fp'], counts['fn'], \
+  counts["tp"], counts["tn"], counts["fp"], counts["fn"], \
   scorer.totalCount

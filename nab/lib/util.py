@@ -5,21 +5,33 @@ import sys
 
 def relativeFilePaths(directory):
   for dirpath,_,filenames in os.walk(directory):
-    filenames = [f for f in filenames if not f[0] == '.']
+    filenames = [f for f in filenames if not f[0] == "."]
     for f in filenames:
       yield os.path.join(dirpath, f)
 
 
 def absoluteFilePaths(directory):
   for dirpath,_,filenames in os.walk(directory):
-    filenames = [f for f in filenames if not f[0] == '.']
+    filenames = [f for f in filenames if not f[0] == "."]
     for f in filenames:
       yield os.path.abspath(os.path.join(dirpath, f))
 
+def makeDirsExist(dirname):
+  """
+  Makes sure a given path exists
+  """
+
+  if not os.path.exists(dirname):
+    # This is being run in parralel so watch out for race condition.
+    try:
+      os.makedirs(dirname)
+    except OSError:
+      pass
+
+
 def createPath(path):
   dirname = os.path.dirname(path)
-  if not os.path.exists(dirname):
-    os.makedirs(dirname)
+  makeDirsExist(dirname)
 
 
 def detectorClassToName(obj):
@@ -55,24 +67,24 @@ def osPathSplit(path, debug=False):
 
 def convertResultsPathToDataPath(path):
   # print path
-  path = path.split('/')
+  path = path.split("/")
   detector = path[0]
   path = path[1:]
 
   filename = path[-1]
-  toRemove = detector + '_'
+  toRemove = detector + "_"
 
   i = filename.index(toRemove)
   filename = filename[:i] + filename[i+len(toRemove):]
 
   path[-1] = filename
-  path = '/'.join(path)
+  path = "/".join(path)
   # print path
   return path
 
-def flattenDict(dictionary, files={}, head=''):
+def flattenDict(dictionary, files={}, head=""):
   for key in dictionary.keys():
-    concat = head + '/' + key if head != '' else key
+    concat = head + "/" + key if head != "" else key
     if type(dictionary[key]) is dict:
       flattenDict(dictionary[key], files, concat)
     else:
@@ -81,7 +93,7 @@ def flattenDict(dictionary, files={}, head=''):
   return files
 
 def strf(t):
-  return datetime.datetime.strftime(t, '%Y-%m-%d %H:%M:%S.%f')
+  return datetime.datetime.strftime(t, "%Y-%m-%d %H:%M:%S.%f")
 
 def strp(t):
   return dateutil.parser.parse(t)

@@ -1,7 +1,7 @@
 import os
 import copy
 import pandas
-import util
+from nab.lib.util import absoluteFilePaths, createPath
 
 class DataSet(object):
 
@@ -19,8 +19,8 @@ class DataSet(object):
     path = newPath if newPath else self.srcPath
     self.data.to_csv(path, index=False)
 
+
   def modifyData(self, columnName, data=None, write=False):
-    # print self.srcPath
     if data:
       self.data[columnName] = data
     else:
@@ -30,18 +30,19 @@ class DataSet(object):
     if write:
       self.write()
 
+
   def getTimestampRange(self, t1, t2):
-    tmp = self.data[self.data['timestamp'] >= t1]
-    ans = tmp[tmp['timestamp'] <= t2]['timestamp'].tolist()
+    tmp = self.data[self.data["timestamp"] >= t1]
+    ans = tmp[tmp["timestamp"] <= t2]["timestamp"].tolist()
     return ans
 
 
   def __str__(self):
-    ans = ''
-    ans += 'path:                %s\n' % self.srcPath
-    ans += 'file name:           %s\n'% self.fileName
-    ans += 'data size:         ', self.data.shape()
-    ans += 'sample line: %s\n' % ', '.join(self.data[0])
+    ans = ""
+    ans += "path:                %s\n" % self.srcPath
+    ans += "file name:           %s\n"% self.fileName
+    ans += "data size:         ", self.data.shape()
+    ans += "sample line: %s\n" % ", ".join(self.data[0])
     return ans
 
 
@@ -52,16 +53,18 @@ class Corpus(object):
     self.dataSets = self.getDataSets()
     self.numDataSets = len(self.dataSets)
 
+
   def getDataSets(self):
-    filePaths = util.absoluteFilePaths(self.srcRoot)
+    filePaths = absoluteFilePaths(self.srcRoot)
     dataSets = [DataSet(path) for path in filePaths]
 
     def getRelativePath(srcRoot, srcPath):
-      return srcPath[srcPath.index(srcRoot)+len(srcRoot):].strip('/')
+      return srcPath[srcPath.index(srcRoot)+len(srcRoot):].strip("/")
 
     dataSets = {getRelativePath(self.srcRoot, d.srcPath) : d \
                                                             for d in dataSets}
     return dataSets
+
 
   def addColumn(self, columnName, data, write=False, newRoot=None):
     corp = self.copy(newRoot) if newRoot else self
@@ -70,6 +73,7 @@ class Corpus(object):
 
     return corp
 
+
   def removeColumn(self, columnName, write=False, newRoot=None):
     corp = self.copy(newRoot) if newRoot else self
     for relativePath in self.dataSets.keys():
@@ -77,28 +81,31 @@ class Corpus(object):
 
     return corp
 
+
   def copy(self, newRoot=None):
 
-    if newRoot[-1] != '/':
-      newRoot += '/'
+    if newRoot[-1] != "/":
+      newRoot += "/"
     if os.path.isdir(newRoot):
-      print 'directory already exists'
-      return None
+      print "directory already exists"
+      return
     else:
-      util.createPath(newRoot)
+      createPath(newRoot)
     newCorpus = Corpus(newRoot)
     for relativePath in self.dataSets.keys():
       newCorpus.addDataSet(relativePath, self.dataSets[relativePath])
-      print 'adding %s' % os.path.join(newRoot, relativePath)
+      print "adding %s" % os.path.join(newRoot, relativePath)
     return newCorpus
+
 
   def addDataSet(self, relativePath, dataSet):
     self.dataSets[relativePath] = copy.deepcopy(dataSet)
     newPath = self.srcRoot + relativePath
-    util.createPath(newPath)
+    createPath(newPath)
     self.dataSets[relativePath].srcPath = newPath
     self.dataSets[relativePath].write()
     self.numDataSets = len(self.dataSets)
+
 
   def getDataSubset(self, query):
     ans = {}

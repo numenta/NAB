@@ -5,7 +5,7 @@ import simplejson as json
 from nupic.algorithms import anomaly_likelihood
 from nupic.frameworks.opf.modelfactory import ModelFactory
 
-from nab.detectors.base_new import AnomalyDetector
+from nab.detectors.base import AnomalyDetector
 
 class NumentaDetector(AnomalyDetector):
 
@@ -51,7 +51,7 @@ class NumentaDetector(AnomalyDetector):
 
     # print "result: %s" % str(result)
     # Retrieve the anomaly score and write it to a file
-    rawScore = result.inferences['anomalyScore']
+    rawScore = result.inferences["anomalyScore"]
 
     # print "rawScore: %s" %(rawScore)
     # Compute the Anomaly Likelihood
@@ -72,25 +72,24 @@ class NumentaDetector(AnomalyDetector):
     with open(paramsPath) as fp:
       modelParams = json.load(fp)
 
-    self.sensorParams = modelParams['modelParams']['sensorParams']\
-                                   ['encoders']['value']
+    self.sensorParams = modelParams["modelParams"]["sensorParams"]\
+                                   ["encoders"]["value"]
 
     # RDSE - resolution calculation
     resolution = max(0.001,
                      (self.inputMax - self.inputMin) / \
-                     self.sensorParams.pop('numBuckets')
+                     self.sensorParams.pop("numBuckets")
                     )
-    self.sensorParams['resolution'] = resolution
+    self.sensorParams["resolution"] = resolution
 
     self.model = ModelFactory.create(modelParams)
 
-    self.model.enableInference({'predictedField': 'value'})
+    self.model.enableInference({"predictedField": "value"})
 
     # The anomaly likelihood object
     numentaLearningPeriod = math.floor(probationaryPeriod / 2.0)
     self.anomalyLikelihood = AnomalyLikelihood(probationaryPeriod,
                                                numentaLearningPeriod)
-    print "finished configureDetector: %d", id(self)
 
 #############################################################################
 
@@ -118,8 +117,8 @@ class AnomalyLikelihood(object):
   def _computeLogLikelihood(self, likelihood):
     """
     Compute a log scale representation of the likelihood value. Since the
-    likelihood computations return low probabilities that often go into 4 9's or
-    5 9's, a log value is more useful for visualization, thresholding, etc.
+    likelihood computations return low probabilities that often go into 4 9"s or
+    5 9"s, a log value is more useful for visualization, thresholding, etc.
     """
     # The log formula is:
     # Math.log(1.0000000001 - likelihood) / Math.log(1.0 - 0.9999999999);

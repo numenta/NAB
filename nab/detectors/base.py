@@ -1,23 +1,9 @@
-import csv
 import os
 import sys
 import math
+import pandas
 import datetime
-import multiprocessing
-from copy import copy
-
-def makeDirsExist(path):
-  """
-  Makes sure a given path exists
-  """
-
-  if not os.path.exists(path):
-    # This is being run in parralel so watch out for race condition.
-    try:
-      os.makedirs(path)
-    except OSError:
-      pass
-
+from nab.lib.util import makeDirsExist
 
 class AnomalyDetector(object):
   """
@@ -25,21 +11,22 @@ class AnomalyDetector(object):
   take note of which methods MUST be overridden, as documented below.
   """
 
-  def __init__(self,
-              corpus,
-              labels,
-              name,
-              probationaryPercent,
-              outputDir,
-              numCPUs,):
-    self.corpus = corpus
+  def __init__( self,
+                relativePath,
+                dataSet,
+                labels,
+                name,
+                probationaryPercent,
+                outputDir):
+
+    self.relativePath = relativePath
+    self.dataSet = dataSet
     self.labels = labels
     self.name = name
-    self.probationaryPercent = probationaryPercent
-    self.outputDir = os.path.join(outputDir,self.name)
-    self.numCPUs = numCPUs
+    self.probationaryPeriod = \
+      math.floor(probationaryPercent * dataSet.data.shape[0])
+    self.outputDir = outputDir
     self.threshold = self.getThreshold()
-
 
   def getOutputPrefix(self):
     """
@@ -88,13 +75,6 @@ class AnomalyDetector(object):
     self.configureDetector(probationaryPeriodData)
 
 
-  def setThreshold(self):
-    if self.threshold:
-      return self.threshold
-    print 'Error: No threshold set'
-    sys.exit()
-
-
   def handleRecord(self, inputData):
     """
     Returns a list [anomalyScore, *]. It is required that the first
@@ -106,32 +86,13 @@ class AnomalyDetector(object):
     """
     pass
 
-  def runCorpus(self):
-    p = multiprocessing.Pool(self.numCPUs)
+  def getOutputPathAndHeader(self):
+    relativeDir, fileName = os.path.split(self.relativePath)
 
-    tasks = []
-    for relativePath, dataSet in self.corpus.dataSets.iteritems():
-      arguments = []
-      # print relativePath
-      arguments.append(self)
-      arguments.append(relativePath)
-      arguments.append(dataSet)
-      arguments.append(self.labels.labels[relativePath]['label'])
-
-    tasks.append(arguments)
-
-    p.map(runFile, tasks)
-
-
-  def getWriter(self, relativePath):
-    relativeDir, fileName = os.path.split(relativePath)
-
-    fileName = self.getOutputPrefix() + "_" + fileName
-    outputDir = os.path.join(self.outputDir, relativeDir)
+    fileName =  self.name + "_" + fileName
+    outputDir = os.path.join(self.outputDir, self.name, relativeDir)
     makeDirsExist(outputDir)
     outputPath = os.path.join(outputDir, fileName)
-
-    writer = csv.writer(open(outputPath, 'wb'))
 
     headers = ["timestamp",
                 "value",
@@ -142,82 +103,44 @@ class AnomalyDetector(object):
 
     headers.append("alerts")
 
+    return outputPath, headers
 
-    writer.writerow(headers)
-    # rawFilename = self.getOutputPrefix() + "_raw_scores_" + filename
-    # rawOutPath = os.path.join(self.outputDir, relativeDir, 'raw')
+  def run(self):
+    print "run: %d", id(self)
+    self.configure(self.dataSet.data["value"].loc[:self.probationaryPeriod])
 
-    # rawOutputFile = os.path.join(rawOutPath, rawFilename)
-    # print rawOutputFile
-    # makeDirsExist(rawOutPath)
-    # rawWriter = csv.writer(open(rawOutputFile, "wb"))
+    outputPath, headers = self.getOutputPathAndHeader()
 
-    # alertFilename = self.getOutputPrefix() + "_alerts_" + filename
-    # alertOutPath = os.path.join(self.outputDir, relativeDir, 'alerts')
-    # alertOutputFile = os.path.join(alertOutPath, alertFilename)
-    # print alertOutputFile
-    # makeDirsExist(alertOutPath)
-    # alertWriter = csv.writer(open(alertOutputFile, "wb"))
+    ans = pandas.DataFrame(columns=headers)
+    # print "for loop: %d", id(self)
+    for i, row in self.dataSet.data.iterrows():
+      # print "beginning label %s: %d\n"% (str(self.labels), id(self))
+      # print "label: %d\n"% (id(self))
 
-    # headers = ["timestamp",
-    #             "value",
-    #             "label"]
+      label = self.labels["label"][i]
 
-    # alertHeaders = copy(headers)
-    # alertHeaders.append("alert")
-    # rawHeaders = copy(headers)
-    # rawHeaders.append("anomaly_score")
+      # print "row to inputData: %d", id(self)
+      inputData = row.to_dict()
 
-    # Add in any additional headers (if any)
-    # alertWriter.writerow(alertHeaders)
-    # rawHeaders.extend(self.getAdditionalHeaders())
-    # rawWriter.writerow(rawHeaders)
+      # print "handleRecord call: %d", id(self)
+      detectorValues = self.handleRecord(inputData)
 
-    return writer, outputPath
+      # print "thresholdedValues: %d", id(self)
+      thresholdedValues = 1 if detectorValues[0] >= self.threshold else 0
 
-def runFile(args):
+      # print "outputrow: %d", id(self)
+      outputRow = list(row) + [label] + detectorValues + [thresholdedValues]
 
-  detector, relativePath, dataSet, labels = args
+      ans.loc[i] = outputRow
 
-  # print 'in detector',
-  # print self.probationaryPercent,
-  # print dataSet.data.shape[0],
-  probationaryPeriod = math.floor(detector.probationaryPercent * dataSet.data.shape[0])
-  # print probationaryPeriod
+      # Progress report
+      if (i % 500) == 0:
+        print ".",
+        sys.stdout.flush()
 
-  detector.configure(dataSet.data['value'].loc[:probationaryPeriod])
+    # print "writing to file(%s): %d" % (outputPath, id(self))
+    ans.to_csv(outputPath, index=False)
 
-  writer, outputPath = detector.getWriter(relativePath)
-
-  for i, row in dataSet.data.iterrows():
-    # Retrieve the detector output and write it to a file
-    # print self.labels.labels[relativePath]['label'][i]
-    label = labels[i]
-    inputData = row.to_dict()
-
-    detectorValues = detector.handleRecord(inputData)
-    thresholdedValues = [1.0] if detectorValues[0] >= detector.threshold else [0.0]
-
-    outputRow = list(row) + [label]
-    outputRow.extend(detectorValues)
-    outputRow.extend(thresholdedValues)
-
-    # rawOutputRow = copy(row)
-    # rawOutputRow.extend(detectorValues)
-    # alertOutputRow = copy(row)
-    # alertOutputRow.extend(thresholdedValues)
-
-    # rawWriter.writerow(rawOutputRow)
-    # alertWriter.writerow(alertOutputRow)
-
-    writer.writerow(outputRow)
-
-
-    # Progress report
-    if (i % 500) == 0:
-      print ".",
-      sys.stdout.flush()
-
-  print "\nCompleted processing", i, "records at", datetime.datetime.now()
-  print "Results for", dataSet.fileName,
-  print "have been written to %s" %(outputPath)
+    print "\nCompleted processing", i, "records at", datetime.datetime.now()
+    print "Results for", self.dataSet.fileName,
+    print "have been written to %s" %(outputPath)
