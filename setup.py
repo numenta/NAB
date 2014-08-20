@@ -1,5 +1,6 @@
 import os
 from setuptools import setup, find_packages
+from nab.lib.util import relativeFilePaths, recur
 
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
@@ -7,6 +8,16 @@ from setuptools import setup, find_packages
 # string in below ...
 def read(fname):
   return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
+depth = 1
+
+root = recur(os.path.dirname, os.path.realpath(__file__), depth)
+
+
+f = open(os.path.join(root,'filePaths.txt'), 'w')
+paths = relativeFilePaths(os.path.join(root,'data'))
+
+print >> f, "\n".join("'"+str(p).replace(root + "/", "")+"'," for p in paths)
 
 setup(
   name = "nab",
@@ -19,3 +30,4 @@ setup(
   packages=find_packages(),
   long_description=read('README.md'),
 )
+

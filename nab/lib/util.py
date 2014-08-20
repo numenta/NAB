@@ -3,6 +3,13 @@ import datetime
 import dateutil
 import sys
 
+def relativeFilePaths(directory):
+  for dirpath,_,filenames in os.walk(directory):
+    filenames = [f for f in filenames if not f[0] == '.']
+    for f in filenames:
+      yield os.path.join(dirpath, f)
+
+
 def absoluteFilePaths(directory):
   for dirpath,_,filenames in os.walk(directory):
     filenames = [f for f in filenames if not f[0] == '.']
@@ -51,10 +58,9 @@ def convertResultsPathToDataPath(path):
   path = path.split('/')
   detector = path[0]
   path = path[1:]
-  path.remove('alerts')
 
   filename = path[-1]
-  toRemove = detector + '_alerts_'
+  toRemove = detector + '_'
 
   i = filename.index(toRemove)
   filename = filename[:i] + filename[i+len(toRemove):]

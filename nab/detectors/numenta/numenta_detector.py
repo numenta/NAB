@@ -5,7 +5,7 @@ import simplejson as json
 from nupic.algorithms import anomaly_likelihood
 from nupic.frameworks.opf.modelfactory import ModelFactory
 
-from nab.detectors.base import AnomalyDetector
+from nab.detectors.base_new import AnomalyDetector
 
 class NumentaDetector(AnomalyDetector):
 
@@ -13,6 +13,8 @@ class NumentaDetector(AnomalyDetector):
 
     # Init the super class
     super(NumentaDetector, self).__init__(*args, **kwargs)
+
+
 
   def getOutputPrefix(self):
     """
@@ -42,23 +44,28 @@ class NumentaDetector(AnomalyDetector):
     Internally to NuPIC "anomalyScore" corresponds to "likelihood_score"
     and "rawScore" corresponds to "anomaly_score". Sorry about that.
     """
-
+    # print type(self.model)
+    # print "inputData: %s" % str(inputData)
     # Send it to Numenta detector and get back the results
     result = self.model.run(inputData)
 
+    # print "result: %s" % str(result)
     # Retrieve the anomaly score and write it to a file
     rawScore = result.inferences['anomalyScore']
 
+    # print "rawScore: %s" %(rawScore)
     # Compute the Anomaly Likelihood
     anomalyScore = self.anomalyLikelihood.likelihood(inputData["value"],
                                                      rawScore,
                                                      inputData["timestamp"])
+    # print "anomalyScore: %s" % str(anomalyScore)
 
     return [anomalyScore, rawScore]
 
   def configureDetector(self, probationaryPeriodData):
         # Load the model params JSON
     probationaryPeriod = probationaryPeriodData.shape[0]
+
     paramsPath = os.path.join(os.path.split(__file__)[0],
                 "modelParams",
                 "model_params_rdse_94.json")
@@ -83,6 +90,7 @@ class NumentaDetector(AnomalyDetector):
     numentaLearningPeriod = math.floor(probationaryPeriod / 2.0)
     self.anomalyLikelihood = AnomalyLikelihood(probationaryPeriod,
                                                numentaLearningPeriod)
+    print "finished configureDetector: %d", id(self)
 
 #############################################################################
 

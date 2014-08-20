@@ -14,7 +14,7 @@
 
 AnomalyDetectors:
     - numenta
-    - skyline
+    # - skyline
 
 ResultsDirectory: "results"
 

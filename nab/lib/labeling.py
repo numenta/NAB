@@ -8,7 +8,6 @@ import json
 from nab.lib.corpus import Corpus
 from nab.lib.util import absoluteFilePaths, flattenDict, strf, strp, deepmap
 
-
 class UserLabel(object):
 
 
@@ -17,7 +16,9 @@ class UserLabel(object):
     self.path = path
     self.dataRoot = dataRoot
     self.yaml = yaml.load(open(self.path,'r'))
+
     self.pathDict = flattenDict(yaml.load(open(self.path,'r')))
+
     if corp == None:
       self.corpus = Corpus(dataRoot)
     else:
@@ -32,6 +33,7 @@ class UserLabel(object):
       return key + '.csv'
 
     for key in self.pathDict.keys():
+
       windows[convertKey(key)] = [[dateutil.parser.parse(t) for t in l]
                                                     for l in self.pathDict[key]]
     return windows
@@ -63,7 +65,7 @@ class LabelCombiner(object):
 
 
   def write(self, destDir):
-    # print type(self.combinedWindows)
+
 
     windows = json.dumps(self.combinedWindows)
     windowWriter = open(os.path.join(destDir, 'corpus_windows.json'), 'w')
@@ -106,7 +108,6 @@ class LabelCombiner(object):
         t = row['timestamp']
 
         count = 0
-
         for l in self.userLabels:
           if any(t >= t1 and t <= t2 for [t1,t2] in l.windows[relativePath]):
             count += 1

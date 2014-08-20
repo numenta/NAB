@@ -17,7 +17,7 @@ def main(args):
     args.destDir = os.path.join(root, args.destDir)
 
   print args.dataDir
-  mcorpus = Corpus(args.dataDir)
+  corpus = Corpus(args.dataDir)
   corpusLabel = CorpusLabel(args.labelDir, corpus=corpus)
 
   corpusLabel.getEverything()

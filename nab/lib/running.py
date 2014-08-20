@@ -2,6 +2,7 @@ import os
 import math
 import pandas
 import yaml
+import logging
 import multiprocessing
 
 from nab.lib.corpus import Corpus
@@ -31,81 +32,91 @@ class Runner(object):
     self.probationaryPercent = self.config["ProbationaryPercent"]
 
     self.profiles = self.getProfiles()
-    self.numCPUs = self.getNumCPUs()
+    self.pool = multiprocessing.Pool(self.getNumCPUs())
     self.plot = options.plotResults
 
 
   def detect(self):
     print "Obtaining detections"
-    print self.detectors
-    for detectorName, detectorConstructor in self.detectors.iteritems():
-      print detectorName
-      instance = detectorConstructor(
-        corpus=self.corp,
-        labels=self.corpusLabel,
-        name=detectorName,
-        probationaryPercent=self.probationaryPercent,
-        outputDir=self.resultsDir,
-        numCPUs=self.numCPUs)
+    multiprocessing.log_to_stderr(logging.DEBUG)
 
-      instance.runCorpus()
+    for detector, DetectorConstructor in self.detectors.iteritems():
+      args = []
+
+
+      for relativePath, dataSet in self.corp.dataSets.iteritems():
+
+        args.append(DetectorConstructor(
+          relativePath=relativePath,
+          dataSet=dataSet,
+          labels=self.corpusLabel.labels[relativePath],
+          name=detector,
+          probationaryPercent=self.probationaryPercent,
+          outputDir=self.resultsDir))
+
+    print "calling multiprocessing pool"
+    # print args
+
+    self.pool.map(detectHelper, args)
+
 
   def score(self):
     print "Obtaining Scores"
+    multiprocessing.log_to_stderr(logging.DEBUG)
+    ans = pandas.DataFrame(columns=("Detector", "Username", "File",
+      "Score", "tp", "tn", "fp", "fn", "Total_Count"))
 
-    for detectorName in self.detectors.keys():
-      ans = defaultdict(list)
-      resultsDetectorDir = os.path.join(self.resultsDir, detectorName)
+    for detector in self.detectors.keys():
+      resultsDetectorDir = os.path.join(self.resultsDir, detector)
       resultsCorpus = Corpus(resultsDetectorDir)
+
+      args = []
 
       dataSets = resultsCorpus.getDataSubset('/alerts/')
 
-      for profileName, profile in self.profiles.iteritems():
+      for username, profile in self.profiles.iteritems():
 
         costMatrix = profile['CostMatrix']
 
-        for relativePath in dataSets.keys():
+        for relativePath, dataSet in dataSets.keys.iteritems():
 
-          predicted = dataSets[relativePath].data['alert']
-          relativePath = convertResultsPathToDataPath(os.path.join(detectorName, relativePath))
+
+          relativePath = convertResultsPathToDataPath( \
+            os.path.join(detector, relativePath))
 
           windows = self.corpusLabel.windows[relativePath]
           labels = self.corpusLabel.labels[relativePath]
 
-          probationaryPeriod = math.floor(self.probationaryPercent*labels.shape[0])
+          probationaryPeriod = math.floor(
+            self.probationaryPercent * labels.shape[0])
 
-          scorer = Scorer(
-            predicted=predicted,
-            labels=labels,
-            windowLimits=windows,
-            costMatrix=costMatrix,
-            probationaryPeriod=probationaryPeriod)
+          args.append(
+            [detector,
+             username,
+             relativePath,
+             dataSet,
+             windows,
+             labels,
+             costMatrix,
+             probationaryPeriod])
 
-          scorer.getScore()
+      print 'calling multiprocessing pool'
+      results = self.pool.map(scoreHelper, args)
 
-          counts = scorer.counts
+      print results
 
-          ans["Detector"].append(detectorName)
-          ans["Username"].append(profileName)
-          ans["File"].append(relativePath)
-          ans["Score"].append(scorer.score)
-          ans["tp"].append(counts['tp'])
-          ans["tn"].append(counts['tn'])
-          ans["fp"].append(counts['fp'])
-          ans["fn"].append(counts['fn'])
-          ans["Total Count"].append(scorer.totalCount)
+      for i in range(len(results)):
+        ans.loc[i] = results[i]
 
-      ans = pandas.DataFrame(ans)
-
-      scorePath = os.path.join(resultsDetectorDir, detectorName+"_scores.csv")
+      scorePath = os.path.join(resultsDetectorDir, detector + "_scores.csv")
       ans.to_csv(scorePath, index=False)
 
   def getDetectors(self, constructors):
     self.detectors = {}
     for c in constructors:
-      print 'in getDetectors'
-      print c
-      print detectorClassToName(c)
+      # print 'in getDetectors'
+      # print c
+      # print detectorClassToName(c)
       self.detectors[detectorClassToName(c)] = c
 
     return self.detectors
@@ -125,3 +136,30 @@ class Runner(object):
     if not self.options.numCPUs:
       return multiprocessing.cpu_count()
     return int(self.options.numCPUs)
+
+
+def detectHelper(detectorInstance):
+  d = detectorInstance
+  print "Beginning detection with %s for %s" % (d.name, d.relativePath)
+  detectorInstance.run()
+
+def scoreHelper(args):
+  detector, username, relativePath, dataSet, windows, labels, \
+  costMatrix, probationaryPeriod = args
+
+  predicted = dataSet.data['alert']
+
+  scorer = Scorer(
+    predicted=predicted,
+    labels=labels,
+    windowLimits=windows,
+    costMatrix=costMatrix,
+    probationaryPeriod=probationaryPeriod)
+
+  scorer.getScore()
+
+  counts = scorer.counts
+
+  return detector, username, relativePath, scorer.score, \
+  counts['tp'], counts['tn'], counts['fp'], counts['fn'], \
+  scorer.totalCount

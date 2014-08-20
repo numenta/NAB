@@ -15,7 +15,6 @@ depth = 3
 root = recur(dirname, realpath(__file__), depth)
 
 def main(args):
-
   if not args.absolutePaths:
     args.labelDir = os.path.join(root, args.labelDir)
     args.dataDir = os.path.join(root, args.dataDir)
