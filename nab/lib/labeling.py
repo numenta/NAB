@@ -9,7 +9,10 @@ from nab.lib.corpus import Corpus
 from nab.lib.util import absoluteFilePaths, flattenDict, strf, strp, deepmap
 
 class UserLabel(object):
-
+  """
+  Class to store and manipulate a set of labels of a single labelers. Labels
+  are stored as anomaly windows given by timestamps.
+  """
 
   def __init__(self, path, dataRoot=None, corp=None):
 
@@ -27,6 +30,9 @@ class UserLabel(object):
 
 
   def getWindows(self):
+    """
+    Anomaly windows are stored as dictionary with the filename being the key
+    """
     windows = {}
 
     def convertKey(key):
@@ -40,6 +46,10 @@ class UserLabel(object):
 
 
 class LabelCombiner(object):
+  """
+  Class used to combine labels given many UserLabel objects. The process to
+  combine labels is given in the NAB wiki
+  """
 
   def __init__(self, labelRoot, dataRoot, threshold=1):
     self.labelRoot = labelRoot
@@ -65,7 +75,9 @@ class LabelCombiner(object):
 
 
   def write(self, destDir):
-
+    """
+    Write the combined labels to a destination directory
+    """
 
     windows = json.dumps(self.combinedWindows)
     windowWriter = open(os.path.join(destDir, "corpus_windows.json"), "w")
@@ -86,12 +98,18 @@ class LabelCombiner(object):
 
 
   def combine(self):
+    """
+    Combine UserLabel's
+    """
     self.getUserLabels()
     self.combineLabels()
     self.combineWindows()
 
 
   def getUserLabels(self):
+    """
+    Collect UserLabels
+    """
     labelPaths = absoluteFilePaths(self.labelRoot)
     userLabels = [UserLabel(path, corp=self.corpus) for path in labelPaths]
     self.userLabels = userLabels
@@ -99,6 +117,9 @@ class LabelCombiner(object):
 
 
   def combineLabels(self):
+    """
+    Combine windows to create raw labels
+    """
     labels = {}
     for relativePath, dataSet in self.corpus.dataSets.iteritems():
       timestampsHolder = []
@@ -125,6 +146,9 @@ class LabelCombiner(object):
 
 
   def combineWindows(self):
+    """
+    Take raw combined Labels and compress them to combinedWindows
+    """
     allWindows = {}
 
     for relativePath, labels in self.combinedLabels.iteritems():
@@ -162,6 +186,9 @@ class LabelCombiner(object):
 
 
 class CorpusLabel(object):
+  """
+  Class to store and manipulate the combined corpus label.
+  """
   def __init__(self, labelDir, dataDir=None, corpus=None):
     self.labelDir = labelDir
     self.dataDir = dataDir
@@ -177,10 +204,16 @@ class CorpusLabel(object):
     self.labels = None
 
   def getEverything(self):
+    """
+    Get boths labels and windows.
+    """
     self.getWindows()
     self.getLabels()
 
   def getWindows(self):
+    """
+    Get windows.
+    """
     windowFile = open(os.path.join(self.labelDir, "corpus_windows.json"), "r")
     windows = json.load(windowFile)
     self.rawWindows = windows
@@ -189,6 +222,9 @@ class CorpusLabel(object):
       self.windows[relativePath] = deepmap(strp, windows[relativePath])
 
   def getLabels(self):
+    """
+    Get Labels.
+    """
     labelFile = open(os.path.join(self.labelDir, "corpus_labels.json"), "r")
     labels  = json.load(labelFile)
     self.rawLabels = labels

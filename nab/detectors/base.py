@@ -106,7 +106,6 @@ class AnomalyDetector(object):
     return outputPath, headers
 
   def run(self):
-    print "run: %d", id(self)
     self.configure(self.dataSet.data["value"].loc[:self.probationaryPeriod])
 
     outputPath, headers = self.getOutputPathAndHeader()
@@ -134,7 +133,7 @@ class AnomalyDetector(object):
       ans.loc[i] = outputRow
 
       # Progress report
-      if (i % 500) == 0:
+      if (i % 1000) == 0:
         print ".",
         sys.stdout.flush()
 

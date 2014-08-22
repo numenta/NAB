@@ -68,7 +68,7 @@ class NumentaDetector(AnomalyDetector):
 
     paramsPath = os.path.join(os.path.split(__file__)[0],
                 "modelParams",
-                "model_params_rdse_94.json")
+                "model_params.json")
     with open(paramsPath) as fp:
       modelParams = json.load(fp)
 

@@ -49,14 +49,11 @@
                 "timestamp_dayOfWeek": null,
                 "timestamp_weekend": null,
                 "value": {
-                    "clipInput": true,
-                    "fieldname": "value",
-                    "maxval": 100.0,
-                    "minval": 0.0,
-                    "n": 114,
                     "name": "value",
-                    "type": "ScalarEncoder",
-                    "w": 21
+                    "fieldname": "value",
+                    "numBuckets": 94.0,
+                    "seed": 42,
+                    "type": "RandomDistributedScalarEncoder"
                 }
             },
             "sensorAutoReset": null,

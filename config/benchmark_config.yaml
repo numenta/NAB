@@ -12,16 +12,7 @@
 # AnomalyDetector and then add it here to have run_benchmark.py use your
 # detector to generate results.
 
-AnomalyDetectors:
-    - numenta
-    # - skyline
-
-ResultsDirectory: "results"
-
 # The probationary period is the number of records at the begining of each
 # dataset for which a detector will not be scored. This period is allowed
 # to provide a consistent amount of time for each detector to stabilize
 # and collect initial statistics. Best not to modify.
-ProbationaryPercent: 0.1
-
-numCPUs: None

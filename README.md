@@ -45,7 +45,7 @@ This benchmark is representative of a task in human time-scales. Per-record
 classification should take place in less than 5 minutes. Anomaly detection
 should happen as quickly as possible following the onset of an anomaly.
 
-You must minimize the cost of using your detection technique. 
+You must minimize the cost of using your detection technique.
 
 It is insufficient to just catch all anomalies. A high false-positive rate will
 reduce or eliminate an institution's willingness to use your technique.
@@ -61,7 +61,7 @@ an EC2 instance with all requirements and this repository pre-installed.
 
 ami-299be419
 
-On an m3.2xlarge the full benchmark takes around 8 minutes to run.
+On an m3.2xlarge the full benchmark takes around X minutes to run.
 
 ### Supported Platforms
 
@@ -112,7 +112,8 @@ Then follow build directions in the NuPIC `README.md`.
 #### Replicate Our Results
 
     cd /path/to/nab
-    python run_benchmark.py
+    python setup.py develop (for now)
+    python nab/run.py
 
 This will produce results files for the Numenta anomaly detection method as well
 as baseline results using methods from the [Etsy
@@ -182,12 +183,12 @@ be consumed by analyze_results.py
 ### Evaluation
 
 #### Labeling Key
- 
+
 - PA - Point anomaly
 - APB - Anomalous Period Begins
 - APE - Anomalous Period Ends
 - TPB - Transition Period Begins
-  - If a new, stable pattern looks like is being established the first two 
+  - If a new, stable pattern looks like is being established the first two
     hours will be labeled ambiguous.
     - However if the stable pattern is one we have seen before it will
       be labeled non-anomalous.
@@ -201,22 +202,22 @@ requirements for a production anomaly detection system.
 - For each record check if it is labeled (ground truth) as an anomaly
 - If it is an anomaly
   - A detector has ALLOWED records to catch the anomaly
-  - For each record that follows the start of the anomaly where the anomaly is 
+  - For each record that follows the start of the anomaly where the anomaly is
     not caught, there is a small penalty (LAG)
   - If the detector catches the anomaly, this is a True Positive
     - Once an anomaly has been flagged there is a SUPRESSION period
-    - To avoid spamming the end user a detector should not flag other records 
+    - To avoid spamming the end user a detector should not flag other records
       as anomalous during the SUPPRESSION period
-    - If a detector flags one *or more* additional records during a SUPPRESSION 
+    - If a detector flags one *or more* additional records during a SUPPRESSION
       period, it is a False Positive (SPAM)
-      - This reflects the binary nature of Spam. Once the useful detection has 
-        been made everything else is spam. Lots of spam is only marginally 
+      - This reflects the binary nature of Spam. Once the useful detection has
+        been made everything else is spam. Lots of spam is only marginally
         worse than any spam.
-    - If a record is not flagged as an anomaly in the SUPPRESSION period this 
+    - If a record is not flagged as an anomaly in the SUPPRESSION period this
       is a True Negative
-  - If ALLOWED records elapse without the anomaly being caught it is a 
+  - If ALLOWED records elapse without the anomaly being caught it is a
     False Negative
-- If it is not an anomaly, and we're not in an ALLOWED period or in a 
+- If it is not an anomaly, and we're not in an ALLOWED period or in a
   SUPRESSION period then:
   - If it is flagged as an anomaly it is a False Positive
   - Otherwise it is a True Negative

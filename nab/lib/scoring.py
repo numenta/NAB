@@ -1,6 +1,9 @@
 import math
 
 class CostMatrix(object):
+  """
+  Class to store a costmatrix
+  """
   def __init__(self, dictionary):
     self.tp = dictionary["tpCost"]
     self.tn = dictionary["tnCost"]
@@ -10,6 +13,9 @@ class CostMatrix(object):
 
 
 class Window(object):
+  """
+  Class to store a window in a dataset
+  """
 
   def __init__(self, windowId, limits, labels):
     self.id = windowId
@@ -21,21 +27,28 @@ class Window(object):
 
 
   def getIndices(self, labels):
+    """
+    Given a set of labels, get the pandas index of the records within the window
+    """
     tmp = labels[labels["timestamp"] >= self.t1]
     windows = tmp[tmp["timestamp"] <= self.t2]
     return windows.index
 
   def getFirstTP(self):
+    """
+    Get the first instance of True positive within a window if it exists.
+    Otherwise, return -1
+    """
     tp = self.labels[self.labels["type"] == "tp"]
     if len(tp):
       return tp.iloc[0].name
     return -1
 
-  def isInWindow(self, index):
-    return index in self.indices
-
 
 class Scorer(object):
+  """
+  Class used to score a dataset
+  """
   def __init__(self, predicted, labels, windowLimits, costMatrix, probationaryPeriod):
     self.predicted = predicted
     self.labels = labels
@@ -50,6 +63,9 @@ class Scorer(object):
 
 
   def initCount(self):
+    """
+    Initialize dictionary that counts the number of tp's, tn's, fp's, and fn's
+    """
     self.counts = {
     "tp": 0,
     "tn": 0,
@@ -60,6 +76,9 @@ class Scorer(object):
 
 
   def getWindows(self, limits):
+    """
+    Create list of windows of the dataset
+    """
     #SORT WINDOWS BEFORE PUTTING THEM IN LIST
 
     self.getLabelTypes()
@@ -68,7 +87,9 @@ class Scorer(object):
 
 
   def getLabelTypes(self):
-
+    """
+    Populate counts dictionary
+    """
     types = []
 
     for i, row in self.labels.iterrows():
@@ -88,6 +109,9 @@ class Scorer(object):
 
 
   def getScore(self):
+    """
+    Score the dataset
+    """
 
     # collect TP scores
     tpScore = 0
@@ -121,6 +145,10 @@ class Scorer(object):
 
 
   def getClosestPrecedingWindow(self, index):
+    """
+    given a record index, find the closest preceding window. This helps score
+    false positives.
+    """
     minDistance = float("inf")
     windowId = -1
     for window in self.windows:
@@ -134,4 +162,8 @@ class Scorer(object):
 
 
 def sigmoid(x):
+  """
+  Monotonically decreasing function used to score true positives and false
+  positives.
+  """
   return 1 / (1 + math.exp(-x))

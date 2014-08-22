@@ -35,8 +35,8 @@ depth = 2
 root = recur(os.path.dirname, os.path.realpath(__file__), depth)
 
 def main(args):
-  constructors = getDetectorClassConstructors(args.config)
-  runner = Runner(root, args, constructors)
+  detectorConstructors = getDetectorClassConstructors(args.detectors)
+  runner = Runner(root, args, detectorConstructors)
 
   if args.detectOnly:
     runner.detect()
@@ -49,12 +49,9 @@ def main(args):
     runner.score()
 
 
-def getDetectorClassConstructors(relativeConfigPath):
-  f = open(os.path.join(root, relativeConfigPath))
+def getDetectorClassConstructors(detectors):
 
-  config = yaml.load(f)
-
-  detectorClassNames = [detectorNameToClass(detector) for detector in config["AnomalyDetectors"]]
+  detectorClassNames = [detectorNameToClass(d) for d in detectors]
 
   detectorConstructors = [globals()[className] for className in detectorClassNames]
 
@@ -75,7 +72,6 @@ if __name__ == "__main__":
                     default=False,
                     action="store_true")
 
-
   parser.add_argument("--dataDir",
                     default="data",
                     help="This holds all the label windows for the corpus.")
@@ -84,11 +80,17 @@ if __name__ == "__main__":
                     default="labels",
                     help="This holds all the label windows for the corpus.")
 
+  parser.add_argument("--resultsDir",
+                    default="results",
+                    help="This will hold the results after running detectors \
+                    on the data")
 
-  parser.add_argument("-c", "--config",
-                    default="config/benchmark_config.yaml",
-                    help="The configuration file to use while running the "
-                    "benchmark.")
+  parser.add_argument("-d", "--detectors",
+                    nargs="*",
+                    type=str,
+                    help="Select which detector/detector(s) you want to use. \
+                    Make sure to import the corresponding detectors classes \
+                    within run.py")
 
   parser.add_argument("-p", "--profiles",
                     default="config/user_profiles.yaml",
@@ -99,6 +101,11 @@ if __name__ == "__main__":
                     default=None,
                     help="The number of CPUs to use to run the "
                     "benchmark. If not specified all CPUs will be used.")
+
+  parser.add_argument("-pp","--probationaryPercent",
+                    default=0.1,
+                    help="The percentage of dataset to be used to configure \
+                    the detector and not to be used for scoring")
 
   args = parser.parse_args()
 

@@ -4,6 +4,10 @@ import pandas
 from nab.lib.util import absoluteFilePaths, createPath
 
 class DataSet(object):
+  """
+  Class for storing and manipulating a dataset within a corpus
+  Data is stored in pandas.DataFrame
+  """
 
 
   def __init__(self, srcPath):
@@ -16,11 +20,19 @@ class DataSet(object):
 
 
   def write(self, newPath=None):
+    """
+    Write dataset to self.srcPath or newPath if given
+    """
     path = newPath if newPath else self.srcPath
     self.data.to_csv(path, index=False)
 
 
   def modifyData(self, columnName, data=None, write=False):
+    """
+    Modify dataset
+    Add columnName to dataset if data is given
+    otherwise, remove columnName from dataset
+    """
     if data:
       self.data[columnName] = data
     else:
@@ -32,6 +44,9 @@ class DataSet(object):
 
 
   def getTimestampRange(self, t1, t2):
+    """
+    Given timestamp range, get all records that are within that range.
+    """
     tmp = self.data[self.data["timestamp"] >= t1]
     ans = tmp[tmp["timestamp"] <= t2]["timestamp"].tolist()
     return ans
@@ -47,6 +62,10 @@ class DataSet(object):
 
 
 class Corpus(object):
+  """
+  Class for storing and manipulating a corpus of data where each dataset is
+  stored as a DataSet object.
+  """
 
   def __init__(self, srcRoot):
     self.srcRoot = srcRoot
@@ -55,6 +74,10 @@ class Corpus(object):
 
 
   def getDataSets(self):
+    """
+    Collect dataSets from self.srcRoot where datasets are stored in a dictionary
+    in which the path relative to the self.srcRoot is their key.
+    """
     filePaths = absoluteFilePaths(self.srcRoot)
     dataSets = [DataSet(path) for path in filePaths]
 
@@ -67,6 +90,11 @@ class Corpus(object):
 
 
   def addColumn(self, columnName, data, write=False, newRoot=None):
+    """
+    Add column to entire corpus given columnName and dictionary of data for each
+    file in the corpus. If newRoot is given then corpus is copied and then
+    modified.
+    """
     corp = self.copy(newRoot) if newRoot else self
     for relativePath in self.dataSets.keys():
       corp.dataSets[relativePath].modifyData(columnName, data[relativePath], write=write)
@@ -75,6 +103,10 @@ class Corpus(object):
 
 
   def removeColumn(self, columnName, write=False, newRoot=None):
+    """
+    Remove column from entire corpus given columnName. If newRoot if given then
+    corpus is copied and then modified.
+    """
     corp = self.copy(newRoot) if newRoot else self
     for relativePath in self.dataSets.keys():
       corp.dataSets[relativePath].modifyData(columnName, write=write)
@@ -83,6 +115,9 @@ class Corpus(object):
 
 
   def copy(self, newRoot=None):
+    """
+    Copy corpus to a newRoot which cannot already exist
+    """
 
     if newRoot[-1] != "/":
       newRoot += "/"
@@ -99,6 +134,9 @@ class Corpus(object):
 
 
   def addDataSet(self, relativePath, dataSet):
+    """
+    Add dataset to corpus given its realtivePath within the corpus
+    """
     self.dataSets[relativePath] = copy.deepcopy(dataSet)
     newPath = self.srcRoot + relativePath
     createPath(newPath)
@@ -108,6 +146,10 @@ class Corpus(object):
 
 
   def getDataSubset(self, query):
+    """
+    Get subset of the corpus given a query to match the dataset filename or
+    relative path.
+    """
     ans = {}
     for relativePath in self.dataSets.keys():
       if query in relativePath:
