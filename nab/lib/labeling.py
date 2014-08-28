@@ -1,12 +1,39 @@
-#!/usr/bin/env python
+# ----------------------------------------------------------------------
+# Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
+# with Numenta, Inc., for a separate license for this software code, the
+# following terms and conditions apply:
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 3 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see http://www.gnu.org/licenses.
+#
+# http://numenta.org/licenses/
+# ----------------------------------------------------------------------
+
+
+
 import os
+import sys
 import yaml
 import dateutil.parser
 import pandas
 import json
 
 from nab.lib.corpus import Corpus
-from nab.lib.util import absoluteFilePaths, flattenDict, strf, strp, deepmap
+from nab.lib.util import (absoluteFilePaths,
+                          flattenDict,
+                          strf,
+                          strp,
+                          deepmap,
+                          makeDirsExist)
 
 class UserLabel(object):
   """
@@ -39,7 +66,7 @@ class UserLabel(object):
       return key + ".csv"
 
     for key in self.pathDict.keys():
-
+      # print self.pathDict[key]
       windows[convertKey(key)] = [[dateutil.parser.parse(t) for t in l]
                                                     for l in self.pathDict[key]]
     return windows
@@ -78,7 +105,7 @@ class LabelCombiner(object):
     """
     Write the combined labels to a destination directory
     """
-
+    makeDirsExist(destDir)
     windows = json.dumps(self.combinedWindows)
     windowWriter = open(os.path.join(destDir, "corpus_windows.json"), "w")
     windowWriter.write(windows)
@@ -130,6 +157,7 @@ class LabelCombiner(object):
 
         count = 0
         for l in self.userLabels:
+
           if any(t >= t1 and t <= t2 for [t1,t2] in l.windows[relativePath]):
             count += 1
 

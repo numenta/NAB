@@ -19,6 +19,8 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
+
+
 helpString = """ This script takes a batch of csvs and generates an ROC curve
 given the csvs using steps between thresholds of 0.0 and 1.0. Finally it will
 find the point on that ROC curve which minimizes the average cost over
