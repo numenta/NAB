@@ -2,6 +2,7 @@
 
 <head>
   <script type="text/javascript" src="dygraph-combined.js"></script>
+  <script type="text/javascript" src="moment.min.js"></script>
 
   <style>
 
@@ -127,6 +128,11 @@ function render() {
                 });
               }
               blockRedraw = false;
+            },
+            pointClickCallback: function(e, point) {
+              timestamp = moment(new Date(point.xval));
+              timestampString = timestamp.format("YYYY-MM-DD HH-mm-ss.SSS000");
+              alert(timestampString);
             }
           }
         )
