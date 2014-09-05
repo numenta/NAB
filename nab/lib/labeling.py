@@ -71,7 +71,7 @@ class UserLabel(object):
 
   def getWindows(self):
     """
-    Anomaly windows are stored as dictionary with the filename being the key
+    Store anomaly windows as dictionaries with the filename being the key.
     """
     windows = {}
 
@@ -87,15 +87,26 @@ class UserLabel(object):
 class CorpusLabel(object):
   """
   Class to store and manipulate the combined corpus label.
+
   """
-  def __init__(self, labelDir, dataDir=None, corpus=None):
+  def __init__(self, labelDir, dataDir=None, corp=None):
+    """
+
+    @param labelDir     (string)  Source directory of all label files created by
+                                  users. (They should be in a format that is
+                                  digestable by UserLabel)
+
+    @param dataRoot   (string)      (optional) Source directory of corpus.
+
+    @param corp       (nab.Corpus)  (optional) Corpus object.
+    """
     self.labelDir = labelDir
     self.dataDir = dataDir
 
     if self.dataDir:
       self.corpus = Corpus(self.dataDir)
     else:
-      self.corpus = corpus
+      self.corpus = corp
 
     self.rawWindows = None
     self.rawLabels = None
@@ -106,12 +117,14 @@ class CorpusLabel(object):
     """
     Get boths labels and windows.
     """
+
     self.getWindows()
     self.getLabels()
 
   def getWindows(self):
     """
-    Get windows.
+    Get windows as dictionaries with key value pairs of a relative path and its
+    corresponding list of windows.
     """
     windowFile = open(os.path.join(self.labelDir, "corpus_windows.json"), "r")
     windows = json.load(windowFile)
@@ -122,7 +135,9 @@ class CorpusLabel(object):
 
   def getLabels(self):
     """
-    Get Labels.
+    Get Labels as a dictionary of key value pairs of a relative path and its
+    corresponding binary vector of anomaly labels. Labels are simple a more
+    verbose version of the windows.
     """
     labelFile = open(os.path.join(self.labelDir, "corpus_labels.json"), "r")
     labels  = json.load(labelFile)
@@ -166,7 +181,7 @@ class LabelCombiner(object):
 
   def write(self, destDir):
     """
-    Write the combined labels to a destination directory
+    Write the combined labels to a destination directory.
     """
     makeDirsExist(destDir)
     windows = json.dumps(self.combinedWindows)

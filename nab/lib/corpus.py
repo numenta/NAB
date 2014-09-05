@@ -89,6 +89,9 @@ class DataSet(object):
     @param t1   (int)   Starting timestamp.
 
     @param t2   (int)   Ending timestamp.
+
+    @return     (list)  Timestamp and value for each time stamp within the
+                        timestamp range.
     """
     tmp = self.data[self.data["timestamp"] >= t1]
     ans = tmp[tmp["timestamp"] <= t2]["timestamp"].tolist()
@@ -123,6 +126,9 @@ class Corpus(object):
     """
     Collect dataSets from self.srcRoot where datasets are stored in a dictionary
     in which the path relative to the self.srcRoot is their key.
+
+    @return (dict)    Dictionary containing key value pairs of a relative path
+                      and its corresponding dataset.
     """
     filePaths = absoluteFilePaths(self.srcRoot)
     dataSets = [DataSet(path) for path in filePaths]
@@ -150,6 +156,8 @@ class Corpus(object):
 
     @param newRoot      (string)  Path to new directory to store corpus if write
                                   is True.
+
+    @return             (Corpus)  The modified Corpus object.
     """
     corp = self.copy(newRoot) if newRoot else self
     for relativePath in self.dataSets.keys():
@@ -222,6 +230,10 @@ class Corpus(object):
 
     @param query        (string)      Search query for obtainin the subset of
                                       the corpus.
+
+    @return             (dict)        Dictionary containing key value pairs of a
+                                      relative path and its corresponding
+                                      dataset.
     """
     ans = {}
     for relativePath in self.dataSets.keys():
