@@ -18,7 +18,8 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-
+"""
+"""
 
 import os
 import math
@@ -34,12 +35,25 @@ from nab.lib.labeling import CorpusLabel
 
 from collections import defaultdict
 
+
+
 class Runner(object):
   """
   Class to run a configured nab benchmark
   """
 
   def __init__(self, rootDir, args, detectorClasses):
+    """
+    @param rootDir          (string)      Source directory of NAB or NAB-like
+                                          directory with a data, label, results,
+                                          and config directory.
+
+    @param args             (namespace)   Class that holds many paramters of the
+                                          run.
+
+    @param detectorClasses  (list)        All the constructors for the detector
+                                          classes to be used in this run.
+    """
     self.rootDir = rootDir
     self.args = args
 
@@ -141,6 +155,13 @@ class Runner(object):
     """
     Creates a dictionary of detectors with detector names as keys and detector
     classes as values.
+
+    @param constructors     (list)    All the constructors for the detector
+                                      classes to be used in this run.
+
+    @param                  (dict)    Dictionary with key value pairs of a
+                                      detector name and its corresponding
+                                      class constructor.
     """
     self.detectors = {}
     for c in constructors:
@@ -151,6 +172,8 @@ class Runner(object):
   def getCorpusLabel(self):
     """
     Collects the corpus label.
+
+    @return (CorpusLabel)   Label of the entire corpus.
     """
     return CorpusLabel(self.labelDir, None, self.corp)
 
@@ -161,6 +184,8 @@ class Runner(object):
   def getProfiles(self):
     """
     Collects profiles specifying the confusion matrix parameters of each user.
+
+    @return   (string)  The string version of the entire `user_profiles.yaml`
     """
     f = open(os.path.join(self.rootDir, self.args.profiles))
     return yaml.load(f)
@@ -168,6 +193,9 @@ class Runner(object):
   def getNumCPUs(self):
     """
     Returns the number of CPUs on the system unless prespecified.
+
+    @return   (int)   Number of allowed CPUs that you can use to compute with.
+                      If none is given, call multiprocessing.cpu_count()
     """
     if not self.args.numCPUs:
       return multiprocessing.cpu_count()
