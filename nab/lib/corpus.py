@@ -21,6 +21,7 @@
 """
 
 import os
+import sys
 import copy
 import pandas
 from nab.lib.util import absoluteFilePaths, createPath
@@ -53,7 +54,9 @@ class DataSet(object):
     @param newPath (string)   Path to write dataset to. If path is not given,
                               write to source path
     """
+
     path = newPath if newPath else self.srcPath
+    print 'write to:', path
     self.data.to_csv(path, index=False)
 
 
@@ -63,16 +66,19 @@ class DataSet(object):
     Add columnName to dataset if data is given
     otherwise, remove columnName from dataset
 
-    @param columnName (string)  Name of the column in the dataset to either add
-                                or remove.
+    @param columnName (string)          Name of the column in the dataset to
+                                        either add or remove.
 
-    @param data       ()
+    @param data       (pandas.Series)   Column data to be added to dataset.
+                                        Data length should be as long as the
+                                        length of other columns.
 
     @param write      (boolean) Flag to choose whether to write modifications to
                                 source path.
     """
-    if data:
-      print type(data)
+    print columnName, type(data), write
+
+    if isinstance(data, pandas.Series):
       self.data[columnName] = data
     else:
       if columnName in self.data:
@@ -141,7 +147,7 @@ class Corpus(object):
     return dataSets
 
 
-  def addColumn(self, columnName, data, write=False, newRoot=None):
+  def addColumn(self, columnName, data, write=False):
     """
     Add column to entire corpus given columnName and dictionary of data for each
     file in the corpus. If newRoot is given then corpus is copied and then
@@ -149,38 +155,30 @@ class Corpus(object):
 
     @param columnName   (string)  Name of the column in the dataset to add.
 
-    @param data         (dict)    todo
+    @param data         (dict)    Dictionary containing key value pairs of a
+                                  relative path and its corresponding
+                                  dataset (as a pandas.Series).
 
     @param write        (boolean) Flag to decide whether to write corpus
                                   modificiations or not.
-
-    @param newRoot      (string)  Path to new directory to store corpus if write
-                                  is True.
-
-    @return             (Corpus)  The modified Corpus object.
     """
-    corp = self.copy(newRoot) if newRoot else self
+
     for relativePath in self.dataSets.keys():
-      corp.dataSets[relativePath].modifyData(columnName, data[relativePath], write=write)
-
-    return corp
+      self.dataSets[relativePath].modifyData(columnName, data[relativePath], write=write)
 
 
-  def removeColumn(self, columnName, write=False, newRoot=None):
+  def removeColumn(self, columnName, write=False):
     """
     Remove column from entire corpus given columnName. If newRoot if given then
     corpus is copied and then modified.
+
     @param columnName   (string)  Name of the column in the dataset to add.
 
     @param write        (boolean) Flag to decide whether to write corpus
                                   modificiations or not.
-
-    @param newRoot      (string)  Path to new directory to store corpus if write
-                                  is True.
     """
-    corp = self.copy(newRoot) if newRoot else self
     for relativePath in self.dataSets.keys():
-      corp.dataSets[relativePath].modifyData(columnName, write=write)
+      self.dataSets[relativePath].modifyData(columnName, write=write)
 
     return corp
 
@@ -192,6 +190,7 @@ class Corpus(object):
     @param newRoot      (string)      Location of new directory to copy corpus
                                       to.
     """
+    print 'got to copy()'
     if newRoot[-1] != "/":
       newRoot += "/"
     if os.path.isdir(newRoot):
@@ -199,7 +198,10 @@ class Corpus(object):
       return
     else:
       createPath(newRoot)
+
+    print newRoot
     newCorpus = Corpus(newRoot)
+    print self.dataSets.keys()
     for relativePath in self.dataSets.keys():
       newCorpus.addDataSet(relativePath, self.dataSets[relativePath])
       print "adding %s" % os.path.join(newRoot, relativePath)
@@ -215,10 +217,12 @@ class Corpus(object):
 
     @param dataSet          (dataSet)     Data set to be added to corpus.
     """
+    print 'addDataSet'
     self.dataSets[relativePath] = copy.deepcopy(dataSet)
     newPath = self.srcRoot + relativePath
     createPath(newPath)
     self.dataSets[relativePath].srcPath = newPath
+    print 'write'
     self.dataSets[relativePath].write()
     self.numDataSets = len(self.dataSets)
 

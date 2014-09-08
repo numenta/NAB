@@ -117,7 +117,6 @@ class CorpusLabel(object):
     """
     Get boths labels and windows.
     """
-
     self.getWindows()
     self.getLabels()
 
