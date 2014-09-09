@@ -23,7 +23,7 @@ class AnomalyDetector(object):
     self.dataSet = dataSet
     self.labels = labels
     self.name = name
-    self.probationaryPeriod =
+    self.probationaryPeriod = \
                         math.floor(probationaryPercent * dataSet.data.shape[0])
     self.outputDir = outputDir
     self.threshold = self.getThreshold()
@@ -66,14 +66,10 @@ class AnomalyDetector(object):
 
   def configure(self, probationaryPeriodData):
     """
+    This functions takes the probationary period data and calculates some
     """
-    calcMin = probationaryPeriodData.min()
-    calcMax = probationaryPeriodData.max()
-    calcRange = abs(calcMax - calcMin)
-    calcPad = calcRange * .2
-
-    self.inputMin = calcMin - calcPad
-    self.inputMax = calcMax + calcPad
+    self.inputMin = probationaryPeriodData.min()
+    self.inputMax = probationaryPeriodData.max()
     self.configureDetector(probationaryPeriodData)
 
 
@@ -90,7 +86,7 @@ class AnomalyDetector(object):
 
   def getOutputPathAndHeader(self):
     """
-    todo:
+    Gets the outputPath and all the headers needed to write the results files.
     """
     relativeDir, fileName = os.path.split(self.relativePath)
 
@@ -112,7 +108,7 @@ class AnomalyDetector(object):
 
   def run(self):
     """
-    todo:
+    Main function that is called to collect anomaly scores for a given file.
     """
     self.configure(self.dataSet.data["value"].loc[:self.probationaryPeriod])
 
@@ -133,10 +129,10 @@ class AnomalyDetector(object):
       detectorValues = self.handleRecord(inputData)
 
       # print "thresholdedValues: %d", id(self)
-      thresholdedValues = 1 if detectorValues[0] >= self.threshold else 0
+      thresholdedValue = 1 if detectorValues[0] >= self.threshold else 0
 
       # print "outputrow: %d", id(self)
-      outputRow = list(row) + [label] + detectorValues + [thresholdedValues]
+      outputRow = list(row) + [label] + detectorValues + [thresholdedValue]
 
       ans.loc[i] = outputRow
 
