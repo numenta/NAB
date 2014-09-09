@@ -25,7 +25,11 @@ import os
 import datetime
 import dateutil
 import sys
+import pprint
 
+def checkInputs(args):
+  pprint.pprint(vars(args))
+  return input("Enter 1 to proceed, 0 otherwise: ")
 
 
 def relativeFilePaths(directory):
