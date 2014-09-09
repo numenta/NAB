@@ -7,7 +7,7 @@ Jay_Gokhale:
     tpWeight: 500.0
     fnWeight: 1.0
     fpWeight: 1.0
-    fnWeight: 1.0
+    tnWeight: 1.0
 
 # UserA:
 #     CostMatrix:
