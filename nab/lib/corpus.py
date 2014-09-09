@@ -18,6 +18,7 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 """
+This contains the objects to store and manipulate a database of csv files.
 """
 
 import os
