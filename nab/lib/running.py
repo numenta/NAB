@@ -90,7 +90,6 @@ class Runner(object):
           outputDir=self.resultsDir))
 
     print "calling multiprocessing pool"
-
     self.pool.map(detectHelper, args)
 
 
