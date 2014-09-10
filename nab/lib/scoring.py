@@ -140,7 +140,7 @@ class Scorer(object):
     """
     #SORT WINDOWS BEFORE PUTTING THEM IN LIST
     self.getAlertTypes()
-    windows = [Window(i,limits[i], self.labels) for i in range(len(limits))]
+    windows = [Window(i, limit, self.labels) for i, limit in enumerate(limits)]
     return windows
 
 
@@ -174,7 +174,7 @@ class Scorer(object):
     for window in self.windows:
       tpIndex = window.getFirstTP()
       if tpIndex == -1:
-        fnScore +=self.costmatrix["fnWeight"]
+        fnScore += self.costmatrix["fnWeight"]
       else:
         dist = (window.indices[-1] - tpIndex)/window.length
         tpScore += (2*sigmoid(dist) - 0.5)*self.costMatrix["tpWeight"]
