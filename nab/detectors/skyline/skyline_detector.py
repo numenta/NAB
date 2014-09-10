@@ -8,6 +8,8 @@ from nab.detectors.skyline.algorithms import (  median_absolute_deviation,
                                                 least_squares,
                                                 histogram_bins)
 
+
+
 class SkylineDetector(AnomalyDetector):
 
   def __init__(self, *args, **kwargs):
@@ -26,8 +28,10 @@ class SkylineDetector(AnomalyDetector):
                          least_squares,
                          histogram_bins]
 
+
   def getOutputPrefix(self):
     return "skyline"
+
 
   def getThreshold(self):
     """
@@ -36,6 +40,7 @@ class SkylineDetector(AnomalyDetector):
     """
 
     return 0.9
+
 
   def handleRecord(self, inputData):
     """
@@ -50,6 +55,7 @@ class SkylineDetector(AnomalyDetector):
 
     averageScore = score / len(self.algorithms)
     return [averageScore]
+
 
   def configureDetector(self, ProbationaryPeriodData):
     pass

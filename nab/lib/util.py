@@ -17,6 +17,7 @@
 #
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
+
 import os
 import datetime
 import dateutil

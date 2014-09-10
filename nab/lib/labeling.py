@@ -17,6 +17,7 @@
 #
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
+
 import os
 import sys
 import yaml
@@ -49,7 +50,7 @@ class UserLabel(object):
 
     @param corp       (nab.Corpus)  (optional) Corpus object.
     """
-    if not dataRoot and not corp:
+    if dataRoot is None and corp is None:
       raise ValueError()
 
     self.path = path
@@ -79,7 +80,7 @@ class UserLabel(object):
 
 
 class CorpusLabel(object):
-  """Class to store and manipulate the combined corpus label.s"""
+  """Class to store and manipulate the combined corpus labels."""
 
   def __init__(self, labelDir, dataDir=None, corp=None):
     """
@@ -141,7 +142,7 @@ class CorpusLabel(object):
 class LabelCombiner(object):
   """
   Class used to combine labels given many UserLabel objects. The process to
-  combine labels is given in the NAB wiki
+  combine labels is given in the NAB wiki.
   """
 
   def __init__(self, labelRoot, dataRoot, threshold=1):
@@ -189,14 +190,14 @@ class LabelCombiner(object):
 
 
   def combine(self):
-    """Combine UserLabels"""
+    """Combine UserLabels."""
     self.getUserLabels()
     self.combineLabels()
     self.combineWindows()
 
 
   def getUserLabels(self):
-    """Collect UserLabels"""
+    """Collect UserLabels."""
     labelPaths = absoluteFilePaths(self.labelRoot)
     userLabels = [UserLabel(path, corp=self.corpus) for path in labelPaths]
     self.userLabels = userLabels
@@ -204,7 +205,7 @@ class LabelCombiner(object):
 
 
   def combineLabels(self):
-    """Combine windows to create raw labels"""
+    """Combine windows to create raw labels."""
     labels = {}
     for relativePath, dataSet in self.corpus.dataSets.iteritems():
       timestampsHolder = []

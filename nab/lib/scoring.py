@@ -18,9 +18,9 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-
-
 import math
+
+
 
 class CostMatrix(object):
   """

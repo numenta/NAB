@@ -1,9 +1,4 @@
-import pandas
-import numpy as np
-import traceback
-from time import time
 
-from datetime import datetime, timedelta
 
 """
 This is no man's land. Do anything you want in here,
@@ -12,6 +7,14 @@ timeseries is anomalous or not.
 
 To add an algorithm, define it here, and add its name to settings.ALGORITHMS.
 """
+
+import pandas
+import numpy as np
+import traceback
+from time import time
+
+from datetime import datetime, timedelta
+
 
 
 def tail_avg(timeseries):
