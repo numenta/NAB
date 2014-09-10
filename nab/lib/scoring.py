@@ -39,8 +39,6 @@ class CostMatrix(object):
     self.fp = dictionary["fpCost"]
     self.fn = dictionary["fnCost"]
     self.values = dictionary
-=======
->>>>>>> Stashed changes
 
 
 class Window(object):
@@ -96,36 +94,27 @@ class Scorer(object):
                windowLimits,
                costMatrix,
                probationaryPeriod):
-<<<<<<< Updated upstream
-  """
-  @param predicted           (pandas.Series)   Detector predictions of whether
-                                               each record is anomalous or not.
-                                               predictions[0:probationaryPeriod]
-                                               is ignored.
-=======
     """
-    @param predicted           (pandas.Series)  Detector predictions of whether
-                                                each record is anomalous or
-                                                not.
-                                                predictions[0:probationaryPeriod]
-                                                is ignored.
->>>>>>> Stashed changes
+    @param predicted           (pandas.Series)   Detector predictions of whether
+                                                 each record is anomalous or not.
+                                                 predictions[0:probationaryPeriod]
+                                                 is ignored.
 
-  @param labels              (pandas.Series)   Ground truth for each record.
+    @param labels              (pandas.Series)   Ground truth for each record.
 
-  @param windowLimits        (list)            All the window limits in tuple
-                                               form: (timestamp start, timestamp
-                                               end).
+    @param windowLimits        (list)            All the window limits in tuple
+                                                 form: (timestamp start, timestamp
+                                                 end).
 
-  @param costmatrix          (dict)            Dictionary containing all the weights for each record
-                                               type:  True positive (tp)
-                                                      False positive (fp)
-                                                      True Negative (tn)
-                                                      False Negative (fn)
+    @param costmatrix          (dict)            Dictionary containing all the weights for each record
+                                                 type:  True positive (tp)
+                                                        False positive (fp)
+                                                        True Negative (tn)
+                                                        False Negative (fn)
 
-  @param probationaryPeriod  (int)             Row index after which predictions
-                                               are scored.
-  """
+    @param probationaryPeriod  (int)             Row index after which predictions
+                                                 are scored.
+    """
     self.predicted = predicted
     self.labels = labels
     self.probationaryPeriod = probationaryPeriod

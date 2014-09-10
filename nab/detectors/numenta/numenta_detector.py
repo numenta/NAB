@@ -63,8 +63,6 @@ class NumentaDetector(AnomalyDetector):
     return [anomalyScore, rawScore]
 
   def configureDetector(self, probationaryPeriodData):
-    """
-    """
         # Load the model params JSON
     probationaryPeriod = probationaryPeriodData.shape[0]
 

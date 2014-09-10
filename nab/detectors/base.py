@@ -23,7 +23,7 @@ class AnomalyDetector(object):
     self.dataSet = dataSet
     self.labels = labels
     self.name = name
-    self.probationaryPeriod =
+    self.probationaryPeriod = \
                         math.floor(probationaryPercent * dataSet.data.shape[0])
     self.outputDir = outputDir
     self.threshold = self.getThreshold()
@@ -65,8 +65,6 @@ class AnomalyDetector(object):
     pass
 
   def configure(self, probationaryPeriodData):
-    """
-    """
     calcMin = probationaryPeriodData.min()
     calcMax = probationaryPeriodData.max()
     calcRange = abs(calcMax - calcMin)
@@ -89,9 +87,6 @@ class AnomalyDetector(object):
     pass
 
   def getOutputPathAndHeader(self):
-    """
-    todo:
-    """
     relativeDir, fileName = os.path.split(self.relativePath)
 
     fileName =  self.name + "_" + fileName
@@ -111,9 +106,6 @@ class AnomalyDetector(object):
     return outputPath, headers
 
   def run(self):
-    """
-    todo:
-    """
     self.configure(self.dataSet.data["value"].loc[:self.probationaryPeriod])
 
     outputPath, headers = self.getOutputPathAndHeader()
