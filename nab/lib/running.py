@@ -35,9 +35,7 @@ from collections import defaultdict
 
 
 class Runner(object):
-  """
-  Class to run a configured nab benchmark
-  """
+  """Class to run a configured nab benchmark."""
 
   def __init__(self, rootDir, args, detectorClasses):
     """
@@ -167,8 +165,7 @@ class Runner(object):
     return self.detectors
 
   def getCorpusLabel(self):
-    """
-    Collects the corpus label.
+    """Collects the corpus label.
 
     @return (CorpusLabel)   Label of the entire corpus.
     """
@@ -179,8 +176,7 @@ class Runner(object):
   #   return yaml.load(f)
 
   def getProfiles(self):
-    """
-    Collects profiles specifying the confusion matrix parameters of each user.
+    """Collects profiles specifying the confusion matrix parameters of each user.
 
     @return   (string)  The string version of the entire `user_profiles.yaml`
     """
@@ -188,8 +184,7 @@ class Runner(object):
     return yaml.load(f)
 
   def getNumCPUs(self):
-    """
-    Returns the number of CPUs on the system unless prespecified.
+    """Returns the number of CPUs on the system unless prespecified.
 
     @return   (int)   Number of allowed CPUs that you can use to compute with.
                       If none is given, call multiprocessing.cpu_count()
@@ -209,9 +204,7 @@ def detectHelper(detectorInstance):
   detectorInstance.run()
 
 def scoreHelper(args):
-  """
-  Function called to score each file in the corpus.
-  """
+  """Function called to score each file in the corpus."""
   detector, username, relativePath, dataSet, windows, labels, \
   costMatrix, probationaryPeriod = args
 
