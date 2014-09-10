@@ -54,7 +54,6 @@ class DataSet(object):
     """
 
     path = newPath if newPath else self.srcPath
-    print 'write to:', path
     self.data.to_csv(path, index=False)
 
 
@@ -74,8 +73,6 @@ class DataSet(object):
     @param write      (boolean) Flag to choose whether to write modifications to
                                 source path.
     """
-    print columnName, type(data), write
-
     if isinstance(data, pandas.Series):
       self.data[columnName] = data
     else:
@@ -178,9 +175,6 @@ class Corpus(object):
     for relativePath in self.dataSets.keys():
       self.dataSets[relativePath].modifyData(columnName, write=write)
 
-    return corp
-
-
   def copy(self, newRoot=None):
     """
     Copy corpus to a newRoot which cannot already exist
@@ -188,7 +182,6 @@ class Corpus(object):
     @param newRoot      (string)      Location of new directory to copy corpus
                                       to.
     """
-    print 'got to copy()'
     if newRoot[-1] != "/":
       newRoot += "/"
     if os.path.isdir(newRoot):
@@ -197,12 +190,9 @@ class Corpus(object):
     else:
       createPath(newRoot)
 
-    print newRoot
     newCorpus = Corpus(newRoot)
-    print self.dataSets.keys()
     for relativePath in self.dataSets.keys():
       newCorpus.addDataSet(relativePath, self.dataSets[relativePath])
-      print "adding %s" % os.path.join(newRoot, relativePath)
     return newCorpus
 
 
@@ -215,12 +205,10 @@ class Corpus(object):
 
     @param dataSet          (dataSet)     Data set to be added to corpus.
     """
-    print 'addDataSet'
     self.dataSets[relativePath] = copy.deepcopy(dataSet)
     newPath = self.srcRoot + relativePath
     createPath(newPath)
     self.dataSets[relativePath].srcPath = newPath
-    print 'write'
     self.dataSets[relativePath].write()
     self.numDataSets = len(self.dataSets)
 

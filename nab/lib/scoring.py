@@ -184,7 +184,7 @@ class Scorer(object):
     for i, _ in fpLabels.iterrows():
       windowId = self.getClosestPrecedingWindow(i)
       if windowId == -1:
-        fpScore += self.costmatrix.fp
+        fpScore += self.costmatrix["fpWeight"]
         continue
 
       window = self.windows[windowId]

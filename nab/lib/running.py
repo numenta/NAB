@@ -18,9 +18,6 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-"""
-"""
-
 import os
 import math
 import pandas

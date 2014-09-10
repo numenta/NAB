@@ -34,7 +34,6 @@ class AnomalyDetector(object):
 
     This method MUST be overridden by subclasses.
     """
-
     return ""
 
   def getAdditionalHeaders(self):
@@ -45,7 +44,6 @@ class AnomalyDetector(object):
     This method MAY be overridden to provide the names for those
     columns.
     """
-
     return []
 
   def getThreshold(self):
