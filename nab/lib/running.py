@@ -17,6 +17,7 @@
 #
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
+
 import os
 import math
 import pandas
@@ -35,9 +36,7 @@ from nab.lib.labeling import CorpusLabel
 
 
 class Runner(object):
-  """
-  Class to run a configured nab benchmark
-  """
+  """Class to run a configured nab benchmark."""
 
   def __init__(self, args):
     """
@@ -195,7 +194,6 @@ def detectHelper(args):
 
   fileName =  detectorName + "_" + fileName
   outputPath = os.path.join(outputDir, detectorName, relativeDir, fileName)
-
   createPath(outputPath)
 
   print "%s: Beginning detection with %s for %s" % \

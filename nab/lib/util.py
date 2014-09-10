@@ -18,9 +18,6 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-"""
-"""
-
 import os
 import datetime
 import dateutil
@@ -33,8 +30,7 @@ def checkInputs(args):
 
 
 def relativeFilePaths(directory):
-  """
-  Given directory, gets the path of all files within relative to the directory.
+  """Given directory, gets the path of all files within relative to the directory.
 
   @param directory  (string)      Absolute directory name.
 
@@ -48,8 +44,7 @@ def relativeFilePaths(directory):
 
 
 def absoluteFilePaths(directory):
-  """
-  Given directory, gets the absolute path of all files within.
+  """Given directory, gets the absolute path of all files within.
 
   @param  directory   (string)    Directory name.
 
@@ -61,8 +56,7 @@ def absoluteFilePaths(directory):
       yield os.path.abspath(os.path.join(dirpath, f))
 
 def makeDirsExist(dirname):
-  """
-  Makes sure a given directory exists. If not, it creates it.
+  """Makes sure a given directory exists. If not, it creates it.
 
   @param dirname  (string)  Absolute directory name.
   """
@@ -76,8 +70,7 @@ def makeDirsExist(dirname):
 
 
 def createPath(path):
-  """
-  Makes sure a given path exists. If not, it creates it.
+  """Makes sure a given path exists. If not, it creates it.
 
   @param path   (string) Absolute path name.
   """
@@ -86,8 +79,7 @@ def createPath(path):
 
 
 def detectorClassToName(obj):
-  """
-  Removes the 'detector' from the end of detector class's name.
+  """Removes the 'detector' from the end of detector class's name.
 
   @param obj  (subclass of AnomalyDetector)   Detector class.
 
@@ -98,8 +90,6 @@ def detectorClassToName(obj):
   return name
 
 def detectorNameToClass(name):
-  """
-  """
   name = name[0].upper() + name[1:]
   className = name + "Detector"
 
@@ -209,8 +199,7 @@ def recur(function, value, n):
     return recur(function, function(value), n-1)
 
 def deepmap(f, datum):
-  """
-  Deeply applies f across the datum.
+  """Deeply applies f across the datum.
 
   @param f      (function)    Function to map with.
 

@@ -49,23 +49,18 @@ class DataSet(object):
 
 
   def write(self, newPath=None):
-    """
-    Write dataset to self.srcPath or newPath if given
+    """Write dataset to self.srcPath or newPath if given.
 
     @param newPath (string)   Path to write dataset to. If path is not given,
                               write to source path
     """
 
     path = newPath if newPath else self.srcPath
-    print 'write to:', path
     self.data.to_csv(path, index=False)
 
 
   def modifyData(self, columnName, data=None, write=False):
-    """
-    Modify dataset
-    Add columnName to dataset if data is given
-    otherwise, remove columnName from dataset
+    """Add columnName to dataset if data is given otherwise, remove columnName.
 
     @param columnName (string)          Name of the column in the dataset to
                                         either add or remove.
@@ -77,8 +72,6 @@ class DataSet(object):
     @param write      (boolean) Flag to choose whether to write modifications to
                                 source path.
     """
-    print columnName, type(data), write
-
     if isinstance(data, pandas.Series):
       self.data[columnName] = data
     else:
@@ -90,8 +83,7 @@ class DataSet(object):
 
 
   def getTimestampRange(self, t1, t2):
-    """
-    Given timestamp range, get all records that are within that range.
+    """Given timestamp range, get all records that are within that range.
 
     @param t1   (int)   Starting timestamp.
 
@@ -181,17 +173,12 @@ class Corpus(object):
     for relativePath in self.dataSets.keys():
       self.dataSets[relativePath].modifyData(columnName, write=write)
 
-    return corp
-
-
   def copy(self, newRoot=None):
-    """
-    Copy corpus to a newRoot which cannot already exist
+    """Copy corpus to a newRoot which cannot already exist.
 
     @param newRoot      (string)      Location of new directory to copy corpus
                                       to.
     """
-    print 'got to copy()'
     if newRoot[-1] != "/":
       newRoot += "/"
     if os.path.isdir(newRoot):
@@ -200,30 +187,24 @@ class Corpus(object):
     else:
       createPath(newRoot)
 
-    print newRoot
     newCorpus = Corpus(newRoot)
-    print self.dataSets.keys()
     for relativePath in self.dataSets.keys():
       newCorpus.addDataSet(relativePath, self.dataSets[relativePath])
-      print "adding %s" % os.path.join(newRoot, relativePath)
     return newCorpus
 
 
   def addDataSet(self, relativePath, dataSet):
-    """
-    Add dataset to corpus given its realtivePath within the corpus
+    """Add dataset to corpus given its realtivePath within the corpus.
 
     @param relativePath     (string)      Path of the new dataset relative to
                                           the corpus directory.
 
     @param dataSet          (dataSet)     Data set to be added to corpus.
     """
-    print 'addDataSet'
     self.dataSets[relativePath] = copy.deepcopy(dataSet)
     newPath = self.srcRoot + relativePath
     createPath(newPath)
     self.dataSets[relativePath].srcPath = newPath
-    print 'write'
     self.dataSets[relativePath].write()
     self.numDataSets = len(self.dataSets)
 

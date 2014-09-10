@@ -1,8 +1,30 @@
+# ----------------------------------------------------------------------
+# Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
+# with Numenta, Inc., for a separate license for this software code, the
+# following terms and conditions apply:
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 3 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see http://www.gnu.org/licenses.
+#
+# http://numenta.org/licenses/
+# ----------------------------------------------------------------------
+
 import os
 import sys
 import math
 import pandas
 from nab.lib.util import makeDirsExist
+
+
 
 class AnomalyDetector(object):
   """
@@ -15,17 +37,17 @@ class AnomalyDetector(object):
                 probationaryPercent):
 
     self.dataSet = dataSet
-    self.probationaryPeriod = \
-                        math.floor(probationaryPercent * dataSet.data.shape[0])
+    self.probationaryPeriod = math.floor(
+      probationaryPercent * dataSet.data.shape[0])
     self.threshold = self.getThreshold()
 
   def getOutputPrefix(self):
-    """
-    Returns a string to use as a prefix to output file names.
+    """Returns a string to use as a prefix to output file names.
 
     This method MUST be overridden by subclasses.
     """
     return ""
+
 
   def getAdditionalHeaders(self):
     """
@@ -37,6 +59,7 @@ class AnomalyDetector(object):
     """
     return []
 
+
   def getThreshold(self):
     """
     Returns a float between 0.0 and 1.0. This will be used to decide if a given
@@ -46,6 +69,7 @@ class AnomalyDetector(object):
     """
     pass
 
+
   def configureDetector(self, probationaryPeriodData):
     """
     Takes the probationary period data and is allowed to do any statistical
@@ -53,9 +77,10 @@ class AnomalyDetector(object):
     """
     pass
 
+
   def configure(self, probationaryPeriodData):
     """
-    This functions takes the probationary period data and calculates some
+    This functions takes the probationary period data and calculates some.
     """
     self.inputMin = probationaryPeriodData.min()
     self.inputMax = probationaryPeriodData.max()
@@ -72,6 +97,7 @@ class AnomalyDetector(object):
     This method MUST be overridden by subclasses
     """
     pass
+
 
   def getHeader(self):
     """
