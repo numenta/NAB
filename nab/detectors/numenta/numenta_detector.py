@@ -26,7 +26,6 @@ class NumentaDetector(AnomalyDetector):
     """
     Returns a list of strings.
     """
-
     return ["_raw_score"]
 
   def getThreshold(self):
@@ -63,6 +62,11 @@ class NumentaDetector(AnomalyDetector):
     return [anomalyScore, rawScore]
 
   def configureDetector(self, probationaryPeriodData):
+    calcRange = abs(self.inputMax - self.inputMin)
+    calcPad = calcRange * .2
+
+    self.inputMin = self.inputMin - calcPad
+    self.inputMax = self.inputMax + calcPad
         # Load the model params JSON
     probationaryPeriod = probationaryPeriodData.shape[0]
 

@@ -18,13 +18,29 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
+"""
+"""
 
 import os
 import datetime
 import dateutil
 import sys
+import pprint
+
+def checkInputs(args):
+  pprint.pprint(vars(args))
+  return input("Enter 1 to proceed, 0 otherwise: ")
+
 
 def relativeFilePaths(directory):
+  """
+  Given directory, gets the path of all files within relative to the directory.
+
+  @param directory  (string)      Absolute directory name.
+
+  @return           (iterable)    All filepaths within directory, relative to
+                                  that directory.
+  """
   for dirpath,_,filenames in os.walk(directory):
     filenames = [f for f in filenames if not f[0] == "."]
     for f in filenames:
@@ -32,6 +48,13 @@ def relativeFilePaths(directory):
 
 
 def absoluteFilePaths(directory):
+  """
+  Given directory, gets the absolute path of all files within.
+
+  @param  directory   (string)    Directory name.
+
+  @return             (iterable)  All absolute filepaths within directory.
+  """
   for dirpath,_,filenames in os.walk(directory):
     filenames = [f for f in filenames if not f[0] == "."]
     for f in filenames:
@@ -39,7 +62,9 @@ def absoluteFilePaths(directory):
 
 def makeDirsExist(dirname):
   """
-  Makes sure a given path exists
+  Makes sure a given directory exists. If not, it creates it.
+
+  @param dirname  (string)  Absolute directory name.
   """
 
   if not os.path.exists(dirname):
@@ -51,15 +76,30 @@ def makeDirsExist(dirname):
 
 
 def createPath(path):
+  """
+  Makes sure a given path exists. If not, it creates it.
+
+  @param path   (string) Absolute path name.
+  """
   dirname = os.path.dirname(path)
   makeDirsExist(dirname)
 
 
 def detectorClassToName(obj):
-  name = obj.__name__[:-8].lower()
+  """
+  Removes the 'detector' from the end of detector class's name.
+
+  @param obj  (subclass of AnomalyDetector)   Detector class.
+
+  @return     (string)                        Name of detector.
+  """
+  tailLength = len('detector')
+  name = obj.__name__[:-tailLength].lower()
   return name
 
 def detectorNameToClass(name):
+  """
+  """
   name = name[0].upper() + name[1:]
   className = name + "Detector"
 
@@ -70,6 +110,11 @@ def osPathSplit(path, debug=False):
   """
   os_path_split_asunder
   http://stackoverflow.com/questions/4579908/cross-platform-splitting-of-path-in-python
+  Path splitter that works on both unix-based and windows platforms.
+
+  @param path (string) Path to be split.
+
+  @return     (list)   Split path.
   """
   parts = []
   while True:
@@ -87,6 +132,11 @@ def osPathSplit(path, debug=False):
   return parts
 
 def convertResultsPathToDataPath(path):
+  """
+  @param path (string)  Path to dataset in the data directory.
+
+  @return     (string)  Path to dataset result in the result directory.
+  """
   # print path
   path = path.split("/")
   detector = path[0]
@@ -104,6 +154,13 @@ def convertResultsPathToDataPath(path):
   return path
 
 def flattenDict(dictionary, files={}, head=""):
+  """
+  @param dictionary (dict)    Dictionary of dictionaries to be flattened.
+
+  @param files      (dict)    Dictionary to build up
+
+  @param head       (string)  Prefix to each key
+  """
   for key in dictionary.keys():
     concat = head + "/" + key if head != "" else key
     if type(dictionary[key]) is dict:
@@ -114,12 +171,30 @@ def flattenDict(dictionary, files={}, head=""):
   return files
 
 def strf(t):
+  """
+  @param t  (datetime.Datetime) Datetime object.
+
+  @return   (string)            Formatted string of datetime.
+  """
   return datetime.datetime.strftime(t, "%Y-%m-%d %H:%M:%S.%f")
 
 def strp(t):
+  """
+  @param t (datetime.datetime)  String of datetime with format:
+                                "YYYY-MM-DD HH:mm:SS.ss".
+
+  @return   (string)            Datetime object.
+  """
   return dateutil.parser.parse(t)
 
 def recur(function, value, n):
+  """
+  @param function (function)    Function to recurse.
+
+  @param value    (value)       Value to recurse on.
+
+  @param n        (int)         Number of times to recurse.
+  """
   if n < 0 or int(n) != n:
     print "incorrect input"
     sys.exit()
@@ -134,9 +209,15 @@ def recur(function, value, n):
     return recur(function, function(value), n-1)
 
 def deepmap(f, datum):
-    """Deeply applies f across the datum."""
-    if type(datum) == list:
-        return [deepmap(f, x) for x in datum]
-    else:
-        return f(datum)
+  """
+  Deeply applies f across the datum.
+
+  @param f      (function)    Function to map with.
+
+  @param datum  (datum)       Object to map over.
+  """
+  if type(datum) == list:
+      return [deepmap(f, x) for x in datum]
+  else:
+      return f(datum)
 

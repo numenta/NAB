@@ -18,8 +18,6 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-
-
 import os
 import sys
 import yaml
@@ -35,6 +33,8 @@ from nab.lib.util import (absoluteFilePaths,
                           deepmap,
                           makeDirsExist)
 
+
+
 class UserLabel(object):
   """
   Class to store and manipulate a set of labels of a single labelers. Labels
@@ -42,6 +42,16 @@ class UserLabel(object):
   """
 
   def __init__(self, path, dataRoot=None, corp=None):
+    """
+    @param path       (string)      Source path of yaml file containing the
+                                    corpus labels for a single user.
+
+    @param dataRoot   (string)      (optional) Source directory of corpus.
+
+    @param corp       (nab.Corpus)  (optional) Corpus object.
+    """
+    if not dataRoot and not corp:
+      raise ValueError()
 
     self.path = path
     self.dataRoot = dataRoot
@@ -58,7 +68,7 @@ class UserLabel(object):
 
   def getWindows(self):
     """
-    Anomaly windows are stored as dictionary with the filename being the key
+    Store anomaly windows as dictionaries with the filename being the key.
     """
     windows = {}
 
@@ -66,10 +76,74 @@ class UserLabel(object):
       return key + ".csv"
 
     for key in self.pathDict.keys():
-      # print self.pathDict[key]
       windows[convertKey(key)] = [[dateutil.parser.parse(t) for t in l]
                                                     for l in self.pathDict[key]]
     return windows
+
+
+class CorpusLabel(object):
+  """
+  Class to store and manipulate the combined corpus label.
+
+  """
+  def __init__(self, labelDir, dataDir=None, corp=None):
+    """
+
+    @param labelDir     (string)  Source directory of all label files created by
+                                  users. (They should be in a format that is
+                                  digestable by UserLabel)
+
+    @param dataRoot   (string)      (optional) Source directory of corpus.
+
+    @param corp       (nab.Corpus)  (optional) Corpus object.
+    """
+    self.labelDir = labelDir
+    self.dataDir = dataDir
+
+    if self.dataDir:
+      self.corpus = Corpus(self.dataDir)
+    else:
+      self.corpus = corp
+
+    self.rawWindows = None
+    self.rawLabels = None
+    self.windows = None
+    self.labels = None
+
+  def getEverything(self):
+    """
+    Get boths labels and windows.
+    """
+    self.getWindows()
+    self.getLabels()
+
+  def getWindows(self):
+    """
+    Get windows as dictionaries with key value pairs of a relative path and its
+    corresponding list of windows.
+    """
+    windowFile = open(os.path.join(self.labelDir, "corpus_windows.json"), "r")
+    windows = json.load(windowFile)
+    self.rawWindows = windows
+    self.windows = {}
+    for relativePath in windows.keys():
+      self.windows[relativePath] = deepmap(strp, windows[relativePath])
+
+  def getLabels(self):
+    """
+    Get Labels as a dictionary of key value pairs of a relative path and its
+    corresponding binary vector of anomaly labels. Labels are simple a more
+    verbose version of the windows.
+    """
+    labelFile = open(os.path.join(self.labelDir, "corpus_labels.json"), "r")
+    labels  = json.load(labelFile)
+    self.rawLabels = labels
+    self.labels = {}
+
+    for relativePath, value in labels.iteritems():
+      value = pandas.io.json.read_json(value)
+      value["timestamp"] = value["timestamp"].apply(strp)
+      self.labels[relativePath] = value
 
 
 class LabelCombiner(object):
@@ -103,7 +177,7 @@ class LabelCombiner(object):
 
   def write(self, destDir):
     """
-    Write the combined labels to a destination directory
+    Write the combined labels to a destination directory.
     """
     makeDirsExist(destDir)
     windows = json.dumps(self.combinedWindows)
@@ -211,54 +285,3 @@ class LabelCombiner(object):
 
 
     self.combinedWindows = allWindows
-
-
-class CorpusLabel(object):
-  """
-  Class to store and manipulate the combined corpus label.
-  """
-  def __init__(self, labelDir, dataDir=None, corpus=None):
-    self.labelDir = labelDir
-    self.dataDir = dataDir
-
-    if self.dataDir:
-      self.corpus = Corpus(self.dataDir)
-    else:
-      self.corpus = corpus
-
-    self.rawWindows = None
-    self.rawLabels = None
-    self.windows = None
-    self.labels = None
-
-  def getEverything(self):
-    """
-    Get boths labels and windows.
-    """
-    self.getWindows()
-    self.getLabels()
-
-  def getWindows(self):
-    """
-    Get windows.
-    """
-    windowFile = open(os.path.join(self.labelDir, "corpus_windows.json"), "r")
-    windows = json.load(windowFile)
-    self.rawWindows = windows
-    self.windows = {}
-    for relativePath in windows.keys():
-      self.windows[relativePath] = deepmap(strp, windows[relativePath])
-
-  def getLabels(self):
-    """
-    Get Labels.
-    """
-    labelFile = open(os.path.join(self.labelDir, "corpus_labels.json"), "r")
-    labels  = json.load(labelFile)
-    self.rawLabels = labels
-    self.labels = {}
-
-    for relativePath, value in labels.iteritems():
-      value = pandas.io.json.read_json(value)
-      value["timestamp"] = value["timestamp"].apply(strp)
-      self.labels[relativePath] = value
