@@ -105,6 +105,7 @@ class CorpusLabel(object):
     self.windows = None
     self.labels = None
 
+
   def getEverything(self):
     """Get boths labels and windows."""
     self.getWindows()
