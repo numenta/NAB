@@ -23,8 +23,8 @@ class AnomalyDetector(object):
     self.dataSet = dataSet
     self.labels = labels
     self.name = name
-    self.probationaryPeriod = \
-                        math.floor(probationaryPercent * dataSet.data.shape[0])
+    self.probationaryPeriod = math.floor(
+                                    probationaryPercent * dataSet.data.shape[0])
     self.outputDir = outputDir
     self.threshold = self.getThreshold()
 

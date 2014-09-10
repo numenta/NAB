@@ -46,8 +46,7 @@ class DataSet(object):
 
 
   def write(self, newPath=None):
-    """
-    Write dataset to self.srcPath or newPath if given
+    """Write dataset to self.srcPath or newPath if given.
 
     @param newPath (string)   Path to write dataset to. If path is not given,
                               write to source path
@@ -58,10 +57,7 @@ class DataSet(object):
 
 
   def modifyData(self, columnName, data=None, write=False):
-    """
-    Modify dataset
-    Add columnName to dataset if data is given
-    otherwise, remove columnName from dataset
+    """Add columnName to dataset if data is given otherwise, remove columnName.
 
     @param columnName (string)          Name of the column in the dataset to
                                         either add or remove.
@@ -84,8 +80,7 @@ class DataSet(object):
 
 
   def getTimestampRange(self, t1, t2):
-    """
-    Given timestamp range, get all records that are within that range.
+    """Given timestamp range, get all records that are within that range.
 
     @param t1   (int)   Starting timestamp.
 
@@ -176,8 +171,7 @@ class Corpus(object):
       self.dataSets[relativePath].modifyData(columnName, write=write)
 
   def copy(self, newRoot=None):
-    """
-    Copy corpus to a newRoot which cannot already exist
+    """Copy corpus to a newRoot which cannot already exist.
 
     @param newRoot      (string)      Location of new directory to copy corpus
                                       to.
@@ -197,8 +191,7 @@ class Corpus(object):
 
 
   def addDataSet(self, relativePath, dataSet):
-    """
-    Add dataset to corpus given its realtivePath within the corpus
+    """Add dataset to corpus given its realtivePath within the corpus.
 
     @param relativePath     (string)      Path of the new dataset relative to
                                           the corpus directory.
