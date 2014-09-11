@@ -17,12 +17,9 @@
 #
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
-<<<<<<< HEAD
 """
 This contains the objects to store and manipulate a database of csv files.
 """
-=======
->>>>>>> newBranchdocs
 
 import os
 import sys
