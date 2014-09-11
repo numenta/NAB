@@ -191,7 +191,6 @@ def detectHelper(args):
   (i, detectorInstance, detectorName, labels, outputDir, relativePath) = args
 
   relativeDir, fileName = os.path.split(relativePath)
-
   fileName =  detectorName + "_" + fileName
   outputPath = os.path.join(outputDir, detectorName, relativeDir, fileName)
   createPath(outputPath)

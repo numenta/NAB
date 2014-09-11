@@ -87,7 +87,7 @@ class NumentaDetector(AnomalyDetector):
 
     self.inputMin = self.inputMin - calcPad
     self.inputMax = self.inputMax + calcPad
-        # Load the model params JSON
+    # Load the model params JSON
     probationaryPeriod = probationaryPeriodData.shape[0]
 
     paramsPath = os.path.join(os.path.split(__file__)[0],

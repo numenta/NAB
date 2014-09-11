@@ -113,6 +113,7 @@ class AnomalyDetector(object):
 
     return headers
 
+
   def run(self):
     """
     Main function that is called to collect anomaly scores for a given file.
