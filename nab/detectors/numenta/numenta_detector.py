@@ -57,7 +57,7 @@ class NumentaDetector(AnomalyDetector):
 
 
   def handleRecord(self, inputData):
-    """Returns a list [anomalyScore, rawScore].
+    """Returns a tuple (anomalyScore, rawScore).
 
     Internally to NuPIC "anomalyScore" corresponds to "likelihood_score"
     and "rawScore" corresponds to "anomaly_score". Sorry about that.
@@ -78,7 +78,8 @@ class NumentaDetector(AnomalyDetector):
                                                      inputData["timestamp"])
     # print "anomalyScore: %s" % str(anomalyScore)
 
-    return [anomalyScore, rawScore]
+    return (anomalyScore, rawScore)
+
 
 
   def configureDetector(self, probationaryPeriodData):

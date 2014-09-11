@@ -55,9 +55,11 @@ class UserLabel(object):
 
     self.path = path
     self.dataRoot = dataRoot
-    self.yaml = yaml.load(open(self.path,"r"))
 
-    self.pathDict = flattenDict(yaml.load(open(self.path,"r")))
+    with open(self.path,"r") as f:
+      self.yaml = yaml.load(f)
+
+    self.pathDict = flattenDict(self.yaml)
 
     if corp == None:
       self.corpus = Corpus(dataRoot)
@@ -106,22 +108,27 @@ class CorpusLabel(object):
     self.labels = None
 
 
-  def getEverything(self):
+  def initialize(self):
     """Get boths labels and windows."""
+    print "Getting windows"
     self.getWindows()
+    print "Getting Labels"
     self.getLabels()
+
 
   def getWindows(self):
     """
     Get windows as dictionaries with key value pairs of a relative path and its
     corresponding list of windows.
     """
-    windowFile = open(os.path.join(self.labelDir, "corpus_windows.json"), "r")
-    windows = json.load(windowFile)
+    with open(os.path.join(self.labelDir, "corpus_windows.json")) as windowFile:
+      windows = json.load(windowFile)
+
     self.rawWindows = windows
     self.windows = {}
     for relativePath in windows.keys():
       self.windows[relativePath] = deepmap(strp, windows[relativePath])
+
 
   def getLabels(self):
     """
@@ -129,8 +136,8 @@ class CorpusLabel(object):
     corresponding binary vector of anomaly labels. Labels are simple a more
     verbose version of the windows.
     """
-    labelFile = open(os.path.join(self.labelDir, "corpus_labels.json"), "r")
-    labels  = json.load(labelFile)
+    with open(os.path.join(self.labelDir, "corpus_labels.json"), "r") as lFile:
+      labels = json.load(lFile)
     self.rawLabels = labels
     self.labels = {}
 
@@ -173,8 +180,8 @@ class LabelCombiner(object):
     """Write the combined labels to a destination directory."""
     makeDirsExist(destDir)
     windows = json.dumps(self.combinedWindows)
-    windowWriter = open(os.path.join(destDir, "corpus_windows.json"), "w")
-    windowWriter.write(windows)
+    with open(os.path.join(destDir, "corpus_windows.json"), "w") as windowWriter:
+      windowWriter.write(windows)
 
     fileFriendlyLabels = {}
 
@@ -186,8 +193,9 @@ class LabelCombiner(object):
       fileFriendlyLabels[relativePath] = fileFriendlyLabels[relativePath].to_json()
 
     labels = json.dumps(fileFriendlyLabels)
-    labelWriter = open(os.path.join(destDir, "corpus_labels.json"), "w")
-    labelWriter.write(labels)
+
+    with open(os.path.join(destDir, "corpus_labels.json"), "w") as labelWriter:
+      labelWriter.write(labels)
 
 
   def combine(self):

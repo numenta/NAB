@@ -96,42 +96,30 @@ class Scorer(object):
                probationaryPeriod):
     """
     @param predicted           (pandas.Series)   Detector predictions of whether
-<<<<<<< HEAD
                                                  each record is anomalous or
                                                  not.
-=======
-                                                 each record is anomalous or not.
->>>>>>> newBranchdocs
                                                  predictions[0:probationaryPeriod]
                                                  is ignored.
 
     @param labels              (pandas.Series)   Ground truth for each record.
 
     @param windowLimits        (list)            All the window limits in tuple
-<<<<<<< HEAD
                                                  form: (timestamp start,
                                                  timestamp end).
 
     @param costmatrix          (dict)            Dictionary containing all the
                                                  weights for each record
-=======
                                                  form: (timestamp start, timestamp
                                                  end).
 
     @param costmatrix          (dict)            Dictionary containing all the weights for each record
->>>>>>> newBranchdocs
                                                  type:  True positive (tp)
                                                         False positive (fp)
                                                         True Negative (tn)
                                                         False Negative (fn)
 
-<<<<<<< HEAD
     @param probationaryPeriod  (int)             Row index after which
                                                  predictions are scored.
-=======
-    @param probationaryPeriod  (int)             Row index after which predictions
-                                                 are scored.
->>>>>>> newBranchdocs
     """
     self.predicted = predicted
     self.labels = labels

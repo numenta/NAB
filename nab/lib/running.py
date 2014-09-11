@@ -73,7 +73,7 @@ class Runner(object):
     self.corpusLabel.initialize()
 
     print "Getting profiles"
-    self.profiles = yaml.load(open(self.args.profilePath))
+    self.profiles = yaml.load(open(self.args.profilesPath))
 
 
   def detect(self, detectorClasses):
@@ -130,8 +130,6 @@ class Runner(object):
       for username, profile in self.profiles.iteritems():
 
         costMatrix = profile["CostMatrix"]
-
-        print resultsCorpus.dataSets
 
         for relativePath, dataSet in resultsCorpus.dataSets.iteritems():
 
@@ -207,6 +205,7 @@ def detectHelper(args):
   print "%s: Completed processing %s records  at %s" % \
                                         (i, len(results.index), datetime.now())
   print "%s: Results have been written to %s" % (i, outputPath)
+
 
 
 def scoreHelper(args):

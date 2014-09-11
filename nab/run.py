@@ -26,7 +26,7 @@ import yaml
 import argparse
 
 from nab.lib.running import Runner
-from nab.lib.util import recur, detectorNameToClass
+from nab.lib.util import recur, detectorNameToClass, checkInputs
 
 from nab.detectors.numenta.numenta_detector import NumentaDetector
 from nab.detectors.skyline.skyline_detector import SkylineDetector
@@ -37,18 +37,21 @@ depth = 2
 root = recur(os.path.dirname, os.path.realpath(__file__), depth)
 
 def main(args):
-  detectorConstructors = getDetectorClassConstructors(args.detectors)
-  runner = Runner(root, args, detectorConstructors)
 
-  if args.detectOnly:
-    runner.detect()
+  args.dataDir = os.path.join(root, args.dataDir)
+  args.labelDir = os.path.join(root, args.labelDir)
+  args.resultsDir = os.path.join(root, args.resultsDir)
+  args.profilesPath = os.path.join(root, args.profilesPath)
 
-  elif args.scoreOnly:
-    runner.score()
+  runner = Runner(args)
+  runner.initialize()
 
-  else:
-    runner.detect()
-    runner.score()
+  if not args.scoreOnly:
+    detectorConstructors = getDetectorClassConstructors(args.detectors)
+    runner.detect(detectorConstructors)
+
+  if not args.detectOnly:
+    runner.score(args.detectors)
 
 
 def getDetectorClassConstructors(detectors):
@@ -91,11 +94,12 @@ if __name__ == "__main__":
   parser.add_argument("-d", "--detectors",
                     nargs="*",
                     type=str,
+                    default=["numenta"],
                     help="Select which detector/detector(s) you want to use. \
                     Make sure to import the corresponding detectors classes \
                     within run.py")
 
-  parser.add_argument("-p", "--profiles",
+  parser.add_argument("-p", "--profilesPath",
                     default="config/user_profiles.yaml",
                     help="The configuration file to use while running the "
                     "benchmark.")
@@ -112,4 +116,5 @@ if __name__ == "__main__":
 
   args = parser.parse_args()
 
-  main(args)
+  if checkInputs(args):
+    main(args)

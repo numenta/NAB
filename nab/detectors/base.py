@@ -136,7 +136,7 @@ class AnomalyDetector(object):
       thresholdedValue = 1 if detectorValues[0] >= self.threshold else 0
 
       # print "outputrow: %d", id(self)
-      outputRow = list(row) + detectorValues + [thresholdedValue]
+      outputRow = list(row) + list(detectorValues) + [thresholdedValue]
 
       ans.loc[i] = outputRow
 
