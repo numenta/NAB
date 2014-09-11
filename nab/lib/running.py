@@ -163,6 +163,7 @@ class Runner(object):
 
     return self.detectors
 
+
   def getCorpusLabel(self):
     """Collects the corpus label.
 
@@ -170,17 +171,15 @@ class Runner(object):
     """
     return CorpusLabel(self.labelDir, None, self.corp)
 
-  # def getConfig(self):
-  #   f = open(os.path.join(self.rootDir, self.args.config))
-  #   return yaml.load(f)
 
   def getProfiles(self):
     """Collects profiles specifying the confusion matrix parameters of each user.
 
     @return   (string)  The string version of the entire `user_profiles.yaml`
     """
-    f = open(os.path.join(self.rootDir, self.args.profiles))
-    return yaml.load(f)
+    with open(os.path.join(self.rootDir, self.args.profiles)) as f:
+      return yaml.load(f)
+
 
   def getNumCPUs(self):
     """Returns the number of CPUs on the system unless prespecified.
@@ -201,6 +200,7 @@ def detectHelper(detectorInstance):
   d = detectorInstance
   print "Beginning detection with %s for %s" % (d.name, d.relativePath)
   detectorInstance.run()
+
 
 def scoreHelper(args):
   """Function called to score each file in the corpus."""
