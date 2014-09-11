@@ -18,8 +18,6 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-
-
 import os
 import math
 import pandas
@@ -34,12 +32,23 @@ from nab.lib.labeling import CorpusLabel
 
 from collections import defaultdict
 
+
+
 class Runner(object):
-  """
-  Class to run a configured nab benchmark
-  """
+  """Class to run a configured nab benchmark."""
 
   def __init__(self, rootDir, args, detectorClasses):
+    """
+    @param rootDir          (string)      Source directory of NAB or NAB-like
+                                          directory with a data, label, results,
+                                          and config directory.
+
+    @param args             (namespace)   Class that holds many paramters of the
+                                          run.
+
+    @param detectorClasses  (list)        All the constructors for the detector
+                                          classes to be used in this run.
+    """
     self.rootDir = rootDir
     self.args = args
 
@@ -81,7 +90,6 @@ class Runner(object):
           outputDir=self.resultsDir))
 
     print "calling multiprocessing pool"
-
     self.pool.map(detectHelper, args)
 
 
@@ -141,6 +149,13 @@ class Runner(object):
     """
     Creates a dictionary of detectors with detector names as keys and detector
     classes as values.
+
+    @param constructors     (list)    All the constructors for the detector
+                                      classes to be used in this run.
+
+    @param                  (dict)    Dictionary with key value pairs of a
+                                      detector name and its corresponding
+                                      class constructor.
     """
     self.detectors = {}
     for c in constructors:
@@ -148,26 +163,29 @@ class Runner(object):
 
     return self.detectors
 
+
   def getCorpusLabel(self):
-    """
-    Collects the corpus label.
+    """Collects the corpus label.
+
+    @return (CorpusLabel)   Label of the entire corpus.
     """
     return CorpusLabel(self.labelDir, None, self.corp)
 
-  # def getConfig(self):
-  #   f = open(os.path.join(self.rootDir, self.args.config))
-  #   return yaml.load(f)
 
   def getProfiles(self):
+    """Collects profiles specifying the confusion matrix parameters of each user.
+
+    @return   (string)  The string version of the entire `user_profiles.yaml`
     """
-    Collects profiles specifying the confusion matrix parameters of each user.
-    """
-    f = open(os.path.join(self.rootDir, self.args.profiles))
-    return yaml.load(f)
+    with open(os.path.join(self.rootDir, self.args.profiles)) as f:
+      return yaml.load(f)
+
 
   def getNumCPUs(self):
-    """
-    Returns the number of CPUs on the system unless prespecified.
+    """Returns the number of CPUs on the system unless prespecified.
+
+    @return   (int)   Number of allowed CPUs that you can use to compute with.
+                      If none is given, call multiprocessing.cpu_count()
     """
     if not self.args.numCPUs:
       return multiprocessing.cpu_count()
@@ -183,10 +201,9 @@ def detectHelper(detectorInstance):
   print "Beginning detection with %s for %s" % (d.name, d.relativePath)
   detectorInstance.run()
 
+
 def scoreHelper(args):
-  """
-  Function called to score each file in the corpus.
-  """
+  """Function called to score each file in the corpus."""
   detector, username, relativePath, dataSet, windows, labels, \
   costMatrix, probationaryPeriod = args
 

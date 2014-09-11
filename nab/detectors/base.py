@@ -1,9 +1,31 @@
+# ----------------------------------------------------------------------
+# Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
+# with Numenta, Inc., for a separate license for this software code, the
+# following terms and conditions apply:
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 3 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see http://www.gnu.org/licenses.
+#
+# http://numenta.org/licenses/
+# ----------------------------------------------------------------------
+
 import os
 import sys
 import math
 import pandas
 import datetime
 from nab.lib.util import makeDirsExist
+
+
 
 class AnomalyDetector(object):
   """
@@ -23,18 +45,16 @@ class AnomalyDetector(object):
     self.dataSet = dataSet
     self.labels = labels
     self.name = name
-    self.probationaryPeriod = \
-      math.floor(probationaryPercent * dataSet.data.shape[0])
+    self.probationaryPeriod = math.floor(
+      probationaryPercent * dataSet.data.shape[0])
     self.outputDir = outputDir
     self.threshold = self.getThreshold()
 
   def getOutputPrefix(self):
-    """
-    Returns a string to use as a prefix to output file names.
+    """Returns a string to use as a prefix to output file names.
 
     This method MUST be overridden by subclasses.
     """
-
     return ""
 
   def getAdditionalHeaders(self):
@@ -45,7 +65,6 @@ class AnomalyDetector(object):
     This method MAY be overridden to provide the names for those
     columns.
     """
-
     return []
 
   def getThreshold(self):

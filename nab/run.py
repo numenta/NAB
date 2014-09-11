@@ -59,6 +59,7 @@ def getDetectorClassConstructors(detectors):
 
   return detectorConstructors
 
+
 if __name__ == "__main__":
 
   parser = argparse.ArgumentParser()

@@ -18,15 +18,22 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-
-
 import math
+
+
 
 class CostMatrix(object):
   """
   Class to store a costmatrix
   """
   def __init__(self, dictionary):
+    """
+    @param (dict)     Dictionary containing all the weights for each record
+                      type: True positive (tp)
+                            False positive (fp)
+                            True Negative (tn)
+                            False Negative (fn)
+    """
     self.tp = dictionary["tpCost"]
     self.tn = dictionary["tnCost"]
     self.fp = dictionary["fpCost"]
@@ -35,11 +42,16 @@ class CostMatrix(object):
 
 
 class Window(object):
-  """
-  Class to store a window in a dataset
-  """
+  """Class to store a window in a dataset."""
 
   def __init__(self, windowId, limits, labels):
+    """
+    @param windowId   (int)           An integer id for the window.
+
+    @limits           (tuple)         (start timestamp, end timestamp).
+
+    @labels           (pandas.Series) Raw rows of the data within the window.
+    """
     self.id = windowId
     self.t1, self.t2 = limits
     self.indices = self.getIndices(labels)
@@ -49,17 +61,23 @@ class Window(object):
 
 
   def getIndices(self, labels):
-    """
-    Given a set of labels, get the pandas index of the records within the window
+    """Given a set of labels, get the pandas index of the records within window.
+
+    @param    labels  (pandas.Series)                 Raw rows of the data
+                                                      within the window.
+
+    @return           (pandas.core.index.Int64Index)  Row indices of the labels
+                                                      within the window.
     """
     tmp = labels[labels["timestamp"] >= self.t1]
     windows = tmp[tmp["timestamp"] <= self.t2]
     return windows.index
 
   def getFirstTP(self):
-    """
-    Get the first instance of True positive within a window if it exists.
-    Otherwise, return -1
+    """Get the first instance of True positive within a window.
+
+    @return (int)   Index of the first occurence of the true positive within the
+                    window.
     """
     tp = self.labels[self.labels["type"] == "tp"]
     if len(tp):
@@ -68,50 +86,66 @@ class Window(object):
 
 
 class Scorer(object):
-  """
-  Class used to score a dataset
-  """
-  def __init__(self, predicted, labels, windowLimits, costMatrix, probationaryPeriod):
+  """Class used to score a dataset."""
+
+  def __init__(self,
+               predicted,
+               labels,
+               windowLimits,
+               costMatrix,
+               probationaryPeriod):
+    """
+    @param predicted           (pandas.Series)   Detector predictions of whether
+                                                 each record is anomalous or not.
+                                                 predictions[0:probationaryPeriod]
+                                                 is ignored.
+
+    @param labels              (pandas.Series)   Ground truth for each record.
+
+    @param windowLimits        (list)            All the window limits in tuple
+                                                 form: (timestamp start, timestamp
+                                                 end).
+
+    @param costmatrix          (dict)            Dictionary containing all the weights for each record
+                                                 type:  True positive (tp)
+                                                        False positive (fp)
+                                                        True Negative (tn)
+                                                        False Negative (fn)
+
+    @param probationaryPeriod  (int)             Row index after which predictions
+                                                 are scored.
+    """
     self.predicted = predicted
     self.labels = labels
     self.probationaryPeriod = probationaryPeriod
-    self.costMatrix = CostMatrix(costMatrix)
-    self.counts = None
-    self.totalCount = None
-    self.score = None
+    self.costMatrix = costMatrix
+    self.totalCount = len(self.predicted)
 
-    self.initCount()
-    self.windows = self.getWindows(windowLimits)
-
-
-  def initCount(self):
-    """
-    Initialize dictionary that counts the number of tp's, tn's, fp's, and fn's
-    """
     self.counts = {
     "tp": 0,
     "tn": 0,
     "fp": 0,
     "fn": 0}
 
-    self.totalCount = len(self.predicted)
+    self.score = None
+
+    self.windows = self.getWindows(windowLimits)
 
 
   def getWindows(self, limits):
-    """
-    Create list of windows of the dataset
+    """Create list of windows of the dataset.
+
+    @return (list)    All the window limits in tuple form: (timestamp start,
+                      timestamp end).
     """
     #SORT WINDOWS BEFORE PUTTING THEM IN LIST
+    self.getAlertTypes()
+    windows = [Window(i, limit, self.labels) for i, limit in enumerate(limits)]
+    return windows
 
-    self.getLabelTypes()
-    ans = [Window(i,limits[i],self.labels) for i in range(len(limits))]
-    return ans
 
-
-  def getLabelTypes(self):
-    """
-    Populate counts dictionary
-    """
+  def getAlertTypes(self):
+    """Populate counts dictionary."""
     types = []
 
     for i, row in self.labels.iterrows():
@@ -131,45 +165,48 @@ class Scorer(object):
 
 
   def getScore(self):
-    """
-    Score the dataset
-    """
+    """Score the dataset.
 
-    # collect TP scores
+    @return (float)    Quantified score for the given dataset.
+    """
     tpScore = 0
+    fnScore = 0
     for window in self.windows:
       tpIndex = window.getFirstTP()
       if tpIndex == -1:
-        tpScore -= 100
+        fnScore += self.costmatrix["fnWeight"]
       else:
         dist = (window.indices[-1] - tpIndex)/window.length
-        tpScore += (2*sigmoid(dist) - 0.5)*self.costMatrix.tp
+        tpScore += (2*sigmoid(dist) - 0.5)*self.costMatrix["tpWeight"]
 
-
-    # collect FP scores
     fpLabels = self.labels[self.labels["type"] == "fp"]
     fpScore = 0
-    for i, row in fpLabels.iterrows():
+    for i, _ in fpLabels.iterrows():
       windowId = self.getClosestPrecedingWindow(i)
       if windowId == -1:
-        fpScore -= 1
+        fpScore += self.costmatrix["fpWeight"]
         continue
 
       window = self.windows[windowId]
-      fpScore -= (sigmoid((window.indices[-1] - tpIndex)/window.length) - 0.5)*self.costMatrix.fp
 
-    score = tpScore + fpScore
+      dist = (window.indices[-1] - tpIndex)/window.length
+      fpScore += (sigmoid(dist) - 0.5)*self.costMatrix["fpWeight"]
+
+    score = tpScore - fpScore - fnScore
     self.score = score
 
     return score
 
 
-
-
   def getClosestPrecedingWindow(self, index):
-    """
-    given a record index, find the closest preceding window. This helps score
-    false positives.
+    """Given a record index, find the closest preceding window.
+
+    This helps score false positives.
+
+    @param  index   (int)   Index of a record.
+
+    @return         (int)   Window id for the last window preceding the given
+                            index.
     """
     minDistance = float("inf")
     windowId = -1
@@ -184,8 +221,10 @@ class Scorer(object):
 
 
 def sigmoid(x):
-  """
-  Monotonically decreasing function used to score true positives and false
-  positives.
+  """Monotonically decreasing function used to score.
+
+  @param  (float)
+
+  @return (float)
   """
   return 1 / (1 + math.exp(-x))
