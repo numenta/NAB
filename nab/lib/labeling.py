@@ -108,9 +108,11 @@ class CorpusLabel(object):
     self.labels = None
 
 
-  def getEverything(self):
+  def initialize(self):
     """Get boths labels and windows."""
+    print "Getting windows"
     self.getWindows()
+    print "Getting Labels"
     self.getLabels()
 
 

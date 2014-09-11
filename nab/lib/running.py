@@ -22,22 +22,23 @@ import os
 import math
 import pandas
 import yaml
-import logging
 import multiprocessing
+
+from datetime import datetime
 
 from nab.lib.corpus import Corpus
 from nab.lib.scoring import Scorer
-from nab.lib.util import (detectorClassToName, convertResultsPathToDataPath)
+from nab.lib.util import (detectorClassToName,
+                          convertResultsPathToDataPath,
+                          createPath)
 from nab.lib.labeling import CorpusLabel
-
-from collections import defaultdict
 
 
 
 class Runner(object):
   """Class to run a configured nab benchmark."""
 
-  def __init__(self, rootDir, args, detectorClasses):
+  def __init__(self, args):
     """
     @param rootDir          (string)      Source directory of NAB or NAB-like
                                           directory with a data, label, results,
@@ -49,62 +50,79 @@ class Runner(object):
     @param detectorClasses  (list)        All the constructors for the detector
                                           classes to be used in this run.
     """
-    self.rootDir = rootDir
     self.args = args
 
-    self.dataDir = os.path.join(self.rootDir, self.args.dataDir)
-    self.corp = Corpus(self.dataDir)
-
-    self.labelDir = os.path.join(self.rootDir, self.args.labelDir)
-    self.corpusLabel = self.getCorpusLabel()
-    self.corpusLabel.getEverything()
-
-    self.getDetectors(detectorClasses)
-    self.resultsDir = \
-    os.path.join(self.rootDir, args.resultsDir)
     self.probationaryPercent = args.probationaryPercent
 
-    self.profiles = self.getProfiles()
-    self.pool = multiprocessing.Pool(self.getNumCPUs())
+    self.pool = multiprocessing.Pool(args.numCPUs)
+
+    self.corpus = None
+    self.corpusLabel = None
+    self.profiles = None
 
 
-  def detect(self):
+  def initialize(self):
+
+    print "Creating corpus"
+    self.corpus = Corpus(self.args.dataDir)
+
+    print "Creating corpus label"
+    self.corpusLabel = CorpusLabel(self.args.labelDir, None, self.corpus)
+
+    print "Initializing corpus label"
+    self.corpusLabel.initialize()
+
+    print "Getting profiles"
+    self.profiles = yaml.load(open(self.args.profilesPath))
+
+
+  def detect(self, detectorClasses):
     """
     Function that takes a set of detectors and a corpus of data and creates a
     set of files storing the alerts and anomaly scores given by the detectors
-    """
-    print "Obtaining detections"
 
-    for detector, DetectorConstructor in self.detectors.iteritems():
+    @param detectorClasses
+    """
+    print "\nObtaining detections"
+
+    detectors = createDetectorDictionary(detectorClasses)
+    count = 0
+    for detectorName, detectorConstructor in detectors.iteritems():
       args = []
 
+      for relativePath, dataSet in self.corpus.dataSets.iteritems():
 
-      for relativePath, dataSet in self.corp.dataSets.iteritems():
+        args.append(
+          (
+            count,
+            detectorConstructor(
+                          dataSet=dataSet,
+                          probationaryPercent=self.probationaryPercent),
+            detectorName,
+            self.corpusLabel.labels[relativePath]["label"],
+            self.args.resultsDir,
+            relativePath
+          )
+        )
 
-        args.append(DetectorConstructor(
-          relativePath=relativePath,
-          dataSet=dataSet,
-          labels=self.corpusLabel.labels[relativePath],
-          name=detector,
-          probationaryPercent=self.probationaryPercent,
-          outputDir=self.resultsDir))
+        count += 1
 
     print "calling multiprocessing pool"
     self.pool.map(detectHelper, args)
 
 
-  def score(self):
+  def score(self, detectorNames):
     """
     Function that must be called after detection result files have been
     generated. This looks at the result files and scores the performance of each
     detector specified and stores these results in a csv file.
     """
-    print "Obtaining Scores"
+    print "\nObtaining Scores"
     ans = pandas.DataFrame(columns=("Detector", "Username", "File",
       "Score", "tp", "tn", "fp", "fn", "Total_Count"))
 
-    for detector in self.detectors.keys():
-      resultsDetectorDir = os.path.join(self.resultsDir, detector)
+    for detector in detectorNames:
+      resultsDetectorDir = os.path.join(self.args.resultsDir, detector)
       resultsCorpus = Corpus(resultsDetectorDir)
 
       args = []
@@ -114,7 +132,6 @@ class Runner(object):
         costMatrix = profile["CostMatrix"]
 
         for relativePath, dataSet in resultsCorpus.dataSets.iteritems():
-
 
           relativePath = convertResultsPathToDataPath( \
             os.path.join(detector, relativePath))
@@ -129,7 +146,7 @@ class Runner(object):
             [detector,
              username,
              relativePath,
-             dataSet,
+             dataSet.data["alerts"],
              windows,
              labels,
              costMatrix,
@@ -138,76 +155,71 @@ class Runner(object):
       print "calling multiprocessing pool"
       results = self.pool.map(scoreHelper, args)
 
-
       for i in range(len(results)):
         ans.loc[i] = results[i]
 
       scorePath = os.path.join(resultsDetectorDir, detector + "_scores.csv")
       ans.to_csv(scorePath, index=False)
 
-  def getDetectors(self, constructors):
-    """
-    Creates a dictionary of detectors with detector names as keys and detector
-    classes as values.
 
-    @param constructors     (list)    All the constructors for the detector
-                                      classes to be used in this run.
+def createDetectorDictionary(constructors):
+  """
+  Creates a dictionary of detectors with detector names as keys and detector
+  classes as values.
 
-    @param                  (dict)    Dictionary with key value pairs of a
-                                      detector name and its corresponding
-                                      class constructor.
-    """
-    self.detectors = {}
-    for c in constructors:
-      self.detectors[detectorClassToName(c)] = c
+  @param constructors     (list)    All the constructors for the detector
+                                    classes to be used in this run.
 
-    return self.detectors
+  @param                  (dict)    Dictionary with key value pairs of a
+                                    detector name and its corresponding
+                                    class constructor.
+  """
+  detectors = {}
+  for c in constructors:
+    detectors[detectorClassToName(c)] = c
 
-
-  def getCorpusLabel(self):
-    """Collects the corpus label.
-
-    @return (CorpusLabel)   Label of the entire corpus.
-    """
-    return CorpusLabel(self.labelDir, None, self.corp)
+  return detectors
 
 
-  def getProfiles(self):
-    """Collects profiles specifying the confusion matrix parameters of each user.
-
-    @return   (string)  The string version of the entire `user_profiles.yaml`
-    """
-    with open(os.path.join(self.rootDir, self.args.profiles)) as f:
-      return yaml.load(f)
-
-
-  def getNumCPUs(self):
-    """Returns the number of CPUs on the system unless prespecified.
-
-    @return   (int)   Number of allowed CPUs that you can use to compute with.
-                      If none is given, call multiprocessing.cpu_count()
-    """
-    if not self.args.numCPUs:
-      return multiprocessing.cpu_count()
-    return int(self.args.numCPUs)
-
-
-def detectHelper(detectorInstance):
+def detectHelper(args):
   """
   Function called in each detector process that run the detector that it is
   given.
   """
-  d = detectorInstance
-  print "Beginning detection with %s for %s" % (d.name, d.relativePath)
-  detectorInstance.run()
+  (i, detectorInstance, detectorName, labels, outputDir, relativePath) = args
+
+  relativeDir, fileName = os.path.split(relativePath)
+  fileName =  detectorName + "_" + fileName
+  outputPath = os.path.join(outputDir, detectorName, relativeDir, fileName)
+  createPath(outputPath)
+
+  print "%s: Beginning detection with %s for %s" % \
+                                                (i, detectorName, relativePath)
+
+  results = detectorInstance.run()
+
+  results["label"] = labels
+
+  results.to_csv(outputPath, index=False, float_format="%.3f")
+
+  print "%s: Completed processing %s records  at %s" % \
+                                        (i, len(results.index), datetime.now())
+  print "%s: Results have been written to %s" % (i, outputPath)
+
 
 
 def scoreHelper(args):
-  """Function called to score each file in the corpus."""
-  detector, username, relativePath, dataSet, windows, labels, \
-  costMatrix, probationaryPeriod = args
-
-  predicted = dataSet.data["alerts"]
+  """
+  Function called to score each file in the corpus.
+  """
+  (detectorName,
+   username,
+   relativePath,
+   predicted,
+   windows,
+   labels,
+   costMatrix,
+   probationaryPeriod) = args
 
   scorer = Scorer(
     predicted=predicted,
@@ -220,6 +232,6 @@ def scoreHelper(args):
 
   counts = scorer.counts
 
-  return detector, username, relativePath, scorer.score, \
+  return detectorName, username, relativePath, scorer.score, \
   counts["tp"], counts["tn"], counts["fp"], counts["fn"], \
   scorer.totalCount

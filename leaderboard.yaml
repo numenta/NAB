@@ -1,9 +1,0 @@
-
-# Each DataGroup should have its own scores. For now we'll just list the
-# total.
-FullCorpus:
-    Detector: "Numenta"
-    Notes: ""
-    CorpusVersion: "0.1.0"
-    Score: 6836.0
-    Reference: "http://www.numenta.org/nab.pdf"

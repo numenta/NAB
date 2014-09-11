@@ -4,11 +4,10 @@
 # A user for whom missing an anomaly is 10x as costly as each false positive
 Jay_Gokhale:
   CostMatrix:
-    tpCost: 500.0
-    fnCost: 1.0
-    fpCost: 1.0
-    tnCost: 1.0
-  ScoringWindow: 120
+    tpWeight: 500.0
+    fnWeight: 1.0
+    fpWeight: 1.0
+    tnWeight: 1.0
 
 # UserA:
 #     CostMatrix:

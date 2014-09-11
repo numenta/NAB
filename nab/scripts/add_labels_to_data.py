@@ -18,19 +18,19 @@
 #
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
-
-
-
 import os
 import argparse
-
+import sys
+import pandas
 from nab.lib.corpus import Corpus
 from nab.lib.labeling import CorpusLabel
-from nab.lib.util import recur
+from nab.lib.util import recur, checkInputs
 
 depth = 3
 
 root = recur(os.path.dirname, os.path.realpath(__file__), depth)
+
+
 
 def main(args):
 
@@ -39,15 +39,23 @@ def main(args):
     args.dataDir = os.path.join(root, args.dataDir)
     args.destDir = os.path.join(root, args.destDir)
 
-  print args.dataDir
-  corpus = Corpus(args.dataDir)
-  corpusLabel = CorpusLabel(args.labelDir, corpus=corpus)
+  if not checkInputs(args):
+    return
 
+  corpus = Corpus(args.dataDir)
+
+  corpusLabel = CorpusLabel(args.labelDir, corp=corpus)
   corpusLabel.getEverything()
 
-  corpus.addColumn("label", corpusLabel.rawLabels)
+  columnData = dict()
+  for relativePath in corpusLabel.labels.keys():
+    columnData[relativePath] = pandas.Series(corpusLabel.labels[relativePath]["label"])
 
-  corpus.copy(args.destDir)
+  corpus.addColumn("label", columnData)
+
+  corpus.copy(newRoot=args.destDir)
+
+  print "Done adding column!"
 
 
 if __name__ == "__main__":

@@ -22,7 +22,6 @@ import os
 import sys
 import math
 import pandas
-import datetime
 from nab.lib.util import makeDirsExist
 
 
@@ -34,20 +33,12 @@ class AnomalyDetector(object):
   """
 
   def __init__( self,
-                relativePath,
                 dataSet,
-                labels,
-                name,
-                probationaryPercent,
-                outputDir):
+                probationaryPercent):
 
-    self.relativePath = relativePath
     self.dataSet = dataSet
-    self.labels = labels
-    self.name = name
     self.probationaryPeriod = math.floor(
       probationaryPercent * dataSet.data.shape[0])
-    self.outputDir = outputDir
     self.threshold = self.getThreshold()
 
   def getOutputPrefix(self):
@@ -56,6 +47,7 @@ class AnomalyDetector(object):
     This method MUST be overridden by subclasses.
     """
     return ""
+
 
   def getAdditionalHeaders(self):
     """
@@ -67,6 +59,7 @@ class AnomalyDetector(object):
     """
     return []
 
+
   def getThreshold(self):
     """
     Returns a float between 0.0 and 1.0. This will be used to decide if a given
@@ -76,6 +69,7 @@ class AnomalyDetector(object):
     """
     pass
 
+
   def configureDetector(self, probationaryPeriodData):
     """
     Takes the probationary period data and is allowed to do any statistical
@@ -83,14 +77,13 @@ class AnomalyDetector(object):
     """
     pass
 
-  def configure(self, probationaryPeriodData):
-    calcMin = probationaryPeriodData.min()
-    calcMax = probationaryPeriodData.max()
-    calcRange = abs(calcMax - calcMin)
-    calcPad = calcRange * .2
 
-    self.inputMin = calcMin - calcPad
-    self.inputMax = calcMax + calcPad
+  def configure(self, probationaryPeriodData):
+    """
+    This functions takes the probationary period data and calculates some.
+    """
+    self.inputMin = probationaryPeriodData.min()
+    self.inputMax = probationaryPeriodData.max()
     self.configureDetector(probationaryPeriodData)
 
 
@@ -105,37 +98,33 @@ class AnomalyDetector(object):
     """
     pass
 
-  def getOutputPathAndHeader(self):
-    relativeDir, fileName = os.path.split(self.relativePath)
 
-    fileName =  self.name + "_" + fileName
-    outputDir = os.path.join(self.outputDir, self.name, relativeDir)
-    makeDirsExist(outputDir)
-    outputPath = os.path.join(outputDir, fileName)
-
+  def getHeader(self):
+    """
+    Gets the outputPath and all the headers needed to write the results files.
+    """
     headers = ["timestamp",
                 "value",
-                "label",
                 "anomaly_score"]
 
     headers.extend(self.getAdditionalHeaders())
 
     headers.append("alerts")
 
-    return outputPath, headers
+    return headers
+
 
   def run(self):
+    """
+    Main function that is called to collect anomaly scores for a given file.
+    """
     self.configure(self.dataSet.data["value"].loc[:self.probationaryPeriod])
 
-    outputPath, headers = self.getOutputPathAndHeader()
+    headers = self.getHeader()
 
     ans = pandas.DataFrame(columns=headers)
     # print "for loop: %d", id(self)
     for i, row in self.dataSet.data.iterrows():
-      # print "beginning label %s: %d\n"% (str(self.labels), id(self))
-      # print "label: %d\n"% (id(self))
-
-      label = self.labels["label"][i]
 
       # print "row to inputData: %d", id(self)
       inputData = row.to_dict()
@@ -144,10 +133,10 @@ class AnomalyDetector(object):
       detectorValues = self.handleRecord(inputData)
 
       # print "thresholdedValues: %d", id(self)
-      thresholdedValues = 1 if detectorValues[0] >= self.threshold else 0
+      thresholdedValue = 1 if detectorValues[0] >= self.threshold else 0
 
       # print "outputrow: %d", id(self)
-      outputRow = list(row) + [label] + detectorValues + [thresholdedValues]
+      outputRow = list(row) + list(detectorValues) + [thresholdedValue]
 
       ans.loc[i] = outputRow
 
@@ -156,9 +145,6 @@ class AnomalyDetector(object):
         print ".",
         sys.stdout.flush()
 
-    # print "writing to file(%s): %d" % (outputPath, id(self))
-    ans.to_csv(outputPath, index=False)
+    print
+    return ans
 
-    print "\nCompleted processing", i, "records at", datetime.datetime.now()
-    print "Results for", self.dataSet.fileName,
-    print "have been written to %s" %(outputPath)
