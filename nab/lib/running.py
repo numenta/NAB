@@ -46,8 +46,6 @@ class Runner(object):
     """
     self.args = args
 
-    self.probationaryPercent = args.probationaryPercent
-
     self.pool = multiprocessing.Pool(args.numCPUs)
 
     self.corpus = None
@@ -91,7 +89,7 @@ class Runner(object):
             count,
             detectorConstructor(
                           dataSet=dataSet,
-                          probationaryPercent=self.probationaryPercent),
+                          probationaryPercent=self.args.probationaryPercent),
             detectorName,
             self.corpusLabel.labels[relativePath]["label"],
             self.args.resultsDir,
@@ -126,7 +124,7 @@ class Runner(object):
           costMatrix,
           resultsCorpus,
           self.corpusLabel,
-          self.probationaryPercent))
+          self.args.probationaryPercent))
 
     return thresholds
 
@@ -149,7 +147,7 @@ class Runner(object):
 
       for username, profile in self.profiles.iteritems():
 
-        costMatrix = profile["costMatrix"]
+        costMatrix = profile["CostMatrix"]
 
         threshold = detectorThresholds[detector][username]["threshold"]
 
@@ -162,7 +160,7 @@ class Runner(object):
           labels = self.corpusLabel.labels[relativePath]
 
           probationaryPeriod = math.floor(
-            self.probationaryPercent * labels.shape[0])
+            self.args.probationaryPercent * labels.shape[0])
 
           predicted = convertAnomalyScoresToDetections(
             dataSet.data["anomaly_score"], threshold)
@@ -233,15 +231,14 @@ def detectHelper(args):
   print "%s: Results have been written to %s" % (i, outputPath)
 
 
-def optimize(args):
-  threshold = 0.9999877929687505
-  step = 0.00000001
-  bestScore = fitnessFunction(args, threshold)
-  # print "Got to beginning of optimize function"
+def optimize(args, tolerance=0.00001):
+  threshold = 0.5
+  step = 0.1
+  bestScore = fitnessFunction(threshold, args)
 
-  while step > 0.00001:
+  while step > tolerance:
     threshold += step
-    score = fitnessFunction(args, threshold)
+    score = fitnessFunction(threshold, args)
 
     if score > bestScore:
       bestScore = score
@@ -249,7 +246,7 @@ def optimize(args):
 
     else:
       threshold -= 2*step
-      score = fitnessFunction(args, threshold)
+      score = fitnessFunction(threshold, args)
 
       if score > bestScore:
         bestScore = score
@@ -267,8 +264,7 @@ def optimize(args):
           "score": bestScore}
 
 
-def fitnessFunction(args, threshold):
-  # print "begin fitnessFunction"
+def fitnessFunction(threshold, args):
   if not 0 <= threshold <= 1:
     return float("-inf")
 

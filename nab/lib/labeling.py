@@ -136,15 +136,21 @@ class CorpusLabel(object):
     corresponding binary vector of anomaly labels. Labels are simple a more
     verbose version of the windows.
     """
-    with open(os.path.join(self.labelDir, "corpus_labels.json"), "r") as lFile:
-      labels = json.load(lFile)
-    self.rawLabels = labels
+
     self.labels = {}
 
-    for relativePath, value in labels.iteritems():
-      value = pandas.io.json.read_json(value)
-      value["timestamp"] = value["timestamp"].apply(strp)
-      self.labels[relativePath] = value
+    for relativePath, dataSet in self.corpus.dataSets.iteritems():
+      windows = self.windows[relativePath]
+
+      labels = pandas.DataFrame({"timestamp": dataSet.data["timestamp"]})
+      labels['label'] = 0
+
+      for t1, t2 in windows:
+        subset = labels[labels["timestamp"] > t1][labels["timestamp"] < t2]
+        indices = subset.loc[:,"label"].index
+        labels["label"].values[indices] = 1
+
+      self.labels[relativePath] = labels
 
 
 class LabelCombiner(object):
