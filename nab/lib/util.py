@@ -23,8 +23,38 @@ import datetime
 import dateutil
 import sys
 import pprint
+import yaml
 import pandas
 
+
+
+def updateThresholds(newThresholds, thresholdsFilePath):
+  if os.path.exists(thresholdsFilePath):
+    with open(thresholdsFilePath) as inFile:
+      oldThresholds = yaml.load(inFile)
+  else:
+    oldThresholds = dict()
+
+  if not isinstance(oldThresholds, dict):
+    raise ValueError("Incorrect type given to updateThresholds")
+
+  for detector, usernameDictionary in newThresholds.iteritems():
+    if detector not in oldThresholds:
+      oldThresholds[detector] = newThresholds[detector]
+      continue
+
+    for username, data in usernameDictionary.iteritems():
+      if username not in oldThresholds[detector]:
+        oldThresholds[detector][username] = data
+        continue
+
+      if data["score"] > oldThresholds[detector][username]["score"]:
+        oldThresholds[detector][username] = data
+
+  with open(thresholdsFilePath, "w") as outFile:
+    outFile.write(yaml.dump(oldThresholds))
+
+  return oldThresholds
 
 
 def checkInputs(args):

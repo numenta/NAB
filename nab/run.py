@@ -19,27 +19,27 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-
-
 import os
 import argparse
-
+import yaml
 from nab.lib.running import Runner
-from nab.lib.util import recur, detectorNameToClass, checkInputs
+from nab.lib.util import (recur,
+                         detectorNameToClass,
+                         checkInputs,
+                         updateThresholds)
 
 from nab.detectors.numenta.numenta_detector import NumentaDetector
 from nab.detectors.skyline.skyline_detector import SkylineDetector
-
 
 depth = 2
 
 root = recur(os.path.dirname, os.path.realpath(__file__), depth)
 
-def main(args):
-  runner = Runner(args)
-  runner.initialize()
 
-  if not (args.detect and  args.score and args.optimize):
+
+def main(args):
+
+  if not args.detect and not args.score and not args.optimize:
     args.detect = True
     args.optimize = True
     args.score = True
@@ -48,6 +48,10 @@ def main(args):
   args.labelDir = os.path.join(root, args.labelDir)
   args.resultsDir = os.path.join(root, args.resultsDir)
   args.profilesPath = os.path.join(root, args.profilesPath)
+  args.thresholdPath = os.path.join(root, args.thresholdPath)
+
+  runner = Runner(args)
+  runner.initialize()
 
   if args.detect:
     detectorConstructors = getDetectorClassConstructors(args.detectors)
@@ -55,14 +59,17 @@ def main(args):
 
   if args.optimize:
     detectorThresholds = runner.optimize_threshold(args.detectors)
+    detectorThresholds = updateThresholds(detectorThresholds, args.thresholdPath)
+  else:
+    with open(args.thresholdPath) as thresholdConfigFile:
+      detectorThresholds = yaml.load(thresholdConfigFile)
 
   if args.score:
-    detectorThresholds = {'numenta': {'Jay_Gokhale': 0.9999877929687505}}
-    runner.score(detectorThresholds)
+    print detectorThresholds
+    runner.score(args.detectors, detectorThresholds)
 
 
 def getDetectorClassConstructors(detectors):
-
   detectorClassNames = [detectorNameToClass(d) for d in detectors]
 
   detectorConstructors = [globals()[className] for className in detectorClassNames]
@@ -115,6 +122,11 @@ if __name__ == "__main__":
                     default="config/user_profiles.yaml",
                     help="The configuration file to use while running the "
                     "benchmark.")
+
+  parser.add_argument("-t", "--thresholdPath",
+                    default="config/threshold_config.yaml",
+                    help="The configuration file that stores thresholds for \
+                    each combination of detector and username")
 
   parser.add_argument("-n", "--numCPUs",
                     default=None,

@@ -41,15 +41,8 @@ class Runner(object):
 
   def __init__(self, args):
     """
-    @param rootDir          (string)      Source directory of NAB or NAB-like
-                                          directory with a data, label, results,
-                                          and config directory.
-
     @param args             (namespace)   Class that holds many paramters of the
                                           run.
-
-    @param detectorClasses  (list)        All the constructors for the detector
-                                          classes to be used in this run.
     """
     self.args = args
 
@@ -135,12 +128,10 @@ class Runner(object):
           self.corpusLabel,
           self.probationaryPercent))
 
-    print thresholds
     return thresholds
 
 
-
-  def score(self, detectorThresholds):
+  def score(self, detectors, detectorThresholds):
     """
     Function that must be called after detection result files have been
     generated. This looks at the result files and scores the performance of each
@@ -150,7 +141,7 @@ class Runner(object):
     ans = pandas.DataFrame(columns=("Detector", "Username", "File",
       "Threshold", "Score", "tp", "tn", "fp", "fn", "Total_Count"))
 
-    for detector in detectorThresholds.keys():
+    for detector in detectors:
       resultsDetectorDir = os.path.join(self.args.resultsDir, detector)
       resultsCorpus = Corpus(resultsDetectorDir)
 
@@ -158,9 +149,9 @@ class Runner(object):
 
       for username, profile in self.profiles.iteritems():
 
-        costMatrix = profile["CostMatrix"]
+        costMatrix = profile["costMatrix"]
 
-        threshold = detectorThresholds[detector][username]
+        threshold = detectorThresholds[detector][username]["threshold"]
 
         for relativePath, dataSet in resultsCorpus.dataSets.iteritems():
 
@@ -243,8 +234,8 @@ def detectHelper(args):
 
 
 def optimize(args):
-  threshold = 0.5
-  step = 0.1
+  threshold = 0.9999877929687505
+  step = 0.00000001
   bestScore = fitnessFunction(args, threshold)
   # print "Got to beginning of optimize function"
 
@@ -272,7 +263,8 @@ def optimize(args):
     print "step:", step
     print
 
-  return threshold
+  return {"threshold": threshold,
+          "score": bestScore}
 
 
 def fitnessFunction(args, threshold):
