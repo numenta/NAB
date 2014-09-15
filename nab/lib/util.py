@@ -23,11 +23,24 @@ import datetime
 import dateutil
 import sys
 import pprint
+import pandas
+
+
 
 def checkInputs(args):
   pprint.pprint(vars(args))
   return input("Enter 1 to proceed, 0 otherwise: ")
 
+
+def convertAnomalyScoresToDetections(anomalyScores, threshold):
+  length = len(anomalyScores)
+  detections = pandas.Series([0]*length)
+
+  alerts = anomalyScores[anomalyScores >= threshold].index
+
+  detections[alerts] = 1
+
+  return detections
 
 def relativeFilePaths(directory):
   """Given directory, gets the path of all files within relative to the directory.

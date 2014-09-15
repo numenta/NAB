@@ -22,7 +22,6 @@
 
 
 import os
-import yaml
 import argparse
 
 from nab.lib.running import Runner
@@ -37,21 +36,29 @@ depth = 2
 root = recur(os.path.dirname, os.path.realpath(__file__), depth)
 
 def main(args):
+  runner = Runner(args)
+  runner.initialize()
+
+  if not (args.detect and  args.score and args.optimize):
+    args.detect = True
+    args.optimize = True
+    args.score = True
 
   args.dataDir = os.path.join(root, args.dataDir)
   args.labelDir = os.path.join(root, args.labelDir)
   args.resultsDir = os.path.join(root, args.resultsDir)
   args.profilesPath = os.path.join(root, args.profilesPath)
 
-  runner = Runner(args)
-  runner.initialize()
-
-  if not args.scoreOnly:
+  if args.detect:
     detectorConstructors = getDetectorClassConstructors(args.detectors)
     runner.detect(detectorConstructors)
 
-  if not args.detectOnly:
-    runner.score(args.detectors)
+  if args.optimize:
+    detectorThresholds = runner.optimize_threshold(args.detectors)
+
+  if args.score:
+    detectorThresholds = {'numenta': {'Jay_Gokhale': 0.9999877929687505}}
+    runner.score(detectorThresholds)
 
 
 def getDetectorClassConstructors(detectors):
@@ -62,19 +69,24 @@ def getDetectorClassConstructors(detectors):
 
   return detectorConstructors
 
-
 if __name__ == "__main__":
 
   parser = argparse.ArgumentParser()
 
-  parser.add_argument("--detectOnly",
+  parser.add_argument("--detect",
                     help="Generate detector results but do not analyze results \
                     files.",
                     default=False,
                     action="store_true")
 
-  parser.add_argument("--scoreOnly",
+  parser.add_argument("--score",
                     help="Analyze results in the results directory",
+                    default=False,
+                    action="store_true")
+
+  parser.add_argument("--optimize",
+                    help="Optimize the thresholds for each detector and user \
+                    profile combination",
                     default=False,
                     action="store_true")
 

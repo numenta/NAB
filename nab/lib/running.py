@@ -30,7 +30,8 @@ from nab.lib.corpus import Corpus
 from nab.lib.scoring import Scorer
 from nab.lib.util import (detectorClassToName,
                           convertResultsPathToDataPath,
-                          createPath)
+                          createPath,
+                          convertAnomalyScoresToDetections)
 from nab.lib.labeling import CorpusLabel
 
 
@@ -111,7 +112,35 @@ class Runner(object):
     self.pool.map(detectHelper, args)
 
 
-  def score(self, detectorNames):
+  def optimize_threshold(self, detectorNames):
+    print "\nOptimizing anomaly Scores"
+
+    thresholds = dict()
+
+    for detector in detectorNames:
+      resultsDetectorDir = os.path.join(self.args.resultsDir, detector)
+      resultsCorpus = Corpus(resultsDetectorDir)
+
+      thresholds[detector] = dict()
+
+      for username, profile in self.profiles.iteritems():
+        costMatrix = profile["CostMatrix"]
+
+        thresholds[detector][username] = optimize(
+          (self.pool,
+          detector,
+          username,
+          costMatrix,
+          resultsCorpus,
+          self.corpusLabel,
+          self.probationaryPercent))
+
+    print thresholds
+    return thresholds
+
+
+
+  def score(self, detectorThresholds):
     """
     Function that must be called after detection result files have been
     generated. This looks at the result files and scores the performance of each
@@ -119,9 +148,9 @@ class Runner(object):
     """
     print "\nObtaining Scores"
     ans = pandas.DataFrame(columns=("Detector", "Username", "File",
-      "Score", "tp", "tn", "fp", "fn", "Total_Count"))
+      "Threshold", "Score", "tp", "tn", "fp", "fn", "Total_Count"))
 
-    for detector in detectorNames:
+    for detector in detectorThresholds.keys():
       resultsDetectorDir = os.path.join(self.args.resultsDir, detector)
       resultsCorpus = Corpus(resultsDetectorDir)
 
@@ -130,6 +159,8 @@ class Runner(object):
       for username, profile in self.profiles.iteritems():
 
         costMatrix = profile["CostMatrix"]
+
+        threshold = detectorThresholds[detector][username]
 
         for relativePath, dataSet in resultsCorpus.dataSets.iteritems():
 
@@ -142,24 +173,28 @@ class Runner(object):
           probationaryPeriod = math.floor(
             self.probationaryPercent * labels.shape[0])
 
+          predicted = convertAnomalyScoresToDetections(
+            dataSet.data["anomaly_score"], threshold)
+
           args.append(
             [detector,
              username,
              relativePath,
-             dataSet.data["alerts"],
+             threshold,
+             predicted,
              windows,
              labels,
              costMatrix,
              probationaryPeriod])
 
-      print "calling multiprocessing pool"
-      results = self.pool.map(scoreHelper, args)
+    print "calling multiprocessing pool"
+    results = self.pool.map(scoreHelper, args)
 
-      for i in range(len(results)):
-        ans.loc[i] = results[i]
+    for i in range(len(results)):
+      ans.loc[i] = results[i]
 
-      scorePath = os.path.join(resultsDetectorDir, detector + "_scores.csv")
-      ans.to_csv(scorePath, index=False)
+    scorePath = os.path.join(resultsDetectorDir, "scores.csv")
+    ans.to_csv(scorePath, index=False)
 
 
 def createDetectorDictionary(constructors):
@@ -207,6 +242,87 @@ def detectHelper(args):
   print "%s: Results have been written to %s" % (i, outputPath)
 
 
+def optimize(args):
+  threshold = 0.5
+  step = 0.1
+  bestScore = fitnessFunction(args, threshold)
+  # print "Got to beginning of optimize function"
+
+  while step > 0.00001:
+    threshold += step
+    score = fitnessFunction(args, threshold)
+
+    if score > bestScore:
+      bestScore = score
+      step *= 2
+
+    else:
+      threshold -= 2*step
+      score = fitnessFunction(args, threshold)
+
+      if score > bestScore:
+        bestScore = score
+        step *= 2
+      else:
+        threshold += step
+        step *= 0.5
+
+    print "threshold:", threshold
+    print "bestScore:", bestScore
+    print "step:", step
+    print
+
+  return threshold
+
+
+def fitnessFunction(args, threshold):
+  # print "begin fitnessFunction"
+  if not 0 <= threshold <= 1:
+    return float("-inf")
+
+  score = 0
+  (pool,
+   detector,
+   username,
+   costMatrix,
+   resultsCorpus,
+   corpusLabel,
+   probationaryPercent) = args
+
+  args = []
+  for relativePath, dataSet in resultsCorpus.dataSets.iteritems():
+
+    relativePath = convertResultsPathToDataPath( \
+      os.path.join(detector, relativePath))
+
+    windows = corpusLabel.windows[relativePath]
+    labels = corpusLabel.labels[relativePath]
+
+    probationaryPeriod = math.floor(
+      probationaryPercent * labels.shape[0])
+
+    predicted = convertAnomalyScoresToDetections(
+      dataSet.data["anomaly_score"], threshold)
+
+    args.append((
+      detector,
+      username,
+      relativePath,
+      threshold,
+      predicted,
+      windows,
+      labels,
+      costMatrix,
+      probationaryPeriod))
+
+  results = pool.map(scoreHelper, args)
+  score = 0
+
+  for r in results:
+    score += r[4]
+
+  return score
+
 
 def scoreHelper(args):
   """
@@ -215,6 +331,7 @@ def scoreHelper(args):
   (detectorName,
    username,
    relativePath,
+   threshold,
    predicted,
    windows,
    labels,
@@ -232,6 +349,6 @@ def scoreHelper(args):
 
   counts = scorer.counts
 
-  return detectorName, username, relativePath, scorer.score, \
+  return detectorName, username, relativePath, threshold, scorer.score, \
   counts["tp"], counts["tn"], counts["fp"], counts["fn"], \
   scorer.totalCount

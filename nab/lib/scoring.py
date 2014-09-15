@@ -53,25 +53,30 @@ class Window(object):
     @labels           (pandas.Series) Raw rows of the data within the window.
     """
     self.id = windowId
+    # print "window ID:", windowId
     self.t1, self.t2 = limits
-    self.indices = self.getIndices(labels)
+    # print "Limits: [%s, %s]" %(self.t1, self.t2)
+
+    tmp = labels[labels["timestamp"] >= self.t1]
+
+    self.window = tmp[tmp["timestamp"] <= self.t2]
+
+    # print "window:", self.window
+
+    # print "setting window index"
+    self.indices = self.window.index
+
+    # print
     self.labels = labels
+
+    # print "setting self.length"
     self.length = len(self.indices)
+
+    # print "Getting first TP"
     self.firstTP = self.getFirstTP()
 
+    # print "firstTP", self.firstTP
 
-  def getIndices(self, labels):
-    """Given a set of labels, get the pandas index of the records within window.
-
-    @param    labels  (pandas.Series)                 Raw rows of the data
-                                                      within the window.
-
-    @return           (pandas.core.index.Int64Index)  Row indices of the labels
-                                                      within the window.
-    """
-    tmp = labels[labels["timestamp"] >= self.t1]
-    windows = tmp[tmp["timestamp"] <= self.t2]
-    return windows.index
 
   def getFirstTP(self):
     """Get the first instance of True positive within a window.
@@ -79,7 +84,7 @@ class Window(object):
     @return (int)   Index of the first occurence of the true positive within the
                     window.
     """
-    tp = self.labels[self.labels["type"] == "tp"]
+    tp = self.window[self.window["type"] == "tp"]
     if len(tp):
       return tp.iloc[0].name
     return -1
@@ -134,7 +139,7 @@ class Scorer(object):
     "fn": 0}
 
     self.score = None
-
+    self.length = len(predicted)
     self.windows = self.getWindows(windowLimits)
 
 
@@ -180,23 +185,23 @@ class Scorer(object):
     for window in self.windows:
       tpIndex = window.getFirstTP()
       if tpIndex == -1:
-        fnScore += self.costmatrix["fnWeight"]
+        fnScore += self.costMatrix["fnWeight"]
       else:
-        dist = (window.indices[-1] - tpIndex)/window.length
-        tpScore += (2*sigmoid(dist) - 0.5)*self.costMatrix["tpWeight"]
+        dist = (window.indices[-1] - tpIndex)/self.length
+        tpScore += (2*sigmoid(dist) - 1)*self.costMatrix["tpWeight"]
 
     fpLabels = self.labels[self.labels["type"] == "fp"]
     fpScore = 0
     for i, _ in fpLabels.iterrows():
       windowId = self.getClosestPrecedingWindow(i)
       if windowId == -1:
-        fpScore += self.costmatrix["fpWeight"]
+        fpScore += self.costMatrix["fpWeight"]
         continue
 
       window = self.windows[windowId]
 
-      dist = (window.indices[-1] - tpIndex)/window.length
-      fpScore += (sigmoid(dist) - 0.5)*self.costMatrix["fpWeight"]
+      dist = (window.indices[-1] - tpIndex)/self.length
+      fpScore += (2*sigmoid(dist) - 1)*self.costMatrix["fpWeight"]
 
     score = tpScore - fpScore - fnScore
     self.score = score
