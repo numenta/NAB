@@ -94,6 +94,8 @@ function render() {
   var query = document.getElementById("query").value;
   var count = 0;
 
+  var blockRedraw = false;
+
   for (var i = 0; i < filePaths.length; i++) {
     if (filePaths[i].indexOf(query) > -1) {
       graphs.push(
@@ -113,7 +115,6 @@ function render() {
             },
             legend: "always",
             title: filePaths[i],
-
             drawCallback: function (me, initial) {
               if (blockRedraw || initial) return;
               blockRedraw = true;
@@ -133,6 +134,23 @@ function render() {
               timestamp = moment(new Date(point.xval));
               timestampString = timestamp.format("YYYY-MM-DD HH-mm-ss.SSS000");
               alert(timestampString);
+            },
+            underlayCallback: function(canvas, area, g) {
+              var rowVal = g.getValue(0,1);
+              var rowTime = g.getValue(0,0);
+
+              var left = g.toDomCoords(rowTime, rowVal)[0];
+
+
+              row = Math.round(0.15*g.numRows());
+
+              rowVal = g.getValue(row,1);
+              rowTime = g.getValue(row,0);
+
+              var right = g.toDomCoords(rowTime, rowVal)[0]
+
+              canvas.fillStyle = "rgba(150, 150, 150, 1.0)";
+              canvas.fillRect(left, area.y, right - left, area.h);
             }
           }
         )
