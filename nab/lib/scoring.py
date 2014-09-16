@@ -18,6 +18,9 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
+import os
+from nab.lib.util import (convertResultsPathToDataPath,
+                          convertAnomalyScoresToDetections)
 import math
 
 
@@ -52,30 +55,17 @@ class Window(object):
 
     @labels           (pandas.Series) Raw rows of the data within the window.
     """
+    self.labels = labels
     self.id = windowId
-    # print "window ID:", windowId
     self.t1, self.t2 = limits
-    # print "Limits: [%s, %s]" %(self.t1, self.t2)
 
     tmp = labels[labels["timestamp"] >= self.t1]
-
     self.window = tmp[tmp["timestamp"] <= self.t2]
 
-    # print "window:", self.window
-
-    # print "setting window index"
     self.indices = self.window.index
-
-    # print
-    self.labels = labels
-
-    # print "setting self.length"
     self.length = len(self.indices)
 
-    # print "Getting first TP"
     self.firstTP = self.getFirstTP()
-
-    # print "firstTP", self.firstTP
 
 
   def getFirstTP(self):
@@ -239,3 +229,105 @@ def sigmoid(x):
   @return (float)
   """
   return 1 / (1 + math.exp(-x))
+
+def scoreCorpus(threshold, args):
+  """Given a score to the corpus given a detector and a user profile.
+
+  Scores the corpus in parallel.
+
+  @param threshold  (float)   Threshold value to convert an anomaly score value
+                              to a detection.
+
+  @param args       (tuple)   Arguments necessary to call scoreHelper
+  """
+  (pool,
+   detector,
+   username,
+   costMatrix,
+   resultsCorpus,
+   corpusLabel,
+   probationaryPercent) = args
+
+  args = []
+  for relativePath, dataSet in resultsCorpus.dataSets.iteritems():
+
+    relativePath = convertResultsPathToDataPath( \
+      os.path.join(detector, relativePath))
+
+    windows = corpusLabel.windows[relativePath]
+    labels = corpusLabel.labels[relativePath]
+
+    probationaryPeriod = math.floor(
+      probationaryPercent * labels.shape[0])
+
+    predicted = convertAnomalyScoresToDetections(
+      dataSet.data["anomaly_score"], threshold)
+
+    args.append((
+      detector,
+      username,
+      relativePath,
+      threshold,
+      predicted,
+      windows,
+      labels,
+      costMatrix,
+      probationaryPeriod))
+
+  results = pool.map(scoreDataSet, args)
+
+  return results
+
+
+def scoreDataSet(args):
+  """Function called to score each dataset in the corpus.
+
+  @param args   (tuple)  Arguments to get the detection score for a dataset.
+
+  @return       (tuple)  Contains:
+    detectorName  (string)  Name of detector used to get anomaly scores.
+
+    username      (string)  Name of profile used to weight each detection type.
+                            (tp, tn, fp, fn)
+
+    relativePath  (string)  Path of dataset scored.
+
+    threshold     (float)   Threshold used to convert anomaly scores to
+                            detections.
+
+    score         (float)   The score of the dataset.
+
+    counts, tp    (int)     The number of true positive records.
+
+    counts, tn    (int)     The number of true negative records.
+
+    counts, fp    (int)     The number of false positive records.
+
+    counts, fn    (int)     The number of false negative records.
+
+    Total count   (int)     The total number of records.
+  """
+  (detectorName,
+   username,
+   relativePath,
+   threshold,
+   predicted,
+   windows,
+   labels,
+   costMatrix,
+   probationaryPeriod) = args
+
+  scorer = Scorer(
+    predicted=predicted,
+    labels=labels,
+    windowLimits=windows,
+    costMatrix=costMatrix,
+    probationaryPeriod=probationaryPeriod)
+
+  scorer.getScore()
+
+  counts = scorer.counts
+
+  return (detectorName, username, relativePath, threshold, scorer.score, \
+  counts["tp"], counts["tn"], counts["fp"], counts["fn"], \
+  scorer.totalCount)

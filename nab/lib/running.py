@@ -19,20 +19,19 @@
 # ----------------------------------------------------------------------
 
 import os
-import math
 import pandas
 import yaml
 import multiprocessing
 
-from datetime import datetime
+
+from nab.detectors.base import detectDataSet
 
 from nab.lib.corpus import Corpus
-from nab.lib.scoring import Scorer
-from nab.lib.util import (detectorClassToName,
-                          convertResultsPathToDataPath,
-                          createPath,
-                          convertAnomalyScoresToDetections)
+from nab.lib.scoring import scoreCorpus
 from nab.lib.labeling import CorpusLabel
+from nab.lib.optimizing import optimizeThreshold
+
+from nab.lib.util import updateThresholds
 
 
 
@@ -46,8 +45,6 @@ class Runner(object):
     """
     self.args = args
 
-    self.probationaryPercent = args.probationaryPercent
-
     self.pool = multiprocessing.Pool(args.numCPUs)
 
     self.corpus = None
@@ -56,30 +53,27 @@ class Runner(object):
 
 
   def initialize(self):
-
-    print "Creating corpus"
+    """Initialize all the relevant objects for the run."""
     self.corpus = Corpus(self.args.dataDir)
-
-    print "Creating corpus label"
     self.corpusLabel = CorpusLabel(self.args.labelDir, None, self.corpus)
-
-    print "Initializing corpus label"
     self.corpusLabel.initialize()
 
-    print "Getting profiles"
-    self.profiles = yaml.load(open(self.args.profilesPath))
+    with open(self.args.profilesPath) as p:
+      self.profiles = yaml.load(p)
 
 
-  def detect(self, detectorClasses):
-    """
+  def detect(self, detectors):
+    """Generate results file given a dictionary of detector classes
+
     Function that takes a set of detectors and a corpus of data and creates a
     set of files storing the alerts and anomaly scores given by the detectors
 
-    @param detectorClasses
+    @param detectors     (dict)         Dictionary with key value pairs of a
+                                        detector name and its corresponding
+                                        class constructor.
     """
     print "\nObtaining detections"
 
-    detectors = createDetectorDictionary(detectorClasses)
     count = 0
     for detectorName, detectorConstructor in detectors.iteritems():
       args = []
@@ -91,7 +85,7 @@ class Runner(object):
             count,
             detectorConstructor(
                           dataSet=dataSet,
-                          probationaryPercent=self.probationaryPercent),
+                          probationaryPercent=self.args.probationaryPercent),
             detectorName,
             self.corpusLabel.labels[relativePath]["label"],
             self.args.resultsDir,
@@ -102,10 +96,19 @@ class Runner(object):
         count += 1
 
     print "calling multiprocessing pool"
-    self.pool.map(detectHelper, args)
+    self.pool.map(detectDataSet, args)
 
 
-  def optimize_threshold(self, detectorNames):
+  def optimize(self, detectorNames, thresholdPath):
+    """Optimize the threshold for each combination of detector and profile.
+
+    @param detectorNames  (list)  List of detector names.
+
+    @return thresholds    (dict)  Dictionary of dictionaries with detector names
+                                  then usernames as keys followed by another
+                                  dictionary containing the score and the
+                                  threshold used to obtained that score.
+    """
     print "\nOptimizing anomaly Scores"
 
     thresholds = dict()
@@ -119,228 +122,62 @@ class Runner(object):
       for username, profile in self.profiles.iteritems():
         costMatrix = profile["CostMatrix"]
 
-        thresholds[detector][username] = optimize(
+        thresholds[detector][username] = optimizeThreshold(
           (self.pool,
           detector,
           username,
           costMatrix,
           resultsCorpus,
           self.corpusLabel,
-          self.probationaryPercent))
+          self.args.probationaryPercent))
+
+    updateThresholds(thresholds, thresholdPath)
 
     return thresholds
 
 
-  def score(self, detectors, detectorThresholds):
-    """
-    Function that must be called after detection result files have been
-    generated. This looks at the result files and scores the performance of each
-    detector specified and stores these results in a csv file.
+  def score(self, detectors, thresholds):
+    """Score the performance of the detectors.
+
+    Function that must be called only after detection result files have been
+    generated and thresholds have been optimized. This looks at the result files
+    and scores the performance of each detector specified and stores these
+    results in a csv file.
+
+    @param detectorNames  (list)    List of detector names.
+
+    @param thresholds     (dict)    Dictionary of dictionaries with detector
+                                    names then usernames as keys followed by
+                                    another dictionary containing the score and
+                                    the threshold used to obtained that score.
     """
     print "\nObtaining Scores"
-    ans = pandas.DataFrame(columns=("Detector", "Username", "File",
-      "Threshold", "Score", "tp", "tn", "fp", "fn", "Total_Count"))
 
     for detector in detectors:
+      ans = pandas.DataFrame(columns=("Detector", "Username", "File", \
+        "Threshold", "Score", "tp", "tn", "fp", "fn", "Total_Count"))
+
       resultsDetectorDir = os.path.join(self.args.resultsDir, detector)
       resultsCorpus = Corpus(resultsDetectorDir)
 
-      args = []
-
       for username, profile in self.profiles.iteritems():
 
-        costMatrix = profile["costMatrix"]
+        costMatrix = profile["CostMatrix"]
 
-        threshold = detectorThresholds[detector][username]["threshold"]
+        threshold = thresholds[detector][username]["threshold"]
 
-        for relativePath, dataSet in resultsCorpus.dataSets.iteritems():
+        results = scoreCorpus(threshold,
+                              (self.pool,
+                               detector,
+                               username,
+                               costMatrix,
+                               resultsCorpus,
+                               self.corpusLabel,
+                               self.args.probationaryPercent))
 
-          relativePath = convertResultsPathToDataPath( \
-            os.path.join(detector, relativePath))
+        for row in results:
+          ans.loc[len(ans)] = row
 
-          windows = self.corpusLabel.windows[relativePath]
-          labels = self.corpusLabel.labels[relativePath]
+      scorePath = os.path.join(resultsDetectorDir, detector + "_scores.csv")
+      ans.to_csv(scorePath, index=False)
 
-          probationaryPeriod = math.floor(
-            self.probationaryPercent * labels.shape[0])
-
-          predicted = convertAnomalyScoresToDetections(
-            dataSet.data["anomaly_score"], threshold)
-
-          args.append(
-            [detector,
-             username,
-             relativePath,
-             threshold,
-             predicted,
-             windows,
-             labels,
-             costMatrix,
-             probationaryPeriod])
-
-    print "calling multiprocessing pool"
-    results = self.pool.map(scoreHelper, args)
-
-    for i in range(len(results)):
-      ans.loc[i] = results[i]
-
-    scorePath = os.path.join(resultsDetectorDir, "scores.csv")
-    ans.to_csv(scorePath, index=False)
-
-
-def createDetectorDictionary(constructors):
-  """
-  Creates a dictionary of detectors with detector names as keys and detector
-  classes as values.
-
-  @param constructors     (list)    All the constructors for the detector
-                                    classes to be used in this run.
-
-  @param                  (dict)    Dictionary with key value pairs of a
-                                    detector name and its corresponding
-                                    class constructor.
-  """
-  detectors = {}
-  for c in constructors:
-    detectors[detectorClassToName(c)] = c
-
-  return detectors
-
-
-def detectHelper(args):
-  """
-  Function called in each detector process that run the detector that it is
-  given.
-  """
-  (i, detectorInstance, detectorName, labels, outputDir, relativePath) = args
-
-  relativeDir, fileName = os.path.split(relativePath)
-  fileName =  detectorName + "_" + fileName
-  outputPath = os.path.join(outputDir, detectorName, relativeDir, fileName)
-  createPath(outputPath)
-
-  print "%s: Beginning detection with %s for %s" % \
-                                                (i, detectorName, relativePath)
-
-  results = detectorInstance.run()
-
-  results["label"] = labels
-
-  results.to_csv(outputPath, index=False, float_format="%.3f")
-
-  print "%s: Completed processing %s records  at %s" % \
-                                        (i, len(results.index), datetime.now())
-  print "%s: Results have been written to %s" % (i, outputPath)
-
-
-def optimize(args):
-  threshold = 0.9999877929687505
-  step = 0.00000001
-  bestScore = fitnessFunction(args, threshold)
-  # print "Got to beginning of optimize function"
-
-  while step > 0.00001:
-    threshold += step
-    score = fitnessFunction(args, threshold)
-
-    if score > bestScore:
-      bestScore = score
-      step *= 2
-
-    else:
-      threshold -= 2*step
-      score = fitnessFunction(args, threshold)
-
-      if score > bestScore:
-        bestScore = score
-        step *= 2
-      else:
-        threshold += step
-        step *= 0.5
-
-    print "threshold:", threshold
-    print "bestScore:", bestScore
-    print "step:", step
-    print
-
-  return {"threshold": threshold,
-          "score": bestScore}
-
-
-def fitnessFunction(args, threshold):
-  # print "begin fitnessFunction"
-  if not 0 <= threshold <= 1:
-    return float("-inf")
-
-  score = 0
-  (pool,
-   detector,
-   username,
-   costMatrix,
-   resultsCorpus,
-   corpusLabel,
-   probationaryPercent) = args
-
-  args = []
-  for relativePath, dataSet in resultsCorpus.dataSets.iteritems():
-
-    relativePath = convertResultsPathToDataPath( \
-      os.path.join(detector, relativePath))
-
-    windows = corpusLabel.windows[relativePath]
-    labels = corpusLabel.labels[relativePath]
-
-    probationaryPeriod = math.floor(
-      probationaryPercent * labels.shape[0])
-
-    predicted = convertAnomalyScoresToDetections(
-      dataSet.data["anomaly_score"], threshold)
-
-    args.append((
-      detector,
-      username,
-      relativePath,
-      threshold,
-      predicted,
-      windows,
-      labels,
-      costMatrix,
-      probationaryPeriod))
-
-  results = pool.map(scoreHelper, args)
-  score = 0
-
-  for r in results:
-    score += r[4]
-
-  return score
-
-
-def scoreHelper(args):
-  """
-  Function called to score each file in the corpus.
-  """
-  (detectorName,
-   username,
-   relativePath,
-   threshold,
-   predicted,
-   windows,
-   labels,
-   costMatrix,
-   probationaryPeriod) = args
-
-  scorer = Scorer(
-    predicted=predicted,
-    labels=labels,
-    windowLimits=windows,
-    costMatrix=costMatrix,
-    probationaryPeriod=probationaryPeriod)
-
-  scorer.getScore()
-
-  counts = scorer.counts
-
-  return detectorName, username, relativePath, threshold, scorer.score, \
-  counts["tp"], counts["tn"], counts["fp"], counts["fn"], \
-  scorer.totalCount

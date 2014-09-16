@@ -29,6 +29,20 @@ import pandas
 
 
 def updateThresholds(newThresholds, thresholdsFilePath):
+  """Keep thresholds file updated with best runs of optimize_threshold.
+
+  The thresholds file keeps a dictionary of best thresholds and scores for
+  combinations of detector and user profiles. This function makes sure to keep
+  the best thresholds inside that file and keep them there to be used by others
+  who are using the same detector and have the same profile (cost matrix)
+
+  @param newThresholds      (dict)    Dictionary of optimized thresholds gotten
+                                      from most recent call to optimize().
+
+  @param thresholdsFilePath (string)  File containing the best thresholds and
+                                      their corresponding scores from the past
+                                      runs of optimize().
+  """
   if os.path.exists(thresholdsFilePath):
     with open(thresholdsFilePath) as inFile:
       oldThresholds = yaml.load(inFile)
@@ -58,11 +72,25 @@ def updateThresholds(newThresholds, thresholdsFilePath):
 
 
 def checkInputs(args):
+  """Function that displays a set of arguments and asks to proceed."""
   pprint.pprint(vars(args))
-  return input("Enter 1 to proceed, 0 otherwise: ")
+  inp = raw_input("Proceed? (y/n): ")
+
+  if inp == 'y':
+    return True
+
+  if inp == 'n':
+    return False
+
+  print "Incorrect input given\n"
+  checkInputs(args)
 
 
 def convertAnomalyScoresToDetections(anomalyScores, threshold):
+  """
+  Convert anmaly scores (values between 0 and 1) to detections (binary
+  values) given a threshold.
+  """
   length = len(anomalyScores)
   detections = pandas.Series([0]*length)
 

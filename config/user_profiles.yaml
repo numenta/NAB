@@ -3,7 +3,7 @@
 
 # A user for whom missing an anomaly is 10x as costly as each false positive
 Jay_Gokhale:
-  costMatrix:
+  CostMatrix:
     tpWeight: 1.0
     fnWeight: 1.0
     fpWeight: 1.0
