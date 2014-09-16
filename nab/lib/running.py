@@ -54,30 +54,28 @@ class Runner(object):
 
 
   def initialize(self):
+    """Initialize all the relevant objects for the run."""
 
-    print "Creating corpus"
     self.corpus = Corpus(self.args.dataDir)
-
-    print "Creating corpus label"
     self.corpusLabel = CorpusLabel(self.args.labelDir, None, self.corpus)
-
-    print "Initializing corpus label"
     self.corpusLabel.initialize()
 
-    print "Getting profiles"
-    self.profiles = yaml.load(open(self.args.profilesPath))
+    with open(self.args.profilesPath) as p:
+      self.profiles = yaml.load(p)
 
 
-  def detect(self, detectorClasses):
-    """
+  def detect(self, detectors):
+    """Generate results file given a dictionary of detector classes
+
     Function that takes a set of detectors and a corpus of data and creates a
     set of files storing the alerts and anomaly scores given by the detectors
 
-    @param detectorClasses
+    @param detectors     (dict)         Dictionary with key value pairs of a
+                                        detector name and its corresponding
+                                        class constructor.
     """
     print "\nObtaining detections"
 
-    detectors = createDetectorDictionary(detectorClasses)
     count = 0
     for detectorName, detectorConstructor in detectors.iteritems():
       args = []
@@ -104,6 +102,15 @@ class Runner(object):
 
 
   def optimize_threshold(self, detectorNames):
+    """Optimize the threshold for each combination of detector and profile.
+
+    @param detectorNames  (list)  List of detector names.
+
+    @return thresholds     (dict) Dictionary of dictionaries with detector names
+                                  then usernames as keys followed by another
+                                  dictionary containing the score and the
+                                  threshold used to obtained that score.
+    """
     print "\nOptimizing anomaly Scores"
 
     thresholds = dict()
@@ -129,13 +136,23 @@ class Runner(object):
     return thresholds
 
 
-  def score(self, detectors, detectorThresholds):
-    """
-    Function that must be called after detection result files have been
-    generated. This looks at the result files and scores the performance of each
-    detector specified and stores these results in a csv file.
+  def score(self, detectors, thresholds):
+    """Score the performance of the detectors.
+
+    Function that must be called only after detection result files have been
+    generated and thresholds have been optimized. This looks at the result files
+    and scores the performance of each detector specified and stores these
+    results in a csv file.
+
+    @param detectorNames  (list)    List of detector names.
+
+    @param thresholds     (dict)    Dictionary of dictionaries with detector
+                                    names then usernames as keys followed by
+                                    another dictionary containing the score and
+                                    the threshold used to obtained that score.
     """
     print "\nObtaining Scores"
+
     ans = pandas.DataFrame(columns=("Detector", "Username", "File",
       "Threshold", "Score", "tp", "tn", "fp", "fn", "Total_Count"))
 
@@ -149,7 +166,7 @@ class Runner(object):
 
         costMatrix = profile["CostMatrix"]
 
-        threshold = detectorThresholds[detector][username]["threshold"]
+        threshold = thresholds[detector][username]["threshold"]
 
         for relativePath, dataSet in resultsCorpus.dataSets.iteritems():
 
@@ -185,24 +202,6 @@ class Runner(object):
     scorePath = os.path.join(resultsDetectorDir, "scores.csv")
     ans.to_csv(scorePath, index=False)
 
-
-def createDetectorDictionary(constructors):
-  """
-  Creates a dictionary of detectors with detector names as keys and detector
-  classes as values.
-
-  @param constructors     (list)    All the constructors for the detector
-                                    classes to be used in this run.
-
-  @param                  (dict)    Dictionary with key value pairs of a
-                                    detector name and its corresponding
-                                    class constructor.
-  """
-  detectors = {}
-  for c in constructors:
-    detectors[detectorClassToName(c)] = c
-
-  return detectors
 
 
 def detectHelper(args):

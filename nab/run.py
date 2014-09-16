@@ -70,9 +70,7 @@ def main(args):
 
 
 def getDetectorClassConstructors(detectors):
-  detectorClassNames = [detectorNameToClass(d) for d in detectors]
-
-  detectorConstructors = [globals()[className] for className in detectorClassNames]
+  detectorConstructors = {d:globals()[detectorNameToClass(d)] for d in detectors}
 
   return detectorConstructors
 
