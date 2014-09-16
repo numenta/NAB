@@ -54,8 +54,6 @@ class Runner(object):
 
   def initialize(self):
     """Initialize all the relevant objects for the run."""
-
-
     self.corpus = Corpus(self.args.dataDir)
     self.corpusLabel = CorpusLabel(self.args.labelDir, None, self.corpus)
     self.corpusLabel.initialize()

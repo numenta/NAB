@@ -22,7 +22,7 @@ import os
 import sys
 import math
 import pandas
-from nab.lib.util import makeDirsExist, createPath
+from nab.lib.util import createPath
 from datetime import datetime
 
 

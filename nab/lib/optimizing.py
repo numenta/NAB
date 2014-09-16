@@ -33,7 +33,7 @@ def optimizeThreshold(args):
   @param tolerance  (float)   Number used to determine when optimization has
                               converged to a sufficiently good score.
 
-  @return (tuple) Contains:
+  @return (dict) Contains:
         "threshold" (float)   Threshold that returns the largest score from the
                               Objective function.
 
@@ -71,7 +71,7 @@ def twiddle(objFunction, args, init=0.5, tolerance=0.00001):
 
   @param init       (float)   Initial value of the parameter.
 
-  @return (tuple) Contains:
+  @return (dict) Contains:
         "parameter" (float)   Threshold that returns the largest score from the
                               Objective function.
 
@@ -129,7 +129,9 @@ def objectiveFunction(threshold, args):
   @param threshold  (float)   Threshold value to convert an anomaly score value
                               to a detection.
 
-  @param args       (tuple)   Arguments necessary to call scoreHelper
+  @param args       (tuple)   Arguments necessary to call scoreHelper.
+
+  @return score     (float)   Score of corpus.
   """
   if not 0 <= threshold <= 1:
     return float("-inf")
