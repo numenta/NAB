@@ -28,8 +28,7 @@ from datetime import datetime
 
 from nab.lib.corpus import Corpus
 from nab.lib.scoring import Scorer
-from nab.lib.util import (detectorClassToName,
-                          convertResultsPathToDataPath,
+from nab.lib.util import (convertResultsPathToDataPath,
                           createPath,
                           convertAnomalyScoresToDetections)
 from nab.lib.labeling import CorpusLabel
@@ -55,6 +54,7 @@ class Runner(object):
 
   def initialize(self):
     """Initialize all the relevant objects for the run."""
+
 
     self.corpus = Corpus(self.args.dataDir)
     self.corpusLabel = CorpusLabel(self.args.labelDir, None, self.corpus)
@@ -98,7 +98,7 @@ class Runner(object):
         count += 1
 
     print "calling multiprocessing pool"
-    self.pool.map(detectHelper, args)
+    self.pool.map(detectDataSet, args)
 
 
   def optimize_threshold(self, detectorNames):
@@ -153,14 +153,12 @@ class Runner(object):
     """
     print "\nObtaining Scores"
 
-    ans = pandas.DataFrame(columns=("Detector", "Username", "File",
-      "Threshold", "Score", "tp", "tn", "fp", "fn", "Total_Count"))
-
     for detector in detectors:
+      ans = pandas.DataFrame(columns=("Detector", "Username", "File", \
+        "Threshold", "Score", "tp", "tn", "fp", "fn", "Total_Count"))
+
       resultsDetectorDir = os.path.join(self.args.resultsDir, detector)
       resultsCorpus = Corpus(resultsDetectorDir)
-
-      args = []
 
       for username, profile in self.profiles.iteritems():
 
@@ -168,46 +166,31 @@ class Runner(object):
 
         threshold = thresholds[detector][username]["threshold"]
 
-        for relativePath, dataSet in resultsCorpus.dataSets.iteritems():
+        results = scoreCorpus(threshold,
+                              (self.pool,
+                               detector,
+                               username,
+                               costMatrix,
+                               resultsCorpus,
+                               self.corpusLabel,
+                               self.args.probationaryPercent))
 
-          relativePath = convertResultsPathToDataPath( \
-            os.path.join(detector, relativePath))
+        for i, row in enumerate(results):
+          ans.loc[len(ans)] = row
 
-          windows = self.corpusLabel.windows[relativePath]
-          labels = self.corpusLabel.labels[relativePath]
-
-          probationaryPeriod = math.floor(
-            self.args.probationaryPercent * labels.shape[0])
-
-          predicted = convertAnomalyScoresToDetections(
-            dataSet.data["anomaly_score"], threshold)
-
-          args.append(
-            [detector,
-             username,
-             relativePath,
-             threshold,
-             predicted,
-             windows,
-             labels,
-             costMatrix,
-             probationaryPeriod])
-
-    print "calling multiprocessing pool"
-    results = self.pool.map(scoreHelper, args)
-
-    for i in range(len(results)):
-      ans.loc[i] = results[i]
-
-    scorePath = os.path.join(resultsDetectorDir, "scores.csv")
-    ans.to_csv(scorePath, index=False)
+      scorePath = os.path.join(resultsDetectorDir, detector + "_scores.csv")
+      ans.to_csv(scorePath, index=False)
 
 
+###### Helper Functions
 
-def detectHelper(args):
+
+def detectDataSet(args):
   """
   Function called in each detector process that run the detector that it is
   given.
+
+  @param args   (tuple)   Arguments to run a detector on a file and then
   """
   (i, detectorInstance, detectorName, labels, outputDir, relativePath) = args
 
@@ -231,13 +214,38 @@ def detectHelper(args):
 
 
 def optimize(args, tolerance=0.00001):
+  """Optimize the threshold for a given combination of detector and profile.
+
+  This is a local hill-climbing algorithm that attempts to find the best
+  threshold for the objective function.
+
+  @param args       (tuple)   Arguments necessary for the objective function.
+
+  @param tolerance  (float)   Number used to determine when optimization has
+                              converged to a sufficiently good score.
+
+  @return (tuple) Contains:
+        "threshold" (float)   Threshold that returns the largest score from the
+                              Objective function.
+
+        "score"     (float)   The score from the objective function given the
+                              threshold.
+  """
+  pastCalls = dict()
   threshold = 0.5
   step = 0.1
-  bestScore = fitnessFunction(threshold, args)
+  bestScore = objectiveFunction(threshold, args)
+
+  pastCalls[threshold] = bestScore
 
   while step > tolerance:
     threshold += step
-    score = fitnessFunction(threshold, args)
+
+    if threshold not in pastCalls:
+      score = objectiveFunction(threshold, args)
+      pastCalls[threshold] = score
+
+    score = pastCalls[threshold]
 
     if score > bestScore:
       bestScore = score
@@ -245,7 +253,12 @@ def optimize(args, tolerance=0.00001):
 
     else:
       threshold -= 2*step
-      score = fitnessFunction(threshold, args)
+
+      if threshold not in pastCalls:
+        score = objectiveFunction(threshold, args)
+        pastCalls[threshold] = score
+
+      score = pastCalls[threshold]
 
       if score > bestScore:
         bestScore = score
@@ -263,11 +276,37 @@ def optimize(args, tolerance=0.00001):
           "score": bestScore}
 
 
-def fitnessFunction(threshold, args):
+def objectiveFunction(threshold, args):
+  """Objective function that scores the corpus given a specific threshold.
+
+  @param threshold  (float)   Threshold value to convert an anomaly score value
+                              to a detection.
+
+  @param args       (tuple)   Arguments necessary to call scoreHelper
+  """
   if not 0 <= threshold <= 1:
     return float("-inf")
 
+  results = scoreCorpus(threshold, args)
+
   score = 0
+
+  for r in results:
+    score += r[4]
+
+  return score
+
+
+def scoreCorpus(threshold, args):
+  """Given a score to the corpus given a detector and a user profile.
+
+  Scores the corpus in parallel.
+
+  @param threshold  (float)   Threshold value to convert an anomaly score value
+                              to a detection.
+
+  @param args       (tuple)   Arguments necessary to call scoreHelper
+  """
   (pool,
    detector,
    username,
@@ -302,18 +341,38 @@ def fitnessFunction(threshold, args):
       costMatrix,
       probationaryPeriod))
 
-  results = pool.map(scoreHelper, args)
-  score = 0
+  results = pool.map(scoreDataSet, args)
 
-  for r in results:
-    score += r[4]
-
-  return score
+  return results
 
 
-def scoreHelper(args):
-  """
-  Function called to score each file in the corpus.
+def scoreDataSet(args):
+  """Function called to score each dataset in the corpus.
+
+  @param args   (tuple)  Arguments to get the detection score for a dataset.
+
+  @return       (tuple)  Contains:
+    detectorName  (string)  Name of detector used to get anomaly scores.
+
+    username      (string)  Name of profile used to weight each detection type.
+                            (tp, tn, fp, fn)
+
+    relativePath  (string)  Path of dataset scored.
+
+    threshold     (float)   Threshold used to convert anomaly scores to
+                            detections.
+
+    score         (float)   The score of the dataset.
+
+    counts, tp    (int)     The number of true positive records.
+
+    counts, tn    (int)     The number of true negative records.
+
+    counts, fp    (int)     The number of false positive records.
+
+    counts, fn    (int)     The number of false negative records.
+
+    Total count   (int)     The total number of records.
   """
   (detectorName,
    username,
@@ -336,6 +395,6 @@ def scoreHelper(args):
 
   counts = scorer.counts
 
-  return detectorName, username, relativePath, threshold, scorer.score, \
+  return (detectorName, username, relativePath, threshold, scorer.score, \
   counts["tp"], counts["tn"], counts["fp"], counts["fn"], \
-  scorer.totalCount
+  scorer.totalCount)
