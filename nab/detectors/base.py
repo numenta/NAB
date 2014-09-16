@@ -22,7 +22,8 @@ import os
 import sys
 import math
 import pandas
-from nab.lib.util import makeDirsExist
+from nab.lib.util import makeDirsExist, createPath
+from datetime import datetime
 
 
 
@@ -123,19 +124,14 @@ class AnomalyDetector(object):
     headers = self.getHeader()
 
     ans = pandas.DataFrame(columns=headers)
-    # print "for loop: %d", id(self)
     for i, row in self.dataSet.data.iterrows():
 
-      # print "row to inputData: %d", id(self)
       inputData = row.to_dict()
 
-      # print "handleRecord call: %d", id(self)
       detectorValues = self.handleRecord(inputData)
 
-      # print "thresholdedValues: %d", id(self)
       thresholdedValue = 1 if detectorValues[0] >= self.threshold else 0
 
-      # print "outputrow: %d", id(self)
       outputRow = list(row) + list(detectorValues) + [thresholdedValue]
 
       ans.loc[i] = outputRow
@@ -147,4 +143,32 @@ class AnomalyDetector(object):
 
     print
     return ans
+
+
+def detectDataSet(args):
+  """
+  Function called in each detector process that run the detector that it is
+  given.
+
+  @param args   (tuple)   Arguments to run a detector on a file and then
+  """
+  (i, detectorInstance, detectorName, labels, outputDir, relativePath) = args
+
+  relativeDir, fileName = os.path.split(relativePath)
+  fileName =  detectorName + "_" + fileName
+  outputPath = os.path.join(outputDir, detectorName, relativeDir, fileName)
+  createPath(outputPath)
+
+  print "%s: Beginning detection with %s for %s" % \
+                                                (i, detectorName, relativePath)
+
+  results = detectorInstance.run()
+
+  results["label"] = labels
+
+  results.to_csv(outputPath, index=False, float_format="%.3f")
+
+  print "%s: Completed processing %s records  at %s" % \
+                                        (i, len(results.index), datetime.now())
+  print "%s: Results have been written to %s" % (i, outputPath)
 

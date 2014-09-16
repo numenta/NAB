@@ -26,7 +26,7 @@ from nab.lib.running import Runner
 from nab.lib.util import (recur,
                          detectorNameToClass,
                          checkInputs,
-                         updateThresholds)
+                         )
 
 from nab.detectors.numenta.numenta_detector import NumentaDetector
 from nab.detectors.skyline.skyline_detector import SkylineDetector
@@ -58,14 +58,11 @@ def main(args):
     runner.detect(detectorConstructors)
 
   if args.optimize:
-    detectorThresholds = runner.optimize_threshold(args.detectors)
-    detectorThresholds = updateThresholds(detectorThresholds, args.thresholdPath)
-  else:
-    with open(args.thresholdPath) as thresholdConfigFile:
-      detectorThresholds = yaml.load(thresholdConfigFile)
+    runner.optimize(args.detectors, args.thresholdPath)
 
   if args.score:
-    print detectorThresholds
+    with open(args.thresholdPath) as thresholdConfigFile:
+      detectorThresholds = yaml.load(thresholdConfigFile)
     runner.score(args.detectors, detectorThresholds)
 
 
