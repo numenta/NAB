@@ -28,7 +28,6 @@ from datetime import datetime
 
 
 
-
 class AnomalyDetector(object):
   """
   Base class for all anomaly detectors. When inheriting from this class please
@@ -70,8 +69,7 @@ class AnomalyDetector(object):
 
     This method MUST be overridden by subclasses
     """
-    pass
-
+    raise NotImplementedError
 
   def getHeader(self):
     """

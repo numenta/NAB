@@ -30,7 +30,7 @@ from nab.util import (recur,
 from nab.detectors.numenta.numenta_detector import NumentaDetector
 from nab.detectors.skyline.skyline_detector import SkylineDetector
 
-depth = 2
+depth = 1
 
 root = recur(os.path.dirname, os.path.realpath(__file__), depth)
 
@@ -43,25 +43,40 @@ def main(args):
     args.optimize = True
     args.score = True
 
-  args.dataDir = os.path.join(root, args.dataDir)
-  args.labelDir = os.path.join(root, args.labelDir)
-  args.resultsDir = os.path.join(root, args.resultsDir)
-  args.profilesPath = os.path.join(root, args.profilesPath)
-  args.thresholdPath = os.path.join(root, args.thresholdPath)
 
-  runner = Runner(args)
+  detectors = args.detectors
+  numCPUs = args.numCPUs
+  probationaryPercent = args.probationaryPercent
+
+  dataDir = os.path.join(root, args.dataDir)
+  labelDir = os.path.join(root, args.labelDir)
+  resultsDir = os.path.join(root, args.resultsDir)
+  profilesPath = os.path.join(root, args.profilesPath)
+  thresholdPath = os.path.join(root, args.thresholdPath)
+
+  runner = Runner(dataDir=dataDir,
+                  labelDir=labelDir,
+                  resultsDir=resultsDir,
+                  profilesPath=profilesPath,
+                  thresholdPath=thresholdPath,
+                  probationaryPercent=probationaryPercent,
+                  numCPUs=numCPUs)
+
   runner.initialize()
 
   if args.detect:
     detectorConstructors = getDetectorClassConstructors(args.detectors)
+    print detectorConstructors
+    print args.detectors
     runner.detect(detectorConstructors)
 
   if args.optimize:
-    runner.optimize(args.detectors, args.thresholdPath)
+    runner.optimize(args.detectors)
 
   if args.score:
     with open(args.thresholdPath) as thresholdConfigFile:
       detectorThresholds = yaml.load(thresholdConfigFile)
+
     runner.score(args.detectors, detectorThresholds)
 
 
@@ -81,16 +96,24 @@ if __name__ == "__main__":
                     default=False,
                     action="store_true")
 
-  parser.add_argument("--score",
-                    help="Analyze results in the results directory",
-                    default=False,
-                    action="store_true")
-
   parser.add_argument("--optimize",
                     help="Optimize the thresholds for each detector and user \
                     profile combination",
                     default=False,
                     action="store_true")
+
+  parser.add_argument("--score",
+                    help="Analyze results in the results directory",
+                    default=False,
+                    action="store_true")
+
+  parser.add_argument("-d", "--detectors",
+                    nargs="*",
+                    type=str,
+                    default=["numenta"],
+                    help="Select which detector/detector(s) you want to use. \
+                    Make sure to import the corresponding detectors classes \
+                    within run.py")
 
   parser.add_argument("--dataDir",
                     default="data",
@@ -104,14 +127,6 @@ if __name__ == "__main__":
                     default="results",
                     help="This will hold the results after running detectors \
                     on the data")
-
-  parser.add_argument("-d", "--detectors",
-                    nargs="*",
-                    type=str,
-                    default=["numenta"],
-                    help="Select which detector/detector(s) you want to use. \
-                    Make sure to import the corresponding detectors classes \
-                    within run.py")
 
   parser.add_argument("-p", "--profilesPath",
                     default="config/user_profiles.yaml",

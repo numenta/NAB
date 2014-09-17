@@ -35,11 +35,11 @@ class NumentaDetector(AnomalyDetector):
 
     super(NumentaDetector, self).__init__(*args, **kwargs)
 
-    self.numentaConfigure()
-
     self.model = None
     self.sensorParams = None
     self.anomalyLikelihood = None
+
+    self.numentaConfigure()
 
 
   def getAdditionalHeaders(self):
