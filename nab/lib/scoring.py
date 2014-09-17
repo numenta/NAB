@@ -68,7 +68,7 @@ class Window(object):
     self.firstTP = self.getFirstTP()
 
 
-  def getFirstTP(self):
+  def getFirstTruePositive(self):
     """Get the first instance of True positive within a window.
 
     @return (int)   Index of the first occurence of the true positive within the
@@ -102,11 +102,6 @@ class Scorer(object):
                                                  form: (timestamp start,
                                                  timestamp end).
 
-    @param costmatrix          (dict)            Dictionary containing all the
-                                                 weights for each record
-                                                 form: (timestamp start, timestamp
-                                                 end).
-
     @param costmatrix          (dict)            Dictionary containing all the weights for each record
                                                  type:  True positive (tp)
                                                         False positive (fp)
@@ -123,10 +118,10 @@ class Scorer(object):
     self.totalCount = len(self.predicted)
 
     self.counts = {
-    "tp": 0,
-    "tn": 0,
-    "fp": 0,
-    "fn": 0}
+      "tp": 0,
+      "tn": 0,
+      "fp": 0,
+      "fn": 0}
 
     self.score = None
     self.length = len(predicted)

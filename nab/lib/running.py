@@ -38,9 +38,9 @@ from nab.lib.util import updateThresholds
 class Runner(object):
   """Class to run a configured nab benchmark."""
 
-  def __init__(self, args):
+  def __init__(self, detectors, threshold):
     """
-    @param args             (namespace)   Class that holds many paramters of the
+    @param args             (namespace)   Class that holds many parameters of the
                                           run.
     """
     self.args = args

@@ -1,2 +1,5 @@
 numenta:
   Jay_Gokhale: {score: -66.13771273788555, threshold: 0.9999877929687505}
+
+detector_name:
+	username: {score: -1000, threshold: .9}
