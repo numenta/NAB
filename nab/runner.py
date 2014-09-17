@@ -40,8 +40,8 @@ class Runner(object):
 
   def __init__(self, args):
     """
-    @param args             (namespace)   Class that holds many parameters of the
-                                          run.
+    @param args             (namespace)   Class that holds many parameters of
+                                          the run.
     """
     self.args = args
 

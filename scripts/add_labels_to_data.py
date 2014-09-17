@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#! /usr/bin/env python
 # ----------------------------------------------------------------------
 # Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
 # with Numenta, Inc., for a separate license for this software code, the
@@ -18,13 +18,13 @@
 #
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
+
 import os
 import argparse
-import sys
 import pandas
-from nab.lib.corpus import Corpus
-from nab.lib.labeling import CorpusLabel
-from nab.lib.util import recur, checkInputs
+from nab.corpus import Corpus
+from nab.labeler import CorpusLabel
+from nab.util import recur, checkInputs
 
 depth = 3
 
@@ -49,7 +49,8 @@ def main(args):
 
   columnData = dict()
   for relativePath in corpusLabel.labels.keys():
-    columnData[relativePath] = pandas.Series(corpusLabel.labels[relativePath]["label"])
+    columnData[relativePath] = pandas.Series(
+      corpusLabel.labels[relativePath]["label"])
 
   corpus.addColumn("label", columnData)
 

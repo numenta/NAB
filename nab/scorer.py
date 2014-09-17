@@ -93,7 +93,8 @@ class Scorer(object):
     @param predicted           (pandas.Series)   Detector predictions of whether
                                                  each record is anomalous or
                                                  not.
-                                                 predictions[0:probationaryPeriod]
+                                                 predictions[
+                                                 0:probationaryPeriod]
                                                  is ignored.
 
     @param labels              (pandas.Series)   Ground truth for each record.
@@ -102,7 +103,8 @@ class Scorer(object):
                                                  form: (timestamp start,
                                                  timestamp end).
 
-    @param costmatrix          (dict)            Dictionary containing all the weights for each record
+    @param costmatrix          (dict)            Dictionary containing all the
+                                                 weights for each record
                                                  type:  True positive (tp)
                                                         False positive (fp)
                                                         True Negative (tn)

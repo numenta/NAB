@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#! /usr/bin/env python
 # ----------------------------------------------------------------------
 # Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
 # with Numenta, Inc., for a separate license for this software code, the
@@ -19,17 +19,17 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-
-
 import os
 import argparse
 
-from nab.lib.corpus import Corpus
-from nab.lib.util import recur
+from nab.corpus import Corpus
+from nab.util import recur
 
 depth = 3
 
 root = recur(os.path.dirname, os.path.realpath(__file__), depth)
+
+
 
 def main(args):
   if not args.absolutePaths:
@@ -67,4 +67,3 @@ if __name__ == "__main__":
 
   args = parser.parse_args()
   main(args)
-

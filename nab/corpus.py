@@ -158,7 +158,8 @@ class Corpus(object):
     """
 
     for relativePath in self.dataSets.keys():
-      self.dataSets[relativePath].modifyData(columnName, data[relativePath], write=write)
+      self.dataSets[relativePath].modifyData(
+        columnName, data[relativePath], write=write)
 
 
   def removeColumn(self, columnName, write=False):
