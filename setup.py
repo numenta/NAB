@@ -16,30 +16,24 @@ depth = 1
 
 root = recur(os.path.dirname, os.path.realpath(__file__), depth)
 
-def writePaths(folderName):
+def writePaths(folderName, filters=None):
+  if filters is None:
+    filters = []
+
   with open(os.path.join(root, folderName + "_file_paths.txt"), "w") as f:
     paths = relativeFilePaths(os.path.join(root, folderName))
-    paths = map((lambda x: [str(x).replace(root + "/", "")]), paths)
+    paths = [str(p).replace(root + "/", "") for p in paths]
 
+    filters = [folderName + "/" + path for path in filters]
+    print filters
     writer = csv.writer(f)
-    writer.writerows(paths)
+    for path in paths:
 
-# with open(os.path.join(root,"data_file_paths.txt"), "w") as f:
-#   paths = relativeFilePaths(os.path.join(root,"data"))
-#   writer = csv.writer(f)
-#   writer.writerows(paths)
-#   # print >> f, "[" + ",\n".join("\""+str(p).replace(root + "/", "")+"\"" for p in paths) + "];"
-
-# with open(os.path.join(root,"results_file_paths.txt"), "w") as f:
-#   paths = relativeFilePaths(os.path.join(root,"results"))
-
-#   # writer = csv.writer(f)
-#   # writer.writerows(paths)
-
-#   # print >> f, "[" + ",\n".join("\""+str(p).replace(root + "/", "")+"\"" for p in paths) + "];"
+      if path not in filters:
+        writer.writerow([path])
 
 writePaths("data")
-writePaths("results")
+writePaths("results", filters=["README.md"])
 
 setup(
   name = "nab",
