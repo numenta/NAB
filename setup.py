@@ -1,6 +1,7 @@
 import os
 from setuptools import setup, find_packages
 from nab.lib.util import relativeFilePaths, recur
+import csv
 
 # Utility function to read the README file.
 # Used for the long_description.  It"s nice, because now 1) we have a top level
@@ -15,11 +16,30 @@ depth = 1
 
 root = recur(os.path.dirname, os.path.realpath(__file__), depth)
 
+def writePaths(folderName):
+  with open(os.path.join(root, folderName + "_file_paths.txt"), "w") as f:
+    paths = relativeFilePaths(os.path.join(root, folderName))
+    paths = map((lambda x: [str(x).replace(root + "/", "")]), paths)
 
-f = open(os.path.join(root,"filePaths.txt"), "w")
-paths = relativeFilePaths(os.path.join(root,"data"))
+    writer = csv.writer(f)
+    writer.writerows(paths)
 
-print >> f, "[" + ",\n".join("\""+str(p).replace(root + "/", "")+"\"" for p in paths) + "];"
+# with open(os.path.join(root,"data_file_paths.txt"), "w") as f:
+#   paths = relativeFilePaths(os.path.join(root,"data"))
+#   writer = csv.writer(f)
+#   writer.writerows(paths)
+#   # print >> f, "[" + ",\n".join("\""+str(p).replace(root + "/", "")+"\"" for p in paths) + "];"
+
+# with open(os.path.join(root,"results_file_paths.txt"), "w") as f:
+#   paths = relativeFilePaths(os.path.join(root,"results"))
+
+#   # writer = csv.writer(f)
+#   # writer.writerows(paths)
+
+#   # print >> f, "[" + ",\n".join("\""+str(p).replace(root + "/", "")+"\"" for p in paths) + "];"
+
+writePaths("data")
+writePaths("results")
 
 setup(
   name = "nab",
