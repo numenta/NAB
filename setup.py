@@ -1,6 +1,7 @@
 import os
 from setuptools import setup, find_packages
 from nab.lib.util import relativeFilePaths, recur
+import csv
 
 # Utility function to read the README file.
 # Used for the long_description.  It"s nice, because now 1) we have a top level
@@ -15,11 +16,24 @@ depth = 1
 
 root = recur(os.path.dirname, os.path.realpath(__file__), depth)
 
+def writePaths(folderName, filters=None):
+  if filters is None:
+    filters = []
 
-f = open(os.path.join(root,"filePaths.txt"), "w")
-paths = relativeFilePaths(os.path.join(root,"data"))
+  with open(os.path.join(root, folderName + "_file_paths.txt"), "w") as f:
+    paths = relativeFilePaths(os.path.join(root, folderName))
+    paths = [str(p).replace(root + "/", "") for p in paths]
 
-print >> f, "[" + ",\n".join("\""+str(p).replace(root + "/", "")+"\"" for p in paths) + "];"
+    filters = [folderName + "/" + path for path in filters]
+    print filters
+    writer = csv.writer(f)
+    for path in paths:
+
+      if path not in filters:
+        writer.writerow([path])
+
+writePaths("data")
+writePaths("results", filters=["README.md"])
 
 setup(
   name = "nab",

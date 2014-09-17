@@ -1,8 +1,11 @@
 <html>
 
 <head>
-  <script type="text/javascript" src="dygraph-combined.js"></script>
-  <script type="text/javascript" src="moment.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/dygraph/1.0.1/dygraph-combined.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.3/moment.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-csv/0.71/jquery.csv-0.71.min.js"></script>
+
 
   <style>
 
@@ -25,6 +28,8 @@
 <body>
 
 <div class="selectors">
+<button type="button" id="renderButton" onclick="render('data_file_paths.txt')">Look at Data</button><br>
+<button type="button" id="renderButton" onclick="render('results_file_paths.txt')">Look at Results</button><br>
 <input type="text", name="query", id="query", placeholder="type in query and press enter", onkeydown="render()",
 size="50">
 </div>
@@ -33,42 +38,20 @@ size="50">
 </div>
 
 <script type="text/javascript">
-var graphs = [];
 
-filePaths =
-["data/artificialNoAnomaly/art_daily_no_noise.csv",
-"data/artificialNoAnomaly/art_daily_perfect_square_wave.csv",
-"data/artificialNoAnomaly/art_daily_small_noise.csv",
-"data/artificialNoAnomaly/art_flatline.csv",
-"data/artificialNoAnomaly/art_noisy.csv",
-"data/artificialWithAnomaly/art_daily_flatmiddle.csv",
-"data/artificialWithAnomaly/art_daily_jumpsdown.csv",
-"data/artificialWithAnomaly/art_daily_jumpsup.csv",
-"data/artificialWithAnomaly/art_daily_nojump.csv",
-"data/artificialWithAnomaly/art_increase_spike_density.csv",
-"data/artificialWithAnomaly/art_load_balancer_spikes.csv",
-"data/realAWSCloudwatch/ec2_cpu_utilization_24ae8d.csv",
-"data/realAWSCloudwatch/ec2_cpu_utilization_53ea38.csv",
-"data/realAWSCloudwatch/ec2_cpu_utilization_5f5533.csv",
-"data/realAWSCloudwatch/ec2_cpu_utilization_77c1ca.csv",
-"data/realAWSCloudwatch/ec2_cpu_utilization_825cc2.csv",
-"data/realAWSCloudwatch/ec2_cpu_utilization_ac20cd.csv",
-"data/realAWSCloudwatch/ec2_cpu_utilization_c6585a.csv",
-"data/realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv",
-"data/realAWSCloudwatch/ec2_disk_write_bytes_1ef3de.csv",
-"data/realAWSCloudwatch/ec2_disk_write_bytes_c0d644.csv",
-"data/realAWSCloudwatch/ec2_network_in_257a54.csv",
-"data/realAWSCloudwatch/ec2_network_in_5abac7.csv",
-"data/realAWSCloudwatch/elb_request_count_8c0756.csv",
-"data/realAWSCloudwatch/grok_asg_anomaly.csv",
-"data/realAWSCloudwatch/iio_us-east-1_i-a2eb1cd9_NetworkIn.csv",
-"data/realAWSCloudwatch/rds_cpu_utilization_cc0c53.csv",
-"data/realAWSCloudwatch/rds_cpu_utilization_e47b3b.csv",
-"data/realKnownCause/ambient_temperature_system_failure.csv",
-"data/realKnownCause/cpu_utilization_asg_misconfiguration.csv",
-"data/realKnownCause/ec2_request_latency_system_failure.csv",
-"data/realKnownCause/machine_temperature_system_failure.csv"];
 
+function getFilePaths(path){
+  $.ajax({
+    url: path,
+    // "results_file_paths.txt",
+    async: false,
+    success: function (csvd) {
+        filePaths = $.csv2Array(csvd);
+    },
+    dataType: "text",
+});
+  return filePaths
+}
 
 function createDiv(container, id){
   id = "graphdiv" + id
@@ -81,8 +64,8 @@ function createDiv(container, id){
 }
 
 
-function render() {
-
+function render(path) {
+  filePaths = getFilePaths(path)
   if (event.keyCode != 13)
     return
 
@@ -94,26 +77,39 @@ function render() {
   var query = document.getElementById("query").value;
   var count = 0;
 
+  var blockRedraw = false;
+
   for (var i = 0; i < filePaths.length; i++) {
-    if (filePaths[i].indexOf(query) > -1) {
+    path = filePaths[i][0]
+    if (path.indexOf(query) > -1) {
       graphs.push(
         new Dygraph(
           createDiv(graphDiv, count++),
-          filePaths[i],
+          path,
           {
+            visibility: [true, true, true, false, true],
             series: {
               timestamp: {
-                axis: "x1",
-                //strokeWidth: 1,
+                axis: "x1"
               },
               value: {
-                axis: "y1",
-                //strokeWidth: 1,
+                axis: "y1"
+              },
+              label: {
+                axis: "y2"
+              },
+              anomaly_score: {
+                axis: "y2"
+              },
+              _raw_score: {
+                axis: "y2"
+              },
+              _alerts: {
+                axis: "y2"
               }
             },
             legend: "always",
-            title: filePaths[i],
-
+            title: path,
             drawCallback: function (me, initial) {
               if (blockRedraw || initial) return;
               blockRedraw = true;
@@ -132,7 +128,24 @@ function render() {
             pointClickCallback: function(e, point) {
               timestamp = moment(new Date(point.xval));
               timestampString = timestamp.format("YYYY-MM-DD HH-mm-ss.SSS000");
-              alert(timestampString);
+              window.prompt("Copy to clipboard: Ctrl+C, Enter", timestampString);
+            },
+            underlayCallback: function(canvas, area, g) {
+              var rowVal = g.getValue(0,1);
+              var rowTime = g.getValue(0,0);
+
+              var left = g.toDomCoords(rowTime, rowVal)[0];
+
+
+              row = Math.round(0.15*g.numRows());
+
+              rowVal = g.getValue(row,1);
+              rowTime = g.getValue(row,0);
+
+              var right = g.toDomCoords(rowTime, rowVal)[0]
+
+              canvas.fillStyle = "rgba(150, 150, 150, 1.0)";
+              canvas.fillRect(left, area.y, right - left, area.h);
             }
           }
         )
