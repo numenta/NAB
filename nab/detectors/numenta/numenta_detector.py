@@ -39,8 +39,6 @@ class NumentaDetector(AnomalyDetector):
     self.sensorParams = None
     self.anomalyLikelihood = None
 
-    self.numentaConfigure()
-
 
   def getAdditionalHeaders(self):
     """Returns a list of strings."""
@@ -72,8 +70,7 @@ class NumentaDetector(AnomalyDetector):
     return (anomalyScore, rawScore)
 
 
-
-  def numentaConfigure(self):
+  def initialize(self):
     calcRange = abs(self.inputMax - self.inputMin)
     calcPad = calcRange * .2
 

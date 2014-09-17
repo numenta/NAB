@@ -47,7 +47,15 @@ class AnomalyDetector(object):
     self.inputMax = self.dataSet.data["value"].max()
 
 
-  @abc.abstractmethod
+  def initialize(self):
+    """Do anything to initialize your detector in before calling run.
+
+    Pooling across cores forces a pickling operation when moving objects from
+    the main core to the pool and this may not always be possible. This function
+    allows you to create objects within the pool itself to avoid this issue.
+    """
+    pass
+
   def getAdditionalHeaders(self):
     """
     Returns a list of strings. Subclasses can add in additional columns per
@@ -71,6 +79,7 @@ class AnomalyDetector(object):
     """
     raise NotImplementedError
 
+
   def getHeader(self):
     """
     Gets the outputPath and all the headers needed to write the results files.
@@ -80,8 +89,6 @@ class AnomalyDetector(object):
                 "anomaly_score"]
 
     headers.extend(self.getAdditionalHeaders())
-
-    headers.append("alerts")
 
     return headers
 
@@ -100,9 +107,7 @@ class AnomalyDetector(object):
 
       detectorValues = self.handleRecord(inputData)
 
-      thresholdedValue = 1 if detectorValues[0] >= self.threshold else 0
-
-      outputRow = list(row) + list(detectorValues) + [thresholdedValue]
+      outputRow = list(row) + list(detectorValues)
 
       ans.loc[i] = outputRow
 
@@ -131,6 +136,8 @@ def detectDataSet(args):
 
   print "%s: Beginning detection with %s for %s" % \
                                                 (i, detectorName, relativePath)
+
+  detectorInstance.initialize()
 
   results = detectorInstance.run()
 

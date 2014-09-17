@@ -45,8 +45,8 @@ def main(args):
 
 
   detectors = args.detectors
-  numCPUs = args.numCPUs
-  probationaryPercent = args.probationaryPercent
+  numCPUs = int(args.numCPUs)
+  probationaryPercent = float(args.probationaryPercent)
 
   dataDir = os.path.join(root, args.dataDir)
   labelDir = os.path.join(root, args.labelDir)
@@ -66,8 +66,6 @@ def main(args):
 
   if args.detect:
     detectorConstructors = getDetectorClassConstructors(args.detectors)
-    print detectorConstructors
-    print args.detectors
     runner.detect(detectorConstructors)
 
   if args.optimize:
@@ -144,7 +142,7 @@ if __name__ == "__main__":
                     "benchmark. If not specified all CPUs will be used.")
 
   parser.add_argument("-pp","--probationaryPercent",
-                    default=0.1,
+                    default=0.15,
                     help="The percentage of dataset to be used to configure \
                     the detector and not to be used for scoring")
 
