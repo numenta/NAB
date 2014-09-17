@@ -1,12 +1,12 @@
 from nab.detectors.base import AnomalyDetector
 
-from nab.detectors.skyline.algorithms import (  median_absolute_deviation,
-                                                first_hour_average,
-                                                stddev_from_average,
-                                                stddev_from_moving_average,
-                                                mean_subtraction_cumulation,
-                                                least_squares,
-                                                histogram_bins)
+from nab.detectors.skyline.algorithms import (median_absolute_deviation,
+                                              first_hour_average,
+                                              stddev_from_average,
+                                              stddev_from_moving_average,
+                                              mean_subtraction_cumulation,
+                                              least_squares,
+                                              histogram_bins)
 
 
 
@@ -33,15 +33,6 @@ class SkylineDetector(AnomalyDetector):
     return "skyline"
 
 
-  def getThreshold(self):
-    """
-    Returns a known good threshold for the dataset. Discovered by using the
-    optimize_threshold.py script.
-    """
-
-    return 0.9
-
-
   def handleRecord(self, inputData):
     """
     Returns a list [anomalyScore].
@@ -55,7 +46,3 @@ class SkylineDetector(AnomalyDetector):
 
     averageScore = score / len(self.algorithms)
     return [averageScore]
-
-
-  def configureDetector(self, ProbationaryPeriodData):
-    pass

@@ -40,7 +40,9 @@ class AnomalyDetector(object):
     self.dataSet = dataSet
     self.probationaryPeriod = math.floor(
       probationaryPercent * dataSet.data.shape[0])
-    self.threshold = self.getThreshold()
+
+    self.inputMin = self.dataSet.data["value"].min()
+    self.inputMax = self.dataSet.data["value"].max()
 
   def getOutputPrefix(self):
     """Returns a string to use as a prefix to output file names.
@@ -59,33 +61,6 @@ class AnomalyDetector(object):
     columns.
     """
     return []
-
-
-  def getThreshold(self):
-    """
-    Returns a float between 0.0 and 1.0. This will be used to decide if a given
-    record becomes an alert.
-
-    This method MUST be overridden by child classes.
-    """
-    pass
-
-
-  def configureDetector(self, probationaryPeriodData):
-    """
-    Takes the probationary period data and is allowed to do any statistical
-    calculation with it in order to configure itself
-    """
-    pass
-
-
-  def configure(self, probationaryPeriodData):
-    """
-    This functions takes the probationary period data and calculates some.
-    """
-    self.inputMin = probationaryPeriodData.min()
-    self.inputMax = probationaryPeriodData.max()
-    self.configureDetector(probationaryPeriodData)
 
 
   def handleRecord(self, inputData):
@@ -119,7 +94,6 @@ class AnomalyDetector(object):
     """
     Main function that is called to collect anomaly scores for a given file.
     """
-    self.configure(self.dataSet.data["value"].loc[:self.probationaryPeriod])
 
     headers = self.getHeader()
 

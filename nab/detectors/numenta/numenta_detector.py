@@ -35,6 +35,12 @@ class NumentaDetector(AnomalyDetector):
 
     super(NumentaDetector, self).__init__(*args, **kwargs)
 
+    self.numentaConfigure()
+
+    self.model = None
+    self.sensorParams = None
+    self.anomalyLikelihood = None
+
 
   def getOutputPrefix(self):
     """
@@ -46,14 +52,6 @@ class NumentaDetector(AnomalyDetector):
   def getAdditionalHeaders(self):
     """Returns a list of strings."""
     return ["raw_score"]
-
-
-  def getThreshold(self):
-    """
-    Returns a known good threshold for the dataset. Discovered by using the
-    optimize_threshold.py script.
-    """
-    return 0.99996
 
 
   def handleRecord(self, inputData):
@@ -82,14 +80,13 @@ class NumentaDetector(AnomalyDetector):
 
 
 
-  def configureDetector(self, probationaryPeriodData):
+  def numentaConfigure(self):
     calcRange = abs(self.inputMax - self.inputMin)
     calcPad = calcRange * .2
 
     self.inputMin = self.inputMin - calcPad
     self.inputMax = self.inputMax + calcPad
     # Load the model params JSON
-    probationaryPeriod = probationaryPeriodData.shape[0]
 
     paramsPath = os.path.join(os.path.split(__file__)[0],
                 "modelParams",
@@ -112,8 +109,8 @@ class NumentaDetector(AnomalyDetector):
     self.model.enableInference({"predictedField": "value"})
 
     # The anomaly likelihood object
-    numentaLearningPeriod = math.floor(probationaryPeriod / 2.0)
-    self.anomalyLikelihood = AnomalyLikelihood(probationaryPeriod,
+    numentaLearningPeriod = math.floor(self.probationaryPeriod / 2.0)
+    self.anomalyLikelihood = AnomalyLikelihood(self.probationaryPeriod,
                                                numentaLearningPeriod)
 
 #############################################################################

@@ -25,47 +25,27 @@ import math
 
 
 
-class CostMatrix(object):
-  """
-  Class to store a costmatrix
-  """
-  def __init__(self, dictionary):
-    """
-    @param (dict)     Dictionary containing all the weights for each record
-                      type: True positive (tp)
-                            False positive (fp)
-                            True Negative (tn)
-                            False Negative (fn)
-    """
-    self.tp = dictionary["tpWeight"]
-    self.tn = dictionary["tnWeight"]
-    self.fp = dictionary["fpWeight"]
-    self.fn = dictionary["fnWeight"]
-    self.values = dictionary
-
-
 class Window(object):
   """Class to store a window in a dataset."""
 
-  def __init__(self, windowId, limits, labels):
+  def __init__(self, windowId, limits, allRecords):
     """
     @param windowId   (int)           An integer id for the window.
 
     @limits           (tuple)         (start timestamp, end timestamp).
 
-    @labels           (pandas.Series) Raw rows of the data within the window.
+    @allRecords       (pandas.Series) Raw rows of the the whole dataset.
     """
-    self.labels = labels
     self.id = windowId
     self.t1, self.t2 = limits
 
-    tmp = labels[labels["timestamp"] >= self.t1]
+    tmp = allRecords[allRecords["timestamp"] >= self.t1]
     self.window = tmp[tmp["timestamp"] <= self.t2]
 
     self.indices = self.window.index
     self.length = len(self.indices)
 
-    self.firstTP = self.getFirstTP()
+    self.firstTP = self.getFirstTruePositive()
 
 
   def getFirstTruePositive(self):
@@ -170,7 +150,7 @@ class Scorer(object):
     tpScore = 0
     fnScore = 0
     for window in self.windows:
-      tpIndex = window.getFirstTP()
+      tpIndex = window.getFirstTruePositive()
       if tpIndex == -1:
         fnScore += self.costMatrix["fnWeight"]
       else:
