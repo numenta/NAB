@@ -22,11 +22,10 @@
 import os
 import argparse
 import yaml
-from nab.lib.running import Runner
-from nab.lib.util import (recur,
-                         detectorNameToClass,
-                         checkInputs,
-                         )
+from nab.runner import Runner
+from nab.util import (recur,
+                      detectorNameToClass,
+                      checkInputs)
 
 from nab.detectors.numenta.numenta_detector import NumentaDetector
 from nab.detectors.skyline.skyline_detector import SkylineDetector
@@ -67,7 +66,8 @@ def main(args):
 
 
 def getDetectorClassConstructors(detectors):
-  detectorConstructors = {d:globals()[detectorNameToClass(d)] for d in detectors}
+  detectorConstructors = {
+  d:globals()[detectorNameToClass(d)] for d in detectors}
 
   return detectorConstructors
 

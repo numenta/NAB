@@ -18,7 +18,7 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-from nab.lib.scoring import scoreCorpus
+from nab.scorer import scoreCorpus
 
 
 
@@ -81,7 +81,7 @@ def twiddle(objFunction, args, init=0.5, tolerance=0.00001):
   pastCalls = dict()
   x = init
   step = 0.1
-  bestScore = objectiveFunction(x, args)
+  bestScore = objFunction(x, args)
 
   pastCalls[x] = bestScore
 
@@ -89,7 +89,7 @@ def twiddle(objFunction, args, init=0.5, tolerance=0.00001):
     x += step
 
     if x not in pastCalls:
-      score = objectiveFunction(x, args)
+      score = objFunction(x, args)
       pastCalls[x] = score
 
     score = pastCalls[x]
@@ -102,7 +102,7 @@ def twiddle(objFunction, args, init=0.5, tolerance=0.00001):
       x -= 2*step
 
       if x not in pastCalls:
-        score = objectiveFunction(x, args)
+        score = objFunction(x, args)
         pastCalls[x] = score
 
       score = pastCalls[x]

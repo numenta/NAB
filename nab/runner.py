@@ -26,19 +26,19 @@ import multiprocessing
 
 from nab.detectors.base import detectDataSet
 
-from nab.lib.corpus import Corpus
-from nab.lib.scoring import scoreCorpus
-from nab.lib.labeling import CorpusLabel
-from nab.lib.optimizing import optimizeThreshold
+from nab.corpus import Corpus
+from nab.scorer import scoreCorpus
+from nab.labeler import CorpusLabel
+from nab.optimizer import optimizeThreshold
 
-from nab.lib.util import updateThresholds
+from nab.util import updateThresholds
 
 
 
 class Runner(object):
   """Class to run a configured nab benchmark."""
 
-  def __init__(self, detectors, threshold):
+  def __init__(self, args):
     """
     @param args             (namespace)   Class that holds many parameters of the
                                           run.
