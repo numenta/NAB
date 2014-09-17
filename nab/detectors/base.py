@@ -20,10 +20,12 @@
 
 import os
 import sys
+import abc
 import math
 import pandas
 from nab.util import createPath
 from datetime import datetime
+
 
 
 
@@ -32,6 +34,7 @@ class AnomalyDetector(object):
   Base class for all anomaly detectors. When inheriting from this class please
   take note of which methods MUST be overridden, as documented below.
   """
+  __metaclass__ = abc.ABCMeta
 
   def __init__( self,
                 dataSet,
@@ -44,14 +47,8 @@ class AnomalyDetector(object):
     self.inputMin = self.dataSet.data["value"].min()
     self.inputMax = self.dataSet.data["value"].max()
 
-  def getOutputPrefix(self):
-    """Returns a string to use as a prefix to output file names.
 
-    This method MUST be overridden by subclasses.
-    """
-    return ""
-
-
+  @abc.abstractmethod
   def getAdditionalHeaders(self):
     """
     Returns a list of strings. Subclasses can add in additional columns per
@@ -63,6 +60,7 @@ class AnomalyDetector(object):
     return []
 
 
+  @abc.abstractmethod
   def handleRecord(self, inputData):
     """
     Returns a list [anomalyScore, *]. It is required that the first

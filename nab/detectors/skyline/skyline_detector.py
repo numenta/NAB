@@ -29,10 +29,6 @@ class SkylineDetector(AnomalyDetector):
                          histogram_bins]
 
 
-  def getOutputPrefix(self):
-    return "skyline"
-
-
   def handleRecord(self, inputData):
     """
     Returns a list [anomalyScore].
