@@ -19,19 +19,18 @@
 # ----------------------------------------------------------------------
 
 import os
-import sys
 import yaml
 import dateutil.parser
 import pandas
 import json
 
-from nab.lib.corpus import Corpus
-from nab.lib.util import (absoluteFilePaths,
-                          flattenDict,
-                          strf,
-                          strp,
-                          deepmap,
-                          makeDirsExist)
+from nab.corpus import Corpus
+from nab.util import (absoluteFilePaths,
+                      flattenDict,
+                      strf,
+                      strp,
+                      deepmap,
+                      makeDirsExist)
 
 
 

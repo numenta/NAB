@@ -19,8 +19,8 @@
 # ----------------------------------------------------------------------
 
 import os
-from nab.lib.util import (convertResultsPathToDataPath,
-                          convertAnomalyScoresToDetections)
+from nab.util import (convertResultsPathToDataPath,
+                      convertAnomalyScoresToDetections)
 import math
 
 
