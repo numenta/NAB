@@ -60,7 +60,8 @@ def median_absolute_deviation(timeseries):
 
 # def grubbs(timeseries):
 #     """
-#     A timeseries is anomalous if the Z score is greater than the Grubb's score.
+#     A timeseries is anomalous if the Z score is greater than the Grubb's
+# score.
 #     """
 
 #     series = np.array([x[1] for x in timeseries])
@@ -71,7 +72,8 @@ def median_absolute_deviation(timeseries):
 #     len_series = len(series)
 #     threshold = scipy.stats.t.isf(.05 / (2 * len_series), len_series - 2)
 #     threshold_squared = threshold * threshold
-#     grubbs_score = ((len_series - 1) / np.sqrt(len_series)) * np.sqrt(threshold_squared / (len_series - 2 + threshold_squared))
+#     grubbs_score = ((len_series - 1) / np.sqrt(len_series)) * np.sqrt(
+  # threshold_squared / (len_series - 2 + threshold_squared))
 
 #     return z_score > grubbs_score
 
@@ -146,7 +148,8 @@ def least_squares(timeseries):
   on a projected least squares model is greater than three sigma.
   """
 
-  x = np.array([(t[0] - datetime(1970,1,1)).total_seconds() for t in timeseries])
+  x = np.array(
+    [(t[0] - datetime(1970,1,1)).total_seconds() for t in timeseries])
   y = np.array([t[1] for t in timeseries])
   A = np.vstack([x, np.ones(len(x))]).T
   results = np.linalg.lstsq(A, y)
@@ -205,7 +208,8 @@ def histogram_bins(timeseries):
 
 #     hour_ago = time() - 3600
 #     ten_minutes_ago = time() - 600
-#     reference = scipy.array([x[1] for x in timeseries if x[0] >= hour_ago and x[0] < ten_minutes_ago])
+#     reference = scipy.array(
+  # [x[1] for x in timeseries if x[0] >= hour_ago and x[0] < ten_minutes_ago])
 #     probe = scipy.array([x[1] for x in timeseries if x[0] >= ten_minutes_ago])
 
 #     if reference.size < 20 or probe.size < 20:
@@ -224,7 +228,8 @@ def histogram_bins(timeseries):
 # def is_anomalously_anomalous(metric_name, ensemble, datapoint):
 #     """
 #     This method runs a meta-analysis on the metric to determine whether the
-#     metric has a past history of triggering. TODO: weight intervals based on datapoint
+#     metric has a past history of triggering.
+# TODO: weight intervals based on datapoint
 #     """
 #     # We want the datapoint to avoid triggering twice on the same data
 #     new_trigger = [time(), datapoint]
@@ -232,7 +237,8 @@ def histogram_bins(timeseries):
 #     # Get the old history
 #     raw_trigger_history = redis_conn.get("trigger_history." + metric_name)
 #     if not raw_trigger_history:
-#         redis_conn.set("trigger_history." + metric_name, packb([(time(), datapoint)]))
+#         redis_conn.set("trigger_history." + metric_name, packb(
+  # [(time(), datapoint)]))
 #         return True
 
 #     trigger_history = unpackb(raw_trigger_history)
@@ -274,7 +280,10 @@ def histogram_bins(timeseries):
 #     raise Stale()
 
 #   # Get rid of boring series
-#   if len(set(item[1] for item in timeseries[-MAX_TOLERABLE_BOREDOM:])) == BOREDOM_SET_SIZE:
+#   if len(
+  # set(
+    # item[1] for item in timeseries[
+    # -MAX_TOLERABLE_BOREDOM:])) == BOREDOM_SET_SIZE:
 #     raise Boring()
 
 #   try:

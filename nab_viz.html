@@ -43,7 +43,6 @@ size="50">
 function getFilePaths(path){
   $.ajax({
     url: path,
-    // "results_file_paths.txt",
     async: false,
     success: function (csvd) {
         filePaths = $.csv2Array(csvd);
@@ -59,7 +58,6 @@ function createDiv(container, id){
   div.id = id
   div.className = "graph"
   container[0].appendChild(div)
-  console.log ("constructing " + id);
   return div
 }
 

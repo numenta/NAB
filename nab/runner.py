@@ -26,26 +26,57 @@ import multiprocessing
 
 from nab.detectors.base import detectDataSet
 
-from nab.lib.corpus import Corpus
-from nab.lib.scoring import scoreCorpus
-from nab.lib.labeling import CorpusLabel
-from nab.lib.optimizing import optimizeThreshold
+from nab.corpus import Corpus
+from nab.scorer import scoreCorpus
+from nab.labeler import CorpusLabel
+from nab.optimizer import optimizeThreshold
 
-from nab.lib.util import updateThresholds
+from nab.util import updateThresholds
 
 
 
 class Runner(object):
   """Class to run a configured nab benchmark."""
 
-  def __init__(self, args):
+  def __init__(self,
+               dataDir,
+               labelDir,
+               resultsDir,
+               profilesPath,
+               thresholdPath,
+               probationaryPercent=0.15,
+               numCPUs=None):
     """
-    @param args             (namespace)   Class that holds many paramters of the
-                                          run.
-    """
-    self.args = args
+    @param dataDir        (string)  Directory where all the raw datasets exist.
 
-    self.pool = multiprocessing.Pool(args.numCPUs)
+    @param labelDir       (string)  Directory where the labels of the datasets
+                                    exist.
+
+    @param resultsDir     (string)  Directory where the detector anomaly scores
+                                    will be scored.
+
+    @param profilesPath   (string)  Path to user profiles prescribing the
+                                    username and the cost matrix.
+
+    @param thresholdPath  (string)  Path to thresholds dictionary containing the
+                                    best thresholds (and their corresponding
+                                    score) for a combination of detector and
+                                    user profile.
+
+    @probationaryPercent  (float)   Percent of each dataset which will be
+                                    ignored during the scoring process.
+
+    @param numCPUs        (int)     Number of CPUs to be used for calls to
+                                    multiprocessing.pool.map
+    """
+    self.dataDir = dataDir
+    self.labelDir = labelDir
+    self.resultsDir = resultsDir
+    self.profilesPath = profilesPath
+    self.thresholdPath = thresholdPath
+
+    self.probationaryPercent = probationaryPercent
+    self.pool = multiprocessing.Pool(numCPUs)
 
     self.corpus = None
     self.corpusLabel = None
@@ -54,11 +85,11 @@ class Runner(object):
 
   def initialize(self):
     """Initialize all the relevant objects for the run."""
-    self.corpus = Corpus(self.args.dataDir)
-    self.corpusLabel = CorpusLabel(self.args.labelDir, None, self.corpus)
+    self.corpus = Corpus(self.dataDir)
+    self.corpusLabel = CorpusLabel(self.labelDir, None, self.corpus)
     self.corpusLabel.initialize()
 
-    with open(self.args.profilesPath) as p:
+    with open(self.profilesPath) as p:
       self.profiles = yaml.load(p)
 
 
@@ -77,7 +108,6 @@ class Runner(object):
     count = 0
     for detectorName, detectorConstructor in detectors.iteritems():
       args = []
-
       for relativePath, dataSet in self.corpus.dataSets.iteritems():
 
         args.append(
@@ -85,10 +115,10 @@ class Runner(object):
             count,
             detectorConstructor(
                           dataSet=dataSet,
-                          probationaryPercent=self.args.probationaryPercent),
+                          probationaryPercent=self.probationaryPercent),
             detectorName,
             self.corpusLabel.labels[relativePath]["label"],
-            self.args.resultsDir,
+            self.resultsDir,
             relativePath
           )
         )
@@ -99,7 +129,7 @@ class Runner(object):
     self.pool.map(detectDataSet, args)
 
 
-  def optimize(self, detectorNames, thresholdPath):
+  def optimize(self, detectorNames):
     """Optimize the threshold for each combination of detector and profile.
 
     @param detectorNames  (list)  List of detector names.
@@ -114,7 +144,7 @@ class Runner(object):
     thresholds = dict()
 
     for detector in detectorNames:
-      resultsDetectorDir = os.path.join(self.args.resultsDir, detector)
+      resultsDetectorDir = os.path.join(self.resultsDir, detector)
       resultsCorpus = Corpus(resultsDetectorDir)
 
       thresholds[detector] = dict()
@@ -129,9 +159,9 @@ class Runner(object):
           costMatrix,
           resultsCorpus,
           self.corpusLabel,
-          self.args.probationaryPercent))
+          self.probationaryPercent))
 
-    updateThresholds(thresholds, thresholdPath)
+    updateThresholds(thresholds, self.thresholdPath)
 
     return thresholds
 
@@ -157,7 +187,7 @@ class Runner(object):
       ans = pandas.DataFrame(columns=("Detector", "Username", "File", \
         "Threshold", "Score", "tp", "tn", "fp", "fn", "Total_Count"))
 
-      resultsDetectorDir = os.path.join(self.args.resultsDir, detector)
+      resultsDetectorDir = os.path.join(self.resultsDir, detector)
       resultsCorpus = Corpus(resultsDetectorDir)
 
       for username, profile in self.profiles.iteritems():
@@ -173,7 +203,7 @@ class Runner(object):
                                costMatrix,
                                resultsCorpus,
                                self.corpusLabel,
-                               self.args.probationaryPercent))
+                               self.probationaryPercent))
 
         for row in results:
           ans.loc[len(ans)] = row

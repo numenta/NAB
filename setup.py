@@ -1,6 +1,6 @@
 import os
 from setuptools import setup, find_packages
-from nab.lib.util import relativeFilePaths, recur
+from nab.util import relativeFilePaths, recur
 import csv
 
 # Utility function to read the README file.

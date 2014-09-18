@@ -19,19 +19,18 @@
 # ----------------------------------------------------------------------
 
 import os
-import sys
 import yaml
 import dateutil.parser
 import pandas
 import json
 
-from nab.lib.corpus import Corpus
-from nab.lib.util import (absoluteFilePaths,
-                          flattenDict,
-                          strf,
-                          strp,
-                          deepmap,
-                          makeDirsExist)
+from nab.corpus import Corpus
+from nab.util import (absoluteFilePaths,
+                      flattenDict,
+                      strf,
+                      strp,
+                      deepmap,
+                      makeDirsExist)
 
 
 
@@ -186,7 +185,8 @@ class LabelCombiner(object):
     """Write the combined labels to a destination directory."""
     makeDirsExist(destDir)
     windows = json.dumps(self.combinedWindows)
-    with open(os.path.join(destDir, "corpus_windows.json"), "w") as windowWriter:
+    with open(os.path.join(
+      destDir, "corpus_windows.json"), "w") as windowWriter:
       windowWriter.write(windows)
 
     fileFriendlyLabels = {}
@@ -196,7 +196,8 @@ class LabelCombiner(object):
       fileFriendlyLabels[relativePath]["timestamp"] = \
                       fileFriendlyLabels[relativePath]["timestamp"].apply(strf)
 
-      fileFriendlyLabels[relativePath] = fileFriendlyLabels[relativePath].to_json()
+      fileFriendlyLabels[relativePath] = \
+        fileFriendlyLabels[relativePath].to_json()
 
     labels = json.dumps(fileFriendlyLabels)
 

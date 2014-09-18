@@ -23,10 +23,10 @@ This contains the objects to store and manipulate a database of csv files.
 """
 
 import os
-import sys
 import copy
 import pandas
-from nab.lib.util import absoluteFilePaths, createPath
+from nab.util import (absoluteFilePaths,
+                      createPath)
 
 
 
@@ -158,7 +158,8 @@ class Corpus(object):
     """
 
     for relativePath in self.dataSets.keys():
-      self.dataSets[relativePath].modifyData(columnName, data[relativePath], write=write)
+      self.dataSets[relativePath].modifyData(
+        columnName, data[relativePath], write=write)
 
 
   def removeColumn(self, columnName, write=False):

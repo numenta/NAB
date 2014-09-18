@@ -20,9 +20,10 @@
 
 import os
 import sys
+import abc
 import math
 import pandas
-from nab.lib.util import createPath
+from nab.util import createPath
 from datetime import datetime
 
 
@@ -32,6 +33,7 @@ class AnomalyDetector(object):
   Base class for all anomaly detectors. When inheriting from this class please
   take note of which methods MUST be overridden, as documented below.
   """
+  __metaclass__ = abc.ABCMeta
 
   def __init__( self,
                 dataSet,
@@ -40,15 +42,19 @@ class AnomalyDetector(object):
     self.dataSet = dataSet
     self.probationaryPeriod = math.floor(
       probationaryPercent * dataSet.data.shape[0])
-    self.threshold = self.getThreshold()
 
-  def getOutputPrefix(self):
-    """Returns a string to use as a prefix to output file names.
+    self.inputMin = self.dataSet.data["value"].min()
+    self.inputMax = self.dataSet.data["value"].max()
 
-    This method MUST be overridden by subclasses.
+
+  def initialize(self):
+    """Do anything to initialize your detector in before calling run.
+
+    Pooling across cores forces a pickling operation when moving objects from
+    the main core to the pool and this may not always be possible. This function
+    allows you to create objects within the pool itself to avoid this issue.
     """
-    return ""
-
+    pass
 
   def getAdditionalHeaders(self):
     """
@@ -61,33 +67,7 @@ class AnomalyDetector(object):
     return []
 
 
-  def getThreshold(self):
-    """
-    Returns a float between 0.0 and 1.0. This will be used to decide if a given
-    record becomes an alert.
-
-    This method MUST be overridden by child classes.
-    """
-    pass
-
-
-  def configureDetector(self, probationaryPeriodData):
-    """
-    Takes the probationary period data and is allowed to do any statistical
-    calculation with it in order to configure itself
-    """
-    pass
-
-
-  def configure(self, probationaryPeriodData):
-    """
-    This functions takes the probationary period data and calculates some.
-    """
-    self.inputMin = probationaryPeriodData.min()
-    self.inputMax = probationaryPeriodData.max()
-    self.configureDetector(probationaryPeriodData)
-
-
+  @abc.abstractmethod
   def handleRecord(self, inputData):
     """
     Returns a list [anomalyScore, *]. It is required that the first
@@ -97,7 +77,7 @@ class AnomalyDetector(object):
 
     This method MUST be overridden by subclasses
     """
-    pass
+    raise NotImplementedError
 
 
   def getHeader(self):
@@ -110,8 +90,6 @@ class AnomalyDetector(object):
 
     headers.extend(self.getAdditionalHeaders())
 
-    headers.append("alerts")
-
     return headers
 
 
@@ -119,7 +97,6 @@ class AnomalyDetector(object):
     """
     Main function that is called to collect anomaly scores for a given file.
     """
-    self.configure(self.dataSet.data["value"].loc[:self.probationaryPeriod])
 
     headers = self.getHeader()
 
@@ -130,9 +107,7 @@ class AnomalyDetector(object):
 
       detectorValues = self.handleRecord(inputData)
 
-      thresholdedValue = 1 if detectorValues[0] >= self.threshold else 0
-
-      outputRow = list(row) + list(detectorValues) + [thresholdedValue]
+      outputRow = list(row) + list(detectorValues)
 
       ans.loc[i] = outputRow
 
@@ -161,6 +136,8 @@ def detectDataSet(args):
 
   print "%s: Beginning detection with %s for %s" % \
                                                 (i, detectorName, relativePath)
+
+  detectorInstance.initialize()
 
   results = detectorInstance.run()
 

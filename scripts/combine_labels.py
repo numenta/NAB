@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#! /usr/bin/env python
 # ----------------------------------------------------------------------
 # Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
 # with Numenta, Inc., for a separate license for this software code, the
@@ -18,59 +18,67 @@
 #
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
+
+
 import os
+from os.path import dirname, realpath
 import argparse
-import sys
-import pandas
-from nab.lib.corpus import Corpus
-from nab.lib.labeling import CorpusLabel
-from nab.lib.util import recur, checkInputs
+
+from nab.labeler import LabelCombiner, CorpusLabel
+
+from nab.util import recur
 
 depth = 3
 
-root = recur(os.path.dirname, os.path.realpath(__file__), depth)
-
-
+root = recur(dirname, realpath(__file__), depth)
 
 def main(args):
-
   if not args.absolutePaths:
     args.labelDir = os.path.join(root, args.labelDir)
     args.dataDir = os.path.join(root, args.dataDir)
     args.destDir = os.path.join(root, args.destDir)
 
-  if not checkInputs(args):
-    return
+  params = [args.labelDir, args.dataDir]
 
-  corpus = Corpus(args.dataDir)
+  if hasattr(args, "threshold"):
+    params.append(args.threshold)
 
-  corpusLabel = CorpusLabel(args.labelDir, corp=corpus)
+  print "Labels Directory: %s" % args.labelDir
+  print "Data Directory: %s" % args.dataDir
+  print "Destination Directory: %s" % args.destDir
+
+  labelCombiner = LabelCombiner(*tuple(params))
+
+  print "Combining Labels"
+
+  labelCombiner.combine()
+
+  print "Writing combined labels"
+
+  labelCombiner.write(args.destDir)
+
+  print "Attempting to load objects as a test"
+
+  corpusLabel = CorpusLabel(args.destDir, args.dataDir)
+
   corpusLabel.getEverything()
 
-  columnData = dict()
-  for relativePath in corpusLabel.labels.keys():
-    columnData[relativePath] = pandas.Series(corpusLabel.labels[relativePath]["label"])
-
-  corpus.addColumn("label", columnData)
-
-  corpus.copy(newRoot=args.destDir)
-
-  print "Done adding column!"
+  print "Success!"
 
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
 
+  parser.add_argument("--labelDir",
+                    help="This directory holds all the individual labels")
+
   parser.add_argument("--dataDir",
                     default="data",
-                    help="This holds all the label windows for the corpus.")
-
-  parser.add_argument("--labelDir",
-                    default="labels",
-                    help="This holds all the label windows for the corpus.")
+                    help="This holds all the label windows for the corpus")
 
   parser.add_argument("--destDir",
-                    help="Where you want to store the resulting corpus")
+                    help="Where you want to store the combined labels",
+                    default="labels")
 
   parser.add_argument("--absolutePaths",
                       help="Whether file paths entered are not relative to \
@@ -79,5 +87,6 @@ if __name__ == "__main__":
                       action="store_true")
 
   args = parser.parse_args()
+
   main(args)
 

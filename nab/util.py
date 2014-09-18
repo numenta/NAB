@@ -101,7 +101,7 @@ def convertAnomalyScoresToDetections(anomalyScores, threshold):
   return detections
 
 def relativeFilePaths(directory):
-  """Given directory, gets the path of all files within relative to the directory.
+  """Given directory, get path of all files within relative to the directory.
 
   @param directory  (string)      Absolute directory name.
 
@@ -277,7 +277,7 @@ def deepmap(f, datum):
   @param datum  (datum)       Object to map over.
   """
   if type(datum) == list:
-      return [deepmap(f, x) for x in datum]
+    return [deepmap(f, x) for x in datum]
   else:
-      return f(datum)
+    return f(datum)
 
