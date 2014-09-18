@@ -45,7 +45,7 @@ def main(args):
 
 
   detectors = args.detectors
-  numCPUs = int(args.numCPUs)
+  numCPUs = int(args.numCPUs) if args.numCPUs is not None else None
   probationaryPercent = float(args.probationaryPercent)
 
   dataDir = os.path.join(root, args.dataDir)

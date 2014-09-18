@@ -1,5 +1,6 @@
-numenta:
-  Jay_Gokhale: {score: -66.13771273788555, threshold: 0.9999877929687505}
-
 detector_name:
-	username: {score: -1000, threshold: .9}
+  username: {score: -1000, threshold: 0.9}
+numenta:
+  Jay_Gokhale: {score: -73.0, threshold: 0.9999877929687505}
+skyline:
+  Jay_Gokhale: {score: -52.76517989917993, threshold: 0.9000000000000006}

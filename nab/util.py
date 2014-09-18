@@ -177,7 +177,6 @@ def osPathSplit(path, debug=False):
 
   @return     (list)   Split path.
   """
-  print "Inside osPathSplit"
   parts = []
   while True:
     newpath, tail = os.path.split(path)
