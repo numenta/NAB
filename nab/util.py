@@ -83,7 +83,7 @@ def checkInputs(args):
     return False
 
   print "Incorrect input given\n"
-  checkInputs(args)
+  return checkInputs(args)
 
 
 def convertAnomalyScoresToDetections(anomalyScores, threshold):

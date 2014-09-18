@@ -109,9 +109,7 @@ class CorpusLabel(object):
 
   def initialize(self):
     """Get boths labels and windows."""
-    print "Getting windows"
     self.getWindows()
-    print "Getting Labels"
     self.getLabels()
 
 
@@ -145,7 +143,7 @@ class CorpusLabel(object):
       labels['label'] = 0
 
       for t1, t2 in windows:
-        subset = labels[labels["timestamp"] > t1][labels["timestamp"] < t2]
+        subset = labels[labels["timestamp"] >= t1][labels["timestamp"] <= t2]
         indices = subset.loc[:,"label"].index
         labels["label"].values[indices] = 1
 

@@ -227,6 +227,8 @@ def scoreCorpus(threshold, args):
 
   args = []
   for relativePath, dataSet in resultsCorpus.dataSets.iteritems():
+    if relativePath == detector + "_scores.csv":
+      continue
 
     relativePath = convertResultsPathToDataPath( \
       os.path.join(detector, relativePath))
