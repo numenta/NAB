@@ -231,7 +231,11 @@ class LabelCombiner(object):
 
 
   def combineLabels(self):
-    """Combine windows to create raw labels."""
+    """Combine windows to create raw labels.
+    This uses the threshold to determine if a particular record should be
+    labeled as 1 or 0. Threshold describes the level of agreement you want
+    between labelers before you label a record as anomalous.
+    """
     labels = {}
     for relativePath, dataSet in self.corpus.dataSets.iteritems():
       timestampsHolder = []
@@ -293,11 +297,17 @@ class LabelCombiner(object):
     self.combinedWindows = allWindows
 
   def relaxWindows(self):
+    """
+    This takes all windows and relaxes them by a certain percentage of the data.
+    A length (relaxWindowLength) is picked before hand and each window is
+    lengthened on both its left and right side by that length. This length is
+    chosen as a certain percetange of the dataset.
+    """
     allRelaxedWindows = {}
     for relativePath, limits in self.combinedWindows.iteritems():
       data = self.corpus.dataSets[relativePath].data
       length = len(data["timestamp"])
-      percentOfDataSet = 0.05
+      percentOfDataSet = 0.025
       numWindows = len(limits)
       relaxWindowLength = int(percentOfDataSet*length)
 
