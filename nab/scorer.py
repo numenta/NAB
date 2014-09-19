@@ -19,6 +19,7 @@
 # ----------------------------------------------------------------------
 
 import os
+import pandas
 from nab.util import (convertResultsPathToDataPath,
                       convertAnomalyScoresToDetections)
 import math
@@ -28,7 +29,7 @@ import math
 class Window(object):
   """Class to store a window in a dataset."""
 
-  def __init__(self, windowId, limits, allRecords):
+  def __init__(self, windowId, limits, data):
     """
     @param windowId   (int)           An integer id for the window.
 
@@ -39,13 +40,11 @@ class Window(object):
     self.id = windowId
     self.t1, self.t2 = limits
 
-    tmp = allRecords[allRecords["timestamp"] >= self.t1]
+    tmp = labels[labels["timestamp"] >= self.t1]
     self.window = tmp[tmp["timestamp"] <= self.t2]
 
     self.indices = self.window.index
     self.length = len(self.indices)
-
-    self.firstTP = self.getFirstTruePositive()
 
 
   def getFirstTruePositive(self):
@@ -64,13 +63,14 @@ class Scorer(object):
   """Class used to score a dataset."""
 
   def __init__(self,
-               predicted,
+               timestamps,
+               predictions,
                labels,
                windowLimits,
                costMatrix,
                probationaryPeriod):
     """
-    @param predicted           (pandas.Series)   Detector predictions of whether
+    @param predictions           (pandas.Series)   Detector predictions of whether
                                                  each record is anomalous or
                                                  not.
                                                  predictions[
@@ -93,11 +93,13 @@ class Scorer(object):
     @param probationaryPeriod  (int)             Row index after which
                                                  predictions are scored.
     """
-    self.predicted = predicted
-    self.labels = labels
+    self.data = pandas.DataFrame()
+    self.data["timestamp"] = timestamps
+    self.data["label"] = labels
+
     self.probationaryPeriod = probationaryPeriod
     self.costMatrix = costMatrix
-    self.totalCount = len(self.predicted)
+    self.totalCount = len(self.data["label"])
 
     self.counts = {
       "tp": 0,
@@ -106,7 +108,8 @@ class Scorer(object):
       "fn": 0}
 
     self.score = None
-    self.length = len(predicted)
+    self.length = len(predictions)
+    self.data["type"] = self.getAlertTypes(predictions)
     self.windows = self.getWindows(windowLimits)
 
 
@@ -117,29 +120,31 @@ class Scorer(object):
                       timestamp end).
     """
     #SORT WINDOWS BEFORE PUTTING THEM IN LIST
-    self.getAlertTypes()
-    windows = [Window(i, limit, self.labels) for i, limit in enumerate(limits)]
+
+      windows.append(Window(i, relaxedLimit, self.data))
+
     return windows
 
 
-  def getAlertTypes(self):
+  def getAlertTypes(self, predictions):
     """Populate counts dictionary."""
     types = []
 
-    for i, row in self.labels.iterrows():
+    for i, row in self.data.iterrows():
       if i < self.probationaryPeriod:
         types.append("probationaryPeriod")
         continue
 
-      pred = self.predicted[int(i)]
+      pred = predictions[int(i)]
       diff = abs(pred - row["label"])
-      category = ""
+
+      category = str()
       category += "f" if bool(diff) else "t"
-      category += "p" if bool(self.predicted[int(i)]) else "n"
+      category += "p" if bool(pred) else "n"
       self.counts[category] += 1
       types.append(category)
 
-    self.labels["type"] = types
+    return types
 
 
   def getScore(self):
@@ -157,7 +162,7 @@ class Scorer(object):
         dist = (window.indices[-1] - tpIndex)/self.length
         tpScore += (2*sigmoid(dist) - 1)*self.costMatrix["tpWeight"]
 
-    fpLabels = self.labels[self.labels["type"] == "fp"]
+    fpLabels = self.data[self.data["type"] == "fp"]
     fpScore = 0
     for i, _ in fpLabels.iterrows():
       windowId = self.getClosestPrecedingWindow(i)
@@ -297,8 +302,9 @@ def scoreDataSet(args):
    probationaryPeriod) = args
 
   scorer = Scorer(
-    predicted=predicted,
-    labels=labels,
+    timestamps=labels["timestamp"],
+    predictions=predicted,
+    labels=labels["label"],
     windowLimits=windows,
     costMatrix=costMatrix,
     probationaryPeriod=probationaryPeriod)
@@ -309,4 +315,4 @@ def scoreDataSet(args):
 
   return (detectorName, username, relativePath, threshold, scorer.score, \
   counts["tp"], counts["tn"], counts["fp"], counts["fn"], \
-  scorer.totalCount)
+  scorer.length)

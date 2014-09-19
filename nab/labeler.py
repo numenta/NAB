@@ -75,6 +75,17 @@ class UserLabel(object):
       return key + ".csv"
 
     for key in self.pathDict.keys():
+      data = self.corpus.dataSets[convertKey(key)].data
+
+      for window in self.pathDict[key]:
+        for t in window:
+          t = t.decode('unicode_escape').encode('ascii','ignore')
+          t = dateutil.parser.parse(t)
+          found = data["timestamp"][data["timestamp"] == pandas.tslib.Timestamp(t)]
+          if len(found) != 1:
+            raise ValueError(
+              "timestamp listed in labels don't exist in file")
+
       windows[convertKey(key)] = [[dateutil.parser.parse(t) for t in l]
                                                     for l in self.pathDict[key]]
     return windows
@@ -133,7 +144,6 @@ class CorpusLabel(object):
     corresponding binary vector of anomaly labels. Labels are simple a more
     verbose version of the windows.
     """
-
     self.labels = {}
 
     for relativePath, dataSet in self.corpus.dataSets.iteritems():
@@ -181,8 +191,9 @@ class LabelCombiner(object):
 
   def write(self, destDir):
     """Write the combined labels to a destination directory."""
+    print self.combinedRelaxedWindows
     makeDirsExist(destDir)
-    windows = json.dumps(self.combinedWindows)
+    windows = json.dumps(self.combinedRelaxedWindows)
     with open(os.path.join(
       destDir, "corpus_windows.json"), "w") as windowWriter:
       windowWriter.write(windows)
@@ -208,6 +219,7 @@ class LabelCombiner(object):
     self.getUserLabels()
     self.combineLabels()
     self.combineWindows()
+    self.relaxWindows()
 
 
   def getUserLabels(self):
@@ -230,18 +242,15 @@ class LabelCombiner(object):
 
         count = 0
         for l in self.userLabels:
-
           if any(t >= t1 and t <= t2 for [t1,t2] in l.windows[relativePath]):
             count += 1
 
-        label = int(count >= self.nlabelers*self.threshold)
+        label = int(count >= self.nlabelers * self.threshold)
         timestampsHolder.append(t)
         labelHolder.append(label)
 
       labels[relativePath] = pandas.DataFrame({"timestamp":timestampsHolder,
           "label": labelHolder})
-
-      # labels[relativePath] = labels[relativePath].to_dict()
 
     self.combinedLabels = labels
 
@@ -282,3 +291,28 @@ class LabelCombiner(object):
 
 
     self.combinedWindows = allWindows
+
+  def relaxWindows(self):
+    allRelaxedWindows = {}
+    for relativePath, limits in self.combinedWindows.iteritems():
+      data = self.corpus.dataSets[relativePath].data
+      length = len(data["timestamp"])
+      percentOfDataSet = 0.05
+      numWindows = len(limits)
+      relaxWindowLength = int(percentOfDataSet*length)
+
+      relaxedWindows = []
+      for i, limit in enumerate(limits):
+        t1, t2 = limit
+        indices = map((
+          lambda t: data["timestamp"][data["timestamp"] == t].index[0]),
+          limit)
+        t1Index = max(indices[0] - relaxWindowLength, 0)
+        t2Index = min(indices[0] + relaxWindowLength, length-1)
+        relaxedLimit = [strf(data["timestamp"][t1Index]),
+          strf(data["timestamp"][t2Index])]
+
+        relaxedWindows.append(relaxedLimit)
+      allRelaxedWindows[relativePath] = relaxedWindows
+
+    self.combinedRelaxedWindows = allRelaxedWindows

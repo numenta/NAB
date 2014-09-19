@@ -18,7 +18,9 @@
 #
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
-
+"""
+Combines a set of labels given within folder (in the yaml format)
+"""
 
 import os
 from os.path import dirname, realpath
@@ -26,28 +28,21 @@ import argparse
 
 from nab.labeler import LabelCombiner, CorpusLabel
 
-from nab.util import recur
+from nab.util import recur, checkInputs
 
-depth = 3
+depth = 2
 
 root = recur(dirname, realpath(__file__), depth)
 
 def main(args):
-  if not args.absolutePaths:
-    args.labelDir = os.path.join(root, args.labelDir)
-    args.dataDir = os.path.join(root, args.dataDir)
-    args.destDir = os.path.join(root, args.destDir)
 
-  params = [args.labelDir, args.dataDir]
+  dataDir = os.path.join(root, args.dataDir)
+  destDir = args.destDir
+  labelDir = args.labelDir
 
-  if hasattr(args, "threshold"):
-    params.append(args.threshold)
+  threshold = 1
 
-  print "Labels Directory: %s" % args.labelDir
-  print "Data Directory: %s" % args.dataDir
-  print "Destination Directory: %s" % args.destDir
-
-  labelCombiner = LabelCombiner(*tuple(params))
+  labelCombiner = LabelCombiner(labelDir, dataDir, threshold)
 
   print "Combining Labels"
 
@@ -55,13 +50,13 @@ def main(args):
 
   print "Writing combined labels"
 
-  labelCombiner.write(args.destDir)
+  labelCombiner.write(destDir)
 
   print "Attempting to load objects as a test"
 
-  corpusLabel = CorpusLabel(args.destDir, args.dataDir)
+  corpusLabel = CorpusLabel(destDir, dataDir)
 
-  corpusLabel.getEverything()
+  corpusLabel.initialize()
 
   print "Success!"
 
@@ -88,5 +83,6 @@ if __name__ == "__main__":
 
   args = parser.parse_args()
 
-  main(args)
+  if checkInputs(args):
+    main(args)
 
