@@ -120,9 +120,7 @@ class Scorer(object):
                       timestamp end).
     """
     #SORT WINDOWS BEFORE PUTTING THEM IN LIST
-
-      windows.append(Window(i, relaxedLimit, self.data))
-
+    windows = [Window(i, limit, self.data) for i, limit in enumerate(limits)]
     return windows
 
 
