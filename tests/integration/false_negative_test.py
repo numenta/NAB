@@ -19,48 +19,19 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-# from nab.scorer import Scorer, scoreCorpus
+from nab.scorer import Scorer, scoreCorpus
 import pandas
 
-# import unittest2 as unittest
+import unittest2 as unittest
 import datetime
 
 
 
-class ExtensiveScoringTest(unittest.TestCase):
-
-
-  def blah():
-  	start = datetime.datetime.now()
-  	increment = datetime.timedelta(minutes=5)
-  	length = 1000
-
-  	timestamps = generateTimetstamps(start, increment, length)
-
-  	labels = pandas.DataFrame()
-  	labels["timestamp"] = timestamps
-  	labels["label"] = 0
-
-  	predicted = pandas.series(labels["label"])
-  	windows = generatorWindows(timestamps, 2, 5)
-
-  	labels[""]
-
-    timestamps = generateTimestamps(datetime.datetime.now(), datetime.timedelta(days=1), 10)
-    windows = generateWindows(timestamps, 1,5)
-    labels = generateLabels(timestamps, windows)
-
-
-
-
-
-
-
 def generateTimestamps(start, increment, length):
-	timestamps = pandas.Series([start])
-	for i in xrange(length - 1):
-		timestamps.loc[i + 1] = timestamps.loc[i] + increment
-	return timestamps
+  timestamps = pandas.Series([start])
+  for i in xrange(length - 1):
+    timestamps.loc[i + 1] = timestamps.loc[i] + increment
+  return timestamps
 
 
 def generateWindows(timestamps, numWindows, windowSize):
@@ -77,6 +48,7 @@ def generateWindows(timestamps, numWindows, windowSize):
     windows.append([t1, t2])
   return windows
 
+
 def generateLabels(timestamps, windows):
   labels = pandas.Series([0]*len(timestamps))
   for t1, t2 in windows:
@@ -85,14 +57,36 @@ def generateLabels(timestamps, windows):
     labels.values[indices] = 1
   return labels
 
-timestamps = generateTimestamps(datetime.datetime.now(), datetime.timedelta(days=1), 10)
-windows = generateWindows(timestamps, 1,5)
-labels = generateLabels(timestamps, windows)
+
+class FalseNegativeTests(unittest.TestCase):
 
 
+  def test_FalseNegativeCausesNegativeScore(self):
+    start = datetime.datetime.now()
+    increment = datetime.timedelta(minutes=5)
+    length = 1000
+    numWindows = 1
+    windowSize = 10
 
-print timestamps
-print windows
-print labels
+    timestamps = generateTimestamps(start, increment, length)
 
+    predictions = pandas.Series([0]*length)
 
+    labels = pandas.Series([0]*length)
+
+    windows = generateWindows(timestamps, numWindows, windowSize)
+
+    costMatrix = {"tpWeight": 1.0,
+    "fnWeight": 2.0,
+    "fpWeight": 3.0,
+    "tnWeight": 4.0}
+
+    probationaryPeriod = 0
+
+    scorer = Scorer(timestamps, predictions, labels, windows, costMatrix,
+      probationaryPeriod)
+
+    self.assertTrue(scorer.getScore() < 0)
+
+if __name__ == '__main__':
+  unittest.main()

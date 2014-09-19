@@ -1,0 +1,181 @@
+# ----------------------------------------------------------------------
+# Numenta Platform for Intelligent Computing (NuPIC)
+# Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
+# with Numenta, Inc., for a separate license for this software code, the
+# following terms and conditions apply:
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 3 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see http://www.gnu.org/licenses.
+#
+# http://numenta.org/licenses/
+# ----------------------------------------------------------------------
+
+from nab.scorer import Scorer, scoreCorpus
+import pandas
+
+import unittest2 as unittest
+import datetime
+
+
+
+def generateTimestamps(start, increment, length):
+  timestamps = pandas.Series([start])
+  for i in xrange(length - 1):
+    timestamps.loc[i + 1] = timestamps.loc[i] + increment
+  return timestamps
+
+
+def generateWindows(timestamps, numWindows, windowSize):
+  start = timestamps[0]
+  delta = timestamps[1] - timestamps[0]
+  length = len(timestamps)
+  diff = int(round((length - numWindows * windowSize) / float(numWindows + 1)))
+  windows = []
+  for i in xrange(numWindows):
+    t1 = start + delta * diff * (i + 1) + (delta * windowSize * i)
+    t2 = t1 + (delta) * (windowSize - 1)
+    if not any(timestamps == t1) or not any(timestamps == t2):
+      raise ValueError("You got the wrong times from the window generator")
+    windows.append([t1, t2])
+  return windows
+
+
+def generateLabels(timestamps, windows):
+  labels = pandas.Series([0]*len(timestamps))
+  for t1, t2 in windows:
+    subset = timestamps[timestamps >= t1][timestamps <= t2]
+    indices = subset.loc[:].index
+    labels.values[indices] = 1
+  return labels
+
+
+class FalsePositiveTests(unittest.TestCase):
+
+
+  def test_falsePositiveMeansNegativeScore(self):
+    """
+    A false positive should make the score negative.
+    """
+    start = datetime.datetime.now()
+    increment = datetime.timedelta(minutes=5)
+    length = 1000
+    numWindows = 1
+    windowSize = 10
+
+    timestamps = generateTimestamps(start, increment, length)
+
+    predictions = pandas.Series([0]*length)
+
+    labels = pandas.Series([0]*length)
+
+    windows = generateWindows(timestamps, numWindows, windowSize)
+
+    costMatrix = {"tpWeight": 1.0,
+    "fnWeight": 1.0,
+    "fpWeight": 1.0,
+    "tnWeight": 1.0}
+
+    probationaryPeriod = 0
+
+    predictions[0] = 1
+
+    scorer = Scorer(timestamps, predictions, labels, windows, costMatrix,
+      probationaryPeriod)
+
+    self.assertTrue(scorer.getScore() < 0)
+
+
+  def test_twoFalsePositivesIsWorseThanOne(self):
+    """False positives have an additive effect on the score. If there are two
+    false positives, A and B, in a file, then the score given A and B should be
+    larger than the score given just A.
+    """
+    start = datetime.datetime.now()
+    increment = datetime.timedelta(minutes=5)
+    length = 1000
+    numWindows = 1
+    windowSize = 10
+
+    timestamps = generateTimestamps(start, increment, length)
+
+    predictions = pandas.Series([0]*length)
+
+    labels = pandas.Series([0]*length)
+
+    windows = generateWindows(timestamps, numWindows, windowSize)
+
+    costMatrix = {"tpWeight": 1.0,
+    "fnWeight": 1.0,
+    "fpWeight": 1.0,
+    "tnWeight": 1.0}
+
+    probationaryPeriod = 0
+
+    predictions[0] = 1
+
+    scorer1 = Scorer(timestamps, predictions, labels, windows, costMatrix,
+      probationaryPeriod)
+
+    score1 = scorer1.getScore()
+
+    predictions[1] = 1
+
+    scorer2 = Scorer(timestamps, predictions, labels, windows, costMatrix,
+      probationaryPeriod)
+
+    score2 = scorer2.getScore()
+
+    self.assertTrue(score1 > score2)
+
+  def test_oneFalsePositiveNoWindow(self):
+    """
+    When there is no window (meaning no anomaly), a false positive should still
+    result in a negative score.
+    """
+    start = datetime.datetime.now()
+    increment = datetime.timedelta(minutes=5)
+    length = 1000
+    numWindows = 0
+    windowSize = 10
+
+    timestamps = generateTimestamps(start, increment, length)
+
+    predictions = pandas.Series([0]*length)
+
+    labels = pandas.Series([0]*length)
+
+    windows = generateWindows(timestamps, numWindows, windowSize)
+
+    costMatrix = {"tpWeight": 1.0,
+    "fnWeight": 1.0,
+    "fpWeight": 1.0,
+    "tnWeight": 1.0}
+
+    predictions[0] = 1
+
+    probationaryPeriod = 0
+
+    scorer = Scorer(timestamps, predictions, labels, windows, costMatrix,
+      probationaryPeriod)
+
+    self.assertTrue(scorer.getScore() == -costMatrix["fpWeight"])
+
+  def test_earlierFalsePositiveAfterWindowIsBetter(self):
+    """Imagine there are two false positives A and B that both occur right after
+    a window. If A occurs earlier than B, then the score change due to A will be
+    less than the score change due to B.
+    """
+    raise NotImplementedError()
+
+
+if __name__ == '__main__':
+  unittest.main()

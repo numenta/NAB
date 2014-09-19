@@ -40,7 +40,7 @@ class Window(object):
     self.id = windowId
     self.t1, self.t2 = limits
 
-    tmp = labels[labels["timestamp"] >= self.t1]
+    tmp = data[data["timestamp"] >= self.t1]
     self.window = tmp[tmp["timestamp"] <= self.t2]
 
     self.indices = self.window.index
@@ -77,7 +77,7 @@ class Scorer(object):
                                                  0:probationaryPeriod]
                                                  is ignored.
 
-    @param labels              (pandas.Series)   Ground truth for each record.
+    @param labels              (pandas.DataFrame)Ground truth for each record.
 
     @param windowLimits        (list)            All the window limits in tuple
                                                  form: (timestamp start,
@@ -154,6 +154,7 @@ class Scorer(object):
     fnScore = 0
     for window in self.windows:
       tpIndex = window.getFirstTruePositive()
+
       if tpIndex == -1:
         fnScore += self.costMatrix["fnWeight"]
       else:
