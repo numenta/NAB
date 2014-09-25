@@ -66,7 +66,7 @@ class TruePositiveTest(unittest.TestCase):
 
     start = datetime.datetime.now()
     increment = datetime.timedelta(minutes=5)
-    length = 100
+    length = 10
     numWindows = 0
     windowSize = 0
 
@@ -99,18 +99,17 @@ class TruePositiveTest(unittest.TestCase):
 
     start = datetime.datetime.now()
     increment = datetime.timedelta(minutes=5)
-    length = 100
+    length = 10
     numWindows = 1
-    windowSize = 10
+    windowSize = 2
 
     timestamps = generateTimestamps(start, increment, length)
 
     predictions = pandas.Series([0]*length)
 
-    labels = pandas.Series([0]*length)
-
     windows = generateWindows(timestamps, numWindows, windowSize)
 
+    labels = generateLabels(timestamps, windows)
     costMatrix = {"tpWeight": 1.0,
     "fnWeight": 2.0,
     "fpWeight": 3.0,
@@ -133,18 +132,18 @@ class TruePositiveTest(unittest.TestCase):
     """
     start = datetime.datetime.now()
     increment = datetime.timedelta(minutes=5)
-    length = 100
+    length = 10
     numWindows = 1
-    windowSize = 10
+    windowSize = 2
 
     timestamps = generateTimestamps(start, increment, length)
 
     predictions1 = pandas.Series([0]*length)
     predictions2 = pandas.Series([0]*length)
 
-    labels = pandas.Series([0]*length)
-
     windows = generateWindows(timestamps, numWindows, windowSize)
+
+    labels = generateLabels(timestamps, windows)
     window = windows[0]
     t1, t2 = window
 
@@ -176,17 +175,17 @@ class TruePositiveTest(unittest.TestCase):
     """
     start = datetime.datetime.now()
     increment = datetime.timedelta(minutes=5)
-    length = 100
+    length = 10
     numWindows = 1
-    windowSize = 10
+    windowSize = 2
 
     timestamps = generateTimestamps(start, increment, length)
 
     predictions = pandas.Series([0]*length)
 
-    labels = pandas.Series([0]*length)
-
     windows = generateWindows(timestamps, numWindows, windowSize)
+
+    labels = generateLabels(timestamps, windows)
     window = windows[0]
     t1, t2 = window
 
