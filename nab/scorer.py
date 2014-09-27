@@ -163,7 +163,8 @@ class Scorer(object):
 
     fpLabels = self.data[self.data["type"] == "fp"]
     fpScore = 0
-    for i, _ in fpLabels.iterrows():
+
+    for i in fpLabels.index:
       windowId = self.getClosestPrecedingWindow(i)
       if windowId == -1:
         fpScore += self.costMatrix["fpWeight"]
@@ -171,7 +172,7 @@ class Scorer(object):
 
       window = self.windows[windowId]
 
-      dist = (window.indices[-1] - tpIndex)/float(self.length)
+      dist = abs((window.indices[-1] - i)/float(self.length))
       fpScore += (2*sigmoid(dist) - 1)*self.costMatrix["fpWeight"]
 
     score = tpScore - fpScore - fnScore
