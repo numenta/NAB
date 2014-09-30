@@ -158,12 +158,13 @@ class Scorer(object):
       if tpIndex == -1:
         fnScore += self.costMatrix["fnWeight"]
       else:
-        dist = (window.indices[-1] - tpIndex)/self.length
+        dist = (window.indices[-1] - tpIndex)/float(self.length)
         tpScore += (2*sigmoid(dist) - 1)*self.costMatrix["tpWeight"]
 
     fpLabels = self.data[self.data["type"] == "fp"]
     fpScore = 0
-    for i, _ in fpLabels.iterrows():
+
+    for i in fpLabels.index:
       windowId = self.getClosestPrecedingWindow(i)
       if windowId == -1:
         fpScore += self.costMatrix["fpWeight"]
@@ -171,7 +172,7 @@ class Scorer(object):
 
       window = self.windows[windowId]
 
-      dist = (window.indices[-1] - tpIndex)/self.length
+      dist = abs((window.indices[-1] - i)/float(self.length))
       fpScore += (2*sigmoid(dist) - 1)*self.costMatrix["fpWeight"]
 
     score = tpScore - fpScore - fnScore
@@ -210,6 +211,7 @@ def sigmoid(x):
   @return (float)
   """
   return 1 / (1 + math.exp(-x))
+
 
 def scoreCorpus(threshold, args):
   """Given a score to the corpus given a detector and a user profile.

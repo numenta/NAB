@@ -1,7 +1,7 @@
 # Users for whom two hours between the start of an anomaly and its alert is the
 # maximum tolerable delay.
 
-# A user for whom missing an anomaly is 10x as costly as each false positive
+# Temporary weights used for testing
 Jay_Gokhale:
   CostMatrix:
     tpWeight: 1.0

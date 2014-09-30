@@ -174,7 +174,44 @@ class FalsePositiveTests(unittest.TestCase):
     a window. If A occurs earlier than B, then the score change due to A will be
     less than the score change due to B.
     """
-    raise NotImplementedError()
+    start = datetime.datetime.now()
+    increment = datetime.timedelta(minutes=5)
+    length = 10
+    numWindows = 1
+    windowSize = 2
+
+    timestamps = generateTimestamps(start, increment, length)
+
+    predictions1 = pandas.Series([0]*length)
+    predictions2 = pandas.Series([0]*length)
+
+    windows = generateWindows(timestamps, numWindows, windowSize)
+
+    labels = generateLabels(timestamps, windows)
+
+    window = windows[0]
+    t1, t2 = window
+
+    costMatrix = {"tpWeight": 1.0,
+    "fnWeight": 1.0,
+    "fpWeight": 1.0,
+    "tnWeight": 1.0}
+
+    probationaryPeriod = 0
+
+    index1 = timestamps[timestamps == t2].index[0] + 1
+    predictions1[index1] = 1
+
+    scorer1 = Scorer(timestamps, predictions1, labels, windows, costMatrix,
+      probationaryPeriod)
+
+    index2 = index1 + 1
+    predictions2[index2] = 1
+
+    scorer2 = Scorer(timestamps, predictions2, labels, windows, costMatrix,
+      probationaryPeriod)
+
+    self.assertTrue(scorer1.getScore() > scorer2.getScore())
 
 
 if __name__ == '__main__':

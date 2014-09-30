@@ -106,8 +106,8 @@ class Runner(object):
     print "\nObtaining detections"
 
     count = 0
+    args = []
     for detectorName, detectorConstructor in detectors.iteritems():
-      args = []
       for relativePath, dataSet in self.corpus.dataSets.iteritems():
 
         args.append(
