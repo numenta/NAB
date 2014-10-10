@@ -40,30 +40,30 @@ class UserLabel(object):
   Labels are stored as anomaly windows given by timestamps.
   """
 
-  def __init__(self, path, dataRoot=None, corp=None):
+  def __init__(self, path, dataDir=None, corpus=None):
     """
-    @param path       (string)      Source path of yaml file containing the
-                                    corpus labels for a single user.
+    @param path      (string)      Source path of yaml file containing the
+                                   corpus labels for a single user.
 
-    @param dataRoot   (string)      (optional) Source directory of corpus.
+    @param dataDir   (string)      (optional) Source directory of corpus.
 
-    @param corp       (nab.Corpus)  (optional) Corpus object.
+    @param corpus    (nab.Corpus)  (optional) Corpus object.
     """
-    if dataRoot is None and corp is None:
-      raise ValueError()
+    if dataDir is None and corpus is None:
+      raise ValueError("Must specify either dataDir or corp")
 
     self.path = path
-    self.dataRoot = dataRoot
+    self.dataDir = dataDir
 
     with open(self.path,"r") as f:
       self.yaml = yaml.load(f)
 
     self.pathDict = flattenDict(self.yaml)
 
-    if corp == None:
-      self.corpus = Corpus(dataRoot)
+    if corpus is None:
+      self.corpus = Corpus(dataDir)
     else:
-      self.corpus = corp
+      self.corpus = corpus
     self.windows = self.getWindows()
 
 
@@ -94,15 +94,15 @@ class UserLabel(object):
 class CorpusLabel(object):
   """Class to store and manipulate the combined corpus labels."""
 
-  def __init__(self, labelDir, dataDir=None, corp=None):
+  def __init__(self, labelDir, dataDir=None, corpus=None):
     """
-    @param labelDir     (string)  Source directory of all label files created by
-                                  users. (They should be in a format that is
-                                  digestable by UserLabel)
+    @param labelDir     (string)    Source directory of all label files created
+                                    by users. (They should be in a format that
+                                    is digestable by UserLabel)
 
-    @param dataRoot   (string)      (optional) Source directory of corpus.
+    @param dataDir      (string)    (optional) Source directory of corpus.
 
-    @param corp       (nab.Corpus)  (optional) Corpus object.
+    @param corpus       (nab.Corpus)(optional) Corpus object.
     """
     self.labelDir = labelDir
     self.dataDir = dataDir
@@ -110,7 +110,7 @@ class CorpusLabel(object):
     if self.dataDir:
       self.corpus = Corpus(self.dataDir)
     else:
-      self.corpus = corp
+      self.corpus = corpus
 
     self.rawWindows = None
     self.rawLabels = None
@@ -166,11 +166,11 @@ class LabelCombiner(object):
   combine labels is given in the NAB wiki.
   """
 
-  def __init__(self, labelRoot, dataRoot, threshold=1):
-    self.labelRoot = labelRoot
-    self.dataRoot = dataRoot
+  def __init__(self, labelDir, dataDir, threshold=1):
+    self.labelDir = labelDir
+    self.dataDir = dataDir
     self.threshold = threshold
-    self.corpus = Corpus(dataRoot)
+    self.corpus = Corpus(dataDir)
 
     self.userLabels = None
     self.nlabelers = None
@@ -181,8 +181,8 @@ class LabelCombiner(object):
 
   def __str__(self):
     ans = ""
-    ans += "labelRoot:           %s\n" % self.labelRoot
-    ans += "dataRoot:            %s\n" % self.dataRoot
+    ans += "labelDir:            %s\n" % self.labelDir
+    ans += "dataDir:             %s\n" % self.dataDir
     ans += "corpus:              %s\n" % self.corpus
     ans += "number of labels:    %d\n" % self.nlabelers
     ans += "threshold:           %d\n" % self.threshold
@@ -224,7 +224,7 @@ class LabelCombiner(object):
 
   def getUserLabels(self):
     """Collect UserLabels."""
-    labelPaths = absoluteFilePaths(self.labelRoot)
+    labelPaths = absoluteFilePaths(self.labelDir)
     userLabels = [UserLabel(path, corp=self.corpus) for path in labelPaths]
     self.userLabels = userLabels
     self.nlabelers = len(self.userLabels)
