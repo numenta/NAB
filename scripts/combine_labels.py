@@ -42,8 +42,7 @@ def main(args):
 
   destDir = args.destDir
   labelDir = args.labelDir
-
-  threshold = 1
+  threshold = args.threshold
 
   labelCombiner = LabelCombiner(labelDir, dataDir, threshold)
 
@@ -83,6 +82,12 @@ if __name__ == "__main__":
                       NAB root",
                       default=False,
                       action="store_true")
+
+  parser.add_argument("--threshold",
+                      help="The percentage agreement you would like between all\
+                      labelers for a record to be considered anomalous (should \
+                      be a number between 0 and 1)",
+                      default=1.0)
 
   args = parser.parse_args()
 
