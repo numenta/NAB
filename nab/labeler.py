@@ -191,7 +191,7 @@ class LabelCombiner(object):
 
   def write(self, destDir):
     """Write the combined labels to a destination directory."""
-    print self.combinedRelaxedWindows
+    # print self.combinedRelaxedWindows
     makeDirsExist(destDir)
     windows = json.dumps(self.combinedRelaxedWindows)
     with open(os.path.join(
@@ -225,7 +225,7 @@ class LabelCombiner(object):
   def getUserLabels(self):
     """Collect UserLabels."""
     labelPaths = absoluteFilePaths(self.labelDir)
-    userLabels = [UserLabel(path, corp=self.corpus) for path in labelPaths]
+    userLabels = [UserLabel(path, corpus=self.corpus) for path in labelPaths]
     self.userLabels = userLabels
     self.nlabelers = len(self.userLabels)
 
