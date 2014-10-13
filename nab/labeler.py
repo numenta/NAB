@@ -20,7 +20,7 @@
 
 import os
 import yaml
-import dateutil.parser
+import itertools
 import pandas
 import json
 
@@ -69,25 +69,29 @@ class UserLabel(object):
 
   def getWindows(self):
     """Store anomaly windows as dictionaries with the filename being the key."""
-    windows = {}
+    windows = dict()
 
-    def convertKey(key):
-      return key + ".csv"
+    def found(t, data):
+      f = data["timestamp"][data["timestamp"] == pandas.tslib.Timestamp(t)]
 
-    for key in self.pathDict.keys():
-      data = self.corpus.dataSets[convertKey(key)].data
+      exists = (len(f) == 1)
 
-      for window in self.pathDict[key]:
-        for t in window:
-          t = t.decode('unicode_escape').encode('ascii','ignore')
-          t = dateutil.parser.parse(t)
-          found = data["timestamp"][data["timestamp"] == pandas.tslib.Timestamp(t)]
-          if len(found) != 1:
-            raise ValueError(
-              "timestamp listed in labels don't exist in file")
+      if not exists:
+        print t, "doesn't exist"
 
-      windows[convertKey(key)] = [[dateutil.parser.parse(t) for t in l]
-                                                    for l in self.pathDict[key]]
+      return exists
+
+    for relativePath in self.pathDict:
+
+      windows[relativePath] = deepmap(strp, self.pathDict[relativePath])
+
+      data = self.corpus.dataSets[relativePath].data
+
+      timestamps = list(itertools.chain(windows[relativePath]))[0]
+
+      if not all(map((lambda t: found(t, data)), timestamps)):
+        raise ValueError("timestamp listed in labels doesn't exist in file")
+
     return windows
 
 
@@ -138,7 +142,8 @@ class CorpusLabel(object):
       windows = json.load(windowFile)
 
     self.rawWindows = windows
-    self.windows = {}
+    self.windows = dict()
+
     for relativePath in windows.keys():
       self.windows[relativePath] = deepmap(strp, windows[relativePath])
 
@@ -149,7 +154,7 @@ class CorpusLabel(object):
     corresponding binary vector of anomaly labels. Labels are simple a more
     verbose version of the windows.
     """
-    self.labels = {}
+    self.labels = dict()
 
     for relativePath, dataSet in self.corpus.dataSets.iteritems():
       windows = self.windows[relativePath]
