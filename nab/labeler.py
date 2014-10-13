@@ -153,8 +153,9 @@ class CorpusLabel(object):
       labels['label'] = 0
 
       for t1, t2 in windows:
-        subset = labels[labels["timestamp"] >= t1][labels["timestamp"] <= t2]
-        indices = subset.loc[:,"label"].index
+        moreThanT1 = labels[labels["timestamp"] >= t1]
+        betweenT1AndT2 = moreThanT1[moreThanT1["timestamp"] <= t2]
+        indices = betweenT1AndT2.loc[:,"label"].index
         labels["label"].values[indices] = 1
 
       self.labels[relativePath] = labels
@@ -197,21 +198,6 @@ class LabelCombiner(object):
     with open(os.path.join(
       destDir, "corpus_windows.json"), "w") as windowWriter:
       windowWriter.write(windows)
-
-    fileFriendlyLabels = {}
-
-    for relativePath, label in self.combinedLabels.iteritems():
-      fileFriendlyLabels[relativePath] = label
-      fileFriendlyLabels[relativePath]["timestamp"] = \
-                      fileFriendlyLabels[relativePath]["timestamp"].apply(strf)
-
-      fileFriendlyLabels[relativePath] = \
-        fileFriendlyLabels[relativePath].to_json()
-
-    labels = json.dumps(fileFriendlyLabels)
-
-    with open(os.path.join(destDir, "corpus_labels.json"), "w") as labelWriter:
-      labelWriter.write(labels)
 
 
   def combine(self):
@@ -295,6 +281,7 @@ class LabelCombiner(object):
 
 
     self.combinedWindows = allWindows
+
 
   def relaxWindows(self):
     """

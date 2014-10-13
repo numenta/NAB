@@ -58,6 +58,8 @@ def main(args):
 
   corpusLabel = CorpusLabel(destDir, dataDir)
 
+  print "Initilializing"
+
   corpusLabel.initialize()
 
   print "Success!"
