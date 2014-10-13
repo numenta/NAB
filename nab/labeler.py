@@ -50,7 +50,7 @@ class UserLabel(object):
     @param corpus    (nab.Corpus)  (optional) Corpus object.
     """
     if dataDir is None and corpus is None:
-      raise ValueError("Must specify either dataDir or corp")
+      raise ValueError("Must specify either dataDir or corpus")
 
     self.path = path
     self.dataDir = dataDir
@@ -104,22 +104,27 @@ class CorpusLabel(object):
 
     @param corpus       (nab.Corpus)(optional) Corpus object.
     """
+    if dataDir is None and corpus is None:
+      raise ValueError("Must specify either dataDir or corpus")
+
     self.labelDir = labelDir
     self.dataDir = dataDir
-
-    if self.dataDir:
-      self.corpus = Corpus(self.dataDir)
-    else:
-      self.corpus = corpus
 
     self.rawWindows = None
     self.rawLabels = None
     self.windows = None
     self.labels = None
 
+    if corpus:
+      self.corpus = corpus
+    else:
+      self.corpus = None
 
   def initialize(self):
     """Get boths labels and windows."""
+    if self.corpus is None:
+      self.corpus = Corpus(self.dataDir)
+
     self.getWindows()
     self.getLabels()
 
@@ -194,10 +199,10 @@ class LabelCombiner(object):
     """Write the combined labels to a destination directory."""
     # print self.combinedRelaxedWindows
     makeDirsExist(destDir)
-    windows = json.dumps(self.combinedRelaxedWindows)
+    relaxedWindows = json.dumps(self.combinedRelaxedWindows, indent=3)
     with open(os.path.join(
       destDir, "corpus_windows.json"), "w") as windowWriter:
-      windowWriter.write(windows)
+      windowWriter.write(relaxedWindows)
 
 
   def combine(self):
@@ -211,8 +216,8 @@ class LabelCombiner(object):
   def getUserLabels(self):
     """Collect UserLabels."""
     labelPaths = absoluteFilePaths(self.labelDir)
-    userLabels = [UserLabel(path, corpus=self.corpus) for path in labelPaths]
-    self.userLabels = userLabels
+    self.userLabels = [UserLabel(path,
+      corpus=self.corpus) for path in labelPaths]
     self.nlabelers = len(self.userLabels)
 
 
@@ -222,32 +227,34 @@ class LabelCombiner(object):
     labeled as 1 or 0. Threshold describes the level of agreement you want
     between labelers before you label a record as anomalous.
     """
-    labels = {}
+    combinedLabels = dict()
+
     for relativePath, dataSet in self.corpus.dataSets.iteritems():
-      timestampsHolder = []
-      labelHolder = []
+      timestamps = []
+      labels = []
 
       for _, row in dataSet.data.iterrows():
         t = row["timestamp"]
 
         count = 0
-        for l in self.userLabels:
-          if any(t >= t1 and t <= t2 for [t1,t2] in l.windows[relativePath]):
+        for user in self.userLabels:
+          if any(t1 <= t <= t2 for [t1,t2] in user.windows[relativePath]):
             count += 1
 
         label = int(count >= self.nlabelers * self.threshold)
-        timestampsHolder.append(t)
-        labelHolder.append(label)
 
-      labels[relativePath] = pandas.DataFrame({"timestamp":timestampsHolder,
-          "label": labelHolder})
+        timestamps.append(t)
+        labels.append(label)
 
-    self.combinedLabels = labels
+      combinedLabels[relativePath] = pandas.DataFrame({"timestamp":timestamps,
+        "label": labels})
+
+    self.combinedLabels = combinedLabels
 
 
   def combineWindows(self):
     """Take raw combined Labels and compress them to combinedWindows."""
-    allWindows = {}
+    combinedWindows = dict()
 
     for relativePath, labels in self.combinedLabels.iteritems():
       delta = labels["timestamp"][1] - labels["timestamp"][0]
@@ -255,32 +262,29 @@ class LabelCombiner(object):
       labels = labels[labels["label"] == 1]
       dataSetWindows = []
 
-      if labels.shape[0] == 0:
-        dataSetWindows = []
-
-      else:
-        curr = None
-        prev = None
+      if labels.shape[0] != 0:
+        t1 = None
+        t0 = None
 
         for _, row in labels.iterrows():
-          curr = row["timestamp"]
-          if not prev:
-            currentWindow = [strf(curr)]
+          t1 = row["timestamp"]
 
-          elif curr - prev != delta:
-            currentWindow.append(strf(prev))
-            dataSetWindows.append(currentWindow)
-            currentWindow = [strf(curr)]
+          if t0 is None:
+            window = [strf(t1)]
 
-          prev = curr
+          elif t1 - t0 != delta:
+            window.append(strf(t0))
+            dataSetWindows.append(window)
+            window = [strf(t1)]
 
-        currentWindow.append(strf(curr))
-        dataSetWindows.append(currentWindow)
+          t0 = t1
 
-      allWindows[relativePath] = dataSetWindows
+        window.append(strf(t1))
+        dataSetWindows.append(window)
 
+      combinedWindows[relativePath] = dataSetWindows
 
-    self.combinedWindows = allWindows
+    self.combinedWindows = combinedWindows
 
 
   def relaxWindows(self):
@@ -290,26 +294,33 @@ class LabelCombiner(object):
     lengthened on both its left and right side by that length. This length is
     chosen as a certain percetange of the dataset.
     """
-    allRelaxedWindows = {}
+    allRelaxedWindows = dict()
+
     for relativePath, limits in self.combinedWindows.iteritems():
+
       data = self.corpus.dataSets[relativePath].data
       length = len(data["timestamp"])
-      percentOfDataSet = 0.025
-      numWindows = len(limits)
+      percentOfDataSet = 0.05
+
       relaxWindowLength = int(percentOfDataSet*length)
 
       relaxedWindows = []
-      for i, limit in enumerate(limits):
+
+      for limit in limits:
         t1, t2 = limit
-        indices = map((
-          lambda t: data["timestamp"][data["timestamp"] == t].index[0]),
+
+        indices = map(
+          (lambda t: data[data["timestamp"] == t]["timestamp"].index[0]),
           limit)
-        t1Index = max(indices[0] - relaxWindowLength, 0)
-        t2Index = min(indices[0] + relaxWindowLength, length-1)
+
+        t1Index = max(indices[0] - relaxWindowLength/2, 0)
+        t2Index = min(indices[0] + relaxWindowLength/2, length-1)
+
         relaxedLimit = [strf(data["timestamp"][t1Index]),
           strf(data["timestamp"][t2Index])]
 
         relaxedWindows.append(relaxedLimit)
+
       allRelaxedWindows[relativePath] = relaxedWindows
 
     self.combinedRelaxedWindows = allRelaxedWindows

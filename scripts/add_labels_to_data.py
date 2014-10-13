@@ -22,11 +22,12 @@
 import os
 import argparse
 import pandas
+
 from nab.corpus import Corpus
 from nab.labeler import CorpusLabel
 from nab.util import recur, checkInputs
 
-depth = 3
+depth = 2
 
 root = recur(os.path.dirname, os.path.realpath(__file__), depth)
 
@@ -56,7 +57,7 @@ def main(args):
 
   corpus.copy(newRoot=args.destDir)
 
-  print "Done adding column!"
+  print "Done adding labels!"
 
 
 if __name__ == "__main__":

@@ -23,26 +23,28 @@ Combines a set of labels given within folder (in the yaml format)
 """
 
 import os
-from os.path import dirname, realpath
+import time
 import argparse
 
 from nab.labeler import LabelCombiner, CorpusLabel
-
 from nab.util import recur, checkInputs
 
 depth = 2
 
-root = recur(dirname, realpath(__file__), depth)
+root = recur(os.path.dirname, os.path.realpath(__file__), depth)
+print root
+
 
 def main(args):
   if not args.absolutePaths:
     dataDir = os.path.join(root, args.dataDir)
+    labelDir = os.path.join(root, args.labelDir)
   else:
     dataDir = args.dataDir
+    labelDir = args.labelDir
 
   destDir = args.destDir
-  labelDir = args.labelDir
-  threshold = args.threshold
+  threshold = int(args.threshold)
 
   labelCombiner = LabelCombiner(labelDir, dataDir, threshold)
 
@@ -58,11 +60,13 @@ def main(args):
 
   corpusLabel = CorpusLabel(destDir, dataDir)
 
-  print "Initilializing"
+  print "Initializing"
 
   corpusLabel.initialize()
 
-  print "Success!"
+  print "Successfully combined labels"
+
+  print "Resulting labels stored in:", os.path.join(destDir, "corpus_windows.json")
 
 
 if __name__ == "__main__":
@@ -94,5 +98,8 @@ if __name__ == "__main__":
   args = parser.parse_args()
 
   if checkInputs(args):
+    a = time.time()
     main(args)
+    b = time.time()
+    print "Elapsed time:", b - a
 
