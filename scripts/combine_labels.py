@@ -24,9 +24,11 @@ Combines a set of labels given within folder (in the yaml format)
 
 import os
 import time
+import pprint
 import argparse
 
 from nab.labeler import LabelCombiner, CorpusLabel
+from nab.corpus import Corpus
 from nab.util import recur, checkInputs
 
 depth = 2
@@ -43,10 +45,16 @@ def main(args):
     dataDir = args.dataDir
     labelDir = args.labelDir
 
-  destDir = args.destDir
+  destPath = args.destPath
   threshold = int(args.threshold)
 
-  labelCombiner = LabelCombiner(labelDir, dataDir, threshold)
+  print "Getting Corpus"
+
+  corpus = Corpus(dataDir)
+
+  print "Creating LabelCombiner"
+
+  labelCombiner = LabelCombiner(labelDir, corpus, threshold)
 
   print "Combining Labels"
 
@@ -54,19 +62,18 @@ def main(args):
 
   print "Writing combined labels"
 
-  labelCombiner.write(destDir)
+  labelCombiner.write(destPath)
 
   print "Attempting to load objects as a test"
 
-  corpusLabel = CorpusLabel(destDir, dataDir)
-
-  print "Initializing"
-
-  corpusLabel.initialize()
+  corpusLabel = CorpusLabel(path=destPath, corpus=corpus)
 
   print "Successfully combined labels"
 
-  print "Resulting labels stored in:", os.path.join(destDir, "corpus_windows.json")
+
+  print "Resulting windows stored in:", destPath
+
+  pprint.pprint(corpusLabel.windows)
 
 
 if __name__ == "__main__":
@@ -79,7 +86,7 @@ if __name__ == "__main__":
                     default="data",
                     help="This holds all the label windows for the corpus")
 
-  parser.add_argument("--destDir",
+  parser.add_argument("--destPath",
                     help="Where you want to store the combined labels",
                     default="labels")
 

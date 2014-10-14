@@ -20,7 +20,7 @@
 
 import os
 import pandas
-import yaml
+import json
 import multiprocessing
 
 
@@ -40,8 +40,8 @@ class Runner(object):
 
   def __init__(self,
                dataDir,
-               labelDir,
                resultsDir,
+               labelPath,
                profilesPath,
                thresholdPath,
                probationaryPercent=0.15,
@@ -49,11 +49,11 @@ class Runner(object):
     """
     @param dataDir        (string)  Directory where all the raw datasets exist.
 
-    @param labelDir       (string)  Directory where the labels of the datasets
-                                    exist.
-
     @param resultsDir     (string)  Directory where the detector anomaly scores
                                     will be scored.
+
+    @param labelPath      (string)  Path where the labels of the datasets
+                                    exist.
 
     @param profilesPath   (string)  Path to user profiles prescribing the
                                     username and the cost matrix.
@@ -70,8 +70,9 @@ class Runner(object):
                                     multiprocessing.pool.map
     """
     self.dataDir = dataDir
-    self.labelDir = labelDir
     self.resultsDir = resultsDir
+
+    self.labelPath = labelPath
     self.profilesPath = profilesPath
     self.thresholdPath = thresholdPath
 
@@ -86,11 +87,10 @@ class Runner(object):
   def initialize(self):
     """Initialize all the relevant objects for the run."""
     self.corpus = Corpus(self.dataDir)
-    self.corpusLabel = CorpusLabel(self.labelDir, None, self.corpus)
-    self.corpusLabel.initialize()
+    self.corpusLabel = CorpusLabel(path=self.labelPath, corpus=self.corpus)
 
     with open(self.profilesPath) as p:
-      self.profiles = yaml.load(p)
+      self.profiles = json.load(p)
 
 
   def detect(self, detectors):

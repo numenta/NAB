@@ -45,7 +45,7 @@ def main(args):
 
   corpus = Corpus(args.dataDir)
 
-  corpusLabel = CorpusLabel(args.labelDir, corp=corpus)
+  corpusLabel = CorpusLabel(args.labelDir, corpus=corpus)
   corpusLabel.getEverything()
 
   columnData = dict()

@@ -2,12 +2,15 @@
 # maximum tolerable delay.
 
 # Temporary weights used for testing
-Jay_Gokhale:
-  CostMatrix:
-    tpWeight: 1.0
-    fnWeight: 1.0
-    fpWeight: 1.0
-    tnWeight: 1.0
+{
+"Jay_Gokhale": {
+	"CostMatrix": {
+    	"tpWeight": 1.0
+    	"fnWeight": 1.0
+    	"fpWeight": 1.0
+    	"tnWeight": 1.0
+	}
+}
 
 # UserA:
 #     CostMatrix:

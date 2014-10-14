@@ -19,58 +19,46 @@
 # ----------------------------------------------------------------------
 
 import os
-import yaml
 import itertools
 import pandas
 import json
 
-from nab.corpus import Corpus
 from nab.util import (absoluteFilePaths,
-                      flattenDict,
                       strf,
                       strp,
                       deepmap,
-                      makeDirsExist)
+                      createPath)
 
 
 
-class UserLabel(object):
-  """Class to store and manipulate a set of labels of a single labelers.
+class CorpusLabel(object):
+  """Class to store and manipulate corpus labels."""
 
-  Labels are stored as anomaly windows given by timestamps.
-  """
-
-  def __init__(self, path, dataDir=None, corpus=None):
+  def __init__(self, path, corpus):
     """
-    @param path      (string)      Source path of yaml file containing the
-                                   corpus labels for a single user.
+    @param labelDir     (string)    Source directory of all label files created
+                                    by users. (They should be in a format that
+                                    is digestable by UserLabel)
 
-    @param dataDir   (string)      (optional) Source directory of corpus.
+    @param dataDir      (string)    (optional) Source directory of corpus.
 
-    @param corpus    (nab.Corpus)  (optional) Corpus object.
+    @param corpus       (nab.Corpus)(optional) Corpus object.
     """
-    if dataDir is None and corpus is None:
-      raise ValueError("Must specify either dataDir or corpus")
-
     self.path = path
-    self.dataDir = dataDir
 
-    with open(self.path,"r") as f:
-      self.yaml = yaml.load(f)
+    self.windows = None
+    self.labels = None
 
-    self.pathDict = flattenDict(self.yaml)
-
-    if corpus is None:
-      self.corpus = Corpus(dataDir)
-    else:
-      self.corpus = corpus
-    self.windows = self.getWindows()
+    self.corpus = corpus
+    self.getWindows()
+    self.getLabels()
 
 
   def getWindows(self):
-    """Store anomaly windows as dictionaries with the filename being the key."""
-    windows = dict()
-
+    """
+    Get windows as dictionaries with key value pairs of a relative path and its
+    corresponding list of windows.
+    """
     def found(t, data):
       f = data["timestamp"][data["timestamp"] == pandas.tslib.Timestamp(t)]
 
@@ -81,9 +69,13 @@ class UserLabel(object):
 
       return exists
 
-    for relativePath in self.pathDict:
+    with open(os.path.join(self.path)) as windowFile:
+      windows = json.load(windowFile)
 
-      windows[relativePath] = deepmap(strp, self.pathDict[relativePath])
+    self.windows = dict()
+
+    for relativePath in windows.keys():
+      self.windows[relativePath] = deepmap(strp, windows[relativePath])
 
       data = self.corpus.dataSets[relativePath].data
 
@@ -91,61 +83,6 @@ class UserLabel(object):
 
       if not all(map((lambda t: found(t, data)), timestamps)):
         raise ValueError("timestamp listed in labels doesn't exist in file")
-
-    return windows
-
-
-class CorpusLabel(object):
-  """Class to store and manipulate the combined corpus labels."""
-
-  def __init__(self, labelDir, dataDir=None, corpus=None):
-    """
-    @param labelDir     (string)    Source directory of all label files created
-                                    by users. (They should be in a format that
-                                    is digestable by UserLabel)
-
-    @param dataDir      (string)    (optional) Source directory of corpus.
-
-    @param corpus       (nab.Corpus)(optional) Corpus object.
-    """
-    if dataDir is None and corpus is None:
-      raise ValueError("Must specify either dataDir or corpus")
-
-    self.labelDir = labelDir
-    self.dataDir = dataDir
-
-    self.rawWindows = None
-    self.rawLabels = None
-    self.windows = None
-    self.labels = None
-
-    if corpus:
-      self.corpus = corpus
-    else:
-      self.corpus = None
-
-  def initialize(self):
-    """Get boths labels and windows."""
-    if self.corpus is None:
-      self.corpus = Corpus(self.dataDir)
-
-    self.getWindows()
-    self.getLabels()
-
-
-  def getWindows(self):
-    """
-    Get windows as dictionaries with key value pairs of a relative path and its
-    corresponding list of windows.
-    """
-    with open(os.path.join(self.labelDir, "corpus_windows.json")) as windowFile:
-      windows = json.load(windowFile)
-
-    self.rawWindows = windows
-    self.windows = dict()
-
-    for relativePath in windows.keys():
-      self.windows[relativePath] = deepmap(strp, windows[relativePath])
 
 
   def getLabels(self):
@@ -177,11 +114,10 @@ class LabelCombiner(object):
   combine labels is given in the NAB wiki.
   """
 
-  def __init__(self, labelDir, dataDir, threshold=1):
+  def __init__(self, labelDir, corpus, threshold=1):
     self.labelDir = labelDir
-    self.dataDir = dataDir
     self.threshold = threshold
-    self.corpus = Corpus(dataDir)
+    self.corpus = corpus
 
     self.userLabels = None
     self.nlabelers = None
@@ -200,13 +136,11 @@ class LabelCombiner(object):
     return ans
 
 
-  def write(self, destDir):
+  def write(self, destPath):
     """Write the combined labels to a destination directory."""
-    # print self.combinedRelaxedWindows
-    makeDirsExist(destDir)
+    createPath(destPath)
     relaxedWindows = json.dumps(self.combinedRelaxedWindows, indent=3)
-    with open(os.path.join(
-      destDir, "corpus_windows.json"), "w") as windowWriter:
+    with open(destPath, "w") as windowWriter:
       windowWriter.write(relaxedWindows)
 
 
@@ -221,8 +155,9 @@ class LabelCombiner(object):
   def getUserLabels(self):
     """Collect UserLabels."""
     labelPaths = absoluteFilePaths(self.labelDir)
-    self.userLabels = [UserLabel(path,
-      corpus=self.corpus) for path in labelPaths]
+
+    self.userLabels = [CorpusLabel(path, self.corpus) for path in labelPaths]
+
     self.nlabelers = len(self.userLabels)
 
 
@@ -295,7 +230,7 @@ class LabelCombiner(object):
   def relaxWindows(self):
     """
     This takes all windows and relaxes them by a certain percentage of the data.
-    A length (relaxWindowLength) is picked before hand and each window is
+    A length (relaxWindowLength) is picked beforehand and each window is
     lengthened on both its left and right side by that length. This length is
     chosen as a certain percetange of the dataset.
     """
