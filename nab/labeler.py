@@ -158,6 +158,9 @@ class LabelCombiner(object):
 
     self.userLabels = [CorpusLabel(path, self.corpus) for path in labelPaths]
 
+    if len(self.userLabels) == 0:
+      raise ValueError("No users labels found")
+
     self.nlabelers = len(self.userLabels)
 
 
@@ -181,7 +184,7 @@ class LabelCombiner(object):
           if any(t1 <= t <= t2 for [t1,t2] in user.windows[relativePath]):
             count += 1
 
-        label = int(count >= self.nlabelers * self.threshold)
+        label = int(count >= self.nlabelers * self.threshold and count > 0)
 
         timestamps.append(t)
         labels.append(label)
