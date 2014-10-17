@@ -47,7 +47,7 @@ def updateThresholds(newThresholds, thresholdsFilePath):
     with open(thresholdsFilePath) as inFile:
       oldThresholds = json.load(inFile)
   else:
-    oldThresholds = dict()
+    oldThresholds = {}
 
   if not isinstance(oldThresholds, dict):
     raise ValueError("Incorrect type given to updateThresholds")

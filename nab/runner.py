@@ -141,13 +141,13 @@ class Runner(object):
     """
     print "\nOptimizing anomaly Scores"
 
-    thresholds = dict()
+    thresholds = {}
 
     for detector in detectorNames:
       resultsDetectorDir = os.path.join(self.resultsDir, detector)
       resultsCorpus = Corpus(resultsDetectorDir)
 
-      thresholds[detector] = dict()
+      thresholds[detector] = {}
 
       for username, profile in self.profiles.iteritems():
         costMatrix = profile["CostMatrix"]

@@ -72,7 +72,7 @@ class CorpusLabel(object):
     with open(os.path.join(self.path)) as windowFile:
       windows = json.load(windowFile)
 
-    self.windows = dict()
+    self.windows = {}
 
     for relativePath in windows.keys():
       self.windows[relativePath] = deepmap(strp, windows[relativePath])
@@ -91,7 +91,7 @@ class CorpusLabel(object):
     corresponding binary vector of anomaly labels. Labels are simple a more
     verbose version of the windows.
     """
-    self.labels = dict()
+    self.labels = {}
 
     for relativePath, dataSet in self.corpus.dataSets.iteritems():
       windows = self.windows[relativePath]
@@ -170,7 +170,7 @@ class LabelCombiner(object):
     labeled as 1 or 0. Threshold describes the level of agreement you want
     between labelers before you label a record as anomalous.
     """
-    combinedLabels = dict()
+    combinedLabels = {}
 
     for relativePath, dataSet in self.corpus.dataSets.iteritems():
       timestamps = []
@@ -197,7 +197,7 @@ class LabelCombiner(object):
 
   def combineWindows(self):
     """Take raw combined Labels and compress them to combinedWindows."""
-    combinedWindows = dict()
+    combinedWindows = {}
 
     for relativePath, labels in self.combinedLabels.iteritems():
       delta = labels["timestamp"][1] - labels["timestamp"][0]
@@ -237,7 +237,7 @@ class LabelCombiner(object):
     lengthened on both its left and right side by that length. This length is
     chosen as a certain percetange of the dataset.
     """
-    allRelaxedWindows = dict()
+    allRelaxedWindows = {}
 
     for relativePath, limits in self.combinedWindows.iteritems():
 

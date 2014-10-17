@@ -105,8 +105,8 @@ if __name__ == "__main__":
   args = parser.parse_args()
 
   if checkInputs(args):
-    a = time.time()
+    start = time.time()
     main(args)
-    b = time.time()
-    print "Elapsed time:", b - a
+    end = time.time()
+    print "Elapsed time:", end - start
 

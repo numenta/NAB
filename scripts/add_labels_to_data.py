@@ -48,7 +48,7 @@ def main(args):
   corpusLabel = CorpusLabel(args.labelDir, corpus=corpus)
   corpusLabel.getEverything()
 
-  columnData = dict()
+  columnData = {}
   for relativePath in corpusLabel.labels.keys():
     columnData[relativePath] = pandas.Series(
       corpusLabel.labels[relativePath]["label"])

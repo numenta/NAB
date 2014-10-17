@@ -46,7 +46,7 @@ def optimizeThreshold(args):
     init=0.5,
     tolerance=.00001)
 
-  answer = dict()
+  answer = {}
 
   answer['threshold'] = result['parameter']
 
@@ -78,7 +78,7 @@ def twiddle(objFunction, args, init=0.5, tolerance=0.00001):
         "score"     (float)   The score from the objective function given the
                               threshold.
   """
-  pastCalls = dict()
+  pastCalls = {}
   x = init
   step = 0.1
   bestScore = objFunction(x, args)
