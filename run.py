@@ -21,7 +21,7 @@
 
 import os
 import argparse
-import yaml
+import json
 from nab.runner import Runner
 from nab.util import (recur,
                       detectorNameToClass,
@@ -73,14 +73,14 @@ def main(args):
 
   if args.score:
     with open(args.thresholdPath) as thresholdConfigFile:
-      detectorThresholds = yaml.load(thresholdConfigFile)
+      detectorThresholds = json.load(thresholdConfigFile)
 
     runner.score(args.detectors, detectorThresholds)
 
 
 def getDetectorClassConstructors(detectors):
   detectorConstructors = {
-  d:globals()[detectorNameToClass(d)] for d in detectors}
+  d : globals()[detectorNameToClass(d)] for d in detectors}
 
   return detectorConstructors
 
@@ -127,12 +127,12 @@ if __name__ == "__main__":
                     on the data")
 
   parser.add_argument("-p", "--profilesPath",
-                    default="config/user_profiles.yaml",
+                    default="config/profiles.json",
                     help="The configuration file to use while running the "
                     "benchmark.")
 
   parser.add_argument("-t", "--thresholdPath",
-                    default="config/threshold_config.yaml",
+                    default="config/thresholds.json",
                     help="The configuration file that stores thresholds for \
                     each combination of detector and username")
 

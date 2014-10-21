@@ -23,26 +23,38 @@ Combines a set of labels given within folder (in the yaml format)
 """
 
 import os
-from os.path import dirname, realpath
+import time
+import pprint
 import argparse
 
 from nab.labeler import LabelCombiner, CorpusLabel
-
+from nab.corpus import Corpus
 from nab.util import recur, checkInputs
 
 depth = 2
 
-root = recur(dirname, realpath(__file__), depth)
+root = recur(os.path.dirname, os.path.realpath(__file__), depth)
+print root
+
 
 def main(args):
+  if not args.absolutePaths:
+    dataDir = os.path.join(root, args.dataDir)
+    labelDir = os.path.join(root, args.labelDir)
+  else:
+    dataDir = args.dataDir
+    labelDir = args.labelDir
 
-  dataDir = os.path.join(root, args.dataDir)
-  destDir = args.destDir
-  labelDir = args.labelDir
+  destPath = args.destPath
+  threshold = int(args.threshold)
 
-  threshold = 1
+  print "Getting Corpus"
 
-  labelCombiner = LabelCombiner(labelDir, dataDir, threshold)
+  corpus = Corpus(dataDir)
+
+  print "Creating LabelCombiner"
+
+  labelCombiner = LabelCombiner(labelDir, corpus, threshold)
 
   print "Combining Labels"
 
@@ -50,15 +62,18 @@ def main(args):
 
   print "Writing combined labels"
 
-  labelCombiner.write(destDir)
+  labelCombiner.write(destPath)
 
   print "Attempting to load objects as a test"
 
-  corpusLabel = CorpusLabel(destDir, dataDir)
+  corpusLabel = CorpusLabel(path=destPath, corpus=corpus)
 
-  corpusLabel.initialize()
+  print "Successfully combined labels"
 
-  print "Success!"
+
+  print "Resulting windows stored in:", destPath
+
+  pprint.pprint(corpusLabel.windows)
 
 
 if __name__ == "__main__":
@@ -71,7 +86,7 @@ if __name__ == "__main__":
                     default="data",
                     help="This holds all the label windows for the corpus")
 
-  parser.add_argument("--destDir",
+  parser.add_argument("--destPath",
                     help="Where you want to store the combined labels",
                     default="labels")
 
@@ -81,8 +96,17 @@ if __name__ == "__main__":
                       default=False,
                       action="store_true")
 
+  parser.add_argument("--threshold",
+                      help="The percentage agreement you would like between all\
+                      labelers for a record to be considered anomalous (should \
+                      be a number between 0 and 1)",
+                      default=1.0)
+
   args = parser.parse_args()
 
   if checkInputs(args):
+    start = time.time()
     main(args)
+    end = time.time()
+    print "Elapsed time:", end - start
 

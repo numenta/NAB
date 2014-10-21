@@ -1,0 +1,15 @@
+
+{
+	"numenta": {
+  		"Jay_Gokhale": {
+  			"score": -85.98640653844967,
+  			"threshold": 0.9999877929687505
+  		}
+  	},
+	"skyline": {
+  		"Jay_Gokhale": {
+  			"score": -47.52393011541706,
+  			"threshold": 0.9000000000000006
+  		}
+  	}
+}

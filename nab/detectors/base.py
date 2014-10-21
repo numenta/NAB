@@ -116,7 +116,6 @@ class AnomalyDetector(object):
         print ".",
         sys.stdout.flush()
 
-    print
     return ans
 
 

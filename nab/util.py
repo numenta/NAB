@@ -23,7 +23,7 @@ import datetime
 import dateutil
 import sys
 import pprint
-import yaml
+import json
 import pandas
 
 
@@ -45,9 +45,9 @@ def updateThresholds(newThresholds, thresholdsFilePath):
   """
   if os.path.exists(thresholdsFilePath):
     with open(thresholdsFilePath) as inFile:
-      oldThresholds = yaml.load(inFile)
+      oldThresholds = json.load(inFile)
   else:
-    oldThresholds = dict()
+    oldThresholds = {}
 
   if not isinstance(oldThresholds, dict):
     raise ValueError("Incorrect type given to updateThresholds")
@@ -66,7 +66,7 @@ def updateThresholds(newThresholds, thresholdsFilePath):
         oldThresholds[detector][username] = data
 
   with open(thresholdsFilePath, "w") as outFile:
-    outFile.write(yaml.dump(oldThresholds))
+    outFile.write(json.dump(oldThresholds))
 
   return oldThresholds
 

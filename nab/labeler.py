@@ -19,107 +19,37 @@
 # ----------------------------------------------------------------------
 
 import os
-import yaml
-import dateutil.parser
+import itertools
 import pandas
 import json
 
-from nab.corpus import Corpus
 from nab.util import (absoluteFilePaths,
-                      flattenDict,
                       strf,
                       strp,
                       deepmap,
-                      makeDirsExist)
+                      createPath)
 
-
-
-class UserLabel(object):
-  """Class to store and manipulate a set of labels of a single labelers.
-
-  Labels are stored as anomaly windows given by timestamps.
-  """
-
-  def __init__(self, path, dataRoot=None, corp=None):
-    """
-    @param path       (string)      Source path of yaml file containing the
-                                    corpus labels for a single user.
-
-    @param dataRoot   (string)      (optional) Source directory of corpus.
-
-    @param corp       (nab.Corpus)  (optional) Corpus object.
-    """
-    if dataRoot is None and corp is None:
-      raise ValueError()
-
-    self.path = path
-    self.dataRoot = dataRoot
-
-    with open(self.path,"r") as f:
-      self.yaml = yaml.load(f)
-
-    self.pathDict = flattenDict(self.yaml)
-
-    if corp == None:
-      self.corpus = Corpus(dataRoot)
-    else:
-      self.corpus = corp
-    self.windows = self.getWindows()
-
-
-  def getWindows(self):
-    """Store anomaly windows as dictionaries with the filename being the key."""
-    windows = {}
-
-    def convertKey(key):
-      return key + ".csv"
-
-    for key in self.pathDict.keys():
-      data = self.corpus.dataSets[convertKey(key)].data
-
-      for window in self.pathDict[key]:
-        for t in window:
-          t = t.decode('unicode_escape').encode('ascii','ignore')
-          t = dateutil.parser.parse(t)
-          found = data["timestamp"][data["timestamp"] == pandas.tslib.Timestamp(t)]
-          if len(found) != 1:
-            raise ValueError(
-              "timestamp listed in labels don't exist in file")
-
-      windows[convertKey(key)] = [[dateutil.parser.parse(t) for t in l]
-                                                    for l in self.pathDict[key]]
-    return windows
 
 
 class CorpusLabel(object):
-  """Class to store and manipulate the combined corpus labels."""
+  """Class to store and manipulate corpus labels."""
 
-  def __init__(self, labelDir, dataDir=None, corp=None):
+  def __init__(self, path, corpus):
     """
-    @param labelDir     (string)  Source directory of all label files created by
-                                  users. (They should be in a format that is
-                                  digestable by UserLabel)
+    @param labelDir     (string)    Source directory of all label files created
+                                    by users. (They should be in a format that
+                                    is digestable by UserLabel)
 
-    @param dataRoot   (string)      (optional) Source directory of corpus.
+    @param dataDir      (string)    (optional) Source directory of corpus.
 
-    @param corp       (nab.Corpus)  (optional) Corpus object.
+    @param corpus       (nab.Corpus)(optional) Corpus object.
     """
-    self.labelDir = labelDir
-    self.dataDir = dataDir
+    self.path = path
 
-    if self.dataDir:
-      self.corpus = Corpus(self.dataDir)
-    else:
-      self.corpus = corp
-
-    self.rawWindows = None
-    self.rawLabels = None
     self.windows = None
     self.labels = None
 
-
-  def initialize(self):
-    """Get boths labels and windows."""
+    self.corpus = corpus
     self.getWindows()
     self.getLabels()
 
@@ -129,13 +59,30 @@ class CorpusLabel(object):
     Get windows as dictionaries with key value pairs of a relative path and its
     corresponding list of windows.
     """
-    with open(os.path.join(self.labelDir, "corpus_windows.json")) as windowFile:
+    def found(t, data):
+      f = data["timestamp"][data["timestamp"] == pandas.tslib.Timestamp(t)]
+
+      exists = (len(f) == 1)
+
+      if not exists:
+        print t, "doesn't exist"
+
+      return exists
+
+    with open(os.path.join(self.path)) as windowFile:
       windows = json.load(windowFile)
 
-    self.rawWindows = windows
     self.windows = {}
+
     for relativePath in windows.keys():
       self.windows[relativePath] = deepmap(strp, windows[relativePath])
+
+      data = self.corpus.dataSets[relativePath].data
+
+      timestamps = list(itertools.chain(windows[relativePath]))[0]
+
+      if not all(map((lambda t: found(t, data)), timestamps)):
+        raise ValueError("timestamp listed in labels doesn't exist in file")
 
 
   def getLabels(self):
@@ -153,8 +100,9 @@ class CorpusLabel(object):
       labels['label'] = 0
 
       for t1, t2 in windows:
-        subset = labels[labels["timestamp"] >= t1][labels["timestamp"] <= t2]
-        indices = subset.loc[:,"label"].index
+        moreThanT1 = labels[labels["timestamp"] >= t1]
+        betweenT1AndT2 = moreThanT1[moreThanT1["timestamp"] <= t2]
+        indices = betweenT1AndT2.loc[:,"label"].index
         labels["label"].values[indices] = 1
 
       self.labels[relativePath] = labels
@@ -166,11 +114,10 @@ class LabelCombiner(object):
   combine labels is given in the NAB wiki.
   """
 
-  def __init__(self, labelRoot, dataRoot, threshold=1):
-    self.labelRoot = labelRoot
-    self.dataRoot = dataRoot
+  def __init__(self, labelDir, corpus, threshold=1):
+    self.labelDir = labelDir
     self.threshold = threshold
-    self.corpus = Corpus(dataRoot)
+    self.corpus = corpus
 
     self.userLabels = None
     self.nlabelers = None
@@ -181,37 +128,20 @@ class LabelCombiner(object):
 
   def __str__(self):
     ans = ""
-    ans += "labelRoot:           %s\n" % self.labelRoot
-    ans += "dataRoot:            %s\n" % self.dataRoot
+    ans += "labelDir:            %s\n" % self.labelDir
+    ans += "dataDir:             %s\n" % self.dataDir
     ans += "corpus:              %s\n" % self.corpus
     ans += "number of labels:    %d\n" % self.nlabelers
     ans += "threshold:           %d\n" % self.threshold
     return ans
 
 
-  def write(self, destDir):
+  def write(self, destPath):
     """Write the combined labels to a destination directory."""
-    print self.combinedRelaxedWindows
-    makeDirsExist(destDir)
-    windows = json.dumps(self.combinedRelaxedWindows)
-    with open(os.path.join(
-      destDir, "corpus_windows.json"), "w") as windowWriter:
-      windowWriter.write(windows)
-
-    fileFriendlyLabels = {}
-
-    for relativePath, label in self.combinedLabels.iteritems():
-      fileFriendlyLabels[relativePath] = label
-      fileFriendlyLabels[relativePath]["timestamp"] = \
-                      fileFriendlyLabels[relativePath]["timestamp"].apply(strf)
-
-      fileFriendlyLabels[relativePath] = \
-        fileFriendlyLabels[relativePath].to_json()
-
-    labels = json.dumps(fileFriendlyLabels)
-
-    with open(os.path.join(destDir, "corpus_labels.json"), "w") as labelWriter:
-      labelWriter.write(labels)
+    createPath(destPath)
+    relaxedWindows = json.dumps(self.combinedRelaxedWindows, indent=3)
+    with open(destPath, "w") as windowWriter:
+      windowWriter.write(relaxedWindows)
 
 
   def combine(self):
@@ -224,9 +154,13 @@ class LabelCombiner(object):
 
   def getUserLabels(self):
     """Collect UserLabels."""
-    labelPaths = absoluteFilePaths(self.labelRoot)
-    userLabels = [UserLabel(path, corp=self.corpus) for path in labelPaths]
-    self.userLabels = userLabels
+    labelPaths = absoluteFilePaths(self.labelDir)
+
+    self.userLabels = [CorpusLabel(path, self.corpus) for path in labelPaths]
+
+    if len(self.userLabels) == 0:
+      raise ValueError("No users labels found")
+
     self.nlabelers = len(self.userLabels)
 
 
@@ -236,32 +170,34 @@ class LabelCombiner(object):
     labeled as 1 or 0. Threshold describes the level of agreement you want
     between labelers before you label a record as anomalous.
     """
-    labels = {}
+    combinedLabels = {}
+
     for relativePath, dataSet in self.corpus.dataSets.iteritems():
-      timestampsHolder = []
-      labelHolder = []
+      timestamps = []
+      labels = []
 
       for _, row in dataSet.data.iterrows():
         t = row["timestamp"]
 
         count = 0
-        for l in self.userLabels:
-          if any(t >= t1 and t <= t2 for [t1,t2] in l.windows[relativePath]):
+        for user in self.userLabels:
+          if any(t1 <= t <= t2 for [t1,t2] in user.windows[relativePath]):
             count += 1
 
-        label = int(count >= self.nlabelers * self.threshold)
-        timestampsHolder.append(t)
-        labelHolder.append(label)
+        label = int(count >= self.nlabelers * self.threshold and count > 0)
 
-      labels[relativePath] = pandas.DataFrame({"timestamp":timestampsHolder,
-          "label": labelHolder})
+        timestamps.append(t)
+        labels.append(label)
 
-    self.combinedLabels = labels
+      combinedLabels[relativePath] = pandas.DataFrame({"timestamp":timestamps,
+        "label": labels})
+
+    self.combinedLabels = combinedLabels
 
 
   def combineWindows(self):
     """Take raw combined Labels and compress them to combinedWindows."""
-    allWindows = {}
+    combinedWindows = {}
 
     for relativePath, labels in self.combinedLabels.iteritems():
       delta = labels["timestamp"][1] - labels["timestamp"][0]
@@ -269,60 +205,65 @@ class LabelCombiner(object):
       labels = labels[labels["label"] == 1]
       dataSetWindows = []
 
-      if labels.shape[0] == 0:
-        dataSetWindows = []
-
-      else:
-        curr = None
-        prev = None
+      if labels.shape[0] != 0:
+        t1 = None
+        t0 = None
 
         for _, row in labels.iterrows():
-          curr = row["timestamp"]
-          if not prev:
-            currentWindow = [strf(curr)]
+          t1 = row["timestamp"]
 
-          elif curr - prev != delta:
-            currentWindow.append(strf(prev))
-            dataSetWindows.append(currentWindow)
-            currentWindow = [strf(curr)]
+          if t0 is None:
+            window = [strf(t1)]
 
-          prev = curr
+          elif t1 - t0 != delta:
+            window.append(strf(t0))
+            dataSetWindows.append(window)
+            window = [strf(t1)]
 
-        currentWindow.append(strf(curr))
-        dataSetWindows.append(currentWindow)
+          t0 = t1
 
-      allWindows[relativePath] = dataSetWindows
+        window.append(strf(t1))
+        dataSetWindows.append(window)
 
+      combinedWindows[relativePath] = dataSetWindows
 
-    self.combinedWindows = allWindows
+    self.combinedWindows = combinedWindows
+
 
   def relaxWindows(self):
     """
     This takes all windows and relaxes them by a certain percentage of the data.
-    A length (relaxWindowLength) is picked before hand and each window is
+    A length (relaxWindowLength) is picked beforehand and each window is
     lengthened on both its left and right side by that length. This length is
     chosen as a certain percetange of the dataset.
     """
     allRelaxedWindows = {}
+
     for relativePath, limits in self.combinedWindows.iteritems():
+
       data = self.corpus.dataSets[relativePath].data
       length = len(data["timestamp"])
-      percentOfDataSet = 0.025
-      numWindows = len(limits)
+      percentOfDataSet = 0.05
+
       relaxWindowLength = int(percentOfDataSet*length)
 
       relaxedWindows = []
-      for i, limit in enumerate(limits):
+
+      for limit in limits:
         t1, t2 = limit
-        indices = map((
-          lambda t: data["timestamp"][data["timestamp"] == t].index[0]),
+
+        indices = map(
+          (lambda t: data[data["timestamp"] == t]["timestamp"].index[0]),
           limit)
-        t1Index = max(indices[0] - relaxWindowLength, 0)
-        t2Index = min(indices[0] + relaxWindowLength, length-1)
+
+        t1Index = max(indices[0] - relaxWindowLength/2, 0)
+        t2Index = min(indices[0] + relaxWindowLength/2, length-1)
+
         relaxedLimit = [strf(data["timestamp"][t1Index]),
           strf(data["timestamp"][t2Index])]
 
         relaxedWindows.append(relaxedLimit)
+
       allRelaxedWindows[relativePath] = relaxedWindows
 
     self.combinedRelaxedWindows = allRelaxedWindows
