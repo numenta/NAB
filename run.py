@@ -72,7 +72,7 @@ def main(args):
     runner.optimize(detectors)
 
   if args.score:
-    with open(args.thresholdPath) as thresholdConfigFile:
+    with open(thresholdPath) as thresholdConfigFile:
       detectorThresholds = json.load(thresholdConfigFile)
 
     runner.score(detectors, detectorThresholds)
