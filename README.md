@@ -97,7 +97,7 @@ It is also assumed you have a full checkout of the NuPIC source by this point.
 
 ##### Install Python Requirements
 
-    cd nab
+    cd NAB
     (sudo) pip install -r requirements.txt
 
 ##### Update NuPIC to the correct commit
@@ -113,7 +113,7 @@ Then follow build directions in the NuPIC `README.md`.
 
     cd /path/to/nab
     python setup.py develop (for now)
-    python nab/run.py
+    python run.py
 
 This will produce results files for the Numenta anomaly detection method as well
 as baseline results using methods from the [Etsy
