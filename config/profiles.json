@@ -1,9 +1,10 @@
 {
-"Jay_Gokhale": {
-	"CostMatrix": {
-    	"tpWeight": 1.0,
-    	"fnWeight": 1.0,
-    	"fpWeight": 1.0,
-    	"tnWeight": 1.0
-	}
+  "Jay_Gokhale": {
+  	"CostMatrix": {
+      	"tpWeight": 1.0,
+      	"fnWeight": 1.0,
+      	"fpWeight": 1.0,
+      	"tnWeight": 1.0
+  	}
+  }
 }
