@@ -75,7 +75,11 @@ class CorpusLabel(object):
     self.windows = {}
 
     for relativePath in windows.keys():
+
       self.windows[relativePath] = deepmap(strp, windows[relativePath])
+
+      if len(self.windows[relativePath]) == 0:
+        continue
 
       data = self.corpus.dataSets[relativePath].data
 

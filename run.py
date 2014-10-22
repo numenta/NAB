@@ -49,14 +49,14 @@ def main(args):
   probationaryPercent = float(args.probationaryPercent)
 
   dataDir = os.path.join(root, args.dataDir)
-  labelDir = os.path.join(root, args.labelDir)
+  labelPath = os.path.join(root, args.labelPath)
   resultsDir = os.path.join(root, args.resultsDir)
   profilesPath = os.path.join(root, args.profilesPath)
   thresholdPath = os.path.join(root, args.thresholdPath)
 
   runner = Runner(dataDir=dataDir,
-                  labelDir=labelDir,
                   resultsDir=resultsDir,
+                  labelPath=labelPath,
                   profilesPath=profilesPath,
                   thresholdPath=thresholdPath,
                   probationaryPercent=probationaryPercent,
@@ -65,17 +65,17 @@ def main(args):
   runner.initialize()
 
   if args.detect:
-    detectorConstructors = getDetectorClassConstructors(args.detectors)
+    detectorConstructors = getDetectorClassConstructors(detectors)
     runner.detect(detectorConstructors)
 
   if args.optimize:
-    runner.optimize(args.detectors)
+    runner.optimize(detectors)
 
   if args.score:
-    with open(args.thresholdPath) as thresholdConfigFile:
+    with open(thresholdPath) as thresholdConfigFile:
       detectorThresholds = json.load(thresholdConfigFile)
 
-    runner.score(args.detectors, detectorThresholds)
+    runner.score(detectors, detectorThresholds)
 
 
 def getDetectorClassConstructors(detectors):
@@ -117,8 +117,8 @@ if __name__ == "__main__":
                     default="data",
                     help="This holds all the label windows for the corpus.")
 
-  parser.add_argument("--labelDir",
-                    default="labels",
+  parser.add_argument("--labelPath",
+                    default="labels/corpus_windows.json",
                     help="This holds all the label windows for the corpus.")
 
   parser.add_argument("--resultsDir",

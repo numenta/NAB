@@ -103,7 +103,7 @@ class Runner(object):
                                         detector name and its corresponding
                                         class constructor.
     """
-    print "\nObtaining detections"
+    print "\nObtaining Detections"
 
     count = 0
     args = []
@@ -139,7 +139,7 @@ class Runner(object):
                                   dictionary containing the score and the
                                   threshold used to obtained that score.
     """
-    print "\nOptimizing anomaly Scores"
+    print "\nOptimizing Anomaly Scores"
 
     thresholds = {}
 
@@ -181,7 +181,7 @@ class Runner(object):
                                     another dictionary containing the score and
                                     the threshold used to obtained that score.
     """
-    print "\nObtaining Scores"
+    print "\nObtaining Benchmark Scores"
 
     for detector in detectors:
       ans = pandas.DataFrame(columns=("Detector", "Username", "File", \
@@ -209,5 +209,6 @@ class Runner(object):
           ans.loc[len(ans)] = row
 
       scorePath = os.path.join(resultsDetectorDir, detector + "_scores.csv")
+      print "%s detector benchmark scores written to %s" %(detector, scorePath)
       ans.to_csv(scorePath, index=False)
 
