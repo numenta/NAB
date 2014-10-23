@@ -38,7 +38,7 @@ from nab.util import updateThresholds
 class Runner(object):
   """
   Class to run an endpoint (detect, optimize, or score) on the NAB
-  benchmark using the specified set of profiles.
+  benchmark using the specified set of profiles, thresholds, and/or detectors.
   """
 
   def __init__(self,
