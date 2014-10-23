@@ -117,9 +117,7 @@ if __name__ == "__main__":
                     nargs="*",
                     type=str,
                     default=["numenta"],
-                    help="Select which detector/detector(s) you want to use. "
-                    "Make sure to import the corresponding detectors classes "
-                    "within run.py")
+                    help="Space separated list of detector(s) to use.")
 
   parser.add_argument("--dataDir",
                     default="data",

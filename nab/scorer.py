@@ -232,7 +232,7 @@ def scoreCorpus(threshold, args):
    probationaryPercent) = args
 
   args = []
-  for relativePath, dataSet in resultsCorpus.dataSets.iteritems():
+  for relativePath, dataSet in resultsCorpus.dataFiles.iteritems():
     if relativePath == detector + "_scores.csv":
       continue
 

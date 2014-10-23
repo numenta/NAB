@@ -30,16 +30,15 @@ from nab.util import (absoluteFilePaths,
 
 
 
-class DataSet(object):
+class DataFile(object):
   """
-  Class for storing and manipulating a dataset within a corpus
+  Class for storing and manipulating a single datafile.
   Data is stored in pandas.DataFrame
   """
 
   def __init__(self, srcPath):
     """
-    @param srcPath (string)   Path to read dataset from, data should be in csv
-                              fomat.
+    @param srcPath (string)   Filename of datafile to read.
     """
     self.srcPath = srcPath
 
@@ -50,9 +49,9 @@ class DataSet(object):
 
 
   def write(self, newPath=None):
-    """Write dataset to self.srcPath or newPath if given.
+    """Write datafile to self.srcPath or newPath if given.
 
-    @param newPath (string)   Path to write dataset to. If path is not given,
+    @param newPath (string)   Path to write datafile to. If path is not given,
                               write to source path
     """
 
@@ -61,12 +60,13 @@ class DataSet(object):
 
 
   def modifyData(self, columnName, data=None, write=False):
-    """Add columnName to dataset if data is given otherwise, remove columnName.
+    """Add columnName to datafile if data is given otherwise remove
+    columnName.
 
-    @param columnName (string)          Name of the column in the dataset to
+    @param columnName (string)          Name of the column in the datafile to
                                         either add or remove.
 
-    @param data       (pandas.Series)   Column data to be added to dataset.
+    @param data       (pandas.Series)   Column data to be added to datafile.
                                         Data length should be as long as the
                                         length of other columns.
 
@@ -109,8 +109,8 @@ class DataSet(object):
 
 class Corpus(object):
   """
-  Class for storing and manipulating a corpus of data where each dataset is
-  stored as a DataSet object.
+  Class for storing and manipulating a corpus of data where each datafile is
+  stored as a DataFile object.
   """
 
   def __init__(self, srcRoot):
@@ -118,20 +118,20 @@ class Corpus(object):
     @param srcRoot    (string)    Source directory of corpus.
     """
     self.srcRoot = srcRoot
-    self.dataSets = self.getDataSets()
-    self.numDataSets = len(self.dataSets)
+    self.dataFiles = self.getDataFiles()
+    self.numDataSets = len(self.dataFiles)
 
 
-  def getDataSets(self):
+  def getDataFiles(self):
     """
-    Collect dataSets from self.srcRoot where datasets are stored in a dictionary
+    Collect datafiles from self.srcRoot where datafiles are stored in a dictionary
     in which the path relative to the self.srcRoot is their key.
 
     @return (dict)    Dictionary containing key value pairs of a relative path
-                      and its corresponding dataset.
+                      and its corresponding datafile.
     """
     filePaths = absoluteFilePaths(self.srcRoot)
-    dataSets = [DataSet(path) for path in filePaths]
+    dataSets = [DataFile(path) for path in filePaths]
 
     def getRelativePath(srcRoot, srcPath):
       return srcPath[srcPath.index(srcRoot)+len(srcRoot):].strip("/")
@@ -147,18 +147,18 @@ class Corpus(object):
     file in the corpus. If newRoot is given then corpus is copied and then
     modified.
 
-    @param columnName   (string)  Name of the column in the dataset to add.
+    @param columnName   (string)  Name of the column in the datafile to add.
 
     @param data         (dict)    Dictionary containing key value pairs of a
                                   relative path and its corresponding
-                                  dataset (as a pandas.Series).
+                                  datafile (as a pandas.Series).
 
     @param write        (boolean) Flag to decide whether to write corpus
                                   modificiations or not.
     """
 
-    for relativePath in self.dataSets.keys():
-      self.dataSets[relativePath].modifyData(
+    for relativePath in self.dataFiles.keys():
+      self.dataFiles[relativePath].modifyData(
         columnName, data[relativePath], write=write)
 
 
@@ -167,13 +167,13 @@ class Corpus(object):
     Remove column from entire corpus given columnName. If newRoot if given then
     corpus is copied and then modified.
 
-    @param columnName   (string)  Name of the column in the dataset to add.
+    @param columnName   (string)  Name of the column in the datafile to add.
 
     @param write        (boolean) Flag to decide whether to write corpus
                                   modificiations or not.
     """
-    for relativePath in self.dataSets.keys():
-      self.dataSets[relativePath].modifyData(columnName, write=write)
+    for relativePath in self.dataFiles.keys():
+      self.dataFiles[relativePath].modifyData(columnName, write=write)
 
   def copy(self, newRoot=None):
     """Copy corpus to a newRoot which cannot already exist.
@@ -190,30 +190,30 @@ class Corpus(object):
       createPath(newRoot)
 
     newCorpus = Corpus(newRoot)
-    for relativePath in self.dataSets.keys():
-      newCorpus.addDataSet(relativePath, self.dataSets[relativePath])
+    for relativePath in self.dataFiles.keys():
+      newCorpus.addDataSet(relativePath, self.dataFiles[relativePath])
     return newCorpus
 
 
   def addDataSet(self, relativePath, dataSet):
-    """Add dataset to corpus given its realtivePath within the corpus.
+    """Add datafile to corpus given its realtivePath within the corpus.
 
-    @param relativePath     (string)      Path of the new dataset relative to
+    @param relativePath     (string)      Path of the new datafile relative to
                                           the corpus directory.
 
-    @param dataSet          (dataSet)     Data set to be added to corpus.
+    @param datafile          (datafile)     Data set to be added to corpus.
     """
-    self.dataSets[relativePath] = copy.deepcopy(dataSet)
+    self.dataFiles[relativePath] = copy.deepcopy(dataSet)
     newPath = self.srcRoot + relativePath
     createPath(newPath)
-    self.dataSets[relativePath].srcPath = newPath
-    self.dataSets[relativePath].write()
-    self.numDataSets = len(self.dataSets)
+    self.dataFiles[relativePath].srcPath = newPath
+    self.dataFiles[relativePath].write()
+    self.numDataSets = len(self.dataFiles)
 
 
   def getDataSubset(self, query):
     """
-    Get subset of the corpus given a query to match the dataset filename or
+    Get subset of the corpus given a query to match the datafile filename or
     relative path.
 
     @param query        (string)      Search query for obtainin the subset of
@@ -221,10 +221,10 @@ class Corpus(object):
 
     @return             (dict)        Dictionary containing key value pairs of a
                                       relative path and its corresponding
-                                      dataset.
+                                      datafile.
     """
     ans = {}
-    for relativePath in self.dataSets.keys():
+    for relativePath in self.dataFiles.keys():
       if query in relativePath:
-        ans[relativePath] = self.dataSets[relativePath]
+        ans[relativePath] = self.dataFiles[relativePath]
     return ans

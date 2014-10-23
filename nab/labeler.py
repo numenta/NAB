@@ -81,7 +81,7 @@ class CorpusLabel(object):
       if len(self.windows[relativePath]) == 0:
         continue
 
-      data = self.corpus.dataSets[relativePath].data
+      data = self.corpus.dataFiles[relativePath].data
 
       timestamps = list(itertools.chain(windows[relativePath]))[0]
 
@@ -97,7 +97,7 @@ class CorpusLabel(object):
     """
     self.labels = {}
 
-    for relativePath, dataSet in self.corpus.dataSets.iteritems():
+    for relativePath, dataSet in self.corpus.dataFiles.iteritems():
       windows = self.windows[relativePath]
 
       labels = pandas.DataFrame({"timestamp": dataSet.data["timestamp"]})
@@ -177,7 +177,7 @@ class LabelCombiner(object):
     """
     combinedLabels = {}
 
-    for relativePath, dataSet in self.corpus.dataSets.iteritems():
+    for relativePath, dataSet in self.corpus.dataFiles.iteritems():
       timestamps = []
       labels = []
 
@@ -246,7 +246,7 @@ class LabelCombiner(object):
 
     for relativePath, limits in self.combinedWindows.iteritems():
 
-      data = self.corpus.dataSets[relativePath].data
+      data = self.corpus.dataFiles[relativePath].data
       length = len(data["timestamp"])
       percentOfDataSet = 0.05
 

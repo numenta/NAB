@@ -111,7 +111,7 @@ class Runner(object):
     count = 0
     args = []
     for detectorName, detectorConstructor in detectors.iteritems():
-      for relativePath, dataSet in self.corpus.dataSets.iteritems():
+      for relativePath, dataSet in self.corpus.dataFiles.iteritems():
 
         args.append(
           (
