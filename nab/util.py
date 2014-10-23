@@ -66,7 +66,7 @@ def updateThresholds(newThresholds, thresholdsFilePath):
         oldThresholds[detector][username] = data
 
   with open(thresholdsFilePath, "w") as outFile:
-    outFile.write(json.dump(oldThresholds))
+    outFile.write(json.dumps(oldThresholds))
 
   return oldThresholds
 
@@ -88,7 +88,7 @@ def checkInputs(args):
 
 def convertAnomalyScoresToDetections(anomalyScores, threshold):
   """
-  Convert anmaly scores (values between 0 and 1) to detections (binary
+  Convert anomaly scores (values between 0 and 1) to detections (binary
   values) given a threshold.
   """
   length = len(anomalyScores)

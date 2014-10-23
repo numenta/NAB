@@ -36,7 +36,10 @@ from nab.util import updateThresholds
 
 
 class Runner(object):
-  """Class to run a configured nab benchmark."""
+  """
+  Class to run an endpoint (detect, optimize, or score) on the NAB
+  benchmark using the specified set of profiles, thresholds, and/or detectors.
+  """
 
   def __init__(self,
                dataDir,
@@ -55,8 +58,8 @@ class Runner(object):
     @param labelPath      (string)  Path where the labels of the datasets
                                     exist.
 
-    @param profilesPath   (string)  Path to user profiles prescribing the
-                                    username and the cost matrix.
+    @param profilesPath   (string)  Path to JSON file containing application
+                                    profiles and associated cost matrices.
 
     @param thresholdPath  (string)  Path to thresholds dictionary containing the
                                     best thresholds (and their corresponding
@@ -103,7 +106,7 @@ class Runner(object):
                                         detector name and its corresponding
                                         class constructor.
     """
-    print "\nObtaining detections"
+    print "\nRunning detection step"
 
     count = 0
     args = []
@@ -125,7 +128,6 @@ class Runner(object):
 
         count += 1
 
-    print "calling multiprocessing pool"
     self.pool.map(detectDataSet, args)
 
 
@@ -139,7 +141,7 @@ class Runner(object):
                                   dictionary containing the score and the
                                   threshold used to obtained that score.
     """
-    print "\nOptimizing anomaly Scores"
+    print "\nRunning optimize step"
 
     thresholds = {}
 
@@ -181,7 +183,7 @@ class Runner(object):
                                     another dictionary containing the score and
                                     the threshold used to obtained that score.
     """
-    print "\nObtaining Scores"
+    print "\nRunning scoring step"
 
     for detector in detectors:
       ans = pandas.DataFrame(columns=("Detector", "Username", "File", \
@@ -209,5 +211,6 @@ class Runner(object):
           ans.loc[len(ans)] = row
 
       scorePath = os.path.join(resultsDetectorDir, detector + "_scores.csv")
+      print "%s detector benchmark scores written to %s" %(detector, scorePath)
       ans.to_csv(scorePath, index=False)
 

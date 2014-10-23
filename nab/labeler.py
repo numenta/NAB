@@ -75,7 +75,11 @@ class CorpusLabel(object):
     self.windows = {}
 
     for relativePath in windows.keys():
+
       self.windows[relativePath] = deepmap(strp, windows[relativePath])
+
+      if len(self.windows[relativePath]) == 0:
+        continue
 
       data = self.corpus.dataSets[relativePath].data
 
@@ -110,8 +114,9 @@ class CorpusLabel(object):
 
 class LabelCombiner(object):
   """
-  Class used to combine labels given many UserLabel objects. The process to
-  combine labels is given in the NAB wiki.
+  Class used to combine labels given many Label objects. The process to
+  combine labels is given in the NAB wiki.  This is used for creating
+  the ground truth labels given several human-labeled files.
   """
 
   def __init__(self, labelDir, corpus, threshold=1):
