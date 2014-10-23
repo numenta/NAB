@@ -1,15 +1,14 @@
-
 {
-  "numenta": {
-      "username": {
-        "score": -85.98640653844967,
-        "threshold": 0.9999877929687505
-      }
-    },
-  "skyline": {
-      "username": {
-        "score": -47.52393011541706,
-        "threshold": 0.9000000000000006
-      }
-    }
+	"numenta": {
+  		"profile_name": {
+  			"score": -85.98640653844967,
+  			"threshold": 0.9999877929687505
+  		}
+  	},
+	"skyline": {
+  		"profile_name": {
+  			"score": -47.52393011541706,
+  			"threshold": 0.9000000000000006
+  		}
+  	}
 }

@@ -1,10 +1,10 @@
 {
-  "username": {
-    "CostMatrix": {
-        "tpWeight": 1.0,
-        "fnWeight": 1.0,
-        "fpWeight": 1.0,
-        "tnWeight": 1.0
-  	}
+"profile_name": {
+	"CostMatrix": {
+    	"tpWeight": 1.0,
+    	"fnWeight": 1.0,
+    	"fpWeight": 1.0,
+    	"tnWeight": 1.0
+	}
   }
 }

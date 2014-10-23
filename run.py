@@ -23,16 +23,21 @@ import os
 import argparse
 import json
 from nab.runner import Runner
-from nab.util import (recur,
-                      detectorNameToClass,
-                      checkInputs)
+from nab.util import (detectorNameToClass, checkInputs)
+
 
 from nab.detectors.numenta.numenta_detector import NumentaDetector
 from nab.detectors.skyline.skyline_detector import SkylineDetector
+def getDetectorClassConstructors(detectors):
+  """
+  Takes in names of detectors. Collects class names that correspond to those
+  detectors and returns them in a dict. The dict maps detector name to class
+  names.  Assumes the detectors have been imported.
+  """
+  detectorConstructors = {
+  d : globals()[detectorNameToClass(d)] for d in detectors}
 
-depth = 1
-
-root = recur(os.path.dirname, os.path.realpath(__file__), depth)
+  return detectorConstructors
 
 
 
@@ -44,59 +49,52 @@ def main(args):
     args.score = True
 
 
-  detectors = args.detectors
+  root = os.path.dirname(os.path.realpath(__file__))
+
   numCPUs = int(args.numCPUs) if args.numCPUs is not None else None
-  probationaryPercent = float(args.probationaryPercent)
 
   dataDir = os.path.join(root, args.dataDir)
-  labelPath = os.path.join(root, args.labelPath)
+  labelFile = os.path.join(root, args.labelFile)
   resultsDir = os.path.join(root, args.resultsDir)
-  profilesPath = os.path.join(root, args.profilesPath)
-  thresholdPath = os.path.join(root, args.thresholdPath)
+  profilesFile = os.path.join(root, args.profilesFile)
+  thresholdsFile = os.path.join(root, args.thresholdsFile)
 
   runner = Runner(dataDir=dataDir,
+                  labelPath=labelFile,
                   resultsDir=resultsDir,
-                  labelPath=labelPath,
-                  profilesPath=profilesPath,
-                  thresholdPath=thresholdPath,
-                  probationaryPercent=probationaryPercent,
+                  profilesPath=profilesFile,
+                  thresholdPath=thresholdsFile,
                   numCPUs=numCPUs)
 
   runner.initialize()
 
   if args.detect:
-    detectorConstructors = getDetectorClassConstructors(detectors)
+    detectorConstructors = getDetectorClassConstructors(args.detectors)
     runner.detect(detectorConstructors)
 
   if args.optimize:
-    runner.optimize(detectors)
+    runner.optimize(args.detectors)
 
   if args.score:
-    with open(thresholdPath) as thresholdConfigFile:
+    with open(thresholdsFile) as thresholdConfigFile:
       detectorThresholds = json.load(thresholdConfigFile)
 
-    runner.score(detectors, detectorThresholds)
+    runner.score(args.detectors, detectorThresholds)
 
-
-def getDetectorClassConstructors(detectors):
-  detectorConstructors = {
-  d : globals()[detectorNameToClass(d)] for d in detectors}
-
-  return detectorConstructors
 
 if __name__ == "__main__":
 
   parser = argparse.ArgumentParser()
 
   parser.add_argument("--detect",
-                    help="Generate detector results but do not analyze results \
-                    files.",
+                    help="Generate detector results but do not analyze results "
+                    "files.",
                     default=False,
                     action="store_true")
 
   parser.add_argument("--optimize",
-                    help="Optimize the thresholds for each detector and user \
-                    profile combination",
+                    help="Optimize the thresholds for each detector and user "
+                    "profile combination",
                     default=False,
                     action="store_true")
 
@@ -105,48 +103,50 @@ if __name__ == "__main__":
                     default=False,
                     action="store_true")
 
+  parser.add_argument("--skipConfirmation",
+                    help="If specified will skip the user confirmation step",
+                    default=False,
+                    action="store_true")
+
   parser.add_argument("-d", "--detectors",
                     nargs="*",
                     type=str,
                     default=["numenta"],
-                    help="Select which detector/detector(s) you want to use. \
-                    Make sure to import the corresponding detectors classes \
-                    within run.py")
+                    help="Select which detector/detector(s) you want to use. "
+                    "Make sure to import the corresponding detectors classes "
+                    "within run.py")
 
   parser.add_argument("--dataDir",
                     default="data",
                     help="This holds all the label windows for the corpus.")
 
-  parser.add_argument("--labelPath",
-                    default="labels/corpus_windows.json",
-                    help="This holds all the label windows for the corpus.")
-
   parser.add_argument("--resultsDir",
                     default="results",
-                    help="This will hold the results after running detectors \
-                    on the data")
+                    help="This will hold the results after running detectors "
+                    "on the data")
 
-  parser.add_argument("-p", "--profilesPath",
+  parser.add_argument("--labelFile",
+                    default=os.path.join("labels",
+                                         "corpus_ground_truth_labels.json"),
+                    help="JSON file containing ground truth labels for the "
+                         "corpus.")
+
+  parser.add_argument("-p", "--profilesFile",
                     default="config/profiles.json",
                     help="The configuration file to use while running the "
                     "benchmark.")
 
-  parser.add_argument("-t", "--thresholdPath",
+  parser.add_argument("-t", "--thresholdsFile",
                     default="config/thresholds.json",
-                    help="The configuration file that stores thresholds for \
-                    each combination of detector and username")
+                    help="The configuration file that stores thresholds for "
+                    "each combination of detector and username")
 
   parser.add_argument("-n", "--numCPUs",
                     default=None,
                     help="The number of CPUs to use to run the "
                     "benchmark. If not specified all CPUs will be used.")
 
-  parser.add_argument("-pp","--probationaryPercent",
-                    default=0.15,
-                    help="The percentage of dataset to be used to configure \
-                    the detector and not to be used for scoring")
-
   args = parser.parse_args()
 
-  if checkInputs(args):
+  if args.skipConfirmation or checkInputs(args):
     main(args)
