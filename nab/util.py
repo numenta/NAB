@@ -66,7 +66,8 @@ def updateThresholds(newThresholds, thresholdsFilePath):
         oldThresholds[detector][username] = data
 
   with open(thresholdsFilePath, "w") as outFile:
-    outFile.write(json.dumps(oldThresholds))
+    outFile.write(json.dumps(oldThresholds,
+             sort_keys=True, indent=4, separators=(',', ': ')))
 
   return oldThresholds
 

@@ -26,8 +26,12 @@ from nab.runner import Runner
 from nab.util import (detectorNameToClass, checkInputs)
 
 
+# The following imports are necessary for getDetectorClassConstructors to
+# automatically figure out the detector classes
 from nab.detectors.numenta.numenta_detector import NumentaDetector
 from nab.detectors.skyline.skyline_detector import SkylineDetector
+from nab.detectors.random.random_detector import RandomDetector
+
 def getDetectorClassConstructors(detectors):
   """
   Takes in names of detectors. Collects class names that correspond to those
@@ -113,9 +117,7 @@ if __name__ == "__main__":
                     nargs="*",
                     type=str,
                     default=["numenta"],
-                    help="Select which detector/detector(s) you want to use. "
-                    "Make sure to import the corresponding detectors classes "
-                    "within run.py")
+                    help="Space separated list of detector(s) to use.")
 
   parser.add_argument("--dataDir",
                     default="data",
@@ -128,7 +130,7 @@ if __name__ == "__main__":
 
   parser.add_argument("--labelFile",
                     default=os.path.join("labels",
-                                         "corpus_ground_truth_labels.json"),
+                                         "ground_truth_labels.json"),
                     help="JSON file containing ground truth labels for the "
                          "corpus.")
 
