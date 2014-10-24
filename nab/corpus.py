@@ -119,7 +119,7 @@ class Corpus(object):
     """
     self.srcRoot = srcRoot
     self.dataFiles = self.getDataFiles()
-    self.numDataSets = len(self.dataFiles)
+    self.numDataFiles = len(self.dataFiles)
 
 
   def getDataFiles(self):
@@ -208,7 +208,7 @@ class Corpus(object):
     createPath(newPath)
     self.dataFiles[relativePath].srcPath = newPath
     self.dataFiles[relativePath].write()
-    self.numDataSets = len(self.dataFiles)
+    self.numDataFiles = len(self.dataFiles)
 
 
   def getDataSubset(self, query):
