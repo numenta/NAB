@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
   parser.add_argument("--dataDir",
                     default="data",
-                    help="This holds all the label windows for the corpus")
+                    help="This holds all the data files for the corpus")
 
   parser.add_argument("--destPath",
                     help="Where you want to store the combined labels",

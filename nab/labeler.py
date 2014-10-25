@@ -114,12 +114,28 @@ class CorpusLabel(object):
 
 class LabelCombiner(object):
   """
-  Class used to combine labels given many Label objects. The process to
-  combine labels is given in the NAB wiki.  This is used for creating
-  the ground truth labels given several human-labeled files.
+  This class is used to combine labels from multiple human labelers. The output
+  is a single ground truth label file containing anomalies where there is
+  enough human agreement. The class also computes the relaxed window around
+  each anomaly.  The exact logic is described elsewhere in the NAB
+  documentation.
   """
 
-  def __init__(self, labelDir, corpus, threshold=1):
+  def __init__(self, labelDir, corpus, threshold=1.0):
+    """
+    @param labelDir   (string)   A directory name containing user label files.
+                                 This directory should contain one label file
+                                 per human labeler.
+
+    @param corpus     (Corpus)   Instance of Corpus class.
+
+    @param threshold  (float)    A percentage between 0 and 1, specifying the
+                                 agreement threshold.  It describes the level
+                                 of agreement needed between individual
+                                 labelers before a particular point in a
+                                 data file is labeled as anomalous in the
+                                 combined file.
+    """
     self.labelDir = labelDir
     self.threshold = threshold
     self.corpus = corpus
@@ -134,10 +150,9 @@ class LabelCombiner(object):
   def __str__(self):
     ans = ""
     ans += "labelDir:            %s\n" % self.labelDir
-    ans += "dataDir:             %s\n" % self.dataDir
     ans += "corpus:              %s\n" % self.corpus
     ans += "number of labels:    %d\n" % self.nlabelers
-    ans += "threshold:           %d\n" % self.threshold
+    ans += "agreement threshold: %d\n" % self.threshold
     return ans
 
 
@@ -240,7 +255,7 @@ class LabelCombiner(object):
     This takes all windows and relaxes them by a certain percentage of the data.
     A length (relaxWindowLength) is picked beforehand and each window is
     lengthened on both its left and right side by that length. This length is
-    chosen as a certain percetange of the dataset.
+    chosen as a certain percentage of the datafile.
     """
     allRelaxedWindows = {}
 
@@ -248,7 +263,7 @@ class LabelCombiner(object):
 
       data = self.corpus.dataFiles[relativePath].data
       length = len(data["timestamp"])
-      percentOfDataSet = 0.05
+      percentOfDataSet = 0.1
 
       relaxWindowLength = int(percentOfDataSet*length)
 
