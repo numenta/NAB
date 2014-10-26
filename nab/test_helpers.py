@@ -36,6 +36,19 @@ def generateTimestamps(start, increment, length):
 
 
 def generateWindows(timestamps, numWindows, windowSize):
+  """
+  Returns a list of numWindows windows, where each window is a pair of
+  timestamps. Each window contains windowSize intervals. The windows are roughly
+  evenly spaced throughout the list of timestsamps.
+
+  @param timestamps  (Series) Pandas Series containing list of timestamps.
+
+  @param numWindows  (int)    Number of windows to return
+
+  @param windowSize  (int)    Number of 'intervals' in each window. An interval
+                              is the duration between the first two timestamps.
+
+  """
   start = timestamps[0]
   delta = timestamps[1] - timestamps[0]
   length = len(timestamps)
@@ -47,10 +60,19 @@ def generateWindows(timestamps, numWindows, windowSize):
     if not any(timestamps == t1) or not any(timestamps == t2):
       raise ValueError("You got the wrong times from the window generator")
     windows.append([t1, t2])
+
   return windows
 
 
 def generateLabels(timestamps, windows):
+  """
+  Returns a pandas Series of integers containing a 1 for every window and 0
+  everywhere else.
+
+  @param timestamps (Series)   Pandas Series containing list of timestamps.
+  @param windows    (list)     List of datetime pairs corresponding to each
+                               time window.
+  """
   labels = pandas.Series([0]*len(timestamps))
   for t1, t2 in windows:
     subset = timestamps[timestamps >= t1][timestamps <= t2]

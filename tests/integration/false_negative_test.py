@@ -33,6 +33,10 @@ class FalseNegativeTests(unittest.TestCase):
 
 
   def test_FalseNegativeCausesNegativeScore(self):
+    """
+    A false negative with only one window should have exactly the negative
+    of the false negative score.
+    """
     start = datetime.datetime.now()
     increment = datetime.timedelta(minutes=5)
     length = 1000
@@ -57,7 +61,41 @@ class FalseNegativeTests(unittest.TestCase):
     scorer = Scorer(timestamps, predictions, labels, windows, costMatrix,
       probationaryPeriod)
 
-    self.assertTrue(scorer.getScore() < 0)
+    self.assertTrue(abs(scorer.getScore() + costMatrix['fnWeight']) < 0.1)
+
+
+
+  def test_FourFalseNegatives(self):
+    """
+    A false negative with four windows should have exactly four times
+    the negative of the false negative score.
+    """
+    start = datetime.datetime.now()
+    increment = datetime.timedelta(minutes=5)
+    length = 2000
+    numWindows = 4
+    windowSize = 10
+
+    timestamps = generateTimestamps(start, increment, length)
+
+    predictions = pandas.Series([0]*length)
+
+    labels = pandas.Series([0]*length)
+
+    windows = generateWindows(timestamps, numWindows, windowSize)
+
+    costMatrix = {"tpWeight": 1.0,
+    "fnWeight": 2.0,
+    "fpWeight": 3.0,
+    "tnWeight": 4.0}
+
+    probationaryPeriod = 0
+
+    scorer = Scorer(timestamps, predictions, labels, windows, costMatrix,
+      probationaryPeriod)
+
+    self.assertTrue(abs(scorer.getScore() + 4*costMatrix['fnWeight']) < 0.1)
+
 
 if __name__ == '__main__':
   unittest.main()
