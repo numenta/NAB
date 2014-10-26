@@ -19,43 +19,14 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-from nab.scorer import Scorer, scoreCorpus
 import pandas
 
 import unittest2 as unittest
 import datetime
 
+from nab.scorer import Scorer
+from nab.test_helpers import generateTimestamps, generateWindows
 
-
-def generateTimestamps(start, increment, length):
-  timestamps = pandas.Series([start])
-  for i in xrange(length - 1):
-    timestamps.loc[i + 1] = timestamps.loc[i] + increment
-  return timestamps
-
-
-def generateWindows(timestamps, numWindows, windowSize):
-  start = timestamps[0]
-  delta = timestamps[1] - timestamps[0]
-  length = len(timestamps)
-  diff = int(round((length - numWindows * windowSize) / float(numWindows + 1)))
-  windows = []
-  for i in xrange(numWindows):
-    t1 = start + delta * diff * (i + 1) + (delta * windowSize * i)
-    t2 = t1 + (delta) * (windowSize - 1)
-    if not any(timestamps == t1) or not any(timestamps == t2):
-      raise ValueError("You got the wrong times from the window generator")
-    windows.append([t1, t2])
-  return windows
-
-
-def generateLabels(timestamps, windows):
-  labels = pandas.Series([0]*len(timestamps))
-  for t1, t2 in windows:
-    subset = timestamps[timestamps >= t1][timestamps <= t2]
-    indices = subset.loc[:].index
-    labels.values[indices] = 1
-  return labels
 
 
 class FalseNegativeTests(unittest.TestCase):
