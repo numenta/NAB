@@ -32,17 +32,14 @@ from nab.util import (absoluteFilePaths,
 
 
 class CorpusLabel(object):
-  """Class to store and manipulate corpus labels."""
+  """Class to store and manipulate a single set of labels for the whole
+  benchmark corpus."""
 
   def __init__(self, path, corpus):
     """
-    @param labelDir     (string)    Source directory of all label files created
-                                    by users. (They should be in a format that
-                                    is digestable by UserLabel)
+    @param path    (string)      Name of file containing the set of labels.
 
-    @param dataDir      (string)    (optional) Source directory of corpus.
-
-    @param corpus       (nab.Corpus)(optional) Corpus object.
+    @param corpus  (nab.Corpus)  Corpus object.
     """
     self.path = path
 
@@ -216,7 +213,7 @@ class LabelCombiner(object):
 
 
   def combineWindows(self):
-    """Take raw combined Labels and compress them to combinedWindows."""
+    """Take raw combined labels and compress them to combinedWindows."""
     combinedWindows = {}
 
     for relativePath, labels in self.combinedLabels.iteritems():
@@ -250,12 +247,12 @@ class LabelCombiner(object):
     self.combinedWindows = combinedWindows
 
 
-  def relaxWindows(self):
+  def relaxWindows(self, percentOfDataSet = 0.1):
     """
-    This takes all windows and relaxes them by a certain percentage of the data.
-    A length (relaxWindowLength) is picked beforehand and each window is
-    lengthened on both its left and right side by that length. This length is
-    chosen as a certain percentage of the datafile.
+    This takes all windows and relaxes them (expands them) by a certain
+    percentage of the data. A length (relaxWindowLength) is picked beforehand
+    and each window is lengthened on both its left and right side by that
+    length. This length is chosen as a certain percentage of the datafile.
     """
     allRelaxedWindows = {}
 
@@ -263,24 +260,29 @@ class LabelCombiner(object):
 
       data = self.corpus.dataFiles[relativePath].data
       length = len(data["timestamp"])
-      percentOfDataSet = 0.1
 
       relaxWindowLength = int(percentOfDataSet*length)
 
       relaxedWindows = []
 
+      # print "\n\n========================"
+      # print "file=",relativePath, "relaxation amount=",relaxWindowLength
+
       for limit in limits:
-        t1, t2 = limit
 
-        indices = map(
-          (lambda t: data[data["timestamp"] == t]["timestamp"].index[0]),
-          limit)
+        leftIndex = data[data["timestamp"] == limit[0]]["timestamp"].index[0]
+        rightIndex = data[data["timestamp"] == limit[1]]["timestamp"].index[0]
 
-        t1Index = max(indices[0] - relaxWindowLength/2, 0)
-        t2Index = min(indices[0] + relaxWindowLength/2, length-1)
+        newLeftIndex = max(leftIndex - relaxWindowLength/2, 0)
+        newRightIndex = min(rightIndex + relaxWindowLength/2, length-1)
 
-        relaxedLimit = [strf(data["timestamp"][t1Index]),
-          strf(data["timestamp"][t2Index])]
+        relaxedLimit = [strf(data["timestamp"][newLeftIndex]),
+          strf(data["timestamp"][newRightIndex])]
+
+        # print "original window indices=",leftIndex,rightIndex
+        # print "relaxed indices=",newLeftIndex,newRightIndex
+        # print "original timestamps=",limit
+        # print "relaxed timestamps=",relaxedLimit
 
         relaxedWindows.append(relaxedLimit)
 
