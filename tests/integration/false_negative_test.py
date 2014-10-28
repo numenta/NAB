@@ -19,49 +19,24 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-from nab.scorer import Scorer, scoreCorpus
 import pandas
 
 import unittest2 as unittest
 import datetime
 
+from nab.scorer import Scorer
+from nab.test_helpers import generateTimestamps, generateWindows, generateLabels
 
-
-def generateTimestamps(start, increment, length):
-  timestamps = pandas.Series([start])
-  for i in xrange(length - 1):
-    timestamps.loc[i + 1] = timestamps.loc[i] + increment
-  return timestamps
-
-
-def generateWindows(timestamps, numWindows, windowSize):
-  start = timestamps[0]
-  delta = timestamps[1] - timestamps[0]
-  length = len(timestamps)
-  diff = int(round((length - numWindows * windowSize) / float(numWindows + 1)))
-  windows = []
-  for i in xrange(numWindows):
-    t1 = start + delta * diff * (i + 1) + (delta * windowSize * i)
-    t2 = t1 + (delta) * (windowSize - 1)
-    if not any(timestamps == t1) or not any(timestamps == t2):
-      raise ValueError("You got the wrong times from the window generator")
-    windows.append([t1, t2])
-  return windows
-
-
-def generateLabels(timestamps, windows):
-  labels = pandas.Series([0]*len(timestamps))
-  for t1, t2 in windows:
-    subset = timestamps[timestamps >= t1][timestamps <= t2]
-    indices = subset.loc[:].index
-    labels.values[indices] = 1
-  return labels
 
 
 class FalseNegativeTests(unittest.TestCase):
 
 
   def test_FalseNegativeCausesNegativeScore(self):
+    """
+    A false negative with only one window should have exactly the negative
+    of the false negative score.
+    """
     start = datetime.datetime.now()
     increment = datetime.timedelta(minutes=5)
     length = 1000
@@ -72,21 +47,61 @@ class FalseNegativeTests(unittest.TestCase):
 
     predictions = pandas.Series([0]*length)
 
-    labels = pandas.Series([0]*length)
-
     windows = generateWindows(timestamps, numWindows, windowSize)
 
-    costMatrix = {"tpWeight": 1.0,
-    "fnWeight": 2.0,
-    "fpWeight": 3.0,
-    "tnWeight": 4.0}
+    labels = generateLabels(timestamps, windows)
 
-    probationaryPeriod = 0
+    costMatrix = {"tpWeight": 1.0,
+                  "fnWeight": 2.0,
+                  "fpWeight": 3.0,
+                  "tnWeight": 4.0}
 
     scorer = Scorer(timestamps, predictions, labels, windows, costMatrix,
-      probationaryPeriod)
+      probationaryPeriod=0)
 
-    self.assertTrue(scorer.getScore() < 0)
+    self.assertTrue(abs(scorer.getScore() + costMatrix['fnWeight']) < 0.1)
+
+    # Ensure counts are correct.
+    self.assertEqual(scorer.counts['tn'], length-windowSize*numWindows)
+    self.assertEqual(scorer.counts['tp'], 0)
+    self.assertEqual(scorer.counts['fp'], 0)
+    self.assertEqual(scorer.counts['fn'], windowSize*numWindows)
+
+
+
+  def test_FourFalseNegatives(self):
+    """
+    A false negative with four windows should have exactly four times
+    the negative of the false negative score.
+    """
+    start = datetime.datetime.now()
+    increment = datetime.timedelta(minutes=5)
+    length = 2000
+    numWindows = 4
+    windowSize = 10
+
+    timestamps = generateTimestamps(start, increment, length)
+    predictions = pandas.Series([0]*length)
+    windows = generateWindows(timestamps, numWindows, windowSize)
+    labels = generateLabels(timestamps, windows)
+
+    costMatrix = {"tpWeight": 1.0,
+                  "fnWeight": 2.0,
+                  "fpWeight": 3.0,
+                  "tnWeight": 4.0}
+
+    scorer = Scorer(timestamps, predictions, labels, windows, costMatrix,
+      probationaryPeriod=0)
+
+    self.assertTrue(abs(scorer.getScore() + 4*costMatrix['fnWeight']) < 0.01)
+
+    # Ensure counts are correct.
+    self.assertEqual(scorer.counts['tn'], length-windowSize*numWindows)
+    self.assertEqual(scorer.counts['tp'], 0)
+    self.assertEqual(scorer.counts['fp'], 0)
+    self.assertEqual(scorer.counts['fn'], windowSize*numWindows)
+
+
 
 if __name__ == '__main__':
   unittest.main()
