@@ -41,26 +41,28 @@ class FalsePositiveTests(unittest.TestCase):
     windowSize = 10
 
     timestamps = generateTimestamps(start, increment, length)
-
     predictions = pandas.Series([0]*length)
-
-    labels = pandas.Series([0]*length)
-
     windows = generateWindows(timestamps, numWindows, windowSize)
+    labels = generateLabels(timestamps, windows)
 
     costMatrix = {"tpWeight": 1.0,
     "fnWeight": 1.0,
     "fpWeight": 1.0,
     "tnWeight": 1.0}
 
-    probationaryPeriod = 0
-
     predictions[0] = 1
 
     scorer = Scorer(timestamps, predictions, labels, windows, costMatrix,
-      probationaryPeriod)
+      probationaryPeriod=0)
+    score = scorer.getScore()
 
-    self.assertTrue(scorer.getScore() < 0)
+    self.assertTrue(score < 0)
+
+    # Ensure counts are correct.
+    self.assertEqual(scorer.counts['tn'], length-windowSize*numWindows-1)
+    self.assertEqual(scorer.counts['tp'], 0)
+    self.assertEqual(scorer.counts['fp'], 1)
+    self.assertEqual(scorer.counts['fn'], windowSize*numWindows)
 
 
   def test_twoFalsePositivesIsWorseThanOne(self):
@@ -75,35 +77,44 @@ class FalsePositiveTests(unittest.TestCase):
     windowSize = 10
 
     timestamps = generateTimestamps(start, increment, length)
-
     predictions = pandas.Series([0]*length)
-
-    labels = pandas.Series([0]*length)
-
     windows = generateWindows(timestamps, numWindows, windowSize)
+    labels = generateLabels(timestamps, windows)
+
 
     costMatrix = {"tpWeight": 1.0,
     "fnWeight": 1.0,
     "fpWeight": 1.0,
     "tnWeight": 1.0}
 
-    probationaryPeriod = 0
-
     predictions[0] = 1
 
     scorer1 = Scorer(timestamps, predictions, labels, windows, costMatrix,
-      probationaryPeriod)
+      probationaryPeriod=0)
 
     score1 = scorer1.getScore()
+
 
     predictions[1] = 1
 
     scorer2 = Scorer(timestamps, predictions, labels, windows, costMatrix,
-      probationaryPeriod)
+      probationaryPeriod=0)
 
     score2 = scorer2.getScore()
 
     self.assertTrue(score1 > score2)
+
+    # Ensure counts are correct.
+    self.assertEqual(scorer1.counts['tn'], length-windowSize*numWindows-1)
+    self.assertEqual(scorer1.counts['tp'], 0)
+    self.assertEqual(scorer1.counts['fp'], 1)
+    self.assertEqual(scorer1.counts['fn'], windowSize*numWindows)
+
+    self.assertEqual(scorer2.counts['tn'], length-windowSize*numWindows-2)
+    self.assertEqual(scorer2.counts['tp'], 0)
+    self.assertEqual(scorer2.counts['fp'], 2)
+    self.assertEqual(scorer2.counts['fn'], windowSize*numWindows)
+
 
   def test_oneFalsePositiveNoWindow(self):
     """
@@ -119,10 +130,8 @@ class FalsePositiveTests(unittest.TestCase):
     timestamps = generateTimestamps(start, increment, length)
 
     predictions = pandas.Series([0]*length)
-
-    labels = pandas.Series([0]*length)
-
     windows = generateWindows(timestamps, numWindows, windowSize)
+    labels = generateLabels(timestamps, windows)
 
     costMatrix = {"tpWeight": 1.0,
     "fnWeight": 1.0,
@@ -131,12 +140,17 @@ class FalsePositiveTests(unittest.TestCase):
 
     predictions[0] = 1
 
-    probationaryPeriod = 0
-
     scorer = Scorer(timestamps, predictions, labels, windows, costMatrix,
-      probationaryPeriod)
+      probationaryPeriod=0)
 
     self.assertTrue(scorer.getScore() == -costMatrix["fpWeight"])
+
+    # Ensure counts are correct.
+    self.assertEqual(scorer.counts['tn'], length-windowSize*numWindows-1)
+    self.assertEqual(scorer.counts['tp'], 0)
+    self.assertEqual(scorer.counts['fp'], 1)
+    self.assertEqual(scorer.counts['fn'], windowSize*numWindows)
+
 
   def test_earlierFalsePositiveAfterWindowIsBetter(self):
     """Imagine there are two false positives A and B that both occur right after
@@ -155,32 +169,41 @@ class FalsePositiveTests(unittest.TestCase):
     predictions2 = pandas.Series([0]*length)
 
     windows = generateWindows(timestamps, numWindows, windowSize)
-
     labels = generateLabels(timestamps, windows)
 
     window = windows[0]
     t1, t2 = window
 
     costMatrix = {"tpWeight": 1.0,
-    "fnWeight": 1.0,
-    "fpWeight": 1.0,
-    "tnWeight": 1.0}
-
-    probationaryPeriod = 0
+                  "fnWeight": 1.0,
+                  "fpWeight": 1.0,
+                  "tnWeight": 1.0}
 
     index1 = timestamps[timestamps == t2].index[0] + 1
     predictions1[index1] = 1
 
     scorer1 = Scorer(timestamps, predictions1, labels, windows, costMatrix,
-      probationaryPeriod)
+      probationaryPeriod=0)
+    score1 = scorer1.getScore()
 
-    index2 = index1 + 1
-    predictions2[index2] = 1
+    predictions2[index1+1] = 1
 
     scorer2 = Scorer(timestamps, predictions2, labels, windows, costMatrix,
-      probationaryPeriod)
+      probationaryPeriod=0)
+    score2 = scorer2.getScore()
 
-    self.assertTrue(scorer1.getScore() > scorer2.getScore())
+    self.assertTrue(score1 > score2)
+
+    # Ensure counts are correct.
+    self.assertEqual(scorer1.counts['tn'], length-windowSize*numWindows-1)
+    self.assertEqual(scorer1.counts['tp'], 0)
+    self.assertEqual(scorer1.counts['fp'], 1)
+    self.assertEqual(scorer1.counts['fn'], windowSize*numWindows)
+
+    self.assertEqual(scorer2.counts['tn'], length-windowSize*numWindows-1)
+    self.assertEqual(scorer2.counts['tp'], 0)
+    self.assertEqual(scorer2.counts['fp'], 1)
+    self.assertEqual(scorer2.counts['fn'], windowSize*numWindows)
 
 
 if __name__ == '__main__':

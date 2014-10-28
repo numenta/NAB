@@ -27,7 +27,7 @@ import math
 
 
 class Window(object):
-  """Class to store a window in a dataset."""
+  """Class to store a single window in a datafile."""
 
   def __init__(self, windowId, limits, data):
     """
@@ -35,7 +35,7 @@ class Window(object):
 
     @limits           (tuple)         (start timestamp, end timestamp).
 
-    @allRecords       (pandas.Series) Raw rows of the the whole dataset.
+    @allRecords       (pandas.Series) Raw rows of the whole datafile.
     """
     self.id = windowId
     self.t1, self.t2 = limits
@@ -47,20 +47,32 @@ class Window(object):
     self.length = len(self.indices)
 
 
-  def getFirstTruePositive(self):
-    """Get the first instance of True positive within a window.
+  def __repr__(self):
+    """
+    String representation of Window. For debugging.
+    """
+    s = "WINDOW id=" + str(self.id)
+    s += ", limits: [" + str(self.t1) + ", " + str(self.t2) + "]"
+    s += ", length: " + str(self.length)
+    s += "\nwindow data:\n" + str(self.window)
+    return s
 
-    @return (int)   Index of the first occurence of the true positive within the
-                    window.
+
+  def getFirstTruePositive(self):
+    """Get the index of the first true positive within a window.
+
+    @return (int)   Index of the first occurrence of the true positive within
+                    the window. -1 if there are none.
     """
     tp = self.window[self.window["type"] == "tp"]
-    if len(tp):
+    if len(tp) > 0:
       return tp.iloc[0].name
-    return -1
+    else:
+      return -1
 
 
 class Scorer(object):
-  """Class used to score a dataset."""
+  """Class used to score a datafile."""
 
   def __init__(self,
                timestamps,
@@ -70,28 +82,30 @@ class Scorer(object):
                costMatrix,
                probationaryPeriod):
     """
-    @param predictions           (pandas.Series)   Detector predictions of whether
-                                                 each record is anomalous or
-                                                 not.
-                                                 predictions[
-                                                 0:probationaryPeriod]
-                                                 is ignored.
+    @param predictions   (pandas.Series)   Detector predictions of
+                                           whether each record is anomalous or
+                                           not. predictions[
+                                           0:probationaryPeriod] is ignored.
 
-    @param labels              (pandas.DataFrame)Ground truth for each record.
+    @param labels        (pandas.DataFrame) Ground truth for each record.
+                                           For each record there should be a 1
+                                           or a 0. A 1 implies this record is
+                                           within an anomalous window.
 
-    @param windowLimits        (list)            All the window limits in tuple
-                                                 form: (timestamp start,
-                                                 timestamp end).
+    @param windowLimits  (list)            All the window limits in tuple
+                                           form: (timestamp start, timestamp
+                                           end).
 
-    @param costmatrix          (dict)            Dictionary containing all the
-                                                 weights for each record
-                                                 type:  True positive (tp)
-                                                        False positive (fp)
-                                                        True Negative (tn)
-                                                        False Negative (fn)
+    @param costmatrix    (dict)            Dictionary containing the
+                                           cost matrix for this profile.
+                                           type:  True positive (tp)
+                                                  False positive (fp)
+                                                  True Negative (tn)
+                                                  False Negative (fn)
 
-    @param probationaryPeriod  (int)             Row index after which
-                                                 predictions are scored.
+    @param probationaryPeriod
+                         (int)             Row index after which predictions
+                                           are scored.
     """
     self.data = pandas.DataFrame()
     self.data["timestamp"] = timestamps
@@ -114,7 +128,7 @@ class Scorer(object):
 
 
   def getWindows(self, limits):
-    """Create list of windows of the dataset.
+    """Create list of windows for this datafile.
 
     @return (list)    All the window limits in tuple form: (timestamp start,
                       timestamp end).
@@ -125,7 +139,9 @@ class Scorer(object):
 
 
   def getAlertTypes(self, predictions):
-    """Populate counts dictionary."""
+    """For each record, decide whether it is a tp, fp, tn, or fn. Populate
+    counts dictionary with the total number of records in each category.
+    Return a list of strings containing each prediction type."""
     types = []
 
     for i, row in self.data.iterrows():
@@ -146,39 +162,51 @@ class Scorer(object):
 
 
   def getScore(self):
-    """Score the dataset.
+    """Score the entire datafile and return a single floating point score.
 
-    @return (float)    Quantified score for the given dataset.
+    @return (float)    Quantified score for the given datafile.
     """
+    # Calculate the score for each window. Each window will either have one or
+    # more true positives or no predictions (i.e. a false negative). FNs
+    # lead to a negative contribution, TPs a positive one.
     tpScore = 0
     fnScore = 0
     for window in self.windows:
+
       tpIndex = window.getFirstTruePositive()
 
       if tpIndex == -1:
-        fnScore += self.costMatrix["fnWeight"]
+        fnScore -= self.costMatrix["fnWeight"]
       else:
-        dist = (window.indices[-1] - tpIndex)/float(self.length)
-        tpScore += (2*sigmoid(dist) - 1)*self.costMatrix["tpWeight"]
+        if window.length <= 1:
+          newdist = -2.0
+        else:
+          newdist = -(window.indices[-1] - tpIndex)/float(window.length-1)
 
+        tpScore += scaledSigmoid(newdist)*self.costMatrix["tpWeight"]
+
+    # Go through each false positive and score it. Each FP leads to a negative
+    # contribution dependent on how far it is from the previous window.
     fpLabels = self.data[self.data["type"] == "fp"]
     fpScore = 0
-
     for i in fpLabels.index:
       windowId = self.getClosestPrecedingWindow(i)
+
       if windowId == -1:
-        fpScore += self.costMatrix["fpWeight"]
-        continue
+        fpScore -= self.costMatrix["fpWeight"]
+      else:
+        window = self.windows[windowId]
 
-      window = self.windows[windowId]
+        if window.length <= 1:
+          newdist = 2.0
+        else:
+          newdist = abs(window.indices[-1] - i)/float(window.length-1)
 
-      dist = abs((window.indices[-1] - i)/float(self.length))
-      fpScore += (2*sigmoid(dist) - 1)*self.costMatrix["fpWeight"]
+        fpScore += scaledSigmoid(newdist)*self.costMatrix["fpWeight"]
 
-    score = tpScore - fpScore - fnScore
-    self.score = score
+    self.score = tpScore + fpScore + fnScore
 
-    return score
+    return self.score
 
 
   def getClosestPrecedingWindow(self, index):
@@ -204,13 +232,41 @@ class Scorer(object):
 
 
 def sigmoid(x):
-  """Monotonically decreasing function used to score.
+  """Standard sigmoid function."""
+  return 1 / (1 + math.exp(-x))
 
-  @param  (float)
+
+def scaledSigmoid(relativePositionInWindow):
+  """Return a scaled sigmoid function given a relative position within a
+  labeled window.  The function is computed as follows:
+
+  A relative position of -1.0 is the far left edge of the anomaly window and
+  corresponds to a 2*sigmoid(5) - 1.0 = 0.98661.  This is as early as you can
+  get and still get counted as a true positive.
+
+  A relative position of -0.5 is halfway into the anomaly window and
+  corresponds to a 2*sigmoid(0.5*5) - 1.0 = 0.84828.
+
+  A relative position of 0.0 consists of the right edge of the window and
+  corresponds to a score of 2*sigmoid(0) - 1 = 0.0
+
+  Relative positions > 0 correspond to false positives increasingly far away
+  from the right edge of the window. A relative position of 1.0 is past the
+  right  edge of the  window and corresponds to a score of 2*sigmoid(-5) - 1.0 =
+  -0.98661
+
+  @param  relativePositionInWindow (float)  A relative position
+                                            within a window calculated per the
+                                            rules above.
 
   @return (float)
   """
-  return 1 / (1 + math.exp(-x))
+  if relativePositionInWindow > 3.0:
+    return -1.0
+  elif relativePositionInWindow < -3.0:
+    return 1.0
+  else:
+    return 2*sigmoid(-5*relativePositionInWindow) - 1.0
 
 
 def scoreCorpus(threshold, args):

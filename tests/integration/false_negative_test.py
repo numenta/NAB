@@ -25,7 +25,7 @@ import unittest2 as unittest
 import datetime
 
 from nab.scorer import Scorer
-from nab.test_helpers import generateTimestamps, generateWindows
+from nab.test_helpers import generateTimestamps, generateWindows, generateLabels
 
 
 
@@ -47,21 +47,25 @@ class FalseNegativeTests(unittest.TestCase):
 
     predictions = pandas.Series([0]*length)
 
-    labels = pandas.Series([0]*length)
-
     windows = generateWindows(timestamps, numWindows, windowSize)
 
-    costMatrix = {"tpWeight": 1.0,
-    "fnWeight": 2.0,
-    "fpWeight": 3.0,
-    "tnWeight": 4.0}
+    labels = generateLabels(timestamps, windows)
 
-    probationaryPeriod = 0
+    costMatrix = {"tpWeight": 1.0,
+                  "fnWeight": 2.0,
+                  "fpWeight": 3.0,
+                  "tnWeight": 4.0}
 
     scorer = Scorer(timestamps, predictions, labels, windows, costMatrix,
-      probationaryPeriod)
+      probationaryPeriod=0)
 
     self.assertTrue(abs(scorer.getScore() + costMatrix['fnWeight']) < 0.1)
+
+    # Ensure counts are correct.
+    self.assertEqual(scorer.counts['tn'], length-windowSize*numWindows)
+    self.assertEqual(scorer.counts['tp'], 0)
+    self.assertEqual(scorer.counts['fp'], 0)
+    self.assertEqual(scorer.counts['fn'], windowSize*numWindows)
 
 
 
@@ -77,24 +81,26 @@ class FalseNegativeTests(unittest.TestCase):
     windowSize = 10
 
     timestamps = generateTimestamps(start, increment, length)
-
     predictions = pandas.Series([0]*length)
-
-    labels = pandas.Series([0]*length)
-
     windows = generateWindows(timestamps, numWindows, windowSize)
+    labels = generateLabels(timestamps, windows)
 
     costMatrix = {"tpWeight": 1.0,
-    "fnWeight": 2.0,
-    "fpWeight": 3.0,
-    "tnWeight": 4.0}
-
-    probationaryPeriod = 0
+                  "fnWeight": 2.0,
+                  "fpWeight": 3.0,
+                  "tnWeight": 4.0}
 
     scorer = Scorer(timestamps, predictions, labels, windows, costMatrix,
-      probationaryPeriod)
+      probationaryPeriod=0)
 
-    self.assertTrue(abs(scorer.getScore() + 4*costMatrix['fnWeight']) < 0.1)
+    self.assertTrue(abs(scorer.getScore() + 4*costMatrix['fnWeight']) < 0.01)
+
+    # Ensure counts are correct.
+    self.assertEqual(scorer.counts['tn'], length-windowSize*numWindows)
+    self.assertEqual(scorer.counts['tp'], 0)
+    self.assertEqual(scorer.counts['fp'], 0)
+    self.assertEqual(scorer.counts['fn'], windowSize*numWindows)
+
 
 
 if __name__ == '__main__':
