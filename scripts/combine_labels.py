@@ -91,8 +91,7 @@ if __name__ == "__main__":
                     default="labels")
 
   parser.add_argument("--absolutePaths",
-                      help="Whether file paths entered are not relative to \
-                      NAB root",
+                      help="If specified, paths are absolute paths",
                       default=False,
                       action="store_true")
 
@@ -102,9 +101,15 @@ if __name__ == "__main__":
                       be a number between 0 and 1)",
                       default=1.0)
 
+  parser.add_argument("--skipConfirmation",
+                    help="If specified will skip the user confirmation step",
+                    default=False,
+                    action="store_true")
+
+
   args = parser.parse_args()
 
-  if checkInputs(args):
+  if args.skipConfirmation or checkInputs(args):
     start = time.time()
     main(args)
     end = time.time()
