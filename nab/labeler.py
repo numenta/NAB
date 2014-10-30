@@ -32,8 +32,10 @@ from nab.util import (absoluteFilePaths,
 
 
 class CorpusLabel(object):
-  """Class to store and manipulate a single set of labels for the whole
-  benchmark corpus."""
+  """
+  Class to store and manipulate a single set of labels for the whole
+  benchmark corpus.
+  """
 
   def __init__(self, path, corpus):
     """
@@ -53,7 +55,8 @@ class CorpusLabel(object):
 
   def getWindows(self):
     """
-    Get windows as dictionaries with key value pairs of a relative path and its
+    Read JSON label file. Get windows as dictionaries with key value pairs of a
+    relative path and its
     corresponding list of windows.
     """
     def found(t, data):
@@ -83,7 +86,11 @@ class CorpusLabel(object):
       timestamps = list(itertools.chain(windows[relativePath]))[0]
 
       if not all(map((lambda t: found(t, data)), timestamps)):
-        raise ValueError("timestamp listed in labels doesn't exist in file")
+        raise ValueError("In the label file %s, one of the timestamps used for "
+                         "the datafile %s doesn't exist in the file itself. "
+                         "Timestamps in json label files have to exactly match "
+                         "timestamps in corresponding datafiles." %
+                         (self.path,relativePath) )
 
 
   def getLabels(self):

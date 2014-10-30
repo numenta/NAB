@@ -153,7 +153,7 @@ From the NAB directory, type:
 
     python -m SimpleHTTPServer 12345
  
-Then, open chrome and type this into the url window:
+Then, open Chrome and type this into the url window:
  
     localhost:12345/nab_visualizer.html
  

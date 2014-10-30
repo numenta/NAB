@@ -34,7 +34,6 @@ from nab.util import recur, checkInputs
 depth = 2
 
 root = recur(os.path.dirname, os.path.realpath(__file__), depth)
-print root
 
 
 def main(args):
@@ -70,10 +69,8 @@ def main(args):
 
   print "Successfully combined labels"
 
-
   print "Resulting windows stored in:", destPath
 
-  pprint.pprint(corpusLabel.windows)
 
 
 if __name__ == "__main__":
@@ -110,8 +107,5 @@ if __name__ == "__main__":
   args = parser.parse_args()
 
   if args.skipConfirmation or checkInputs(args):
-    start = time.time()
     main(args)
-    end = time.time()
-    print "Elapsed time:", end - start
 
