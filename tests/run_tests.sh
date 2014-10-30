@@ -15,6 +15,8 @@ echo "========================================"
 echo "Prepping for end to end tests"
 
 rm -rf tests/test_results/numenta
+rm -rf tests/test_results/random
+rm -rf tests/test_results/skyline
 rm -rf tests/test_config
 mkdir tests/test_config
 

@@ -163,7 +163,8 @@ class LabelCombiner(object):
   def write(self, destPath):
     """Write the combined labels to a destination directory."""
     createPath(destPath)
-    relaxedWindows = json.dumps(self.combinedRelaxedWindows, indent=3)
+    relaxedWindows = json.dumps(self.combinedRelaxedWindows,
+             sort_keys=True, indent=4, separators=(',', ': '))
     with open(destPath, "w") as windowWriter:
       windowWriter.write(relaxedWindows)
 
