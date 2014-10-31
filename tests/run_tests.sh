@@ -12,16 +12,34 @@ python tests/integration/true_positive_test.py
 # file outside the repository.
 echo 
 echo "========================================"
-echo "Running end to end tests"
+echo "Prepping for end to end tests"
+
 rm -rf tests/test_results/numenta
-rm tests/test_config/thresholds.json
+rm -rf tests/test_results/random
+rm -rf tests/test_results/skyline
+rm -rf tests/test_config
+mkdir tests/test_config
+
+echo
+echo "========================================"
+echo "Running label combiner"
+
+python scripts/combine_labels.py --labelDir tests/test_labels/human \
+                    --dataDir tests/test_data \
+                    --skipConfirmation \
+                    --destPath tests/test_labels/test_ground_truth.json
+
+echo
+echo "========================================"
+echo "Running analysis with random detector"
+
 time python run.py --numCPUs 3 --dataDir tests/test_data \
-                   --labelFile tests/test_labels/user_label.json \
-                   --thresholdsFile tests/test_config/thresholds.json \
-                   --resultsDir tests/test_results \
-                   --skipConfirmation \
-                   --detectors random
+             --labelFile tests/test_labels/test_ground_truth.json \
+             --thresholdsFile tests/test_config/thresholds.json \
+             --resultsDir tests/test_results \
+             --skipConfirmation \
+             --detectors random
 
-# Add end to end test with just does optimize
+# Add end to end test with just runs optimize
 
-# Add end to end test with just does scoring
+# Add end to end test with just runs scoring

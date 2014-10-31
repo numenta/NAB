@@ -87,14 +87,9 @@ class TruePositiveTest(unittest.TestCase):
 
     index = timestamps[timestamps == windows[0][0]].index[0]
     predictions[index] = 1
-    print "left edge of window=",windows[0][0]
-    print "index=",index
-    print "prediction=\n",predictions
 
     scorer = Scorer(timestamps, predictions, labels, windows, costMatrix,
       probationaryPeriod=0)
-
-    print "score=",scorer.getScore()
 
     self.assertTrue(costMatrix["tpWeight"] - scorer.getScore() <= 1)
 
