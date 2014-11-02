@@ -47,12 +47,6 @@ def getDetectorClassConstructors(detectors):
 
 def main(args):
 
-  if not args.detect and not args.score and not args.optimize:
-    args.detect = True
-    args.optimize = True
-    args.score = True
-
-
   root = os.path.dirname(os.path.realpath(__file__))
 
   numCPUs = int(args.numCPUs) if args.numCPUs is not None else None
@@ -149,6 +143,11 @@ if __name__ == "__main__":
                     "benchmark. If not specified all CPUs will be used.")
 
   args = parser.parse_args()
+
+  if not args.detect and not args.score and not args.optimize:
+    args.detect = True
+    args.optimize = True
+    args.score = True
 
   if args.skipConfirmation or checkInputs(args):
     main(args)

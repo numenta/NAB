@@ -139,3 +139,27 @@ This is the file format for each datafile in the corpus.
 - Records MUST be in chronological order
 - Records MUST be continuous such that there are no missing time steps
 
+##### Data visualizer
+
+There is currently a very crude data visualizer available. To use it do the 
+following:
+
+First generate the list of data files and result files:
+
+    ls -1 */*/*.csv | grep data > data_file_paths.txt 
+    ls -1 */*/*/*.csv | grep results | grep -v test_results > results_file_paths.txt
+
+From the NAB directory, type:
+
+    python -m SimpleHTTPServer 12345
+ 
+Then, open Chrome and type this into the url window:
+ 
+    localhost:12345/nab_visualizer.html
+ 
+To view data, click on "look at data", click in query window and enter 
+“return”. This should show all the data files. You can also type in some 
+letters into the query window and it will filter for filenames that contain
+those characters. 
+
+To view result files, click on "look at results" first.

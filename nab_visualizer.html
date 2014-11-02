@@ -125,7 +125,7 @@ function render(path) {
             },
             pointClickCallback: function(e, point) {
               timestamp = moment(new Date(point.xval));
-              timestampString = timestamp.format("YYYY-MM-DD HH-mm-ss.SSS000");
+              timestampString = timestamp.format("YYYY-MM-DD HH:mm:ss.SSS000");
               window.prompt("Copy to clipboard: Ctrl+C, Enter", timestampString);
             },
             underlayCallback: function(canvas, area, g) {
