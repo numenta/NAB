@@ -185,7 +185,7 @@ class Corpus(object):
       newRoot += "/"
     if os.path.isdir(newRoot):
       print "directory already exists"
-      return
+      return None
     else:
       createPath(newRoot)
 
