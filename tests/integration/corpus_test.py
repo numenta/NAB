@@ -35,13 +35,13 @@ class CorpusTest(unittest.TestCase):
 
 
   @classmethod
-  def setUpClass(self):
+  def setUpClass(cls):
     depth = 3
 
-    self.root = recur(os.path.dirname, os.path.realpath(__file__), depth)
-    self.corpusSrc = self.root + "/tests/test_data"
+    cls.root = recur(os.path.dirname, os.path.realpath(__file__), depth)
+    cls.corpusSrc = cls.root + "/tests/test_data"
 
-    self.copyLocation = self.root + "/tests/corpus_copy_test_location"
+    cls.copyLocation = cls.root + "/tests/corpus_copy_test_location"
 
 
   def setUp(self):
