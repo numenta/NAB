@@ -55,16 +55,6 @@ class CorpusTest(unittest.TestCase):
       self.columnData[relativePath] = pandas.Series(np.zeros(rows))
 
 
-  def test_init(self):
-    """
-    Test the __init__() function, specifically check if
-    attributes such as srcRoot, numDataFiles, and dataFiles are created
-    """
-    self.assertEqual(self.corpus.srcRoot, self.corpusSrc)
-    self.assertEqual(self.corpus.numDataFiles, 3)
-    self.assertIsInstance(self.corpus.dataFiles, dict)
-
-
   def test_getDataFiles(self):
     """
     Test the getDataFiles() function, specifically check if corpus.dataFiles
