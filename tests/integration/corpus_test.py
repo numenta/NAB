@@ -102,8 +102,7 @@ class CorpusTest(unittest.TestCase):
     to another directory and that the copied corpus is the exact same as the
     original.
     """
-    copyLocation = tempfile.mkdtemp()
-    shutil.rmtree(copyLocation)
+    copyLocation = os.path.join(tempfile.mkdtemp(), "test")
     self.corpus.copy(copyLocation)
 
     copyCorpus = nab.corpus.Corpus(copyLocation)
@@ -124,9 +123,7 @@ class CorpusTest(unittest.TestCase):
     data file in the correct location in directory and into the dataFiles
     attribute.
     """
-    copyLocation = tempfile.mkdtemp()
-    shutil.rmtree(copyLocation)
-
+    copyLocation = os.path.join(tempfile.mkdtemp(), "test")
     copyCorpus = self.corpus.copy(copyLocation)
 
     for relativePath, df in self.corpus.dataFiles.iteritems():
