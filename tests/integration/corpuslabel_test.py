@@ -65,27 +65,6 @@ class CorpusLabelTest(unittest.TestCase):
       self.tempCorpusLabelPath, corpus)
 
 
-  # def test_throwErrorWhenOverLappingWindows(self):
-  #   """
-  #   Test whether a value error is thrown when there is an overlap between two
-  #   label windows for the same data file.
-  #   """
-  #   data = pandas.DataFrame({"timestamp" :
-  #     generateTimestamps(strp("2014-01-01"),
-  #     datetime.timedelta(minutes=5), 10)})
-
-  #   windows = [["2014-01-01 00:00", "2014-01-01 00:10"],
-  #     ["2014-01-01 00:05", "2014-01-01 00:15"]]
-
-  #   writeCorpus(self.tempCorpusPath, {"test_data_file.csv" : data})
-  #   writeCorpusLabel(self.tempCorpusLabelPath, {"test_data_file.csv": windows})
-
-  #   corpus = nab.corpus.Corpus(self.tempCorpusPath)
-
-  #   self.assertRaises(ValueError, nab.labeler.CorpusLabel,
-  #     self.tempCorpusLabelPath, corpus)
-
-
   def test_throwErrorWindowStartTimeIsLaterThanWindowEndTime(self):
     """
     Test whether a value error is thrown when a label window's start and end
@@ -149,6 +128,27 @@ class CorpusLabelTest(unittest.TestCase):
 
     self.assertRaises(KeyError, nab.labeler.CorpusLabel,
       self.tempCorpusLabelPath, corpus)
+
+
+  # def test_throwErrorWhenOverLappingWindows(self):
+  #   """
+  #   Test whether a value error is thrown when there is an overlap between two
+  #   label windows for the same data file.
+  #   """
+  #   data = pandas.DataFrame({"timestamp" :
+  #     generateTimestamps(strp("2014-01-01"),
+  #     datetime.timedelta(minutes=5), 10)})
+
+  #   windows = [["2014-01-01 00:00", "2014-01-01 00:10"],
+  #     ["2014-01-01 00:05", "2014-01-01 00:15"]]
+
+  #   writeCorpus(self.tempCorpusPath, {"test_data_file.csv" : data})
+  #   writeCorpusLabel(self.tempCorpusLabelPath, {"test_data_file.csv": windows})
+
+  #   corpus = nab.corpus.Corpus(self.tempCorpusPath)
+
+  #   self.assertRaises(ValueError, nab.labeler.CorpusLabel,
+  #     self.tempCorpusLabelPath, corpus)
 
 
   # def test_raiseWarningWhenDataFilesDontHaveCorrespondingLabelsEntries(self):
