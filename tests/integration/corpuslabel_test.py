@@ -20,160 +20,157 @@
 # ----------------------------------------------------------------------
 
 import os
-import json
 import shutil
 import pandas
+import tempfile
 import datetime
 import unittest2 as unittest
 
 import nab.corpus
 import nab.labeler
-
-from nab.util import recur, createPath, makeDirsExist, strp
-
-from nab.test_helpers import generateTimestamps
-
-
-def writeCorpusLabel(labelsPath, labelWindows):
-  createPath(labelsPath)
-  windows = json.dumps(labelWindows,
-    sort_keys=True, indent=4, separators=(',', ': '))
-
-  with open(labelsPath, "w") as windowWriter:
-    windowWriter.write(windows)
-
-
-def writeCorpus(corpusPath, corpusData):
-  makeDirsExist(corpusPath)
-
-  for relativePath, data in corpusData.iteritems():
-    dataFilePath = os.path.join(corpusPath, relativePath)
-    createPath(dataFilePath)
-    data.to_csv(dataFilePath, index=False)
+from nab.util import strp
+from nab.test_helpers import writeCorpus, writeCorpusLabel, generateTimestamps
 
 
 
 class CorpusLabelTest(unittest.TestCase):
 
-
-  @classmethod
-  def setUpClass(cls):
-    depth = 3
-
-    cls.root = recur(os.path.dirname, os.path.realpath(__file__), depth)
-    cls.corpusSrc = os.path.join(cls.root, "tests/test_data")
-
-
-    cls.labelsFile = os.path.join(cls.root,
-      "tests/test_labels/test_ground_truth.json")
-
-    cls.corpus = nab.corpus.Corpus(cls.corpusSrc)
-
-    cls.tempDir = os.path.join(cls.root, "tests/tmp")
-
-    cls.tmpCorpusPath = os.path.join(cls.tempDir, "data")
-    cls.tmpCorpusLabelPath = os.path.join(cls.tempDir, "labels/label.json")
-
-
   def setUp(self):
-    makeDirsExist(self.tempDir)
-
-    self.corpusLabels = nab.labeler.CorpusLabel(self.labelsFile, self.corpus)
+    self.tempDir = os.path.join(tempfile.mkdtemp(), "test")
+    self.tempCorpusPath = os.path.join(self.tempDir, "data")
+    self.tempCorpusLabelPath = os.path.join(
+      self.tempDir, "labels", "label.json")
 
 
   def tearDown(self):
     shutil.rmtree(self.tempDir)
 
 
-  def test_throwErrorWhenTimestampsNotInDataFile(self):
-    relativePath = "throwErrorWhenTimestampNotInDataFileTest.csv"
-
+  def test_throwErrorWhenWindowTimestampsNotInDataFile(self):
+    """
+    Test whether a value error is thrown when label windows contain timestamps
+    that do no exist in the date file.
+    """
     data = pandas.DataFrame({'timestamp' :
-      generateTimestamps(strp("2014-01-01 00:00:00.0000"), None, 1)})
+      generateTimestamps(strp("2014-01-01"), None, 1)})
 
-    writeCorpus(self.tmpCorpusPath, {relativePath : data})
+    windows = [["2015-01-01", "2015-01-01"]]
 
-    window = ["2015-01-01 00:00:00.00000",
-      "2015-01-01 00:00:00.00000"]
+    writeCorpus(self.tempCorpusPath, {"test_data_file.csv" : data})
+    writeCorpusLabel(self.tempCorpusLabelPath, {"test_data_file.csv": windows})
 
-    writeCorpusLabel(self.tmpCorpusLabelPath, {relativePath: [window]})
+    corpus = nab.corpus.Corpus(self.tempCorpusPath)
 
-    corpus = nab.corpus.Corpus(self.tmpCorpusPath)
-
-    exceptionRaised = False
-
-    try:
-      nab.labeler.CorpusLabel(self.tmpCorpusLabelPath, corpus)
-
-    except ValueError:
-      exceptionRaised = True
-
-    self.assertTrue(exceptionRaised)
+    self.assertRaises(ValueError, nab.labeler.CorpusLabel,
+      self.tempCorpusLabelPath, corpus)
 
 
   def test_throwErrorWhenOverLappingWindows(self):
-    relativePath = "throwErrorWhenTimestampsCreateOverLappingWindows.csv"
+    """
+    Test whether a value error is thrown when there is an overlap between two
+    label windows for the same data file.
+    """
+    data = pandas.DataFrame({'timestamp' :
+      generateTimestamps(strp("2014-01-01"),
+      datetime.timedelta(minutes=5), 10)})
 
-    timestamps = generateTimestamps(strp("2014-01-01 00:00:00.0000"),
-      datetime.timedelta(minutes=5), 10)
-    data = pandas.DataFrame({'timestamp' : timestamps})
+    windows = [["2014-01-01 00:00", "2014-01-01 00:10"],
+      ["2014-01-01 00:05", "2014-01-01 00:15"]]
 
-    writeCorpus(self.tmpCorpusPath, {relativePath : data})
+    writeCorpus(self.tempCorpusPath, {"test_data_file.csv" : data})
+    writeCorpusLabel(self.tempCorpusLabelPath, {"test_data_file.csv": windows})
 
-    windows = [["2014-01-01 00:00:00.00000", "2014-01-01 00:10:00.00000"],
-    ["2014-01-01 00:05:00.00000", "2014-01-01 00:15:00.00000"]]
+    corpus = nab.corpus.Corpus(self.tempCorpusPath)
 
-    writeCorpusLabel(self.tmpCorpusLabelPath, {relativePath: windows})
-
-    corpus = nab.corpus.Corpus(self.tmpCorpusPath)
-
-    exceptionRaised = False
-
-    try:
-      nab.labeler.CorpusLabel(self.tmpCorpusLabelPath, corpus)
-
-    except ValueError:
-      exceptionRaised = True
-
-    self.assertTrue(exceptionRaised)
+    self.assertRaises(ValueError, nab.labeler.CorpusLabel,
+      self.tempCorpusLabelPath, corpus)
 
 
   def test_throwErrorWindowStartTimeIsLaterThanWindowEndTime(self):
-    relativePath = "throwErrorWindowStartTimeIsLaterThanWindowEndTime.csv"
+    """
+    Test whether a value error is thrown when a label window's start and end
+    times are not in chronological order.
+    """
+    data = pandas.DataFrame({'timestamp' :
+      generateTimestamps(strp("2014-01-01"), None, 1)})
 
-    timestamps = generateTimestamps(strp("2014-01-01 00:00:00.0000"), None, 1)
-    data = pandas.DataFrame({'timestamp' : timestamps})
+    windows = [["2014-01-01 00:05", "2014-01-01 00:00"]]
 
-    writeCorpus(self.tmpCorpusPath, {relativePath : data})
+    writeCorpus(self.tempCorpusPath, {"test_data_file.csv" : data})
+    writeCorpusLabel(self.tempCorpusLabelPath, {"test_data_file.csv": windows})
 
-    window = ["2014-01-01 00:05:00.00000",
-      "2014-01-01 00:00:00.00000"]
+    corpus = nab.corpus.Corpus(self.tempCorpusPath)
 
-    writeCorpusLabel(self.tmpCorpusLabelPath, {relativePath: [window]})
-
-    corpus = nab.corpus.Corpus(self.tmpCorpusPath)
-
-    exceptionRaised = False
-
-    try:
-      nab.labeler.CorpusLabel(self.tmpCorpusLabelPath, corpus)
-
-    except ValueError:
-      exceptionRaised = True
-
-    self.assertTrue(exceptionRaised)
+    self.assertRaises(ValueError, nab.labeler.CorpusLabel,
+      self.tempCorpusLabelPath, corpus)
 
 
-  # def test_allRowsLabeledAnomalousShouldBeWithinExactlyOneWindow(self):
-  #   pass
+  def test_allRowsLabeledAnomalousShouldBeWithinAWindow(self):
+    """
+    Test whether all timestamps labeled as anomalous are within a label window.
+    """
+    data = pandas.DataFrame({'timestamp' :
+      generateTimestamps(strp("2014-01-01"),
+      datetime.timedelta(minutes=5), 10)})
+
+    windows = [["2014-01-01 00:15", "2014-01-01 00:30"]]
+
+    writeCorpus(self.tempCorpusPath, {"test_data_file.csv": data})
+    writeCorpusLabel(self.tempCorpusLabelPath, {"test_data_file.csv": windows})
+
+    corpus = nab.corpus.Corpus(self.tempCorpusPath)
+
+    corpusLabel = nab.labeler.CorpusLabel(self.tempCorpusLabelPath, corpus)
+
+    for relativePath, l in corpusLabel.labels.iteritems():
+      windows = corpusLabel.windows[relativePath]
+
+      for row in l[l["label"] == 1].iterrows():
+        self.assertTrue(
+          any([w[0] <= row[1]["timestamp"] <= w[1] for w in windows]))
 
 
-  # def test_showWarningWhenDataFilesDontHaveCorrespondingLabelsEntries(self):
-  #   pass
+  def test_throwErrorWhenThereIsLabelForNonExistentDataFile(self):
+    """
+    Test whether a key error is thrown when there are labels for a data file
+    that doesn't exist in the corpus.
+    """
+    data = pandas.DataFrame({'timestamp' :
+      generateTimestamps(strp("2014-01-01"),
+      datetime.timedelta(minutes=5), 10)})
+
+    windows = [["2014-01-01 00:15", "2014-01-01 00:30"]]
+
+    writeCorpus(self.tempCorpusPath, {"test_data_file.csv": data})
+    writeCorpusLabel(self.tempCorpusLabelPath, {
+      "test_data_file.csv": windows, "non_existent_data_file.csv": windows})
+
+    corpus = nab.corpus.Corpus(self.tempCorpusPath)
+
+    self.assertRaises(KeyError, nab.labeler.CorpusLabel,
+      self.tempCorpusLabelPath, corpus)
 
 
-  # def test_throwErrorWhenThereIsLabelForNonExistentDataFile(self):
-  #   pass
+  def test_showWarningWhenDataFilesDontHaveCorrespondingLabelsEntries(self):
+    """
+    Test whether a warning is raised when there there is data file that doesn't
+    have a corresponding list of label windows.
+    """
+    data = pandas.DataFrame({'timestamp' :
+      generateTimestamps(strp("2014-01-01"),
+      datetime.timedelta(minutes=5), 10)})
+
+    windows = [["2014-01-01 00:15", "2014-01-01 00:30"]]
+
+    writeCorpus(self.tempCorpusPath, {"test_data_file1.csv": data,
+      "test_data_file2.csv": data})
+    writeCorpusLabel(self.tempCorpusLabelPath, {"test_data_file1.csv": windows})
+
+    corpus = nab.corpus.Corpus(self.tempCorpusPath)
+
+    self.assertRaisesRegexp(KeyError, "Valid data file within corpus does not "
+    "have a corresponding label entry", nab.labeler.CorpusLabel,
+      self.tempCorpusLabelPath, corpus)
 
 
 

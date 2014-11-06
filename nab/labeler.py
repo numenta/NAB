@@ -61,11 +61,7 @@ class CorpusLabel(object):
     """
     def found(t, data):
       f = data["timestamp"][data["timestamp"] == pandas.tslib.Timestamp(t)]
-
       exists = (len(f) == 1)
-
-      if not exists:
-        print t, "doesn't exist"
 
       return exists
 
