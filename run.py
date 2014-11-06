@@ -32,6 +32,8 @@ from nab.detectors.numenta.numenta_detector import NumentaDetector
 from nab.detectors.skyline.skyline_detector import SkylineDetector
 from nab.detectors.random.random_detector import RandomDetector
 
+
+
 def getDetectorClassConstructors(detectors):
   """
   Takes in names of detectors. Collects class names that correspond to those
@@ -42,7 +44,6 @@ def getDetectorClassConstructors(detectors):
   d : globals()[detectorNameToClass(d)] for d in detectors}
 
   return detectorConstructors
-
 
 
 def main(args):
@@ -74,7 +75,7 @@ def main(args):
     runner.optimize(args.detectors)
 
   if args.score:
-    with open(thresholdsFile) as thresholdConfigFile:
+    with open(args.thresholdsFile) as thresholdConfigFile:
       detectorThresholds = json.load(thresholdConfigFile)
 
     runner.score(args.detectors, detectorThresholds)
