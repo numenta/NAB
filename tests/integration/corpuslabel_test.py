@@ -20,11 +20,9 @@
 # ----------------------------------------------------------------------
 
 import os
-import copy
 import json
 import shutil
 import pandas
-import numpy as np
 import datetime
 import unittest2 as unittest
 
@@ -34,7 +32,6 @@ import nab.labeler
 from nab.util import recur, createPath, makeDirsExist, strp
 
 from nab.test_helpers import generateTimestamps
-import dateutil.parser
 
 
 def writeCorpusLabel(labelsPath, labelWindows):
@@ -83,8 +80,10 @@ class CorpusLabelTest(unittest.TestCase):
 
     self.corpusLabels = nab.labeler.CorpusLabel(self.labelsFile, self.corpus)
 
+
   def tearDown(self):
     shutil.rmtree(self.tempDir)
+
 
   def test_throwErrorWhenTimestampsNotInDataFile(self):
     relativePath = "throwErrorWhenTimestampNotInDataFileTest.csv"
@@ -168,12 +167,13 @@ class CorpusLabelTest(unittest.TestCase):
   # def test_allRowsLabeledAnomalousShouldBeWithinExactlyOneWindow(self):
   #   pass
 
+
   # def test_showWarningWhenDataFilesDontHaveCorrespondingLabelsEntries(self):
   #   pass
 
+
   # def test_throwErrorWhenThereIsLabelForNonExistentDataFile(self):
   #   pass
-
 
 
 
