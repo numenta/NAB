@@ -40,7 +40,7 @@ class CorpusTest(unittest.TestCase):
     depth = 3
 
     cls.root = recur(os.path.dirname, os.path.realpath(__file__), depth)
-    cls.corpusSource = os.path.join(cls.root, "tests/test_data")
+    cls.corpusSource = os.path.join(cls.root, "tests", "test_data")
 
 
   def setUp(self):

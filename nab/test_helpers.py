@@ -32,7 +32,7 @@ def writeCorpusLabel(labelsPath, labelWindows):
 
   @param labelsPath   (string)  Path to store the corpus label data.
 
-  @param labelWindows (dict)    Dictionary containing key value paris of
+  @param labelWindows (dict)    Dictionary containing key value pairs of
                                 a relative path and its corresponding list of
                                 windows.
   """

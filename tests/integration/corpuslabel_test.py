@@ -51,7 +51,7 @@ class CorpusLabelTest(unittest.TestCase):
     Test whether a value error is thrown when label windows contain timestamps
     that do no exist in the date file.
     """
-    data = pandas.DataFrame({'timestamp' :
+    data = pandas.DataFrame({"timestamp" :
       generateTimestamps(strp("2014-01-01"), None, 1)})
 
     windows = [["2015-01-01", "2015-01-01"]]
@@ -70,7 +70,7 @@ class CorpusLabelTest(unittest.TestCase):
     Test whether a value error is thrown when there is an overlap between two
     label windows for the same data file.
     """
-    data = pandas.DataFrame({'timestamp' :
+    data = pandas.DataFrame({"timestamp" :
       generateTimestamps(strp("2014-01-01"),
       datetime.timedelta(minutes=5), 10)})
 
@@ -91,7 +91,7 @@ class CorpusLabelTest(unittest.TestCase):
     Test whether a value error is thrown when a label window's start and end
     times are not in chronological order.
     """
-    data = pandas.DataFrame({'timestamp' :
+    data = pandas.DataFrame({"timestamp" :
       generateTimestamps(strp("2014-01-01"), None, 1)})
 
     windows = [["2014-01-01 00:05", "2014-01-01 00:00"]]
@@ -109,7 +109,7 @@ class CorpusLabelTest(unittest.TestCase):
     """
     Test whether all timestamps labeled as anomalous are within a label window.
     """
-    data = pandas.DataFrame({'timestamp' :
+    data = pandas.DataFrame({"timestamp" :
       generateTimestamps(strp("2014-01-01"),
       datetime.timedelta(minutes=5), 10)})
 
@@ -133,9 +133,9 @@ class CorpusLabelTest(unittest.TestCase):
   def test_throwErrorWhenThereIsLabelForNonExistentDataFile(self):
     """
     Test whether a key error is thrown when there are labels for a data file
-    that doesn't exist in the corpus.
+    that does not exist in the corpus.
     """
-    data = pandas.DataFrame({'timestamp' :
+    data = pandas.DataFrame({"timestamp" :
       generateTimestamps(strp("2014-01-01"),
       datetime.timedelta(minutes=5), 10)})
 
@@ -153,10 +153,10 @@ class CorpusLabelTest(unittest.TestCase):
 
   def test_showWarningWhenDataFilesDontHaveCorrespondingLabelsEntries(self):
     """
-    Test whether a warning is raised when there there is data file that doesn't
-    have a corresponding list of label windows.
+    Test whether a warning is raised when there there is data file that does
+    not have a corresponding list of label windows.
     """
-    data = pandas.DataFrame({'timestamp' :
+    data = pandas.DataFrame({"timestamp" :
       generateTimestamps(strp("2014-01-01"),
       datetime.timedelta(minutes=5), 10)})
 
