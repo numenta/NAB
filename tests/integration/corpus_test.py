@@ -23,6 +23,7 @@ import os
 import copy
 import shutil
 import pandas
+import tempfile
 import numpy as np
 import unittest2 as unittest
 
@@ -39,20 +40,11 @@ class CorpusTest(unittest.TestCase):
     depth = 3
 
     cls.root = recur(os.path.dirname, os.path.realpath(__file__), depth)
-    cls.corpusSrc = cls.root + "/tests/test_data"
-
-    cls.copyLocation = cls.root + "/tests/corpus_copy_test_location"
+    cls.corpusSource = os.path.join(cls.root, "tests/test_data")
 
 
   def setUp(self):
-    self.corpus = nab.corpus.Corpus(self.corpusSrc)
-
-    self.columnName = "test"
-    self.columnData = {}
-
-    for relativePath, df in self.corpus.dataFiles.iteritems():
-      rows, _ = df.data.shape
-      self.columnData[relativePath] = pandas.Series(np.zeros(rows))
+    self.corpus = nab.corpus.Corpus(self.corpusSource)
 
 
   def test_getDataFiles(self):
@@ -73,7 +65,12 @@ class CorpusTest(unittest.TestCase):
     Test the addColumn() function, specificially check if a new column named
     "test" is added.
     """
-    self.corpus.addColumn(self.columnName, self.columnData, write=False)
+    columnData = {}
+    for relativePath, df in self.corpus.dataFiles.iteritems():
+      rows, _ = df.data.shape
+      columnData[relativePath] = pandas.Series(np.zeros(rows))
+
+    self.corpus.addColumn("test", columnData, write=False)
 
     for df in self.corpus.dataFiles.values():
       self.assertEqual(set(df.data.columns.values),
@@ -85,9 +82,14 @@ class CorpusTest(unittest.TestCase):
     Test the removeColumn() function, specifically check if an added column
     named "test" is removed.
     """
-    self.corpus.addColumn(self.columnName, self.columnData, write=False)
+    columnData = {}
+    for relativePath, df in self.corpus.dataFiles.iteritems():
+      rows, _ = df.data.shape
+      columnData[relativePath] = pandas.Series(np.zeros(rows))
 
-    self.corpus.removeColumn(self.columnName, write=False)
+    self.corpus.addColumn("test", columnData, write=False)
+
+    self.corpus.removeColumn("test", write=False)
 
     for df in self.corpus.dataFiles.values():
       self.assertEqual(set(df.data.columns.values),
@@ -100,9 +102,11 @@ class CorpusTest(unittest.TestCase):
     to another directory and that the copied corpus is the exact same as the
     original.
     """
-    self.corpus.copy(self.copyLocation)
+    copyLocation = tempfile.mkdtemp()
+    shutil.rmtree(copyLocation)
+    self.corpus.copy(copyLocation)
 
-    copyCorpus = nab.corpus.Corpus(self.copyLocation)
+    copyCorpus = nab.corpus.Corpus(copyLocation)
 
     for relativePath in self.corpus.dataFiles.keys():
       self.assertIn(relativePath, copyCorpus.dataFiles.keys())
@@ -111,7 +115,7 @@ class CorpusTest(unittest.TestCase):
         all(self.corpus.dataFiles[relativePath].data == \
             copyCorpus.dataFiles[relativePath].data))
 
-    shutil.rmtree(self.copyLocation)
+    shutil.rmtree(copyLocation)
 
 
   def test_addDataSet(self):
@@ -120,7 +124,10 @@ class CorpusTest(unittest.TestCase):
     data file in the correct location in directory and into the dataFiles
     attribute.
     """
-    copyCorpus = self.corpus.copy(self.copyLocation)
+    copyLocation = tempfile.mkdtemp()
+    shutil.rmtree(copyLocation)
+
+    copyCorpus = self.corpus.copy(copyLocation)
 
     for relativePath, df in self.corpus.dataFiles.iteritems():
       newPath = relativePath + "_copy"
@@ -128,7 +135,7 @@ class CorpusTest(unittest.TestCase):
 
       self.assertTrue(all(copyCorpus.dataFiles[newPath].data == df.data))
 
-    shutil.rmtree(self.copyLocation)
+    shutil.rmtree(copyLocation)
 
 
   def test_getDataSubset(self):
