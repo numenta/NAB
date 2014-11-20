@@ -24,16 +24,16 @@ import unittest2 as unittest
 import nab.optimizer
 
 
-def negativeXSquared(x, args=()):
+def negativeXSquared(x, args):
   """
-  Sample x^2 function with arguments as expected by nab.optimizer.twiddle()
+  x^2 function with arguments as expected by nab.optimizer.twiddle()
   """
   return -x*x
 
 
-def sine(x, args=()):
+def sine(x, args):
   """
-  Sample sine function with arguments as expected by nab.optimizer.twiddle()
+  sine function with arguments as expected by nab.optimizer.twiddle()
   """
   return math.sin(x)
 
@@ -44,9 +44,8 @@ class OptimizerTest(unittest.TestCase):
 
   def test_findsMaximumOfNegativeXSquared(self):
     """
-    Test the twiddle function, specfically whether it can find the maximum of
-    the negative x squared function. The maximum should be at x=0 with a
-    function value of zero.
+    Test the twiddle function, specifically whether it can find the maximum of
+    the negative x squared function.
     Global maximum: x = 0; x^2 = 0
     """
     tolerance = 0.0001
@@ -64,7 +63,7 @@ class OptimizerTest(unittest.TestCase):
 
   def test_findsLocalMaximumsOfSine(self):
     """
-    Test the twiddle function, specifically whether it can find the local
+    Test the twiddle function, specifically whether it can find two local
     maxima of the sine function.
     Local maximum 1: x = pi/2; sin(x) = 1.0
     Local maximum 2: x = 3pi/2; sin(x) = 1.0
