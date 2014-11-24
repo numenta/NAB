@@ -350,16 +350,9 @@ def scoreDataSet(args):
 
   @param args   (tuple)  Arguments to get the detection score for a dataset.
 
-  @return       (tuple)  Contains:
-    detectorName  (string)  Name of detector used to get anomaly scores.
-
-    username      (string)  Name of profile used to weight each detection type.
-                            (tp, tn, fp, fn)
+  @return (tuple)  Contains:
 
     relativePath  (string)  Path of dataset scored.
-
-    threshold     (float)   Threshold used to convert anomaly scores to
-                            detections.
 
     score         (float)   The score of the dataset.
 

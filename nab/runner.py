@@ -117,8 +117,8 @@ class Runner(object):
           (
             count,
             detectorConstructor(
-                          dataSet=dataSet,
-                          probationaryPercent=self.probationaryPercent),
+              dataSet=dataSet,
+              probationaryPercent=self.probationaryPercent),
             detectorName,
             self.corpusLabel.labels[relativePath]["label"],
             self.resultsDir,

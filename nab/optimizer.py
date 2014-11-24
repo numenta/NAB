@@ -25,9 +25,6 @@ from nab.scorer import scoreCorpus
 def optimizeThreshold(args):
   """Optimize the threshold for a given combination of detector and profile.
 
-  This is a local hill-climbing algorithm that attempts to find the best
-  threshold for the objective function.
-
   @param args       (tuple)   Arguments necessary for the objective function.
 
   @param tolerance  (float)   Number used to determine when optimization has
