@@ -199,20 +199,12 @@ def convertResultsPathToDataPath(path):
 
   @return     (string)  Path to dataset result in the result directory.
   """
-  # print path
-  path = path.split("/")
-  detector = path[0]
-  path = path[1:]
+  relativeDir, fileName = os.path.split(path)
 
-  filename = path[-1]
-  toRemove = detector + "_"
+  fileName = "_".join(fileName.split("_")[1:])
 
-  i = filename.index(toRemove)
-  filename = filename[:i] + filename[i+len(toRemove):]
+  path = os.path.join(relativeDir, fileName)
 
-  path[-1] = filename
-  path = "/".join(path)
-  # print path
   return path
 
 def flattenDict(dictionary, files={}, head=""):

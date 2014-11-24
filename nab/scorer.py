@@ -277,11 +277,26 @@ def scoreCorpus(threshold, args):
   @param threshold  (float)   Threshold value to convert an anomaly score value
                               to a detection.
 
-  @param args       (tuple)   Arguments necessary to call scoreHelper
+  @param args (tuple) Contains:
+    pool                (multiprocessing.Pool)  Pool of processes to perform
+                                                perform tasks in parallel.
+
+    costMatrix          (dict)                  Cost matrix to weight the
+                                                true positives, false negatives,
+                                                and false positives during
+                                                scoring.
+
+    resultsCorpus       (nab.Corpus)            Corpus object that holds the per
+                                                record anomaly scores for a
+                                                given detector.
+
+    corpusLabel         (nab.CorpusLabel)       Ground truth anomaly labels for
+                                                the nab corpus.
+
+    probationaryPercent (float)                 Percent of each data file not
+                                                to be considered during scoring.
   """
   (pool,
-   detector,
-   username,
    costMatrix,
    resultsCorpus,
    corpusLabel,
@@ -289,26 +304,22 @@ def scoreCorpus(threshold, args):
 
   args = []
   for relativePath, dataSet in resultsCorpus.dataFiles.iteritems():
-    if relativePath == detector + "_scores.csv":
+    if "_scores.csv" in relativePath:
       continue
 
-    relativePath = convertResultsPathToDataPath( \
-      os.path.join(detector, relativePath))
+    relativePath = convertResultsPathToDataPath(
+      os.path.join(relativePath))
 
     windows = corpusLabel.windows[relativePath]
     labels = corpusLabel.labels[relativePath]
 
-    probationaryPeriod = math.floor(
-      probationaryPercent * labels.shape[0])
+    probationaryPeriod = math.floor(probationaryPercent * labels.shape[0])
 
     predicted = convertAnomalyScoresToDetections(
       dataSet.data["anomaly_score"], threshold)
 
     args.append((
-      detector,
-      username,
       relativePath,
-      threshold,
       predicted,
       windows,
       labels,
@@ -317,7 +328,21 @@ def scoreCorpus(threshold, args):
 
   results = pool.map(scoreDataSet, args)
 
-  return results
+  totals = [0] * (len(results[0]) - 1)
+
+  for row in results:
+    for i in range(len(totals)):
+      totals[i] += row[i + 1]
+
+  results.append(["Totals"] + totals)
+
+  resultsDataFrame = pandas.DataFrame(data=results,
+    columns=("File", "Score", "tpCount", "tnCount", "fpCount", "fnCount",
+      "TotalCount"))
+
+  resultsDataFrame = resultsDataFrame.convert_objects()
+
+  return resultsDataFrame
 
 
 def scoreDataSet(args):
@@ -348,10 +373,7 @@ def scoreDataSet(args):
 
     Total count   (int)     The total number of records.
   """
-  (detectorName,
-   username,
-   relativePath,
-   threshold,
+  (relativePath,
    predicted,
    windows,
    labels,
@@ -370,6 +392,5 @@ def scoreDataSet(args):
 
   counts = scorer.counts
 
-  return (detectorName, username, relativePath, threshold, scorer.score, \
-  counts["tp"], counts["tn"], counts["fp"], counts["fn"], \
-  scorer.length)
+  return (relativePath, scorer.score, counts["tp"], counts["tn"], counts["fp"],
+    counts["fn"], scorer.length)
