@@ -307,8 +307,7 @@ def scoreCorpus(threshold, args):
     if "_scores.csv" in relativePath:
       continue
 
-    relativePath = convertResultsPathToDataPath(
-      os.path.join(relativePath))
+    relativePath = convertResultsPathToDataPath(os.path.join(relativePath))
 
     windows = corpusLabel.windows[relativePath]
     labels = corpusLabel.labels[relativePath]

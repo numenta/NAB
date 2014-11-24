@@ -101,6 +101,7 @@ def convertAnomalyScoresToDetections(anomalyScores, threshold):
 
   return detections
 
+
 def relativeFilePaths(directory):
   """Given directory, get path of all files within relative to the directory.
 
@@ -126,6 +127,7 @@ def absoluteFilePaths(directory):
     filenames = [f for f in filenames if not f[0] == "."]
     for f in filenames:
       yield os.path.abspath(os.path.join(dirpath, f))
+
 
 def makeDirsExist(dirname):
   """Makes sure a given directory exists. If not, it creates it.
@@ -193,6 +195,7 @@ def osPathSplit(path, debug=False):
   parts.reverse()
   return parts
 
+
 def convertResultsPathToDataPath(path):
   """
   @param path (string)  Path to dataset in the data directory.
@@ -206,6 +209,7 @@ def convertResultsPathToDataPath(path):
   path = os.path.join(relativeDir, fileName)
 
   return path
+
 
 def flattenDict(dictionary, files={}, head=""):
   """
@@ -224,6 +228,7 @@ def flattenDict(dictionary, files={}, head=""):
 
   return files
 
+
 def strf(t):
   """
   @param t  (datetime.Datetime) Datetime object.
@@ -231,6 +236,7 @@ def strf(t):
   @return   (string)            Formatted string of datetime.
   """
   return datetime.datetime.strftime(t, "%Y-%m-%d %H:%M:%S.%f")
+
 
 def strp(t):
   """
@@ -240,6 +246,7 @@ def strp(t):
   @return   (string)            Datetime object.
   """
   return dateutil.parser.parse(t)
+
 
 def recur(function, value, n):
   """
@@ -261,6 +268,7 @@ def recur(function, value, n):
 
   else:
     return recur(function, function(value), n-1)
+
 
 def deepmap(f, datum):
   """Deeply applies f across the datum.

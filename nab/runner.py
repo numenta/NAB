@@ -19,7 +19,6 @@
 # ----------------------------------------------------------------------
 
 import os
-import pandas
 import json
 import multiprocessing
 
@@ -192,10 +191,9 @@ class Runner(object):
 
         threshold = thresholds[detectorName][profileName]["threshold"]
 
-        scorePath = os.path.join(
-          resultsDetectorDir,
-          "%s_%s_threshold_%f_scores.csv" % \
-          (detectorName, profileName, threshold))
+        scorePath = os.path.join(resultsDetectorDir,
+          "%s_%s_threshold_%f_scores.csv" % (
+          detectorName, profileName, threshold))
 
         resultsDataFrame = scoreCorpus(
           threshold,
