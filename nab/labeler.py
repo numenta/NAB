@@ -108,10 +108,9 @@ class CorpusLabel(object):
       labels['label'] = 0
 
       for t1, t2 in windows:
-        moreThanT1 = labels[labels["timestamp"] >= t1]
-        betweenT1AndT2 = moreThanT1[moreThanT1["timestamp"] <= t2]
-        indices = betweenT1AndT2.loc[:,"label"].index
-        labels["label"].values[indices] = 1
+        # Find indices where time is between t1 and t2, label with 1
+        i = labels[(labels["timestamp"] >= t1) & (labels["timestamp"] <= t2)].index.values
+        labels["label"].values[i] = 1
 
       self.labels[relativePath] = labels
 
