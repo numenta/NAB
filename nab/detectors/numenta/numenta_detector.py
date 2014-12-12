@@ -20,7 +20,10 @@
 
 import os
 import math
-import simplejson as json
+try:
+  import simplejson as json
+except ImportError:
+  import json
 
 from nupic.algorithms import anomaly_likelihood
 from nupic.frameworks.opf.modelfactory import ModelFactory

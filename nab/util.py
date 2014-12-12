@@ -23,7 +23,10 @@ import datetime
 import dateutil
 import sys
 import pprint
-import json
+try:
+  import simplejson as json
+except ImportError:
+  import json
 import pandas
 
 

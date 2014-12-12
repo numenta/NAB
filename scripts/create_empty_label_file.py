@@ -21,7 +21,10 @@
 
 import os
 import argparse
-import json
+try:
+  import simplejson as json
+except ImportError:
+  import json
 
 from nab.corpus import Corpus
 from nab.util import recur

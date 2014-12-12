@@ -21,7 +21,10 @@
 
 import os
 import argparse
-import json
+try:
+  import simplejson as json
+except ImportError:
+  import json
 from nab.runner import Runner
 from nab.util import (detectorNameToClass, checkInputs)
 

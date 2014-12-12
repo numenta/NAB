@@ -83,7 +83,7 @@ by this point.
     cd NAB
     (sudo) pip install -r requirements.txt
 
-This will install a bunch of requirements, such as pandas and simplejson.  
+This will install additional requirements (if not already installed) such as pandas.
 
 
 ### Usage

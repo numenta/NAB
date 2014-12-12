@@ -21,7 +21,10 @@
 import os
 import itertools
 import pandas
-import json
+try:
+  import simplejson as json
+except ImportError:
+  import json
 
 from nab.util import (absoluteFilePaths,
                       strf,
@@ -96,7 +99,7 @@ class CorpusLabel(object):
   def getLabels(self):
     """
     Get Labels as a dictionary of key value pairs of a relative path and its
-    corresponding binary vector of anomaly labels. Labels are simple a more
+    corresponding binary vector of anomaly labels. Labels are simply a more
     verbose version of the windows.
     """
     self.labels = {}
