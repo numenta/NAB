@@ -142,7 +142,7 @@ def detectDataSet(args):
 
   results["label"] = labels
 
-  results.to_csv(outputPath, index=False, float_format="%.3f")
+  results.to_csv(outputPath, index=False)
 
   print "%s: Completed processing %s records  at %s" % \
                                         (i, len(results.index), datetime.now())
