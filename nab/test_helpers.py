@@ -77,7 +77,7 @@ def generateLabels(timestamps, windows):
   for t1, t2 in windows:
     subset = timestamps[timestamps >= t1][timestamps <= t2]
     indices = subset.loc[:].index
-    labels.values[indices] = 1
+    labels.values[indices.values] = 1
   return labels
 
 
