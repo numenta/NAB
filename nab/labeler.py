@@ -111,7 +111,7 @@ class CorpusLabel(object):
         moreThanT1 = labels[labels["timestamp"] >= t1]
         betweenT1AndT2 = moreThanT1[moreThanT1["timestamp"] <= t2]
         indices = betweenT1AndT2.loc[:,"label"].index
-        labels["label"].values[indices] = 1
+        labels["label"].values[indices.values] = 1
 
       self.labels[relativePath] = labels
 
