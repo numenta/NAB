@@ -18,7 +18,47 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
+import os
+import json
 import pandas
+
+from nab.util import createPath, makeDirsExist
+
+
+
+def writeCorpusLabel(labelsPath, labelWindows):
+  """
+  Create a CorpusLabel file.
+
+  @param labelsPath   (string)  Path to store the corpus label data.
+
+  @param labelWindows (dict)    Dictionary containing key value pairs of
+                                a relative path and its corresponding list of
+                                windows.
+  """
+  createPath(labelsPath)
+  windows = json.dumps(labelWindows,
+    sort_keys=True, indent=4, separators=(',', ': '))
+
+  with open(labelsPath, "w") as windowWriter:
+    windowWriter.write(windows)
+
+
+def writeCorpus(corpusDir, corpusData):
+  """
+  Create a corpus directory.
+  @param corpusDir   (string)   Directory to store the corpus data files.
+
+  @param corpusData   (dict)    Dictionary containing key value pairs of
+                                a relative path and its corresponding data file
+                                data (as a pandas.DataFrame).
+  """
+  makeDirsExist(corpusDir)
+
+  for relativePath, data in corpusData.iteritems():
+    dataFilePath = os.path.join(corpusDir, relativePath)
+    createPath(dataFilePath)
+    data.to_csv(dataFilePath, index=False)
 
 
 def generateTimestamps(start, increment, length):
