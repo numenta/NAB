@@ -64,7 +64,8 @@ def twiddle(objFunction, args, initialGuess=0.5, tolerance=0.00001, domain=(floa
   @param args       (tuple)   Arguments necessary for the objective function.
 
   @param tolerance  (float)   Number used to determine when optimization has
-                              converged to a sufficiently good score.
+                              converged to a sufficiently good score. Should be
+                              very low to yield precise likelihood values.
 
   @param objFunction(function)Objective Function used to quantify how good a
                               particular parameter choice is.

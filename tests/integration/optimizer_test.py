@@ -25,7 +25,7 @@ functions"""
 import math
 import unittest
 
-import nab.optimizer
+from nab.optimizer import twiddle
 
 
 
@@ -71,10 +71,9 @@ class OptimizerTest(unittest.TestCase):
     Optimizer should return 0 at x=0"""
     
     # Start arbitrarily w/in domain
-    result = nab.optimizer.twiddle(objFunction=negativeXSquared,
+    result = twiddle(objFunction=negativeXSquared,
       args = (),
       initialGuess = 42,
-      tolerance = 0.00001,
       domain = (-50, 50))
 
     self.assertTrue(abs(result['parameter'] - 0.0) <= 0.00001,
@@ -89,10 +88,9 @@ class OptimizerTest(unittest.TestCase):
     Optimizer should return 100 at x=10"""
     
     # Start right of global min
-    result = nab.optimizer.twiddle(objFunction=xSquared,
+    result = twiddle(objFunction=xSquared,
       args = (),
       initialGuess = 1,
-      tolerance = 0.00001,
       domain = (0, 10))
       
     self.assertTrue(abs(result['parameter'] - 10.0) <= 0.00001,
@@ -107,10 +105,9 @@ class OptimizerTest(unittest.TestCase):
     Optimizer should return 1.0 at x={pi/2, 3pi/2}"""
 
     # Start left of local max pi/2
-    result = nab.optimizer.twiddle(objFunction=sine,
+    result = twiddle(objFunction=sine,
       args = (),
       initialGuess = math.pi*(0.5 - 0.1),
-      tolerance = 0.00001,
       domain = (0, 2*math.pi))
 
     self.assertTrue(abs(result['parameter'] - math.pi/2) <= 0.00001,
@@ -120,10 +117,9 @@ class OptimizerTest(unittest.TestCase):
       "Optimizer returned max value of %r, but expected 1.0" % result['score'])
 
     # Start right of local max pi/2
-    result = nab.optimizer.twiddle(objFunction=sine,
+    result = twiddle(objFunction=sine,
       args = (),
       initialGuess = math.pi*(0.5 + 0.1),
-      tolerance = 0.00001,
       domain = (0, 2*math.pi))
 
     self.assertTrue(abs(result['parameter'] - math.pi/2) <= 0.00001,
@@ -133,10 +129,9 @@ class OptimizerTest(unittest.TestCase):
       "Optimizer returned max value of %r, but expected 1.0" % result['score'])
 
     # Start left of local min
-    result = nab.optimizer.twiddle(objFunction=sine,
+    result = twiddle(objFunction=sine,
       args = (),
       initialGuess = math.pi*(1.5 - 0.1),
-      tolerance = 0.00001,
       domain = (0, 2*math.pi))
 
     self.assertTrue(abs(result['parameter'] - math.pi/2) <= 0.00001,
@@ -146,10 +141,9 @@ class OptimizerTest(unittest.TestCase):
       "Optimizer returned max value of %r, but expected 1.0" % result['score'])
 
     # Start right of local min
-    result = nab.optimizer.twiddle(objFunction=sine,
+    result = twiddle(objFunction=sine,
       args = (),
       initialGuess = math.pi*(1.5 + 0.1),
-      tolerance = 0.00001,
       domain = (0, 3*math.pi))
 
     self.assertTrue(abs(result['parameter'] - math.pi*5/2) <= 0.00001,
@@ -165,10 +159,9 @@ class OptimizerTest(unittest.TestCase):
     Optimizer should return 5.0625 +/- tolerance at x=2.5"""
 
     # Start right of a local min
-    result = nab.optimizer.twiddle(objFunction=GLFunction,
+    result = twiddle(objFunction=GLFunction,
       args = (),
       initialGuess = 1,
-      tolerance = 0.00001,
       domain = (0.5, 2.5))
 
     self.assertTrue(abs(result['parameter'] - 2.5) <= 0.00001,
@@ -178,10 +171,9 @@ class OptimizerTest(unittest.TestCase):
       "Optimizer returned a max value of %r, but expected 5.0625" % result['score'])
 
     # Start at a local max
-    result = nab.optimizer.twiddle(objFunction=GLFunction,
+    result = twiddle(objFunction=GLFunction,
       args = (),
       initialGuess = 1.25,
-      tolerance = 0.00001,
       domain = (0.5, 2.5))
 
     self.assertFalse(abs(result['parameter'] - 2.5) <= 0.00001,
