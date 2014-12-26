@@ -40,7 +40,6 @@ class CorpusLabel(object):
   def __init__(self, path, corpus):
     """
     @param path    (string)      Name of file containing the set of labels.
-
     @param corpus  (nab.Corpus)  Corpus object.
     """
     self.path = path
@@ -56,8 +55,7 @@ class CorpusLabel(object):
   def getWindows(self):
     """
     Read JSON label file. Get windows as dictionaries with key value pairs of a
-    relative path and its
-    corresponding list of windows.
+    relative path and its corresponding list of windows.
     """
     def found(t, data):
       f = data["timestamp"][data["timestamp"] == pandas.tslib.Timestamp(t)]
@@ -81,18 +79,36 @@ class CorpusLabel(object):
 
       timestamps = list(itertools.chain(windows[relativePath]))[0]
 
-      if not all(map((lambda t: found(t, data)), timestamps)):
+      # Check that windows are in dataset timestamps
+      if not all([found(t,data) for t in timestamps]):
         raise ValueError("In the label file %s, one of the timestamps used for "
-                         "the datafile %s doesn't exist in the file itself. "
-                         "Timestamps in json label files have to exactly match "
-                         "timestamps in corresponding datafiles." %
-                         (self.path,relativePath) )
+                         "the datafile %s doesn't match; it does not exist in "
+                         "the file. Timestamps in json label files have to "
+                         "exactly match timestamps in corresponding datafiles."
+                         % (self.path, relativePath))
+      
+      # Check that window timestamps are chronological
+      deltas = [(pandas.to_datetime(timestamps[i+1])
+                 - pandas.to_datetime(timestamps[i])).total_seconds() > 0
+                for i in range(len(timestamps)-1)]
+      if not all(deltas):
+        raise ValueError("In the label file %s, timestamp(s) are not in "
+                         "chronological order." % self.path)
+      
+      # Check that windows are distinct (unique, non-overlapping); subsequent
+      # windows can share a common end and start time
+      num_windows = len(self.windows[relativePath])
+      if num_windows > 1:
+        if not all([(self.windows[relativePath][i+1][0]
+                    - self.windows[relativePath][i][1]).total_seconds() >= 0
+                    for i in range(num_windows-1)]):
+          raise ValueError("In the label file %s, windows overlap." % self.path)
 
 
   def getLabels(self):
     """
-    Get Labels as a dictionary of key value pairs of a relative path and its
-    corresponding binary vector of anomaly labels. Labels are simple a more
+    Get Labels as a dictionary of key-value pairs of a relative path and its
+    corresponding binary vector of anomaly labels. Labels are simply a more
     verbose version of the windows.
     """
     self.labels = {}
@@ -126,9 +142,7 @@ class LabelCombiner(object):
     @param labelDir   (string)   A directory name containing user label files.
                                  This directory should contain one label file
                                  per human labeler.
-
     @param corpus     (Corpus)   Instance of Corpus class.
-
     @param threshold  (float)    A percentage between 0 and 1, specifying the
                                  agreement threshold.  It describes the level
                                  of agreement needed between individual
