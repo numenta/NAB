@@ -89,10 +89,11 @@ class CorpusLabel(object):
       
       # Check that window timestamps are chronological
       deltas = [(pandas.to_datetime(timestamps[i+1])
-                 - pandas.to_datetime(timestamps[i])).total_seconds() > 0
+                 - pandas.to_datetime(timestamps[i])).total_seconds() >= 0
                 for i in range(len(timestamps)-1)]
+
       if not all(deltas):
-        raise ValueError("In the label file %s, timestamp(s) are not in "
+        raise ValueError("In the label file %s, timestamps are not in "
                          "chronological order." % self.path)
       
       # Check that windows are distinct (unique, non-overlapping); subsequent
