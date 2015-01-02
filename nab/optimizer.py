@@ -52,7 +52,7 @@ def optimizeThreshold(args):
   return answer
 
 
-def twiddle(objFunction, args, init=0.5, tolerance=0.00001):
+def twiddle(objFunction, args, initialGuess=0.5, tolerance=0.00001, domain=(float("-inf"), float("inf"))):
   """Optimize a single parameter given an objective function.
 
   This is a local hill-climbing algorithm. Here is a simple description of it:
@@ -61,12 +61,15 @@ def twiddle(objFunction, args, init=0.5, tolerance=0.00001):
   @param args       (tuple)   Arguments necessary for the objective function.
 
   @param tolerance  (float)   Number used to determine when optimization has
-                              converged to a sufficiently good score.
+                              converged to a sufficiently good score. Should be
+                              very low to yield precise likelihood values.
 
   @param objFunction(function)Objective Function used to quantify how good a
                               particular parameter choice is.
 
   @param init       (float)   Initial value of the parameter.
+  
+  @param domain     (tuple)   Domain of parameter values, as (min, max).
 
   @return (dict) Contains:
         "parameter" (float)   Threshold that returns the largest score from the
@@ -76,14 +79,18 @@ def twiddle(objFunction, args, init=0.5, tolerance=0.00001):
                               threshold.
   """
   pastCalls = {}
-  x = init
-  step = 0.1
+  x = initialGuess
+  delta = 0.1
   bestScore = objFunction(x, args)
 
   pastCalls[x] = bestScore
 
-  while step > tolerance:
-    x += step
+  while delta > tolerance:
+  
+    # Keep x within bounds
+    if x+delta > domain[1]:
+      delta = abs(domain[1] - x) / 2
+    x += delta
 
     if x not in pastCalls:
       score = objFunction(x, args)
@@ -93,10 +100,13 @@ def twiddle(objFunction, args, init=0.5, tolerance=0.00001):
 
     if score > bestScore:
       bestScore = score
-      step *= 2
+      delta *= 2
 
     else:
-      x -= 2*step
+      # Keep x within bounds
+      if x-delta < domain[0]:
+        delta = abs(domain[0] - x) / 2
+      x -= 2*delta
 
       if x not in pastCalls:
         score = objFunction(x, args)
@@ -106,14 +116,14 @@ def twiddle(objFunction, args, init=0.5, tolerance=0.00001):
 
       if score > bestScore:
         bestScore = score
-        step *= 2
+        delta *= 2
       else:
-        x += step
-        step *= 0.5
+        x += delta
+        delta *= 0.5
 
     print "Parameter:", x
     print "Best score:", bestScore
-    print "Step:", step
+    print "Step size:", delta
     print
 
   return {"parameter": x,
