@@ -19,6 +19,7 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
+
 """Tests nab.optimizer for finding the local/global maxima of several 
 functions"""
 
@@ -26,7 +27,6 @@ import math
 import unittest
 
 from nab.optimizer import twiddle
-
 
 
 def negativeXSquared(x, args):
@@ -43,6 +43,7 @@ def xSquared(x, args):
   Global maximum (unbounded) is infinite
   """
   return x*x
+
 
 def sine(x, args):
   """
