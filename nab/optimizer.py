@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------
-# Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
+# Copyright (C) 2015, Numenta, Inc.  Unless you have an agreement
 # with Numenta, Inc., for a separate license for this software code, the
 # following terms and conditions apply:
 #
@@ -40,7 +40,7 @@ def optimizeThreshold(args):
   result = twiddle(
     objFunction=objectiveFunction,
     args=args,
-    init=0.5,
+    initialGuess=0.5,
     tolerance=.00001)
 
   answer = {}
