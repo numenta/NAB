@@ -19,7 +19,6 @@
 # ----------------------------------------------------------------------
 
 import os
-import pandas
 import json
 import multiprocessing
 
@@ -117,8 +116,8 @@ class Runner(object):
           (
             count,
             detectorConstructor(
-                          dataSet=dataSet,
-                          probationaryPercent=self.probationaryPercent),
+              dataSet=dataSet,
+              probationaryPercent=self.probationaryPercent),
             detectorName,
             self.corpusLabel.labels[relativePath]["label"],
             self.resultsDir,
@@ -145,19 +144,17 @@ class Runner(object):
 
     thresholds = {}
 
-    for detector in detectorNames:
-      resultsDetectorDir = os.path.join(self.resultsDir, detector)
+    for detectorName in detectorNames:
+      resultsDetectorDir = os.path.join(self.resultsDir, detectorName)
       resultsCorpus = Corpus(resultsDetectorDir)
 
-      thresholds[detector] = {}
+      thresholds[detectorName] = {}
 
-      for username, profile in self.profiles.iteritems():
+      for profileName, profile in self.profiles.iteritems():
         costMatrix = profile["CostMatrix"]
 
-        thresholds[detector][username] = optimizeThreshold(
+        thresholds[detectorName][profileName] = optimizeThreshold(
           (self.pool,
-          detector,
-          username,
           costMatrix,
           resultsCorpus,
           self.corpusLabel,
@@ -185,32 +182,27 @@ class Runner(object):
     """
     print "\nRunning scoring step"
 
-    for detector in detectors:
-      ans = pandas.DataFrame(columns=("Detector", "Username", "File", \
-        "Threshold", "Score", "tp", "tn", "fp", "fn", "Total_Count"))
+    for detectorName in detectors:
 
-      resultsDetectorDir = os.path.join(self.resultsDir, detector)
+      resultsDetectorDir = os.path.join(self.resultsDir, detectorName)
       resultsCorpus = Corpus(resultsDetectorDir)
 
-      for username, profile in self.profiles.iteritems():
+      for profileName, profile in self.profiles.iteritems():
 
-        costMatrix = profile["CostMatrix"]
+        threshold = thresholds[detectorName][profileName]["threshold"]
 
-        threshold = thresholds[detector][username]["threshold"]
+        scorePath = os.path.join(resultsDetectorDir,
+          "%s_%s_threshold_%f_scores.csv" % (
+          detectorName, profileName, threshold))
 
-        results = scoreCorpus(threshold,
-                              (self.pool,
-                               detector,
-                               username,
-                               costMatrix,
-                               resultsCorpus,
-                               self.corpusLabel,
-                               self.probationaryPercent))
+        resultsDataFrame = scoreCorpus(
+          threshold,
+          (self.pool,
+           profile["CostMatrix"],
+           resultsCorpus,
+           self.corpusLabel,
+           self.probationaryPercent))
 
-        for row in results:
-          ans.loc[len(ans)] = row
-
-      scorePath = os.path.join(resultsDetectorDir, detector + "_scores.csv")
-      print "%s detector benchmark scores written to %s" %(detector, scorePath)
-      ans.to_csv(scorePath, index=False)
-
+        resultsDataFrame.to_csv(scorePath, index=False)
+        print "%s detector benchmark scores written to %s" % \
+          (detectorName, scorePath)

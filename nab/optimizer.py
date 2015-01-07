@@ -143,11 +143,8 @@ def objectiveFunction(threshold, args):
   if not 0 <= threshold <= 1:
     return float("-inf")
 
-  results = scoreCorpus(threshold, args)
+  resultsDataFrame = scoreCorpus(threshold, args)
 
-  score = 0
-
-  for r in results:
-    score += r[4]
+  score = float(resultsDataFrame["Score"].iloc[-1])
 
   return score
