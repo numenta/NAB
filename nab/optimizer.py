@@ -52,7 +52,8 @@ def optimizeThreshold(args):
   return answer
 
 
-def twiddle(objFunction, args, initialGuess=0.5, tolerance=0.00001, domain=(float("-inf"), float("inf"))):
+def twiddle(objFunction, args, initialGuess=0.5, tolerance=0.00001,
+            domain=(float("-inf"), float("inf"))):
   """Optimize a single parameter given an objective function.
 
   This is a local hill-climbing algorithm. Here is a simple description of it:
@@ -143,11 +144,7 @@ def objectiveFunction(threshold, args):
   if not 0 <= threshold <= 1:
     return float("-inf")
 
-  results = scoreCorpus(threshold, args)
-
-  score = 0
-
-  for r in results:
-    score += r[4]
+  resultsDF = scoreCorpus(threshold, args)
+  score = float(resultsDF["Score"].iloc[-1])
 
   return score

@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------
-# Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
+# Copyright (C) 2015, Numenta, Inc.  Unless you have an agreement
 # with Numenta, Inc., for a separate license for this software code, the
 # following terms and conditions apply:
 #
@@ -18,10 +18,13 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-import os
 import itertools
+import os
 import pandas
-import json
+try:
+  import simplejson as json
+except ImportError:
+  import json
 
 from nab.util import (absoluteFilePaths,
                       strf,
