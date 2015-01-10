@@ -1,6 +1,6 @@
  # ----------------------------------------------------------------------
 # Numenta Platform for Intelligent Computing (NuPIC)
-# Copyright (C) 2015, Numenta, Inc.  Unless you have an agreement
+# Copyright (C) 2014-2015, Numenta, Inc.  Unless you have an agreement
 # with Numenta, Inc., for a separate license for this software code, the
 # following terms and conditions apply:
 #
@@ -19,10 +19,9 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-import pandas
-
-import unittest2 as unittest
 import datetime
+import pandas
+import unittest2 as unittest
 
 from nab.scorer import Scorer
 from nab.test_helpers import generateTimestamps, generateWindows, generateLabels
@@ -57,7 +56,7 @@ class TruePositiveTest(unittest.TestCase):
 
     scorer = Scorer(timestamps, predictions, labels, windows, costMatrix,
       probationaryPeriod=0)
-    (_,score) = scorer.getScore()
+    (_, score) = scorer.getScore()
 
     self.assertEqual(score, 0.0)
     self._checkCounts(scorer.counts, 10, 0, 0, 0)
@@ -91,7 +90,7 @@ class TruePositiveTest(unittest.TestCase):
 
     scorer = Scorer(timestamps, predictions, labels, windows, costMatrix,
       probationaryPeriod=0)
-    (_,score) = scorer.getScore()
+    (_, score) = scorer.getScore()
 
     self.assertTrue(costMatrix["tpWeight"] - score <= 1)
 
@@ -128,14 +127,14 @@ class TruePositiveTest(unittest.TestCase):
 
     scorer1 = Scorer(timestamps, predictions1, labels, windows, costMatrix,
       probationaryPeriod=0)
-    (_,score1) = scorer1.getScore()
+    (_, score1) = scorer1.getScore()
 
     index2 = timestamps[timestamps == t2].index[0]
     predictions2[index2] = 1
 
     scorer2 = Scorer(timestamps, predictions2, labels, windows, costMatrix,
       probationaryPeriod=0)
-    (_,score2) = scorer2.getScore()
+    (_, score2) = scorer2.getScore()
 
     self.assertTrue(score1 > score2)
 
@@ -172,7 +171,7 @@ class TruePositiveTest(unittest.TestCase):
     scorer1 = Scorer(timestamps, predictions, labels, windows, costMatrix,
       probationaryPeriod=0)
 
-    (_,score1) = scorer1.getScore()
+    (_, score1) = scorer1.getScore()
 
     index2 = timestamps[timestamps == t2].index[0]
     predictions[index2] = 1
@@ -180,7 +179,7 @@ class TruePositiveTest(unittest.TestCase):
     scorer2 = Scorer(timestamps, predictions, labels, windows, costMatrix,
       probationaryPeriod=0)
 
-    (_,score2) = scorer2.getScore()
+    (_, score2) = scorer2.getScore()
 
     self.assertEqual(score1, score2)
 
