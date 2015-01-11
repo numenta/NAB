@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------
-# Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
+# Copyright (C) 2014-2015, Numenta, Inc.  Unless you have an agreement
 # with Numenta, Inc., for a separate license for this software code, the
 # following terms and conditions apply:
 #
@@ -18,19 +18,19 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
+import multiprocessing
 import os
 import pandas
-import json
-import multiprocessing
-
-
-from nab.detectors.base import detectDataSet
+try:
+  import simplejson as json
+except ImportError:
+  import json
 
 from nab.corpus import Corpus
-from nab.scorer import scoreCorpus
+from nab.detectors.base import detectDataSet
 from nab.labeler import CorpusLabel
 from nab.optimizer import optimizeThreshold
-
+from nab.scorer import scoreCorpus
 from nab.util import updateThresholds
 
 
@@ -106,7 +106,7 @@ class Runner(object):
                                         detector name and its corresponding
                                         class constructor.
     """
-    print "\nRunning detection step"
+    print "Running detection step"
 
     count = 0
     args = []
@@ -117,8 +117,8 @@ class Runner(object):
           (
             count,
             detectorConstructor(
-                          dataSet=dataSet,
-                          probationaryPercent=self.probationaryPercent),
+              dataSet=dataSet,
+              probationaryPercent=self.probationaryPercent),
             detectorName,
             self.corpusLabel.labels[relativePath]["label"],
             self.resultsDir,
@@ -127,7 +127,7 @@ class Runner(object):
         )
 
         count += 1
-
+    
     self.pool.map(detectDataSet, args)
 
 
@@ -137,38 +137,38 @@ class Runner(object):
     @param detectorNames  (list)  List of detector names.
 
     @return thresholds    (dict)  Dictionary of dictionaries with detector names
-                                  then usernames as keys followed by another
+                                  then profile names as keys followed by another
                                   dictionary containing the score and the
                                   threshold used to obtained that score.
     """
-    print "\nRunning optimize step"
+    print "Running optimize step"
 
     thresholds = {}
 
-    for detector in detectorNames:
-      resultsDetectorDir = os.path.join(self.resultsDir, detector)
+    for detectorName in detectorNames:
+      resultsDetectorDir = os.path.join(self.resultsDir, detectorName)
       resultsCorpus = Corpus(resultsDetectorDir)
 
-      thresholds[detector] = {}
+      thresholds[detectorName] = {}
 
-      for username, profile in self.profiles.iteritems():
-        costMatrix = profile["CostMatrix"]
+      for profileName, profile in self.profiles.iteritems():
 
-        thresholds[detector][username] = optimizeThreshold(
+        thresholds[detectorName][profileName] = optimizeThreshold(
           (self.pool,
-          detector,
-          username,
-          costMatrix,
-          resultsCorpus,
-          self.corpusLabel,
-          self.probationaryPercent))
+           detectorName,
+           profileName,
+           profile["CostMatrix"],
+           resultsDetectorDir,
+           resultsCorpus,
+           self.corpusLabel,
+           self.probationaryPercent))
 
     updateThresholds(thresholds, self.thresholdPath)
 
     return thresholds
 
 
-  def score(self, detectors, thresholds):
+  def score(self, detectorNames, thresholds):
     """Score the performance of the detectors.
 
     Function that must be called only after detection result files have been
@@ -179,38 +179,31 @@ class Runner(object):
     @param detectorNames  (list)    List of detector names.
 
     @param thresholds     (dict)    Dictionary of dictionaries with detector
-                                    names then usernames as keys followed by
+                                    names then profile names as keys followed by
                                     another dictionary containing the score and
                                     the threshold used to obtained that score.
     """
-    print "\nRunning scoring step"
+    print "Running scoring step"
 
-    for detector in detectors:
-      ans = pandas.DataFrame(columns=("Detector", "Username", "File", \
-        "Threshold", "Score", "tp", "tn", "fp", "fn", "Total_Count"))
-
-      resultsDetectorDir = os.path.join(self.resultsDir, detector)
+    for detectorName in detectorNames:
+      resultsDetectorDir = os.path.join(self.resultsDir, detectorName)
       resultsCorpus = Corpus(resultsDetectorDir)
 
-      for username, profile in self.profiles.iteritems():
+      for profileName, profile in self.profiles.iteritems():
+      
+        threshold = thresholds[detectorName][profileName]["threshold"]
+        resultsDF = scoreCorpus(threshold,
+                                (self.pool,
+                                 detectorName,
+                                 profileName,
+                                 profile["CostMatrix"],
+                                 resultsDetectorDir,
+                                 resultsCorpus,
+                                 self.corpusLabel,
+                                 self.probationaryPercent))
 
-        costMatrix = profile["CostMatrix"]
-
-        threshold = thresholds[detector][username]["threshold"]
-
-        results = scoreCorpus(threshold,
-                              (self.pool,
-                               detector,
-                               username,
-                               costMatrix,
-                               resultsCorpus,
-                               self.corpusLabel,
-                               self.probationaryPercent))
-
-        for row in results:
-          ans.loc[len(ans)] = row
-
-      scorePath = os.path.join(resultsDetectorDir, detector + "_scores.csv")
-      print "%s detector benchmark scores written to %s" %(detector, scorePath)
-      ans.to_csv(scorePath, index=False)
-
+      scorePath = os.path.join(resultsDetectorDir,
+                               "%s_%s_scores.csv" % (detectorName, profileName))
+      resultsDF.to_csv(scorePath, index=False)
+      print "%s detector benchmark scores written to %s" % (detectorName,
+                                                            scorePath)

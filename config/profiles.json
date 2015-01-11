@@ -1,5 +1,5 @@
 {
-"profile_name": {
+"standard": {
 	"CostMatrix": {
     	"tpWeight": 1.0,
     	"fnWeight": 1.0,

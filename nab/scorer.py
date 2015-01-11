@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------
-# Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
+# Copyright (C) 2014-2015, Numenta, Inc.  Unless you have an agreement
 # with Numenta, Inc., for a separate license for this software code, the
 # following terms and conditions apply:
 #
@@ -18,11 +18,12 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
+import math
 import os
 import pandas
+
 from nab.util import (convertResultsPathToDataPath,
                       convertAnomalyScoresToDetections)
-import math
 
 
 
@@ -35,13 +36,13 @@ class Window(object):
 
     @limits           (tuple)         (start timestamp, end timestamp).
 
-    @allRecords       (pandas.Series) Raw rows of the whole datafile.
+    @data             (pandas.Series) Raw rows of the whole datafile.
     """
     self.id = windowId
     self.t1, self.t2 = limits
 
-    tmp = data[data["timestamp"] >= self.t1]
-    self.window = tmp[tmp["timestamp"] <= self.t2]
+    temp = data[data["timestamp"] >= self.t1]
+    self.window = temp[temp["timestamp"] <= self.t2]
 
     self.indices = self.window.index
     self.length = len(self.indices)
@@ -85,7 +86,7 @@ class Scorer(object):
     @param predictions   (pandas.Series)   Detector predictions of
                                            whether each record is anomalous or
                                            not. predictions[
-                                           0:probationaryPeriod] is ignored.
+                                           0:probationaryPeriod] are ignored.
 
     @param labels        (pandas.DataFrame) Ground truth for each record.
                                            For each record there should be a 1
@@ -133,7 +134,7 @@ class Scorer(object):
     @return (list)    All the window limits in tuple form: (timestamp start,
                       timestamp end).
     """
-    #SORT WINDOWS BEFORE PUTTING THEM IN LIST
+    # Sort windows before putting them into list
     windows = [Window(i, limit, self.data) for i, limit in enumerate(limits)]
     return windows
 
@@ -164,26 +165,35 @@ class Scorer(object):
   def getScore(self):
     """Score the entire datafile and return a single floating point score.
 
-    @return (float)    Quantified score for the given datafile.
+    @return  (float)    Score at each timestamp of the datafile.
     """
-    # Calculate the score for each window. Each window will either have one or
-    # more true positives or no predictions (i.e. a false negative). FNs
+
+    # Scoring section (i) handles TP and FN, (ii) handles FP, TN are 0.
+    scores = pandas.DataFrame([0]*len(self.data), columns=["S(t)"])
+
+    # (i) Calculate the score for each window. Each window will either have one
+    # or more true positives or no predictions (i.e. a false negative). FNs
     # lead to a negative contribution, TPs a positive one.
     tpScore = 0
     fnScore = 0
     for window in self.windows:
-
       tpIndex = window.getFirstTruePositive()
 
       if tpIndex == -1:
-        fnScore -= self.costMatrix["fnWeight"]
+        # False negative; mark once for the whole window (at the start)
+        thisFN = -self.costMatrix["fnWeight"]
+        scores.iloc[window.indices[0]] = thisFN
+        fnScore += thisFN
       else:
+        # True positive
         if window.length <= 1:
           newdist = -2.0
         else:
           newdist = -(window.indices[-1] - tpIndex)/float(window.length-1)
-
-        tpScore += scaledSigmoid(newdist)*self.costMatrix["tpWeight"]
+      
+        thisTP = scaledSigmoid(newdist)*self.costMatrix["tpWeight"]
+        scores.iloc[window.indices[0]] = thisTP
+        tpScore += thisTP
 
     # Go through each false positive and score it. Each FP leads to a negative
     # contribution dependent on how far it is from the previous window.
@@ -193,7 +203,9 @@ class Scorer(object):
       windowId = self.getClosestPrecedingWindow(i)
 
       if windowId == -1:
-        fpScore -= self.costMatrix["fpWeight"]
+        thisFP = -self.costMatrix["fpWeight"]
+        scores.iloc[i] = thisFP
+        fpScore += thisFP
       else:
         window = self.windows[windowId]
 
@@ -201,12 +213,14 @@ class Scorer(object):
           newdist = 2.0
         else:
           newdist = abs(window.indices[-1] - i)/float(window.length-1)
-
-        fpScore += scaledSigmoid(newdist)*self.costMatrix["fpWeight"]
+      
+        thisFP = scaledSigmoid(newdist)*self.costMatrix["fpWeight"]
+        scores.iloc[i] = thisFP
+        fpScore += thisFP
 
     self.score = tpScore + fpScore + fnScore
-
-    return self.score
+    
+    return (scores, self.score)
 
 
   def getClosestPrecedingWindow(self, index):
@@ -270,44 +284,73 @@ def scaledSigmoid(relativePositionInWindow):
 
 
 def scoreCorpus(threshold, args):
-  """Given a score to the corpus given a detector and a user profile.
+  """Scores the corpus given a detector's results and a user profile.
 
   Scores the corpus in parallel.
 
   @param threshold  (float)   Threshold value to convert an anomaly score value
                               to a detection.
 
-  @param args       (tuple)   Arguments necessary to call scoreHelper
+  @param args       (tuple)   Contains:
+  
+    pool                (multiprocessing.Pool)  Pool of processes to perform
+                                                tasks in parallel.
+    detectorName        (string)                Name of detector.
+    
+    profileName         (string)                Name of scoring profile.
+    
+    costMatrix          (dict)                  Cost matrix to weight the
+                                                true positives, false negatives,
+                                                and false positives during
+                                                scoring.
+    resultsDetectorDir  (string)                Directory for the results CSVs.
+    
+    resultsCorpus       (nab.Corpus)            Corpus object that holds the per
+                                                record anomaly scores for a
+                                                given detector.
+    corpusLabel         (nab.CorpusLabel)       Ground truth anomaly labels for
+                                                the NAB corpus.
+    probationaryPercent (float)                 Percent of each data file not
+                                                to be considered during scoring.
   """
   (pool,
-   detector,
-   username,
+   detectorName,
+   profileName,
    costMatrix,
+   resultsDetectorDir,
    resultsCorpus,
    corpusLabel,
    probationaryPercent) = args
-
+   
   args = []
   for relativePath, dataSet in resultsCorpus.dataFiles.iteritems():
-    if relativePath == detector + "_scores.csv":
+    if relativePath == detectorName + "_" + profileName + "_scores.csv":
       continue
 
+    # relativePath: raw dataset file,
+    # e.g. 'artificialNoAnomaly/art_noisy.csv'
     relativePath = convertResultsPathToDataPath( \
-      os.path.join(detector, relativePath))
+      os.path.join(detectorName, relativePath))
+      
+    # outputPath: dataset results file,
+    # e.g. 'results/detector/artificialNoAnomaly/detector_art_noisy.csv'
+    relativeDir, fileName = os.path.split(relativePath)
+    fileName =  detectorName + "_" + fileName
+    outputPath = os.path.join(resultsDetectorDir, relativeDir, fileName)
 
     windows = corpusLabel.windows[relativePath]
     labels = corpusLabel.labels[relativePath]
 
-    probationaryPeriod = math.floor(
-      probationaryPercent * labels.shape[0])
+    probationaryPeriod = math.floor(probationaryPercent * labels.shape[0])
 
     predicted = convertAnomalyScoresToDetections(
       dataSet.data["anomaly_score"], threshold)
 
     args.append((
-      detector,
-      username,
+      detectorName,
+      profileName,
       relativePath,
+      outputPath,
       threshold,
       predicted,
       windows,
@@ -317,7 +360,20 @@ def scoreCorpus(threshold, args):
 
   results = pool.map(scoreDataSet, args)
 
-  return results
+  # Total the 6 scoring metrics for all datasets
+  totals = [None]*3 + [0]*6
+  for row in results:
+    for i in xrange(6):
+      totals[i+3] += row[i+4]
+
+  results.append(["Totals"] + totals)
+
+  resultsDF = pandas.DataFrame(data=results,
+                               columns=("Detector", "Username", "File",
+                                        "Threshold", "Score", "TP", "TN",
+                                        "FP", "FN", "Total_Count"))
+
+  return resultsDF
 
 
 def scoreDataSet(args):
@@ -328,7 +384,7 @@ def scoreDataSet(args):
   @return       (tuple)  Contains:
     detectorName  (string)  Name of detector used to get anomaly scores.
 
-    username      (string)  Name of profile used to weight each detection type.
+    profileName   (string)  Name of profile used to weight each detection type.
                             (tp, tn, fp, fn)
 
     relativePath  (string)  Path of dataset scored.
@@ -346,11 +402,12 @@ def scoreDataSet(args):
 
     counts, fn    (int)     The number of false negative records.
 
-    Total count   (int)     The total number of records.
+    total count   (int)     The total number of records.
   """
   (detectorName,
-   username,
+   profileName,
    relativePath,
+   outputPath,
    threshold,
    predicted,
    windows,
@@ -366,10 +423,15 @@ def scoreDataSet(args):
     costMatrix=costMatrix,
     probationaryPeriod=probationaryPeriod)
 
-  scorer.getScore()
+  (scores,_) = scorer.getScore()
+  
+  # Append scoring function values to the respective results file
+  df_csv = pandas.read_csv(outputPath, header=0, parse_dates=[0])
+  df_csv["S(t)"] = scores
+  df_csv.to_csv(outputPath, index=False)
+
 
   counts = scorer.counts
 
-  return (detectorName, username, relativePath, threshold, scorer.score, \
-  counts["tp"], counts["tn"], counts["fp"], counts["fn"], \
-  scorer.length)
+  return (detectorName, profileName, relativePath, threshold, scorer.score,
+    counts["tp"], counts["tn"], counts["fp"], counts["fn"], scorer.length)

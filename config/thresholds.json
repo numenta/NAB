@@ -1,18 +1,18 @@
 {
     "numenta": {
-        "profile_name": {
+        "standard": {
             "score": -85.98640653844967,
             "threshold": 0.9999877929687505
         }
     },
     "random": {
-        "profile_name": {
+        "standard": {
             "score": -45.0,
             "threshold": 0.9999511718750007
         }
     },
     "skyline": {
-        "profile_name": {
+        "standard": {
             "score": -47.52393011541706,
             "threshold": 0.9000000000000006
         }

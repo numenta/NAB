@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------
-# Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
+# Copyright (C) 2014-2015, Numenta, Inc.  Unless you have an agreement
 # with Numenta, Inc., for a separate license for this software code, the
 # following terms and conditions apply:
 #
@@ -18,13 +18,14 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-import os
-import sys
 import abc
 import math
+import os
 import pandas
-from nab.util import createPath
+import sys
+
 from datetime import datetime
+from nab.util import createPath
 
 
 
@@ -135,16 +136,15 @@ def detectDataSet(args):
 
   print "%s: Beginning detection with %s for %s" % \
                                                 (i, detectorName, relativePath)
-
   detectorInstance.initialize()
 
   results = detectorInstance.run()
 
+  # label=1 for relaxed windows, 0 otherwise
   results["label"] = labels
 
   results.to_csv(outputPath, index=False)
 
-  print "%s: Completed processing %s records  at %s" % \
+  print "%s: Completed processing %s records at %s" % \
                                         (i, len(results.index), datetime.now())
   print "%s: Results have been written to %s" % (i, outputPath)
-

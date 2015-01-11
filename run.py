@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # ----------------------------------------------------------------------
-# Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
+# Copyright (C) 2014-2015, Numenta, Inc.  Unless you have an agreement
 # with Numenta, Inc., for a separate license for this software code, the
 # following terms and conditions apply:
 #
@@ -19,12 +19,15 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-import os
 import argparse
-import json
+import os
+try:
+  import simplejson as json
+except ImportError:
+  import json
+
 from nab.runner import Runner
 from nab.util import (detectorNameToClass, checkInputs)
-
 
 # The following imports are necessary for getDetectorClassConstructors to
 # automatically figure out the detector classes

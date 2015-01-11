@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------
-# Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
+# Copyright (C) 2014-2015, Numenta, Inc.  Unless you have an agreement
 # with Numenta, Inc., for a separate license for this software code, the
 # following terms and conditions apply:
 #
@@ -18,13 +18,17 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-import os
 import datetime
 import dateutil
-import sys
-import pprint
-import json
+import os
 import pandas
+import pprint
+import sys
+
+try:
+  import simplejson as json
+except ImportError:
+  import json
 
 
 
@@ -101,6 +105,7 @@ def convertAnomalyScoresToDetections(anomalyScores, threshold):
 
   return detections
 
+
 def relativeFilePaths(directory):
   """Given directory, get path of all files within relative to the directory.
 
@@ -127,6 +132,7 @@ def absoluteFilePaths(directory):
     for f in filenames:
       yield os.path.abspath(os.path.join(dirpath, f))
 
+
 def makeDirsExist(dirname):
   """Makes sure a given directory exists. If not, it creates it.
 
@@ -134,7 +140,7 @@ def makeDirsExist(dirname):
   """
 
   if not os.path.exists(dirname):
-    # This is being run in parralel so watch out for race condition.
+    # This is being run in parallel so watch out for race condition.
     try:
       os.makedirs(dirname)
     except OSError:
@@ -160,6 +166,7 @@ def detectorClassToName(obj):
   tailLength = len('detector')
   name = obj.__name__[:-tailLength].lower()
   return name
+
 
 def detectorNameToClass(name):
   name = name[0].upper() + name[1:]
@@ -193,13 +200,13 @@ def osPathSplit(path, debug=False):
   parts.reverse()
   return parts
 
+
 def convertResultsPathToDataPath(path):
   """
   @param path (string)  Path to dataset in the data directory.
 
   @return     (string)  Path to dataset result in the result directory.
   """
-  # print path
   path = path.split("/")
   detector = path[0]
   path = path[1:]
@@ -212,8 +219,9 @@ def convertResultsPathToDataPath(path):
 
   path[-1] = filename
   path = "/".join(path)
-  # print path
+
   return path
+
 
 def flattenDict(dictionary, files={}, head=""):
   """
@@ -232,6 +240,7 @@ def flattenDict(dictionary, files={}, head=""):
 
   return files
 
+
 def strf(t):
   """
   @param t  (datetime.Datetime) Datetime object.
@@ -239,6 +248,7 @@ def strf(t):
   @return   (string)            Formatted string of datetime.
   """
   return datetime.datetime.strftime(t, "%Y-%m-%d %H:%M:%S.%f")
+
 
 def strp(t):
   """
@@ -248,6 +258,7 @@ def strp(t):
   @return   (string)            Datetime object.
   """
   return dateutil.parser.parse(t)
+
 
 def recur(function, value, n):
   """
@@ -270,6 +281,7 @@ def recur(function, value, n):
   else:
     return recur(function, function(value), n-1)
 
+
 def deepmap(f, datum):
   """Deeply applies f across the datum.
 
@@ -281,4 +293,3 @@ def deepmap(f, datum):
     return [deepmap(f, x) for x in datum]
   else:
     return f(datum)
-

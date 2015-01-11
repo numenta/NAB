@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------
-# Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
+# Copyright (C) 2014-2015, Numenta, Inc.  Unless you have an agreement
 # with Numenta, Inc., for a separate license for this software code, the
 # following terms and conditions apply:
 #
@@ -22,9 +22,10 @@
 This contains the objects to store and manipulate a database of csv files.
 """
 
-import os
 import copy
+import os
 import pandas
+
 from nab.util import (absoluteFilePaths,
                       createPath)
 
@@ -45,7 +46,7 @@ class DataFile(object):
     self.fileName = os.path.split(srcPath)[1]
 
     self.data = pandas.io.parsers.read_csv(self.srcPath,
-                                          header=0, parse_dates=[0])
+                                           header=0, parse_dates=[0])
 
 
   def write(self, newPath=None):
@@ -105,6 +106,7 @@ class DataFile(object):
     ans += "data size:         ", self.data.shape()
     ans += "sample line: %s\n" % ", ".join(self.data[0])
     return ans
+
 
 
 class Corpus(object):

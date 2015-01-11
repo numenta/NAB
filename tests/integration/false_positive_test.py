@@ -1,6 +1,6 @@
 # ----------------------------------------------------------------------
 # Numenta Platform for Intelligent Computing (NuPIC)
-# Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
+# Copyright (C) 2014-2015, Numenta, Inc.  Unless you have an agreement
 # with Numenta, Inc., for a separate license for this software code, the
 # following terms and conditions apply:
 #
@@ -54,7 +54,7 @@ class FalsePositiveTests(unittest.TestCase):
 
     scorer = Scorer(timestamps, predictions, labels, windows, costMatrix,
       probationaryPeriod=0)
-    score = scorer.getScore()
+    (_, score) = scorer.getScore()
 
     self.assertTrue(score < 0)
 
@@ -92,7 +92,7 @@ class FalsePositiveTests(unittest.TestCase):
     scorer1 = Scorer(timestamps, predictions, labels, windows, costMatrix,
       probationaryPeriod=0)
 
-    score1 = scorer1.getScore()
+    (_, score1) = scorer1.getScore()
 
 
     predictions[1] = 1
@@ -100,7 +100,7 @@ class FalsePositiveTests(unittest.TestCase):
     scorer2 = Scorer(timestamps, predictions, labels, windows, costMatrix,
       probationaryPeriod=0)
 
-    score2 = scorer2.getScore()
+    (_, score2) = scorer2.getScore()
 
     self.assertTrue(score1 > score2)
 
@@ -142,8 +142,9 @@ class FalsePositiveTests(unittest.TestCase):
 
     scorer = Scorer(timestamps, predictions, labels, windows, costMatrix,
       probationaryPeriod=0)
+    (_, score) = scorer.getScore()
 
-    self.assertTrue(scorer.getScore() == -costMatrix["fpWeight"])
+    self.assertTrue(score == -costMatrix["fpWeight"])
 
     # Ensure counts are correct.
     self.assertEqual(scorer.counts['tn'], length-windowSize*numWindows-1)
@@ -184,13 +185,13 @@ class FalsePositiveTests(unittest.TestCase):
 
     scorer1 = Scorer(timestamps, predictions1, labels, windows, costMatrix,
       probationaryPeriod=0)
-    score1 = scorer1.getScore()
+    (_, score1) = scorer1.getScore()
 
     predictions2[index1+1] = 1
 
     scorer2 = Scorer(timestamps, predictions2, labels, windows, costMatrix,
       probationaryPeriod=0)
-    score2 = scorer2.getScore()
+    (_, score2) = scorer2.getScore()
 
     self.assertTrue(score1 > score2)
 

@@ -1,6 +1,6 @@
 # ----------------------------------------------------------------------
 # Numenta Platform for Intelligent Computing (NuPIC)
-# Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
+# Copyright (C) 2014-2015, Numenta, Inc.  Unless you have an agreement
 # with Numenta, Inc., for a separate license for this software code, the
 # following terms and conditions apply:
 #
@@ -58,8 +58,9 @@ class FalseNegativeTests(unittest.TestCase):
 
     scorer = Scorer(timestamps, predictions, labels, windows, costMatrix,
       probationaryPeriod=0)
+    (_, score) = scorer.getScore()
 
-    self.assertTrue(abs(scorer.getScore() + costMatrix['fnWeight']) < 0.1)
+    self.assertTrue(abs(score + costMatrix['fnWeight']) < 0.1)
 
     # Ensure counts are correct.
     self.assertEqual(scorer.counts['tn'], length-windowSize*numWindows)
@@ -92,8 +93,9 @@ class FalseNegativeTests(unittest.TestCase):
 
     scorer = Scorer(timestamps, predictions, labels, windows, costMatrix,
       probationaryPeriod=0)
+    (_, score) = scorer.getScore()
 
-    self.assertTrue(abs(scorer.getScore() + 4*costMatrix['fnWeight']) < 0.01)
+    self.assertTrue(abs(score + 4*costMatrix['fnWeight']) < 0.01)
 
     # Ensure counts are correct.
     self.assertEqual(scorer.counts['tn'], length-windowSize*numWindows)
