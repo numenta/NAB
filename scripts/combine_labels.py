@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 # ----------------------------------------------------------------------
-# Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
+# Copyright (C) 2014-2015, Numenta, Inc.  Unless you have an agreement
 # with Numenta, Inc., for a separate license for this software code, the
 # following terms and conditions apply:
 #
@@ -22,14 +22,16 @@
 Combines a set of labels given within folder (in the yaml format)
 """
 
-import os
-import time
-import pprint
 import argparse
+import os
+import pprint
+import time
 
-from nab.labeler import LabelCombiner, CorpusLabel
 from nab.corpus import Corpus
+from nab.labeler import LabelCombiner, CorpusLabel
 from nab.util import recur, checkInputs
+
+
 
 depth = 2
 
@@ -67,45 +69,43 @@ def main(args):
 
   corpusLabel = CorpusLabel(path=destPath, corpus=corpus)
 
-  print "Successfully combined labels"
+  print "Successfully combined labels!"
 
   print "Resulting windows stored in:", destPath
-
 
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
 
   parser.add_argument("--labelDir",
-                    help="This directory holds all the individual labels")
+                      default="labels/raw",
+                      help="This directory holds the individual label files")
 
   parser.add_argument("--dataDir",
-                    default="data",
-                    help="This holds all the data files for the corpus")
+                      default="data",
+                      help="This holds all the data files for the corpus")
 
   parser.add_argument("--destPath",
-                    help="Where you want to store the combined labels",
-                    default="labels")
+                      default="labels/combined_labels.json",
+                      help="Where the combined labels file will be stored")
 
   parser.add_argument("--absolutePaths",
-                      help="If specified, paths are absolute paths",
                       default=False,
-                      action="store_true")
+                      action="store_true",
+                      help="If specified, paths are absolute paths")
 
   parser.add_argument("--threshold",
+                      default=1.0,
                       help="The percentage agreement you would like between all\
                       labelers for a record to be considered anomalous (should \
-                      be a number between 0 and 1)",
-                      default=1.0)
+                      be a number between 0 and 1)")
 
   parser.add_argument("--skipConfirmation",
-                    help="If specified will skip the user confirmation step",
                     default=False,
-                    action="store_true")
-
+                    action="store_true",
+                    help="If specified will skip the user confirmation step")
 
   args = parser.parse_args()
 
   if args.skipConfirmation or checkInputs(args):
     main(args)
-
