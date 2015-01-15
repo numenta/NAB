@@ -47,7 +47,7 @@ def main(args):
     labelDir = args.labelDir
 
   destPath = args.destPath
-  threshold = int(args.threshold)
+  threshold = args.threshold
 
   print "Getting Corpus"
 
@@ -95,7 +95,8 @@ if __name__ == "__main__":
                       help="If specified, paths are absolute paths")
 
   parser.add_argument("--threshold",
-                      default=1.0,
+                      default=0.9,
+                      type=float,
                       help="The percentage agreement you would like between all\
                       labelers for a record to be considered anomalous (should \
                       be a number between 0 and 1)")
