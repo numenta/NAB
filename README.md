@@ -9,7 +9,7 @@ This repository contains the data and scripts necessary to replicate the
 results in the forthcoming Numenta Anomaly Benchmark (NAB) paper.
 
 We hope you will compare these results with your own anomaly detection methods.
-Competitive results tied to open source code will be listed here. Let us know
+Competitive results tied to open source code will be posted here on the Scoreboard. Let us know
 about your work by submitting a pull request.
 
 ### Corpus
@@ -18,8 +18,7 @@ The NAB corpus of timeseries datasets is designed to provide data for research
 in streaming anomaly detection. It is comprised of both artificial and
 real-world timeseries data containing labeled anomalous periods of behavior.
 
-All data are ordered, timestamped, single-valued metrics collected at 5 minute
-intervals.
+All data are ordered, timestamped, single-valued metrics collected at 5-minute intervals.
 
 Much of the real-world data are values from AWS server metrics as collected by 
 the [AmazonCloudwatch service](https://aws.amazon
@@ -27,28 +26,18 @@ the [AmazonCloudwatch service](https://aws.amazon
 metrics include CPU Utilization, Network Bytes In, and Disk Read Bytes. There
 are also real world sensor readings from some large machines. 
 
-All data is included in the repository. We are actively searching for more data
+All data is included in the repository. We are in the process of adding more data, and actively searching for more data.
 
 #### Task
 
-Detect anomalous behavior in streaming data in real-time and provide *useful*
-alerts.
+Detect anomalous behavior in streaming data in real-time and provide *useful* alerts.
 
-You must be able to handle streaming data.
+Your anomaly detector must be able to handle streaming data. Post-hoc analysis is insufficient for this task. All classifications must
+be done as if the data is being presented for the first time, in real time. Anomalies must be detected within a reasonable amount of time.
 
-Post-hoc analysis is insufficient for this task. All classifications must
-be done as if the data is being presented for the first time, in real time.
+This benchmark is representative of a task in human time-scales. Per-record classification should take place in less than 5 minutes. Anomaly detection should happen as quickly as possible following the onset of an anomaly.
 
-You must be able to provide a response in a reasonable amount of time.
-
-This benchmark is representative of a task in human time-scales. Per-record
-classification should take place in less than 5 minutes. Anomaly detection
-should happen as quickly as possible following the onset of an anomaly.
-
-You must minimize the cost of using your detection technique.
-
-It is insufficient to just catch all anomalies. A high false-positive rate will
-reduce or eliminate an institution's willingness to use your technique.
+It is insufficient to just catch all anomalies. A high false-positive rate will reduce or eliminate an institution's willingness to use your technique. You must minimize the cost of using your detection technique.
 
 Installing NAB
 --------------
@@ -83,7 +72,7 @@ by this point.
     cd NAB
     (sudo) pip install -r requirements.txt
 
-This will install a bunch of requirements, such as pandas and simplejson.  
+This will install the requirements, such as pandas and simplejson.  
 
 
 ### Usage
@@ -92,29 +81,24 @@ This will install a bunch of requirements, such as pandas and simplejson.
     python setup.py develop (for now)
     python run.py
 
-This will produce results files for the Numenta anomaly detection method as well
-as baseline results using methods from the [Etsy
-Skyline](https://github.com/etsy/skyline) anomaly detection library. This will
-also pass those results files to the analyze_results.py script to
-generate final scores.
+This will produce results files for the Numenta anomaly detection method, as well as baseline results using methods from the [Etsy Skyline](https://github.com/etsy/skyline) anomaly detection library, and a random detector. This will also pass those results files to the analyze_results.py script to generate final scores.
 
-Once NAB is finalized (not yet!) to replicate results exactly you will need a 
-specific version of NuPIC:
+Once NAB is finalized (not yet!) to replicate results exactly you will need a specific version of NuPIC:
     
     cd /path/to/nupic/
     git checkout -b nab {TAG NAME}
 
-Then follow build directions in the NuPIC `README.md`.
+Then follow build directions in the [NuPIC "README.md"](https://github.com/numenta/nupic/blob/master/README.md).
 
 #### Data format
 
-##### Input data files
+##### Raw input data files
 
-This is the file format for each datafile in the corpus.
+This repo contains a corpus of 35 file of time-series data, in the following format:
 
-- All files MUST be in CSV format
-- All files MUST have exactly one header row
-- The header row MUST have the following fields
+- CSV format
+- One header row
+- Fields for "timestamp" and "value"
     - "timestamp"
         - The time of the end of the metric collection window
         - e.g 2014-04-01 12:00:00.000000 is values collected between
@@ -122,27 +106,36 @@ This is the file format for each datafile in the corpus.
             - 2014-04-01 12:00:00.000000
     - "value"
         - The collected metric, e.g. CPUUtilization percent
+        - MUST be either floats or integers (converted to floats internally)
+- Each record MUST represent an equal amount of time
+- Records MUST be in chronological order
+- Records MUST be continuous such that there are no missing time steps
+
+##### Detector results data files
+
+The detector under test will output a results file for each datafile in the corpus. This is the format:
+
+- All files MUST be in CSV format
+- All files MUST have exactly one header row
+- The header row MUST have the following fields
+    - "timestamp", MUST follow this format:
+	    - YYYY-MM-DD HH:MM:SS.s
+    	- e.g. 2014-04-01 00:00:00.000000
+    - "value": same format as input data files
     - "label"
-        - This is ground truth for the class of a record.
-- Header rows MAY have other fields as well. These are ignored.
-- Values in the "timestamp" column MUST follow this format
-    - YYYY-MM-DD HH:MM:SS.s
-    - e.g. 2014-04-01 00:00:00.000000
-- Metric values in the "value" column MUST be either
-    - floats
-    - integers (these will be converted to floats internally)
-- Values in the "label" column MUST be either
-    - 0     - This record is known to be non-anomalous
-    - 0.5   - This record's class is ambiguous
-    - 1     - This record is known to be anomalous
+        - This is ground truth for the class of a record
+        - Values are either:
+            - 0: This record is known to be non-anomalous
+		    - 0.5: This record's class is ambiguous
+    		- 1: This record is known to be anomalous
+- Header rows MAY have other fields as well. These are ignored by the NAB scorer.
 - Each record MUST represent an equal amount of time
 - Records MUST be in chronological order
 - Records MUST be continuous such that there are no missing time steps
 
 ##### Data visualizer
 
-There is currently a very crude data visualizer available. To use it do the 
-following:
+There is currently a simple data visualizer available, usefule in hand labeling datasets. To use it do the following:
 
 First generate the list of data files and result files:
 
@@ -157,9 +150,10 @@ Then, open Chrome and type this into the url window:
  
     localhost:12345/nab_visualizer.html
  
-To view data, click on "look at data", click in query window and enter 
-“return”. This should show all the data files. You can also type in some 
-letters into the query window and it will filter for filenames that contain
-those characters. 
+To view data, click on "look at data", click in query window and press RETURN key. This should show all the data files. You can also filter the files by keyword with the query window; it will filter for filenames that contain the entered characters.
+
+To get a string of the timestamp at a data point, simply click on the data point.
+
+To zoom in on a region of data, drag the cursor to highlight the section of interest. To zoom back out, double-click the screen.
 
 To view result files, click on "look at results" first.
