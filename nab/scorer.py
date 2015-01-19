@@ -168,7 +168,9 @@ class Scorer(object):
     @return  (float)    Score at each timestamp of the datafile.
     """
 
-    # Scoring section (i) handles TP and FN, (ii) handles FP, TN are 0.
+    # Scoring section (i) handles TP and FN, (ii) handles FP, and TN are 0.
+    # Input to the scoring function is var position: within a given window, the
+    # position relative to the true anomaly.
     scores = pandas.DataFrame([0]*len(self.data), columns=["S(t)"])
 
     # (i) Calculate the score for each window. Each window will either have one
@@ -187,11 +189,16 @@ class Scorer(object):
       else:
         # True positive
         if window.length <= 1:
-          newdist = -2.0
+          position = -2.0
         else:
-          newdist = -(window.indices[-1] - tpIndex)/float(window.length-1)
-      
-        thisTP = scaledSigmoid(newdist)*self.costMatrix["tpWeight"]
+#          print "window = ", window
+#          print "window.indices[-1] = ", window.indices[-1]
+          position = -(window.indices[-1] - tpIndex)/float(window.length-1)
+#          print "tpIndex = ", tpIndex
+#          print "window length = ", window.length
+#          print "... position = ", position
+
+        thisTP = scaledSigmoid(position)*self.costMatrix["tpWeight"]
         scores.iloc[window.indices[0]] = thisTP
         tpScore += thisTP
 
@@ -210,11 +217,11 @@ class Scorer(object):
         window = self.windows[windowId]
 
         if window.length <= 1:
-          newdist = 2.0
+          position = 2.0
         else:
-          newdist = abs(window.indices[-1] - i)/float(window.length-1)
+          position = abs(window.indices[-1] - i)/float(window.length-1)
       
-        thisFP = scaledSigmoid(newdist)*self.costMatrix["fpWeight"]
+        thisFP = scaledSigmoid(position)*self.costMatrix["fpWeight"]
         scores.iloc[i] = thisFP
         fpScore += thisFP
 
