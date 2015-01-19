@@ -99,14 +99,17 @@ class CorpusLabel(object):
         raise ValueError("In the label file %s, timestamps are not in "
                          "chronological order." % self.path)
       
-      # Check that windows are distinct (unique, non-overlapping); subsequent
-      # windows can share a common end and start time
-      num_windows = len(self.windows[relativePath])
-      if num_windows > 1:
-        if not all([(self.windows[relativePath][i+1][0]
-                    - self.windows[relativePath][i][1]).total_seconds() >= 0
-                    for i in range(num_windows-1)]):
-          raise ValueError("In the label file %s, windows overlap." % self.path)
+      # Check that windows are distinct (unique, non-overlapping); the end time
+      # of a window can be the same as the start time of the subsequent window.
+      # This check is not for the combined labels file, and the self.path
+      # condition must match the "--destPath" argument in combine_labels.py.
+      if not self.path == 'labels/combined_labels.json':
+        num_windows = len(self.windows[relativePath])
+        if num_windows > 1:
+          if not all([(self.windows[relativePath][i+1][0]
+                      - self.windows[relativePath][i][1]).total_seconds() >= 0
+                      for i in range(num_windows-1)]):
+            raise ValueError("In the label file %s, windows overlap." % self.path)
 
 
   def getLabels(self):
@@ -176,9 +179,10 @@ class LabelCombiner(object):
 
   def write(self, destPath):
     """Write the combined labels to a destination directory."""
-    createPath(destPath)
+    if not os.path.isdir(destPath):
+      createPath(destPath)
     relaxedWindows = json.dumps(self.combinedRelaxedWindows,
-             sort_keys=True, indent=4, separators=(',', ': '))
+      sort_keys=True, indent=4, separators=(',', ': '))
     with open(destPath, "w") as windowWriter:
       windowWriter.write(relaxedWindows)
 
@@ -206,15 +210,15 @@ class LabelCombiner(object):
   def combineLabels(self):
     """Combine windows to create raw labels.
     This uses the threshold to determine if a particular record should be
-    labeled as 1 or 0. Threshold describes the level of agreement you want
-    between labelers before you label a record as anomalous.
+    labeled as 1 or 0; threshold describes the level of agreement
+    between labelers.
     """
     combinedLabels = {}
 
     for relativePath, dataSet in self.corpus.dataFiles.iteritems():
       timestamps = []
       labels = []
-
+      
       for _, row in dataSet.data.iterrows():
         t = row["timestamp"]
 
@@ -223,6 +227,7 @@ class LabelCombiner(object):
           if any(t1 <= t <= t2 for [t1,t2] in user.windows[relativePath]):
             count += 1
 
+        # Label anomalous if count is large enough, as defined by threshold
         label = int(count >= self.nlabelers * self.threshold and count > 0)
 
         timestamps.append(t)
