@@ -190,7 +190,6 @@ class LabelCombiner(object):
     """Combine UserLabels."""
     self.getUserLabels()
     self.combineLabels()
-#    self.combineWindows()  # PHASED OUT (delete it below)
     self.relaxWindows()
 
 
@@ -223,67 +222,26 @@ class LabelCombiner(object):
         
         count = 0
         for user in self.userLabels:
-#          if any(t1 <= t <= t2 for [t1,t2] in user.windows[relativePath]):
-          # Considers only the initial anomaly timestamp (start)...
           if any(t1 == t for [t1,_] in user.windows[relativePath]):
-          # w/ a buffer...
-          
+            # The initial anomaly timestamp (start) matches exactly
             count += 1
 
         # Label anomalous if count is large enough, as defined by threshold
         label = int(count >= self.nlabelers * self.threshold and count > 0)
-
         timestamps.append(t)
         labels.append(label)
     
+      labelIndices[relativePath] = [
+        i for i in range(len(combinedLabels[relativePath]))
+        if combinedLabels[relativePath]['label'][i]==1]
+        
       print ("Anomaly labels in %s = " % relativePath), (sum(labels))
       combinedLabels[relativePath] = pandas.DataFrame({"timestamp":timestamps,
         "label": labels})
-      labelIndices[relativePath] = [i for i in range(len(combinedLabels[relativePath]))
-        if combinedLabels[relativePath]['label'][i]==1]
       print "labelIndices = ", labelIndices[relativePath]
 
     self.combinedLabels = combinedLabels
     self.labelIndices = labelIndices
-      # combinedLabels[relativePath]['label'] = 1 for anomaly timestamps
-
-#  def combineWindows(self):  # PHASED OUT
-#    """
-#    Take raw combined labels and compress them to combinedWindows.
-#    Every timestamp that should be within a true (non-relaxed) window is labeled
-#    with a 1, as done by self.combineLabels().
-#    """
-#    combinedWindows = {}
-#
-#    for relativePath, labels in self.combinedLabels.iteritems():
-#      delta = labels["timestamp"][1] - labels["timestamp"][0]
-#
-#      labels = labels[labels["label"] == 1]
-#      dataSetWindows = []
-#
-#      if labels.shape[0] != 0:
-#        t1 = None
-#        t0 = None
-#
-#        for _, row in labels.iterrows():
-#          t1 = row["timestamp"]
-#
-#          if t0 is None:
-#            window = [strf(t1)]
-#
-#          elif t1 - t0 != delta:
-#            window.append(strf(t0))
-#            dataSetWindows.append(window)
-#            window = [strf(t1)]
-#
-#          t0 = t1
-#
-#        window.append(strf(t1))
-#        dataSetWindows.append(window)
-#
-#      combinedWindows[relativePath] = dataSetWindows
-#
-#    self.combinedWindows = combinedWindows
 
 
   def relaxWindows(self, percentOfDataSet = 0.1):
@@ -303,9 +261,9 @@ class LabelCombiner(object):
         relaxWindowLength = int(percentOfDataSet * length / len(anomalies))
       else:
         relaxWindowLength = int(percentOfDataSet * length)
-#      print "\n\n========================"
-#      print "file=",relativePath, "file length=",length, \
-#            "number of windows=",num, "relaxation amount=",relaxWindowLength
+      
+      print "file=",relativePath, "file length=",length, \
+            "number of windows=",num, "relaxation amount=",relaxWindowLength
 
       relaxedWindows = []
       for a in anomalies:
@@ -320,42 +278,3 @@ class LabelCombiner(object):
       allRelaxedWindows[relativePath] = relaxedWindows
 
     self.combinedRelaxedWindows = allRelaxedWindows
-
-
-#    for relativePath, limits in self.combinedWindows.iteritems():
-#
-#      data = self.corpus.dataFiles[relativePath].data
-#      length = len(data["timestamp"])
-#      num = len(limits)
-#      
-#      if num:
-#        relaxWindowLength = int(percentOfDataSet * length / len(limits))
-#      else:
-#        relaxWindowLength = int(percentOfDataSet * length)
-#
-#      print "\n\n========================"
-#      print "file=",relativePath, "file length=",length, \
-#            "number of windows=",num, "relaxation amount=",relaxWindowLength
-#
-#      relaxedWindows = []
-#      for limit in limits:
-#
-#        leftIndex = data[data["timestamp"] == limit[0]]["timestamp"].index[0]
-#        rightIndex = data[data["timestamp"] == limit[1]]["timestamp"].index[0]
-#
-#        newLeftIndex = max(leftIndex - relaxWindowLength/2, 0)
-#        newRightIndex = min(rightIndex + relaxWindowLength/2, length-1)
-#
-#        relaxedLimit = [strf(data["timestamp"][newLeftIndex]),
-#          strf(data["timestamp"][newRightIndex])]
-#
-##        print "original window indices=",leftIndex,rightIndex
-##        print "relaxed indices=",newLeftIndex,newRightIndex
-##        print "original timestamps=",limit
-##        print "relaxed timestamps=",relaxedLimit
-#
-#        relaxedWindows.append(relaxedLimit)
-#
-#      allRelaxedWindows[relativePath] = relaxedWindows
-#
-#    self.combinedRelaxedWindows = allRelaxedWindows
