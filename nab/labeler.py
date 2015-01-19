@@ -267,8 +267,8 @@ class LabelCombiner(object):
 
       relaxedWindows = []
       for a in anomalies:
-        front = max(a - relaxWindowLength/4, 0)
-        back = min(a + 3*relaxWindowLength/4, length-1)
+        front = max(a - relaxWindowLength/2, 0)
+        back = min(a + relaxWindowLength/2, length-1)
   
         relaxedLimit = [strf(data["timestamp"][front]),
                         strf(data["timestamp"][back])]
