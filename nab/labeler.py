@@ -230,14 +230,14 @@ class LabelCombiner(object):
         label = int(count >= self.nlabelers * self.threshold and count > 0)
         timestamps.append(t)
         labels.append(label)
-    
+
+      combinedLabels[relativePath] = pandas.DataFrame({"timestamp":timestamps,
+        "label": labels})
       labelIndices[relativePath] = [
         i for i in range(len(combinedLabels[relativePath]))
         if combinedLabels[relativePath]['label'][i]==1]
         
       print ("Anomaly labels in %s = " % relativePath), (sum(labels))
-      combinedLabels[relativePath] = pandas.DataFrame({"timestamp":timestamps,
-        "label": labels})
       print "labelIndices = ", labelIndices[relativePath]
 
     self.combinedLabels = combinedLabels
