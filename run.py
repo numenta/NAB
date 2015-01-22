@@ -113,7 +113,7 @@ if __name__ == "__main__":
   parser.add_argument("-d", "--detectors",
                     nargs="*",
                     type=str,
-                    default=["numenta"],
+                    default=["numenta", "random", "skyline"],
                     help="Space separated list of detector(s) to use.")
 
   parser.add_argument("--dataDir",

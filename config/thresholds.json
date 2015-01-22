@@ -7,13 +7,13 @@
     },
     "random": {
         "standard": {
-            "score": -45.0,
+            "score": -43.0,
             "threshold": 0.9999511718750007
         }
     },
     "skyline": {
         "standard": {
-            "score": -47.52393011541706,
+            "score": -28.981989788186304,
             "threshold": 0.9000000000000006
         }
     }
