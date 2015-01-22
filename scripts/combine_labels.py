@@ -95,7 +95,7 @@ if __name__ == "__main__":
                       help="If specified, paths are absolute paths")
 
   parser.add_argument("--threshold",
-                      default=0.9,
+                      default=0.5,
                       type=float,
                       help="The percentage agreement you would like between all\
                       labelers for a record to be considered anomalous (should \

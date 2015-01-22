@@ -18,7 +18,9 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
+import datetime
 import itertools
+import numpy
 import os
 import pandas
 try:
@@ -109,7 +111,7 @@ class CorpusLabel(object):
                     - self.windows[relativePath][i][1]).total_seconds() >= 0
                     for i in xrange(num_windows-1)]):
           raise ValueError("In the label file %s, windows overlap." % self.path)
-
+      
 
   def getLabels(self):
     """
@@ -143,7 +145,7 @@ class LabelCombiner(object):
   documentation.
   """
 
-  def __init__(self, labelDir, corpus, threshold=1.0):
+  def __init__(self, labelDir, corpus, threshold=0.5, windowSize=0.07):
     """
     @param labelDir   (string)   A directory name containing user label files.
                                  This directory should contain one label file
@@ -155,10 +157,13 @@ class LabelCombiner(object):
                                  labelers before a particular point in a
                                  data file is labeled as anomalous in the
                                  combined file.
+    @param windowSize (Corpus)   Estimated size of an anomaly window, as a
+                                 ratio the dataset length.
     """
     self.labelDir = labelDir
-    self.threshold = threshold
     self.corpus = corpus
+    self.threshold = threshold
+    self.windowSize = windowSize
 
     self.userLabels = None
     self.nlabelers = None
@@ -187,14 +192,14 @@ class LabelCombiner(object):
 
 
   def combine(self):
-    """Combine UserLabels."""
+    """Combine the raw user labels, and set the relaxed anomaly windows."""
     self.getUserLabels()
-    self.combineLabels()
+    self.combineRawLabels()
     self.relaxWindows()
 
 
   def getUserLabels(self):
-    """Collect UserLabels."""
+    """Collect the raw user labels from the path 'nab/labels/raw/'."""
     labelPaths = absoluteFilePaths(self.labelDir)
 
     self.userLabels = [CorpusLabel(path, self.corpus) for path in labelPaths]
@@ -204,52 +209,81 @@ class LabelCombiner(object):
 
     self.nlabelers = len(self.userLabels)
 
-
-  def combineLabels(self):
-    """Combine windows to create raw labels.
-    This uses the threshold to determine if a particular record should be
-    labeled as 1 or 0; threshold describes the level of agreement
-    between labelers.
+    
+  def combineRawLabels(self):
+    """
+    Combines raw user labels to create set of true anomaly labels; checks 
+    explicitly for common start times in the raw windows.
+    A buffer is used to merge labels that identify the same anomaly. The buffer
+    is half the estimated window size of an anomaly -- approximates an average
+    of two anomalies per dataset, and no window can have >1 anomaly.
+    After merging, a label becomes a true anomaly if it was labeled by a
+    proportion of the users greater than the defined threshold.
     """
     combinedLabels = {}
     labelIndices = {}
-
+    
     for relativePath, dataSet in self.corpus.dataFiles.iteritems():
-      timestamps = []
-      labels = []
-      for _, row in dataSet.data.iterrows():
-        t = row["timestamp"]
-        
-        count = 0
-        for user in self.userLabels:
-          if any(t1 == t for [t1,_] in user.windows[relativePath]):
-            # The initial anomaly timestamp (start) matches exactly
-            count += 1
+      
+      length = len(dataSet.data)
+      timestamps = dataSet.data["timestamp"]
+      buffer = datetime.timedelta(minutes=round(length*self.windowSize/2))
+      rawWindows = []
+      bucket = []
+      rawAnomalies = []
+      trueAnomalies = []
+      
+      for user in self.userLabels:
+        if user.windows[relativePath]:
+          rawWindows.append(user.windows[relativePath])
+      if not rawWindows:
+          # No labeled anomalies in this dataset
+          combinedLabels[relativePath] = pandas.DataFrame(
+            {"timestamp":timestamps, "label":numpy.zeros(length, dtype=int)})
+          labelIndices[relativePath] = []
+          continue
+      else:
+        times = []
+        # Get all the labeled start times
+        [times.append(t[0]) for timesList in rawWindows for t in timesList]
+      times.sort()
 
-        # Label anomalous if count is large enough, as defined by threshold
-        label = int(count >= self.nlabelers * self.threshold and count > 0)
-        timestamps.append(t)
-        labels.append(label)
+      # Bucket similar timestamps
+      current = None
+      for t in times:
+        if current is None:
+          current = t
+          bucket = [current]
+          continue
+        if (t - current) <= buffer:
+          bucket.append(t)
+        else:
+          rawAnomalies.append(bucket)
+          current = t
+          bucket = [current]
+      if bucket:
+        rawAnomalies.append(bucket)
 
-      combinedLabels[relativePath] = pandas.DataFrame({"timestamp":timestamps,
-        "label": labels})
-      labelIndices[relativePath] = [
-        i for i in range(len(combinedLabels[relativePath]))
-        if combinedLabels[relativePath]['label'][i]==1]
-        
-      print ("Anomaly labels in %s = " % relativePath), (sum(labels))
-      print "labelIndices = ", labelIndices[relativePath]
+      # Merge the bucketed timestamps that qualify as true anomalies
+      for bucket in rawAnomalies:
+        if len(bucket) > len(self.userLabels)*self.threshold:
+          trueAnomalies.append(max(bucket, key=bucket.count))
 
+      labels = numpy.array(timestamps.isin(trueAnomalies), dtype=int)
+      combinedLabels[relativePath] = pandas.DataFrame(
+        {"timestamp":timestamps, "label":labels})
+      labelIndices[relativePath] = [i for i in range(len(labels))
+                                    if labels[i]==1]
+  
     self.combinedLabels = combinedLabels
     self.labelIndices = labelIndices
+    
 
-
-  def relaxWindows(self, percentOfDataSet = 0.1):
+  def relaxWindows(self):
     """
-    This takes all windows and relaxes them (expands them) by a certain
-    percentage of the data. A length (relaxWindowLength) is picked beforehand
-    and each window is lengthened on both its left and right side by that
-    length. This length is chosen as a certain percentage of the datafile.
+    This takes all the true anomalies, as calculated by combineRawLabels(), and
+    adds a relaxed window. The window length is the class variable windowSize,
+    and the location is centered on the anomaly timestamp.
     """
     allRelaxedWindows = {}
     for relativePath, anomalies in self.labelIndices.iteritems():
@@ -258,9 +292,9 @@ class LabelCombiner(object):
       length = len(data)
       num = len(anomalies)
       if num:
-        relaxWindowLength = int(percentOfDataSet * length / len(anomalies))
+        relaxWindowLength = int(self.windowSize * length / len(anomalies))
       else:
-        relaxWindowLength = int(percentOfDataSet * length)
+        relaxWindowLength = int(self.windowSize * length)
       
       print "file=",relativePath, "file length=",length, \
             "number of windows=",num, "relaxation amount=",relaxWindowLength

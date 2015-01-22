@@ -179,6 +179,7 @@ class Scorer(object):
     tpScore = 0
     fnScore = 0
     for window in self.windows:
+      # window is ground truth
       tpIndex = window.getFirstTruePositive()
 
       if tpIndex == -1:
@@ -191,16 +192,19 @@ class Scorer(object):
         if window.length <= 1:
           position = -2.0
         else:
-#          print "window = ", window
-#          print "window.indices[-1] = ", window.indices[-1]
-          position = -(window.indices[-1] - tpIndex)/float(window.length-1)
-#          print "tpIndex = ", tpIndex
-#          print "window length = ", window.length
-#          print "... position = ", position
-
+          position = -(window.indices[-1] - tpIndex + 1)/float(window.length)
+            # +1 b/c indices start at 0
+            
         thisTP = scaledSigmoid(position)*self.costMatrix["tpWeight"]
         scores.iloc[window.indices[0]] = thisTP
         tpScore += thisTP
+        
+        print "===================================="
+        print "TP is located at index ", tpIndex
+        print "window indices = ", window.indices
+        print "window length = ", window.length
+        print "position = ", position
+        print "thisTP = ", thisTP
 
     # Go through each false positive and score it. Each FP leads to a negative
     # contribution dependent on how far it is from the previous window.
