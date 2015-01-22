@@ -168,7 +168,9 @@ class Scorer(object):
     @return  (float)    Score at each timestamp of the datafile.
     """
 
-    # Scoring section (i) handles TP and FN, (ii) handles FP, TN are 0.
+    # Scoring section (i) handles TP and FN, (ii) handles FP, and TN are 0.
+    # Input to the scoring function is var position: within a given window, the
+    # position relative to the true anomaly.
     scores = pandas.DataFrame([0]*len(self.data), columns=["S(t)"])
 
     # (i) Calculate the score for each window. Each window will either have one
@@ -177,6 +179,7 @@ class Scorer(object):
     tpScore = 0
     fnScore = 0
     for window in self.windows:
+      # window is ground truth
       tpIndex = window.getFirstTruePositive()
 
       if tpIndex == -1:
@@ -187,13 +190,21 @@ class Scorer(object):
       else:
         # True positive
         if window.length <= 1:
-          newdist = -2.0
+          position = -2.0
         else:
-          newdist = -(window.indices[-1] - tpIndex)/float(window.length-1)
-      
-        thisTP = scaledSigmoid(newdist)*self.costMatrix["tpWeight"]
+          position = -(window.indices[-1] - tpIndex + 1)/float(window.length)
+            # +1 b/c indices start at 0
+            
+        thisTP = scaledSigmoid(position)*self.costMatrix["tpWeight"]
         scores.iloc[window.indices[0]] = thisTP
         tpScore += thisTP
+        
+        print "===================================="
+        print "TP is located at index ", tpIndex
+        print "window indices = ", window.indices
+        print "window length = ", window.length
+        print "position = ", position
+        print "thisTP = ", thisTP
 
     # Go through each false positive and score it. Each FP leads to a negative
     # contribution dependent on how far it is from the previous window.
@@ -210,11 +221,11 @@ class Scorer(object):
         window = self.windows[windowId]
 
         if window.length <= 1:
-          newdist = 2.0
+          position = 2.0
         else:
-          newdist = abs(window.indices[-1] - i)/float(window.length-1)
+          position = abs(window.indices[-1] - i)/float(window.length-1)
       
-        thisFP = scaledSigmoid(newdist)*self.costMatrix["fpWeight"]
+        thisFP = scaledSigmoid(position)*self.costMatrix["fpWeight"]
         scores.iloc[i] = thisFP
         fpScore += thisFP
 
