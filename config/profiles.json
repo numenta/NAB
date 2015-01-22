@@ -6,5 +6,21 @@
     	"fpWeight": 1.0,
     	"tnWeight": 1.0
 	}
+  },
+"typeI": {
+	"CostMatrix": {
+    	"tpWeight": 1.0,
+    	"fnWeight": 0.5,
+    	"fpWeight": 2.0,
+    	"tnWeight": 1.0
+	}
+  },
+"typeII": {
+	"CostMatrix": {
+    	"tpWeight": 1.0,
+    	"fnWeight": 2.0,
+    	"fpWeight": 0.5,
+    	"tnWeight": 1.0
+	}
   }
 }
