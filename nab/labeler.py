@@ -157,7 +157,7 @@ class LabelCombiner(object):
                                  labelers before a particular point in a
                                  data file is labeled as anomalous in the
                                  combined file.
-    @param windowSize (Corpus)   Estimated size of an anomaly window, as a
+    @param windowSize (float)    Estimated size of an anomaly window, as a
                                  ratio the dataset length.
     """
     self.labelDir = labelDir
@@ -199,7 +199,7 @@ class LabelCombiner(object):
 
 
   def getUserLabels(self):
-    """Collect the raw user labels from the path 'nab/labels/raw/'."""
+    """Collect the raw user labels from default labels directory."""
     labelPaths = absoluteFilePaths(self.labelDir)
 
     self.userLabels = [CorpusLabel(path, self.corpus) for path in labelPaths]
@@ -266,7 +266,7 @@ class LabelCombiner(object):
 
       # Merge the bucketed timestamps that qualify as true anomalies
       for bucket in rawAnomalies:
-        if len(bucket) > len(self.userLabels)*self.threshold:
+        if len(bucket) >= len(self.userLabels)*self.threshold:
           trueAnomalies.append(max(bucket, key=bucket.count))
 
       labels = numpy.array(timestamps.isin(trueAnomalies), dtype=int)
