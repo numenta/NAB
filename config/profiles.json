@@ -7,7 +7,7 @@
     	"tnWeight": 1.0
 	}
   },
-"typeI": {
+"type1error": {
 	"CostMatrix": {
     	"tpWeight": 1.0,
     	"fnWeight": 0.5,
@@ -15,7 +15,7 @@
     	"tnWeight": 1.0
 	}
   },
-"typeII": {
+"type2error": {
 	"CostMatrix": {
     	"tpWeight": 1.0,
     	"fnWeight": 2.0,
