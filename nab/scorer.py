@@ -199,12 +199,12 @@ class Scorer(object):
         scores.iloc[window.indices[0]] = thisTP
         tpScore += thisTP
         
-        print "===================================="
-        print "TP is located at index ", tpIndex
-        print "window indices = ", window.indices
-        print "window length = ", window.length
-        print "position = ", position
-        print "thisTP = ", thisTP
+#        print "===================================="
+#        print "TP is located at index ", tpIndex
+#        print "window indices = ", window.indices
+#        print "window length = ", window.length
+#        print "position = ", position
+#        print "thisTP = ", thisTP
 
     # Go through each false positive and score it. Each FP leads to a negative
     # contribution dependent on how far it is from the previous window.
@@ -331,18 +331,19 @@ def scoreCorpus(threshold, args):
    resultsDetectorDir,
    resultsCorpus,
    corpusLabel,
-   probationaryPercent) = args
+   probationaryPercent,
+   scoreFlag) = args
    
   args = []
   for relativePath, dataSet in resultsCorpus.dataFiles.iteritems():
-    if relativePath == detectorName + "_" + profileName + "_scores.csv":
+    if "_scores.csv" in relativePath:
       continue
 
     # relativePath: raw dataset file,
     # e.g. 'artificialNoAnomaly/art_noisy.csv'
     relativePath = convertResultsPathToDataPath( \
       os.path.join(detectorName, relativePath))
-      
+
     # outputPath: dataset results file,
     # e.g. 'results/detector/artificialNoAnomaly/detector_art_noisy.csv'
     relativeDir, fileName = os.path.split(relativePath)
@@ -367,7 +368,8 @@ def scoreCorpus(threshold, args):
       windows,
       labels,
       costMatrix,
-      probationaryPeriod))
+      probationaryPeriod,
+      scoreFlag))
 
   results = pool.map(scoreDataSet, args)
 
@@ -380,7 +382,7 @@ def scoreCorpus(threshold, args):
   results.append(["Totals"] + totals)
 
   resultsDF = pandas.DataFrame(data=results,
-                               columns=("Detector", "Username", "File",
+                               columns=("Detector", "Profile", "File",
                                         "Threshold", "Score", "TP", "TN",
                                         "FP", "FN", "Total_Count"))
 
@@ -424,8 +426,9 @@ def scoreDataSet(args):
    windows,
    labels,
    costMatrix,
-   probationaryPeriod) = args
-
+   probationaryPeriod,
+   scoreFlag) = args
+   
   scorer = Scorer(
     timestamps=labels["timestamp"],
     predictions=predicted,
@@ -436,11 +439,11 @@ def scoreDataSet(args):
 
   (scores,_) = scorer.getScore()
   
-  # Append scoring function values to the respective results file
-  df_csv = pandas.read_csv(outputPath, header=0, parse_dates=[0])
-  df_csv["S(t)"] = scores
-  df_csv.to_csv(outputPath, index=False)
-
+  if scoreFlag:
+    # Append scoring function values to the respective results file
+    df_csv = pandas.read_csv(outputPath, header=0, parse_dates=[0])
+    df_csv["S(t)_%s" % profileName] = scores
+    df_csv.to_csv(outputPath, index=False)
 
   counts = scorer.counts
 

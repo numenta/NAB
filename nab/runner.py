@@ -107,7 +107,7 @@ class Runner(object):
                                         class constructor.
     """
     print "Running detection step"
-
+    
     count = 0
     args = []
     for detectorName, detectorConstructor in detectors.iteritems():
@@ -142,17 +142,19 @@ class Runner(object):
                                   threshold used to obtained that score.
     """
     print "Running optimize step"
-
+    
+    scoreFlag = False
     thresholds = {}
 
     for detectorName in detectorNames:
+      print "................................................"
+      print "Back in runner.optimize() w/ DUT", detectorName
       resultsDetectorDir = os.path.join(self.resultsDir, detectorName)
       resultsCorpus = Corpus(resultsDetectorDir)
 
       thresholds[detectorName] = {}
 
       for profileName, profile in self.profiles.iteritems():
-
         thresholds[detectorName][profileName] = optimizeThreshold(
           (self.pool,
            detectorName,
@@ -161,7 +163,8 @@ class Runner(object):
            resultsDetectorDir,
            resultsCorpus,
            self.corpusLabel,
-           self.probationaryPercent))
+           self.probationaryPercent,
+           scoreFlag))
 
     updateThresholds(thresholds, self.thresholdPath)
 
@@ -184,6 +187,8 @@ class Runner(object):
                                     the threshold used to obtained that score.
     """
     print "Running scoring step"
+    
+    scoreFlag = True
 
     for detectorName in detectorNames:
       resultsDetectorDir = os.path.join(self.resultsDir, detectorName)
@@ -200,10 +205,11 @@ class Runner(object):
                                  resultsDetectorDir,
                                  resultsCorpus,
                                  self.corpusLabel,
-                                 self.probationaryPercent))
+                                 self.probationaryPercent,
+                                 scoreFlag))
 
-      scorePath = os.path.join(resultsDetectorDir,
-                               "%s_%s_scores.csv" % (detectorName, profileName))
-      resultsDF.to_csv(scorePath, index=False)
-      print "%s detector benchmark scores written to %s" % (detectorName,
+        scorePath = os.path.join(resultsDetectorDir,
+                                 "%s_%s_scores.csv" % (detectorName, profileName))
+        resultsDF.to_csv(scorePath, index=False)
+        print "%s detector benchmark scores written to %s" % (detectorName,
                                                             scorePath)
