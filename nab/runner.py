@@ -147,8 +147,6 @@ class Runner(object):
     thresholds = {}
 
     for detectorName in detectorNames:
-      print "................................................"
-      print "Back in runner.optimize() w/ DUT", detectorName
       resultsDetectorDir = os.path.join(self.resultsDir, detectorName)
       resultsCorpus = Corpus(resultsDetectorDir)
 

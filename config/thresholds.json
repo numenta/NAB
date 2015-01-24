@@ -1,7 +1,15 @@
 {
     "numenta": {
         "standard": {
-            "score": -41.58123694136158,
+            "score": -41.581236941361574,
+            "threshold": 0.9999877929687505
+        },
+        "type1error": {
+            "score": -100.36462756695701,
+            "threshold": 0.9999877929687505
+        },
+        "type2error": {
+            "score": -18.18954162856387,
             "threshold": 0.9999877929687505
         }
     },
@@ -9,11 +17,27 @@
         "standard": {
             "score": -43.0,
             "threshold": 0.9999511718750007
+        },
+        "type1error": {
+            "score": -21.5,
+            "threshold": 0.9999511718750007
+        },
+        "type2error": {
+            "score": -86.0,
+            "threshold": 0.9999511718750007
         }
     },
     "skyline": {
         "standard": {
             "score": -28.981989788186304,
+            "threshold": 0.9000000000000006
+        },
+        "type1error": {
+            "score": -30.465805595628787,
+            "threshold": 0.9000000000000006
+        },
+        "type2error": {
+            "score": -48.49008188446506,
             "threshold": 0.9000000000000006
         }
     }
