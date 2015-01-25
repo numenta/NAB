@@ -1,18 +1,14 @@
 ### Under Construction
 
-#### This repo is under heavy, active revision. The code does not work yet. Browse, but don't judge. :)
+#### This repo is under active revision. The code runs but is not yet complete, so please don't judge. :)
 
 The Numenta Anomaly Benchmark
 -----------------------------
 
-This repository contains the data and scripts necessary to replicate the
-results in the forthcoming Numenta Anomaly Benchmark (NAB) paper.
+Welcome. This repository contains the data and scripts necessary to replicate the
+results in the forthcoming Numenta Anomaly Benchmark (NAB) paper. It also provides the tools to run NAB to score your own anomaly detection algorithms. Competitive results tied to open source code will be posted here on the Scoreboard. Let us know about your work by submitting a pull request.
 
-We hope you will compare these results with your own anomaly detection methods.
-Competitive results tied to open source code will be posted here on the Scoreboard. Let us know
-about your work by submitting a pull request.
-
-### Corpus
+#### Corpus
 
 The NAB corpus of timeseries datasets is designed to provide data for research
 in streaming anomaly detection. It is comprised of both artificial and
@@ -57,10 +53,7 @@ You need to manually install the following:
 - [Python 2.7](https://www.python.org/download/)
 - [pip](https://pip.pypa.io/en/latest/installing.html)
 - [Numpy](http://www.numpy.org/num)
-- [NuPIC](http://www.github.com/numenta/nupic) (Source Required)
-
-It is also assumed you have a full checkout and working version of NuPIC 
-by this point.
+- [NuPIC](http://www.github.com/numenta/nupic) (Required only to run the Numenta detector)
 
 ##### Download this repository
 
@@ -72,16 +65,28 @@ by this point.
     cd NAB
     (sudo) pip install -r requirements.txt
 
-This will install the requirements, such as pandas and simplejson.  
+This will install the additional required modules pandas and simplejson.  
 
 
 ### Usage
 
+##### Run NAB
+
     cd /path/to/nab
-    python setup.py develop (for now)
     python run.py
 
-This will produce results files for the Numenta anomaly detection method, as well as baseline results using methods from the [Etsy Skyline](https://github.com/etsy/skyline) anomaly detection library, and a random detector. This will also pass those results files to the analyze_results.py script to generate final scores.
+This will produce results files for the desired anomaly detection methods; the user is prompted which algorithm(s) to run. Included in the repo are the Numenta anomaly detection method, as well as methods from the [Etsy Skyline](https://github.com/etsy/skyline) anomaly detection library, and a random detector. This will also pass those results files to the analyze_results.py script to generate final NAB scores.
+
+##### Run your detector
+
+To run your own detector (named 'DUT' for detector under test), first create a folder in the nab detectors directory:
+
+    cd /path/to/nab/detectors
+    mkdir DUT
+
+This folder should contain all scripts necessary to run your detector. To run properly on the NAB corpus, your algorithm must meet the specs laid out below in the "Detector Results datafiles" section.
+
+Running NAB as instructed above will allow you the option of selecting which detector(s) to run. When prompted, enter `DUT` and you’re good to go!
 
 Once NAB is finalized (not yet!) to replicate results exactly you will need a specific version of NuPIC:
     
@@ -94,7 +99,7 @@ Then follow build directions in the [NuPIC "README.md"](https://github.com/numen
 
 ##### Raw input data files
 
-This repo contains a corpus of 35 file of time-series data, in the following format:
+This repo contains a corpus of 35 file of time-series data, in the format below. The detector under test will read in all datafiles in the corpus.
 
 - CSV format
 - One header row

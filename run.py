@@ -41,7 +41,7 @@ def getDetectorClassConstructors(detectors):
   """
   Takes in names of detectors. Collects class names that correspond to those
   detectors and returns them in a dict. The dict maps detector name to class
-  names.  Assumes the detectors have been imported.
+  names. Assumes the detectors have been imported.
   """
   detectorConstructors = {
   d : globals()[detectorNameToClass(d)] for d in detectors}
@@ -50,7 +50,7 @@ def getDetectorClassConstructors(detectors):
 
 
 def main(args):
-
+  
   root = os.path.dirname(os.path.realpath(__file__))
 
   numCPUs = int(args.numCPUs) if args.numCPUs is not None else None
@@ -60,7 +60,7 @@ def main(args):
   resultsDir = os.path.join(root, args.resultsDir)
   profilesFile = os.path.join(root, args.profilesFile)
   thresholdsFile = os.path.join(root, args.thresholdsFile)
-
+  
   runner = Runner(dataDir=dataDir,
                   labelPath=labelFile,
                   resultsDir=resultsDir,
@@ -146,11 +146,18 @@ if __name__ == "__main__":
                     "benchmark. If not specified all CPUs will be used.")
 
   args = parser.parse_args()
-
+  
   if not args.detect and not args.score and not args.optimize:
     args.detect = True
     args.optimize = True
     args.score = True
 
-  if args.skipConfirmation or checkInputs(args):
+  if args.skipConfirmation:
     main(args)
+  else:
+    print "Which detector(s) would you like to run? Enter one or more of", \
+      args.detectors, "separated by a space."
+    str = raw_input("->")
+    args.detectors = str.split(" ")
+    if checkInputs(args):
+      main(args)
