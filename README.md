@@ -1,6 +1,6 @@
 ### Under Construction
 
-#### This repo is under active revision. The code runs but is not yet complete, so please don't judge. :)
+#### This repo is under active revision. The code does not work yet. Browse, please don't judge. :)
 
 The Numenta Anomaly Benchmark
 -----------------------------
@@ -74,19 +74,15 @@ This will install the additional required modules pandas and simplejson.
 
     cd /path/to/nab
     python run.py
+    python setup.py develop (for now)
 
-This will produce results files for the desired anomaly detection methods; the user is prompted which algorithm(s) to run. Included in the repo are the Numenta anomaly detection method, as well as methods from the [Etsy Skyline](https://github.com/etsy/skyline) anomaly detection library, and a random detector. This will also pass those results files to the analyze_results.py script to generate final NAB scores.
+This will produce results files for the anomaly detection methods. Included in the repo are the Numenta anomaly detection method, as well as methods from the [Etsy Skyline](https://github.com/etsy/skyline) anomaly detection library, and a random detector. This will also pass those results files to the scoring script to generate final NAB scores.
 
-##### Run your detector
+For details on how to run your own detector please see the [NAB writeup](https://drive.google.com/a/numenta.com/file/d/0B1_XUjaAXeV3NlRobXhJVHg0LVU/view?usp=sharing).
 
-To run your own detector (named 'DUT' for detector under test), first create a folder in the nab detectors directory:
+To view a description of the command line options please enter
 
-    cd /path/to/nab/detectors
-    mkdir DUT
-
-This folder should contain all scripts necessary to run your detector. To run properly on the NAB corpus, your algorithm must meet the specs laid out below in the "Detector Results datafiles" section.
-
-Running NAB as instructed above will allow you the option of selecting which detector(s) to run. When prompted, enter `DUT` and you’re good to go!
+	python run.py --help 
 
 Once NAB is finalized (not yet!) to replicate results exactly you will need a specific version of NuPIC:
     

@@ -152,12 +152,5 @@ if __name__ == "__main__":
     args.optimize = True
     args.score = True
 
-  if args.skipConfirmation:
+  if args.skipConfirmation or checkInputs(args):
     main(args)
-  else:
-    print "Which detector(s) would you like to run? Enter one or more of", \
-      args.detectors, "separated by a space."
-    str = raw_input("->")
-    args.detectors = str.split(" ")
-    if checkInputs(args):
-      main(args)
