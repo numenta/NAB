@@ -100,6 +100,12 @@ if __name__ == "__main__":
                       help="The percentage agreement you would like between all\
                       labelers for a record to be considered anomalous (should \
                       be a number between 0 and 1)")
+  
+  parser.add_argument("--verbosity",
+                      default=1,
+                      type=int,
+                      help="Set the level of verbosity; to print out labeling \
+                      metrics during the process, acceptable values are 0,1,2")
 
   parser.add_argument("--skipConfirmation",
                     default=False,

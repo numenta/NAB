@@ -103,8 +103,6 @@ class CorpusLabel(object):
       
       # Check that windows are distinct (unique, non-overlapping); the end time
       # of a window can be the same as the start time of the subsequent window.
-      # This check is not for the combined labels file, and the self.path
-      # condition must match the "--destPath" argument in combine_labels.py.
       num_windows = len(self.windows[relativePath])
       if num_windows > 1:
         if not all([(self.windows[relativePath][i+1][0]
@@ -145,7 +143,9 @@ class LabelCombiner(object):
   documentation.
   """
 
-  def __init__(self, labelDir, corpus, threshold=0.5, windowSize=0.07):
+  def __init__(self, labelDir, corpus, threshold=0.5,
+                                       windowSize=0.10,
+                                       verbosity=1):
     """
     @param labelDir   (string)   A directory name containing user label files.
                                  This directory should contain one label file
@@ -159,11 +159,14 @@ class LabelCombiner(object):
                                  combined file.
     @param windowSize (float)    Estimated size of an anomaly window, as a
                                  ratio the dataset length.
+    @param verbosity  (int)      0, 1, or 2 to print out select labeling
+                                 metrics; 0 is none, 2 is the most.
     """
     self.labelDir = labelDir
     self.corpus = corpus
     self.threshold = threshold
     self.windowSize = windowSize
+    self.verbosity = verbosity
 
     self.userLabels = None
     self.nlabelers = None
@@ -196,6 +199,8 @@ class LabelCombiner(object):
     self.getUserLabels()
     self.combineRawLabels()
     self.relaxWindows()
+    self.checkWindows()
+    self.addKnownLabels()
 
 
   def getUserLabels(self):
@@ -219,9 +224,13 @@ class LabelCombiner(object):
     of two anomalies per dataset, and no window can have >1 anomaly.
     After merging, a label becomes a true anomaly if it was labeled by a
     proportion of the users greater than the defined threshold.
+    
+    If verbosity>0, the dictionary passedLabels -- the raw labels that did not
+    pass the threshold qualification -- is printed to the console.
     """
     combinedLabels = {}
     labelIndices = {}
+    passedLabels = {}
     
     for relativePath, dataSet in self.corpus.dataFiles.iteritems():
       
@@ -232,6 +241,7 @@ class LabelCombiner(object):
       bucket = []
       rawAnomalies = []
       trueAnomalies = []
+      passedAnomalies = []
       
       for user in self.userLabels:
         if user.windows[relativePath]:
@@ -268,12 +278,19 @@ class LabelCombiner(object):
       for bucket in rawAnomalies:
         if len(bucket) >= len(self.userLabels)*self.threshold:
           trueAnomalies.append(max(bucket, key=bucket.count))
+        else:
+          passedAnomalies.append(bucket)
 
       labels = numpy.array(timestamps.isin(trueAnomalies), dtype=int)
       combinedLabels[relativePath] = pandas.DataFrame(
         {"timestamp":timestamps, "label":labels})
       labelIndices[relativePath] = [i for i in range(len(labels))
                                     if labels[i]==1]
+      passedLabels[relativePath] = passedAnomalies
+      if self.verbosity>0:
+        print "----"
+        print "The passed raw labels for %s: " % relativePath
+        print passedLabels[relativePath]
   
     self.combinedLabels = combinedLabels
     self.labelIndices = labelIndices
@@ -284,6 +301,8 @@ class LabelCombiner(object):
     This takes all the true anomalies, as calculated by combineRawLabels(), and
     adds a relaxed window. The window length is the class variable windowSize,
     and the location is centered on the anomaly timestamp.
+    
+    If verbosity=2, the window relaxation metrics are printed to the console.
     """
     allRelaxedWindows = {}
     for relativePath, anomalies in self.labelIndices.iteritems():
@@ -296,14 +315,18 @@ class LabelCombiner(object):
       else:
         relaxWindowLength = int(self.windowSize * length)
       
-      print "file=",relativePath, "file length=",length, \
-            "number of windows=",num, "relaxation amount=",relaxWindowLength
+      if self.verbosity==2:
+        print "----"
+        print "Relaxation metrics for file", relativePath
+        print "file length =", length, ";" \
+              "number of windows =", num, ";" \
+              "relaxation amount =", relaxWindowLength
 
       relaxedWindows = []
       for a in anomalies:
         front = max(a - relaxWindowLength/2, 0)
         back = min(a + relaxWindowLength/2, length-1)
-  
+        
         relaxedLimit = [strf(data["timestamp"][front]),
                         strf(data["timestamp"][back])]
                         
@@ -312,3 +335,30 @@ class LabelCombiner(object):
       allRelaxedWindows[relativePath] = relaxedWindows
 
     self.combinedRelaxedWindows = allRelaxedWindows
+
+
+  def checkWindows(self):
+    """
+    This takes the relaxed windows and merges overlapping windows into a
+    single window.
+    """
+    for relativePath, windows in self.combinedRelaxedWindows.iteritems():
+      num_windows = len(windows)
+      if num_windows > 1:
+        for i in range(num_windows-1):
+          if (pandas.to_datetime(windows[i+1][0])
+              - pandas.to_datetime(windows[i][1])).total_seconds() <= 0:
+            windows[i] = [windows[i][0], windows[i+1][1]]
+            del windows[i+1]
+
+
+  def addKnownLabels(self):
+    """
+    Some data files in the benchmark dataset are of reported anomalies with
+    known causes. These are added manually here.
+    """
+
+
+
+
+    pass
