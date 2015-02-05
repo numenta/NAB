@@ -276,7 +276,6 @@ class LabelCombiner(object):
 
       # Merge the bucketed timestamps that qualify as true anomalies
       for bucket in rawAnomalies:
-#        import pdb; pdb.set_trace()
         if len(bucket) >= len(self.userLabels)*self.threshold:
           trueAnomalies.append(max(bucket, key=bucket.count))
         else:
@@ -344,9 +343,6 @@ class LabelCombiner(object):
     single window.
     """
     for relativePath, windows in self.combinedRelaxedWindows.iteritems():
-#      print "------1-------"
-#      print "PATH = %s" % relativePath
-#      print self.combinedRelaxedWindows
       num_windows = len(windows)
       if num_windows > 1:
         for i in range(num_windows-1):
@@ -354,15 +350,6 @@ class LabelCombiner(object):
               - pandas.to_datetime(windows[i][1])).total_seconds() <= 0:
             windows[i] = [windows[i][0], windows[i+1][1]]
             del windows[i+1]
-#            import pdb; pdb.set_trace()
-#      print "------2-------"
-#      print relativePath
-#      print self.combinedRelaxedWindows
-#      self.combinedRelaxedWindows[relativePath] = windows
-#      print "------3-------"
-#      print relativePath
-#      print self.combinedRelaxedWindows
-#    import pdb; pdb.set_trace()
 
 
   def addKnownLabels(self):
