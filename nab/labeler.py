@@ -235,7 +235,10 @@ class LabelCombiner(object):
       
       length = len(dataSet.data)
       timestamps = dataSet.data["timestamp"]
-      buffer = datetime.timedelta(minutes=round(length*self.windowSize/2))
+      granularity = 5
+      buffer = datetime.timedelta(
+        minutes=round(granularity*length*self.windowSize/2))
+        
       rawWindows = []
       bucket = []
       rawAnomalies = []
