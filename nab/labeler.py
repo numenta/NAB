@@ -138,9 +138,8 @@ class LabelCombiner(object):
   """
   This class is used to combine labels from multiple human labelers. The output
   is a single ground truth label file containing anomalies where there is
-  enough human agreement. The class also computes the relaxed window around
-  each anomaly.  The exact logic is described elsewhere in the NAB
-  documentation.
+  enough human agreement. The class also computes the window around each
+  anomaly.  The exact logic is described elsewhere in the NAB documentation.
   """
 
   def __init__(self, labelDir, corpus, threshold=0.5,
@@ -188,17 +187,17 @@ class LabelCombiner(object):
     """Write the combined labels to a destination directory."""
     if not os.path.isdir(destPath):
       createPath(destPath)
-    relaxedWindows = json.dumps(self.combinedRelaxedWindows,
+    windows = json.dumps(self.combinedWindows,
       sort_keys=True, indent=4, separators=(',', ': '))
     with open(destPath, "w") as windowWriter:
-      windowWriter.write(relaxedWindows)
+      windowWriter.write(windows)
 
 
   def combine(self):
-    """Combine the raw user labels, and set the relaxed anomaly windows."""
+    """Combine the raw user labels, and set the anomaly windows."""
     self.getUserLabels()
     self.combineRawLabels()
-    self.relaxWindows()
+    self.applyWindows()
     self.checkWindows()
     self.addKnownLabels()
 
@@ -287,62 +286,65 @@ class LabelCombiner(object):
       labelIndices[relativePath] = [i for i in range(len(labels))
                                     if labels[i]==1]
       passedLabels[relativePath] = passedAnomalies
+      
       if self.verbosity>0:
         print "----"
-        print "The passed raw labels for %s: " % relativePath
-        print passedLabels[relativePath]
+        print "For %s the passed raw labels and qualified true labels are,"\
+              " respectively:" % relativePath
+        print passedAnomalies
+        print trueAnomalies
   
     self.combinedLabels = combinedLabels
     self.labelIndices = labelIndices
     
 
-  def relaxWindows(self):
+  def applyWindows(self):
     """
     This takes all the true anomalies, as calculated by combineRawLabels(), and
-    adds a relaxed window. The window length is the class variable windowSize,
+    adds a standard window. The window length is the class variable windowSize,
     and the location is centered on the anomaly timestamp.
     
-    If verbosity=2, the window relaxation metrics are printed to the console.
+    If verbosity=2, the window metrics are printed to the console.
     """
-    allRelaxedWindows = {}
+    allWindows = {}
     for relativePath, anomalies in self.labelIndices.iteritems():
     
       data = self.corpus.dataFiles[relativePath].data
       length = len(data)
       num = len(anomalies)
       if num:
-        relaxWindowLength = int(self.windowSize * length / len(anomalies))
+        windowLength = int(self.windowSize * length / len(anomalies))
       else:
-        relaxWindowLength = int(self.windowSize * length)
+        windowLength = int(self.windowSize * length)
       
       if self.verbosity==2:
         print "----"
-        print "Relaxation metrics for file", relativePath
+        print "Window metrics for file", relativePath
         print "file length =", length, ";" \
               "number of windows =", num, ";" \
-              "relaxation amount =", relaxWindowLength
+              "window length =", windowLength
 
-      relaxedWindows = []
+      windows = []
       for a in anomalies:
-        front = max(a - relaxWindowLength/2, 0)
-        back = min(a + relaxWindowLength/2, length-1)
+        front = max(a - windowLength/2, 0)
+        back = min(a + windowLength/2, length-1)
         
-        relaxedLimit = [strf(data["timestamp"][front]),
+        windowLimit = [strf(data["timestamp"][front]),
                         strf(data["timestamp"][back])]
                         
-        relaxedWindows.append(relaxedLimit)
+        windows.append(windowLimit)
 
-      allRelaxedWindows[relativePath] = relaxedWindows
+      allWindows[relativePath] = windows
 
-    self.combinedRelaxedWindows = allRelaxedWindows
+    self.combinedWindows = allWindows
 
 
   def checkWindows(self):
     """
-    This takes the relaxed windows and merges overlapping windows into a
+    This takes the anomaly windows and merges overlapping windows into a
     single window.
     """
-    for relativePath, windows in self.combinedRelaxedWindows.iteritems():
+    for relativePath, windows in self.combinedWindows.iteritems():
       num_windows = len(windows)
       if num_windows > 1:
         for i in range(num_windows-1):
