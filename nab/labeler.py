@@ -44,6 +44,10 @@ class CorpusLabel(object):
 
   def __init__(self, path, corpus):
     """
+    Initializes a CorpusLabel object by getting the anomaly windows and labels. 
+    When this is done for combining raw user labels, we skip getLabels()
+    because labels are not yet created.
+    
     @param path    (string)      Name of file containing the set of labels.
     @param corpus  (nab.Corpus)  Corpus object.
     """
@@ -56,6 +60,7 @@ class CorpusLabel(object):
     self.getWindows()
     
     if "raw" not in self.path:
+      # Do not get labels from files in the path nab/labels/raw
       self.getLabels()
 
 
@@ -78,7 +83,6 @@ class CorpusLabel(object):
     for relativePath in windows.keys():
     
       self.windows[relativePath] = deepmap(strp, windows[relativePath])
-        # timestamp string to datetime.datetime object
 
       if len(self.windows[relativePath]) == 0:
         continue
@@ -101,7 +105,8 @@ class CorpusLabel(object):
   def validateLabels(self):
     """
     This is run at the end of the label combining process (see
-    scripts/compine_labels.py) to validate the resulting ground truth windows.
+    scripts/combine_labels.py) to validate the resulting ground truth windows,
+    specifically that they are distinct (unique, non-overlapping).
     """
     with open(os.path.join(self.path)) as windowFile:
       windows = json.load(windowFile)
@@ -115,8 +120,6 @@ class CorpusLabel(object):
       if len(self.windows[relativePath]) == 0:
         continue
 
-      # Check that windows are distinct (unique, non-overlapping); the end time
-      # of a window can be the same as the start time of the subsequent window.
       num_windows = len(self.windows[relativePath])
       if num_windows > 1:
         if not all([(self.windows[relativePath][i+1][0]
@@ -205,7 +208,7 @@ class LabelCombiner(object):
       sort_keys=True, indent=4, separators=(',', ': '))
     with open(destPath, "w") as windowWriter:
       windowWriter.write(windows)
-
+      
 
   def combine(self):
     """Combine raw and known labels in anomaly windows."""
@@ -230,7 +233,7 @@ class LabelCombiner(object):
     if self.nLabelers == 0:
       raise ValueError("No users labels found")
 
-    
+
   def combineLabels(self):
     """
     Combines raw user labels to create set of true anomaly labels.
@@ -240,16 +243,19 @@ class LabelCombiner(object):
     After bucketing, a label becomes a true anomaly if it was labeled by a
     proportion of the users greater than the defined threshold. Then the bucket
     is merged into one timestamp -- the ground truth label.
-    The set of known anomaly labels are added as well.
+    The set of known anomaly labels are added as well. These have been manually
+    labeled because we know the direct causes of the anomalies. They are added
+    as if they are the result of the bucket-merge process.
     
     If verbosity>0, the dictionary passedLabels -- the raw labels that did not
     pass the threshold qualification -- is printed to the console.
     """
     def setTruthLabels(dataSet, trueAnomalies):
+      """Returns the indices of the ground truth anomalies for a data file."""
       timestamps = dataSet.data["timestamp"]
       labels = numpy.array(timestamps.isin(trueAnomalies), dtype=int)
       return [i for i in range(len(labels)) if labels[i]==1]
-    
+
     labelIndices = {}
     for relativePath, dataSet in self.corpus.dataFiles.iteritems():
     
@@ -257,18 +263,8 @@ class LabelCombiner(object):
         knownAnomalies = self.knownLabels[0].windows[relativePath]
         labelIndices[relativePath] = setTruthLabels(dataSet, knownAnomalies)
         continue
-      
-      length = len(dataSet.data)
-      granularity = 5
-      buffer = datetime.timedelta(
-        minutes=round(granularity*length*self.windowSize/2))
 
       rawTimesLists = []
-      bucket = []
-      rawAnomalies = []
-      trueAnomalies = []
-      passedAnomalies = []
-      
       for user in self.userLabels:
         if user.windows[relativePath]:
           rawTimesLists.append(user.windows[relativePath])
@@ -279,29 +275,13 @@ class LabelCombiner(object):
       else:
         rawTimes = list(itertools.chain.from_iterable(rawTimesLists))
         rawTimes.sort()
-
-      # Bucket similar timestamps
-      current = None
-      for t in rawTimes:
-        if current is None:
-          current = t
-          bucket = [current]
-          continue
-        if (t - current) <= buffer:
-          bucket.append(t)
-        else:
-          rawAnomalies.append(bucket)
-          current = t
-          bucket = [current]
-      if bucket:
-        rawAnomalies.append(bucket)
-
-      # Merge the bucketed timestamps that qualify as true anomalies
-      for bucket in rawAnomalies:
-        if len(bucket) >= len(self.userLabels)*self.threshold:
-          trueAnomalies.append(max(bucket, key=bucket.count))
-        else:
-          passedAnomalies.append(bucket)
+      
+      # Bucket and merge the anomaly timestamps
+      granularity = 5
+      buffer = datetime.timedelta(
+        minutes=round(granularity*len(dataSet.data)*self.windowSize/2))
+      trueAnomalies, passedAnomalies = merge(bucket(rawTimes, buffer),
+                                            len(self.userLabels)*self.threshold)
 
       labelIndices[relativePath] = setTruthLabels(dataSet, trueAnomalies)
 
@@ -368,3 +348,43 @@ class LabelCombiner(object):
               - pandas.to_datetime(windows[i][1])).total_seconds() <= 0:
             windows[i] = [windows[i][0], windows[i+1][1]]
             del windows[i+1]
+
+
+def bucket(rawTimes, buffer):
+  """
+  Buckets (groups) timestamps that are within the amount of time specified by
+  buffer.
+  """
+  bucket = []
+  rawBuckets = []
+  
+  current = None
+  for t in rawTimes:
+    if current is None:
+      current = t
+      bucket = [current]
+      continue
+    if (t - current) <= buffer:
+      bucket.append(t)
+    else:
+      rawBuckets.append(bucket)
+      current = t
+      bucket = [current]
+  if bucket:
+    rawBuckets.append(bucket)
+    
+  return rawBuckets
+
+
+def merge(rawBuckets, threshold):
+  """Merges bucketed timestamps into one (most frequent, or earliest)."""
+  truths = []
+  passed = []
+  
+  for bucket in rawBuckets:
+    if len(bucket) >= threshold:
+      truths.append(max(bucket, key=bucket.count))
+    else:
+      passed.append(bucket)
+
+  return truths, passed

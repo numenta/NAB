@@ -48,8 +48,8 @@ def main(args):
 
   destPath = args.destPath
   threshold = args.threshold
-  windowSize = args.windowSize
   verbosity = args.verbosity
+  windowSize = 0.10
 
   print "Getting Corpus"
 
@@ -105,12 +105,6 @@ if __name__ == "__main__":
                       help="The percentage agreement you would like between all\
                       labelers for a record to be considered anomalous (should \
                       be a number between 0 and 1)")
-  
-  parser.add_argument("--windowSize",
-                      default=0.10,
-                      type=float,
-                      help="Set the size of the standard anomaly window, as a \
-                      portion of data file length.")
                       
   parser.add_argument("--verbosity",
                       default=1,

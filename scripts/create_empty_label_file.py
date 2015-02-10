@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 # ----------------------------------------------------------------------
-# Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
+# Copyright (C) 2014-2015, Numenta, Inc.  Unless you have an agreement
 # with Numenta, Inc., for a separate license for this software code, the
 # following terms and conditions apply:
 #
@@ -19,9 +19,12 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-import os
 import argparse
-import json
+import os
+try:
+  import simplejson as json
+except ImportError:
+  import json
 
 from nab.corpus import Corpus
 from nab.util import recur
@@ -43,7 +46,7 @@ def main(args):
 
   corpus = Corpus(args.dataDir)
 
-  empty_labels = {p : [] for p in corpus.dataFiles.keys()}
+  empty_labels = {p : [] for p in corpus.dataFiles.keys() if "Known" not in p}
 
   with open(args.labelFile, "w") as outFile:
     outFile.write(json.dumps(empty_labels,
@@ -58,7 +61,7 @@ if __name__ == "__main__":
   parser.add_argument("--dataDir",
                     default="data",
                     help="Directory structure containing all the CSV "
-                         "datafiles.")
+                         "data files.")
 
   parser.add_argument("--labelFile",
                     default=os.path.join("labels","empty_labels.json"),
