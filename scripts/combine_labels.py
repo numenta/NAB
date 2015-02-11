@@ -19,7 +19,7 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 """
-Combines a set of labels given within folder (in the yaml format)
+Combines a set of raw label files
 """
 
 import argparse
@@ -48,6 +48,8 @@ def main(args):
 
   destPath = args.destPath
   threshold = args.threshold
+  verbosity = args.verbosity
+  windowSize = 0.10
 
   print "Getting Corpus"
 
@@ -55,7 +57,9 @@ def main(args):
 
   print "Creating LabelCombiner"
 
-  labelCombiner = LabelCombiner(labelDir, corpus, threshold)
+  labelCombiner = LabelCombiner(labelDir, corpus,
+                                threshold, windowSize,
+                                verbosity)
 
   print "Combining Labels"
 
@@ -67,7 +71,8 @@ def main(args):
 
   print "Attempting to load objects as a test"
 
-  corpusLabel = CorpusLabel(path=destPath, corpus=corpus)
+  corpusLabel = CorpusLabel(destPath, corpus)
+  corpusLabel.validateLabels()
 
   print "Successfully combined labels!"
 
@@ -100,6 +105,12 @@ if __name__ == "__main__":
                       help="The percentage agreement you would like between all\
                       labelers for a record to be considered anomalous (should \
                       be a number between 0 and 1)")
+                      
+  parser.add_argument("--verbosity",
+                      default=1,
+                      type=int,
+                      help="Set the level of verbosity; to print out labeling \
+                      metrics during the process, acceptable values are 0,1,2")
 
   parser.add_argument("--skipConfirmation",
                     default=False,

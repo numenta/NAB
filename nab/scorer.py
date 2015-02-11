@@ -136,6 +136,7 @@ class Scorer(object):
     """
     # Sort windows before putting them into list
     windows = [Window(i, limit, self.data) for i, limit in enumerate(limits)]
+
     return windows
 
 
@@ -164,7 +165,10 @@ class Scorer(object):
 
   def getScore(self):
     """Score the entire datafile and return a single floating point score.
-
+    The position in a given window is calculated as the distance from the end
+    of the window, normalized [-1,0]. I.e. positions 1.0 and 0.0 are at the very
+    front and back of the anomaly window, respectively.
+    
     @return  (float)    Score at each timestamp of the datafile.
     """
 
@@ -179,7 +183,6 @@ class Scorer(object):
     tpScore = 0
     fnScore = 0
     for window in self.windows:
-      # window is ground truth
       tpIndex = window.getFirstTruePositive()
 
       if tpIndex == -1:
@@ -189,22 +192,10 @@ class Scorer(object):
         fnScore += thisFN
       else:
         # True positive
-        if window.length <= 1:
-          position = -2.0
-        else:
-          position = -(window.indices[-1] - tpIndex + 1)/float(window.length)
-            # +1 b/c indices start at 0
-            
-        thisTP = scaledSigmoid(position)*self.costMatrix["tpWeight"]
+        position = -(window.indices[-1] - tpIndex + 1)/float(window.length)
+        thisTP = scaledSigmoid(position)*self.costMatrix["tpWeight"] / 0.98661
         scores.iloc[window.indices[0]] = thisTP
         tpScore += thisTP
-        
-#        print "===================================="
-#        print "TP is located at index ", tpIndex
-#        print "window indices = ", window.indices
-#        print "window length = ", window.length
-#        print "position = ", position
-#        print "thisTP = ", thisTP
 
     # Go through each false positive and score it. Each FP leads to a negative
     # contribution dependent on how far it is from the previous window.
@@ -219,12 +210,7 @@ class Scorer(object):
         fpScore += thisFP
       else:
         window = self.windows[windowId]
-
-        if window.length <= 1:
-          position = 2.0
-        else:
-          position = abs(window.indices[-1] - i)/float(window.length-1)
-      
+        position = abs(window.indices[-1] - i)/float(window.length-1)
         thisFP = scaledSigmoid(position)*self.costMatrix["fpWeight"]
         scores.iloc[i] = thisFP
         fpScore += thisFP
@@ -266,19 +252,19 @@ def scaledSigmoid(relativePositionInWindow):
   labeled window.  The function is computed as follows:
 
   A relative position of -1.0 is the far left edge of the anomaly window and
-  corresponds to a 2*sigmoid(5) - 1.0 = 0.98661.  This is as early as you can
-  get and still get counted as a true positive.
+  corresponds to S = 2*sigmoid(5) - 1.0 = 0.98661.  This is the earliest to be
+  counted as a true positive.
 
   A relative position of -0.5 is halfway into the anomaly window and
-  corresponds to a 2*sigmoid(0.5*5) - 1.0 = 0.84828.
+  corresponds to S = 2*sigmoid(0.5*5) - 1.0 = 0.84828.
 
   A relative position of 0.0 consists of the right edge of the window and
-  corresponds to a score of 2*sigmoid(0) - 1 = 0.0
+  corresponds to S = 2*sigmoid(0) - 1 = 0.0.
 
   Relative positions > 0 correspond to false positives increasingly far away
   from the right edge of the window. A relative position of 1.0 is past the
   right  edge of the  window and corresponds to a score of 2*sigmoid(-5) - 1.0 =
-  -0.98661
+  -0.98661.
 
   @param  relativePositionInWindow (float)  A relative position
                                             within a window calculated per the
@@ -287,9 +273,8 @@ def scaledSigmoid(relativePositionInWindow):
   @return (float)
   """
   if relativePositionInWindow > 3.0:
+    # FP well behind window
     return -1.0
-  elif relativePositionInWindow < -3.0:
-    return 1.0
   else:
     return 2*sigmoid(-5*relativePositionInWindow) - 1.0
 
