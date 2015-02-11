@@ -5,12 +5,13 @@
 The Numenta Anomaly Benchmark
 -----------------------------
 
-Welcome. This repository contains the data and scripts necessary to replicate the
-results in the forthcoming Numenta Anomaly Benchmark (NAB) paper. It also provides the tools to run NAB to score your own anomaly detection algorithms. Competitive results tied to open source code will be posted here on the Scoreboard. Let us know about your work by submitting a pull request.
+Welcome. This repository contains the data and scripts necessary to replicate the results in the forthcoming Numenta Anomaly Benchmark (NAB) paper. Also provided are the tools to run NAB scoring on your own anomaly detection algorithms. Competitive results tied to open source code will be posted in the wiki on the [Scoreboard](https://github.com/numenta/NAB/wiki#nab-scoreboard). Let us know about your work by submitting a pull request. 
+
+This readme is a brief overview and contains details for setting up NAB. **Please refer to the [NAB Whitepaper](https://github.com/numenta/NAB/wiki#nab-whitepaper) in the wiki for more details about NAB scoring, data, motivation, etc.**
 
 #### Corpus
 
-The NAB corpus of timeseries datasets is designed to provide data for research
+The NAB corpus of timeseries data files is designed to provide data for research
 in streaming anomaly detection. It is comprised of both artificial and
 real-world timeseries data containing labeled anomalous periods of behavior.
 
@@ -26,14 +27,14 @@ All data is included in the repository. We are in the process of adding more dat
 
 #### Task
 
-Detect anomalous behavior in streaming data in real-time and provide *useful* alerts.
+Detect anomalous behavior in *streaming data in real-time* and provide *useful* alerts.
 
 Your anomaly detector must be able to handle streaming data. Post-hoc analysis is insufficient for this task. All classifications must
 be done as if the data is being presented for the first time, in real time. Anomalies must be detected within a reasonable amount of time.
 
 This benchmark is representative of a task in human time-scales. Per-record classification should take place in less than 5 minutes. Anomaly detection should happen as quickly as possible following the onset of an anomaly.
 
-It is insufficient to just catch all anomalies. A high false-positive rate will reduce or eliminate an institution's willingness to use your technique. You must minimize the cost of using your detection technique.
+It is insufficient to just catch all anomalies. A detector with a high false positive rate is of little use. I.e. many false positives will reduce or eliminate an institution's willingness to use your technique; you must minimize the cost of using your detection technique.
 
 Installing NAB
 --------------
@@ -78,7 +79,7 @@ This will install the additional required modules pandas and simplejson.
 
 This will produce results files for the anomaly detection methods. Included in the repo are the Numenta anomaly detection method, as well as methods from the [Etsy Skyline](https://github.com/etsy/skyline) anomaly detection library, and a random detector. This will also pass those results files to the scoring script to generate final NAB scores.
 
-For details on how to run your own detector please see the [NAB writeup](https://drive.google.com/a/numenta.com/file/d/0B1_XUjaAXeV3NlRobXhJVHg0LVU/view?usp=sharing).
+For details on how to run your own detector please see the [NAB Entry Points diagram](https://github.com/numenta/NAB/wiki#nab-entry-diagram) in the wiki.
 
 To view a description of the command line options please enter
 
@@ -91,52 +92,15 @@ Once NAB is finalized (not yet!) to replicate results exactly you will need a sp
 
 Then follow build directions in the [NuPIC "README.md"](https://github.com/numenta/nupic/blob/master/README.md).
 
-#### Data format
+#### Data
 
-##### Raw input data files
+##### Data and results files
 
-This repo contains a corpus of 35 file of time-series data, in the format below. The detector under test will read in all datafiles in the corpus.
-
-- CSV format
-- One header row
-- Fields for "timestamp" and "value"
-    - "timestamp"
-        - The time of the end of the metric collection window
-        - e.g 2014-04-01 12:00:00.000000 is values collected between
-            - 2014-04-01 11:55:00.000000
-            - 2014-04-01 12:00:00.000000
-    - "value"
-        - The collected metric, e.g. CPUUtilization percent
-        - MUST be either floats or integers (converted to floats internally)
-- Each record MUST represent an equal amount of time
-- Records MUST be in chronological order
-- Records MUST be continuous such that there are no missing time steps
-
-##### Detector results data files
-
-The detector under test will output a results file for each datafile in the corpus. This is the format:
-
-- All files MUST be in CSV format
-- All files MUST have exactly one header row
-- The header row MUST have the following fields
-    - "timestamp", MUST follow this format:
-	    - YYYY-MM-DD HH:MM:SS.s
-    	- e.g. 2014-04-01 00:00:00.000000
-    - "value": same format as input data files
-    - "label"
-        - This is ground truth for the class of a record
-        - Values are either:
-            - 0: This record is known to be non-anomalous
-		    - 0.5: This record's class is ambiguous
-    		- 1: This record is known to be anomalous
-- Header rows MAY have other fields as well. These are ignored by the NAB scorer.
-- Each record MUST represent an equal amount of time
-- Records MUST be in chronological order
-- Records MUST be continuous such that there are no missing time steps
+This repo contains a corpus of 32 data files of time-series data. The format of the CSV files is specified in Appendix G of the [NAB Whitepaper](https://github.com/numenta/NAB/wiki#nab-whitepaper). The detector under test will read in, and be scored on, all data files in the corpus. The format of results files is also specified in the whitepaper posted in the wiki.
 
 ##### Data visualizer
 
-There is currently a simple data visualizer available, usefule in hand labeling datasets. To use it do the following:
+There is currently a simple data visualizer available, useful in hand labeling datasets. To use it do the following:
 
 First generate the list of data files and result files:
 
