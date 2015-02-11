@@ -44,6 +44,10 @@ class CorpusLabel(object):
 
   def __init__(self, path, corpus):
     """
+    Initializes a CorpusLabel object by getting the anomaly windows and labels. 
+    When this is done for combining raw user labels, we skip getLabels()
+    because labels are not yet created.
+    
     @param path    (string)      Name of file containing the set of labels.
     @param corpus  (nab.Corpus)  Corpus object.
     """
@@ -54,13 +58,16 @@ class CorpusLabel(object):
 
     self.corpus = corpus
     self.getWindows()
-    self.getLabels()
+    
+    if "raw" not in self.path:
+      # Do not get labels from files in the path nab/labels/raw
+      self.getLabels()
 
 
   def getWindows(self):
     """
-    Read JSON label file. Get windows as dictionaries with key value pairs of a
-    relative path and its corresponding list of windows.
+    Read JSON label file. Get timestamps as dictionaries with key:value pairs of
+    a relative path and its corresponding list of windows.
     """
     def found(t, data):
       f = data["timestamp"][data["timestamp"] == pandas.tslib.Timestamp(t)]
@@ -81,35 +88,45 @@ class CorpusLabel(object):
         continue
 
       data = self.corpus.dataFiles[relativePath].data
+      if "raw" in self.path:
+        timestamps = windows[relativePath]
+      else:
+        timestamps = list(itertools.chain.from_iterable(windows[relativePath]))
 
-      timestamps = list(itertools.chain(windows[relativePath]))[0]
-
-      # Check that windows are in dataset timestamps
+      # Check that timestamps are present in dataset
       if not all([found(t,data) for t in timestamps]):
         raise ValueError("In the label file %s, one of the timestamps used for "
                          "the datafile %s doesn't match; it does not exist in "
                          "the file. Timestamps in json label files have to "
                          "exactly match timestamps in corresponding datafiles."
                          % (self.path, relativePath))
-      
-      # Check that window timestamps are chronological
-      deltas = [(pandas.to_datetime(timestamps[i+1])
-                 - pandas.to_datetime(timestamps[i])).total_seconds() >= 0
-                for i in range(len(timestamps)-1)]
 
-      if not all(deltas):
-        raise ValueError("In the label file %s, timestamps are not in "
-                         "chronological order." % self.path)
-      
-      # Check that windows are distinct (unique, non-overlapping); the end time
-      # of a window can be the same as the start time of the subsequent window.
+
+  def validateLabels(self):
+    """
+    This is run at the end of the label combining process (see
+    scripts/combine_labels.py) to validate the resulting ground truth windows,
+    specifically that they are distinct (unique, non-overlapping).
+    """
+    with open(os.path.join(self.path)) as windowFile:
+      windows = json.load(windowFile)
+
+    self.windows = {}
+
+    for relativePath in windows.keys():
+    
+      self.windows[relativePath] = deepmap(strp, windows[relativePath])
+
+      if len(self.windows[relativePath]) == 0:
+        continue
+
       num_windows = len(self.windows[relativePath])
       if num_windows > 1:
         if not all([(self.windows[relativePath][i+1][0]
                     - self.windows[relativePath][i][1]).total_seconds() >= 0
                     for i in xrange(num_windows-1)]):
           raise ValueError("In the label file %s, windows overlap." % self.path)
-      
+
 
   def getLabels(self):
     """
@@ -136,15 +153,15 @@ class CorpusLabel(object):
 
 class LabelCombiner(object):
   """
-  This class is used to combine labels from multiple human labelers. The output
-  is a single ground truth label file containing anomalies where there is
-  enough human agreement. The class also computes the window around each
-  anomaly.  The exact logic is described elsewhere in the NAB documentation.
+  This class is used to combine labels from multiple human labelers, and the set
+  of manual labels (known anomalies).
+  The output is a single ground truth label file containing anomalies where
+  there is enough human agreement. The class also computes the window around
+  each anomaly.  The exact logic is described elsewhere in the NAB
+  documentation.
   """
 
-  def __init__(self, labelDir, corpus, threshold=0.5,
-                                       windowSize=0.10,
-                                       verbosity=1):
+  def __init__(self, labelDir, corpus, threshold, windowSize, verbosity):
     """
     @param labelDir   (string)   A directory name containing user label files.
                                  This directory should contain one label file
@@ -168,9 +185,9 @@ class LabelCombiner(object):
     self.verbosity = verbosity
 
     self.userLabels = None
-    self.nlabelers = None
+    self.nLabelers = None
+    self.knownLabels = None
 
-    self.combinedLabels = None
     self.combinedWindows = None
 
 
@@ -178,7 +195,7 @@ class LabelCombiner(object):
     ans = ""
     ans += "labelDir:            %s\n" % self.labelDir
     ans += "corpus:              %s\n" % self.corpus
-    ans += "number of labels:    %d\n" % self.nlabelers
+    ans += "number of labelers:  %d\n" % self.nLabelers
     ans += "agreement threshold: %d\n" % self.threshold
     return ans
 
@@ -191,105 +208,83 @@ class LabelCombiner(object):
       sort_keys=True, indent=4, separators=(',', ': '))
     with open(destPath, "w") as windowWriter:
       windowWriter.write(windows)
-
+      
 
   def combine(self):
-    """Combine the raw user labels, and set the anomaly windows."""
-    self.getUserLabels()
-    self.combineRawLabels()
+    """Combine raw and known labels in anomaly windows."""
+    self.getRawLabels()
+    self.combineLabels()
     self.applyWindows()
     self.checkWindows()
-    self.addKnownLabels()
 
 
-  def getUserLabels(self):
-    """Collect the raw user labels from default labels directory."""
+  def getRawLabels(self):
+    """Collect the raw user labels from specified directory."""
     labelPaths = absoluteFilePaths(self.labelDir)
+    self.userLabels = []
+    self.knownLabels = []
+    for path in labelPaths:
+      if "known" in path:
+        self.knownLabels.append(CorpusLabel(path, self.corpus))
+      else:
+        self.userLabels.append(CorpusLabel(path, self.corpus))
 
-    self.userLabels = [CorpusLabel(path, self.corpus) for path in labelPaths]
-
-    if len(self.userLabels) == 0:
+    self.nLabelers = len(self.userLabels)
+    if self.nLabelers == 0:
       raise ValueError("No users labels found")
 
-    self.nlabelers = len(self.userLabels)
 
-    
-  def combineRawLabels(self):
+  def combineLabels(self):
     """
-    Combines raw user labels to create set of true anomaly labels; checks 
-    explicitly for common start times in the raw windows.
-    A buffer is used to merge labels that identify the same anomaly. The buffer
+    Combines raw user labels to create set of true anomaly labels.
+    A buffer is used to bucket labels that identify the same anomaly. The buffer
     is half the estimated window size of an anomaly -- approximates an average
     of two anomalies per dataset, and no window can have >1 anomaly.
-    After merging, a label becomes a true anomaly if it was labeled by a
-    proportion of the users greater than the defined threshold.
+    After bucketing, a label becomes a true anomaly if it was labeled by a
+    proportion of the users greater than the defined threshold. Then the bucket
+    is merged into one timestamp -- the ground truth label.
+    The set of known anomaly labels are added as well. These have been manually
+    labeled because we know the direct causes of the anomalies. They are added
+    as if they are the result of the bucket-merge process.
     
     If verbosity>0, the dictionary passedLabels -- the raw labels that did not
     pass the threshold qualification -- is printed to the console.
     """
-    combinedLabels = {}
-    labelIndices = {}
-    passedLabels = {}
-    
-    for relativePath, dataSet in self.corpus.dataFiles.iteritems():
-      
-      length = len(dataSet.data)
+    def setTruthLabels(dataSet, trueAnomalies):
+      """Returns the indices of the ground truth anomalies for a data file."""
       timestamps = dataSet.data["timestamp"]
-      granularity = 5
-      buffer = datetime.timedelta(
-        minutes=round(granularity*length*self.windowSize/2))
-        
-      rawWindows = []
-      bucket = []
-      rawAnomalies = []
-      trueAnomalies = []
-      passedAnomalies = []
-      
+      labels = numpy.array(timestamps.isin(trueAnomalies), dtype=int)
+      return [i for i in range(len(labels)) if labels[i]==1]
+
+    labelIndices = {}
+    for relativePath, dataSet in self.corpus.dataFiles.iteritems():
+    
+      if "Known" in relativePath:
+        knownAnomalies = self.knownLabels[0].windows[relativePath]
+        labelIndices[relativePath] = setTruthLabels(dataSet, knownAnomalies)
+        continue
+
+      rawTimesLists = []
       for user in self.userLabels:
         if user.windows[relativePath]:
-          rawWindows.append(user.windows[relativePath])
-      if not rawWindows:
-          # No labeled anomalies in this dataset
-          combinedLabels[relativePath] = pandas.DataFrame(
-            {"timestamp":timestamps, "label":numpy.zeros(length, dtype=int)})
-          labelIndices[relativePath] = []
-          continue
+          rawTimesLists.append(user.windows[relativePath])
+      if not rawTimesLists:
+        # No labeled anomalies for this data file
+        labelIndices[relativePath] = setTruthLabels(dataSet, [])
+        continue
       else:
-        times = []
-        # Get all the labeled start times
-        [times.append(t[0]) for timesList in rawWindows for t in timesList]
-      times.sort()
-
-      # Bucket similar timestamps
-      current = None
-      for t in times:
-        if current is None:
-          current = t
-          bucket = [current]
-          continue
-        if (t - current) <= buffer:
-          bucket.append(t)
-        else:
-          rawAnomalies.append(bucket)
-          current = t
-          bucket = [current]
-      if bucket:
-        rawAnomalies.append(bucket)
-
-      # Merge the bucketed timestamps that qualify as true anomalies
-      for bucket in rawAnomalies:
-        if len(bucket) >= len(self.userLabels)*self.threshold:
-          trueAnomalies.append(max(bucket, key=bucket.count))
-        else:
-          passedAnomalies.append(bucket)
-
-      labels = numpy.array(timestamps.isin(trueAnomalies), dtype=int)
-      combinedLabels[relativePath] = pandas.DataFrame(
-        {"timestamp":timestamps, "label":labels})
-      labelIndices[relativePath] = [i for i in range(len(labels))
-                                    if labels[i]==1]
-      passedLabels[relativePath] = passedAnomalies
+        rawTimes = list(itertools.chain.from_iterable(rawTimesLists))
+        rawTimes.sort()
       
+      # Bucket and merge the anomaly timestamps
+      granularity = 5
+      buffer = datetime.timedelta(
+        minutes=round(granularity*len(dataSet.data)*self.windowSize/2))
+      trueAnomalies, passedAnomalies = merge(bucket(rawTimes, buffer),
+                                            len(self.userLabels)*self.threshold)
+
+      labelIndices[relativePath] = setTruthLabels(dataSet, trueAnomalies)
+
       if self.verbosity>0:
         print "----"
         print "For %s the passed raw labels and qualified true labels are,"\
@@ -297,13 +292,12 @@ class LabelCombiner(object):
         print passedAnomalies
         print trueAnomalies
   
-    self.combinedLabels = combinedLabels
     self.labelIndices = labelIndices
-    
+
 
   def applyWindows(self):
     """
-    This takes all the true anomalies, as calculated by combineRawLabels(), and
+    This takes all the true anomalies, as calculated by combineLabels(), and
     adds a standard window. The window length is the class variable windowSize,
     and the location is centered on the anomaly timestamp.
     
@@ -311,7 +305,6 @@ class LabelCombiner(object):
     """
     allWindows = {}
     for relativePath, anomalies in self.labelIndices.iteritems():
-    
       data = self.corpus.dataFiles[relativePath].data
       length = len(data)
       num = len(anomalies)
@@ -333,7 +326,7 @@ class LabelCombiner(object):
         back = min(a + windowLength/2, length-1)
         
         windowLimit = [strf(data["timestamp"][front]),
-                        strf(data["timestamp"][back])]
+                       strf(data["timestamp"][back])]
                         
         windows.append(windowLimit)
 
@@ -357,13 +350,41 @@ class LabelCombiner(object):
             del windows[i+1]
 
 
-  def addKnownLabels(self):
-    """
-    Some data files in the benchmark dataset are of reported anomalies with
-    known causes. These are added manually here.
-    """
+def bucket(rawTimes, buffer):
+  """
+  Buckets (groups) timestamps that are within the amount of time specified by
+  buffer.
+  """
+  bucket = []
+  rawBuckets = []
+  
+  current = None
+  for t in rawTimes:
+    if current is None:
+      current = t
+      bucket = [current]
+      continue
+    if (t - current) <= buffer:
+      bucket.append(t)
+    else:
+      rawBuckets.append(bucket)
+      current = t
+      bucket = [current]
+  if bucket:
+    rawBuckets.append(bucket)
+    
+  return rawBuckets
 
 
+def merge(rawBuckets, threshold):
+  """Merges bucketed timestamps into one (most frequent, or earliest)."""
+  truths = []
+  passed = []
+  
+  for bucket in rawBuckets:
+    if len(bucket) >= threshold:
+      truths.append(max(bucket, key=bucket.count))
+    else:
+      passed.append(bucket)
 
-
-    pass
+  return truths, passed

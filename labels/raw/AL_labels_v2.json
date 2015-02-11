@@ -1,0 +1,133 @@
+{
+    "artificialNoAnomaly/art_daily_no_noise.csv": [],
+    "artificialNoAnomaly/art_daily_perfect_square_wave.csv": [],
+    "artificialNoAnomaly/art_daily_small_noise.csv": [],
+    "artificialNoAnomaly/art_flatline.csv": [],
+    "artificialNoAnomaly/art_noisy.csv": [],
+    "artificialWithAnomaly/art_daily_flatmiddle.csv":
+    [
+        "2014-04-11 00:00:00.000000"
+    ],
+    "artificialWithAnomaly/art_daily_jumpsdown.csv":
+    [
+        "2014-04-11 09:00:00.000000"
+    ],
+    "artificialWithAnomaly/art_daily_jumpsup.csv":
+    [
+        "2014-04-11 09:00:00.000000"
+    ],
+     "artificialWithAnomaly/art_daily_nojump.csv":
+    [
+         "2014-04-11 09:00:00.000000"
+    ],
+    "artificialWithAnomaly/art_increase_spike_density.csv":
+    [
+         "2014-04-07 23:10:00.000000"
+    ],
+    "artificialWithAnomaly/art_load_balancer_spikes.csv":
+    [
+         "2014-04-11 04:35:00.000000"
+    ],
+    "realAWSCloudwatch/ec2_cpu_utilization_24ae8d.csv":
+    [
+         "2014-02-26 22:05:00.000000",
+         "2014-02-27 17:15:00.000000"
+    ],
+    "realAWSCloudwatch/ec2_cpu_utilization_53ea38.csv":
+    [
+         "2014-02-19 19:10:00.000000",
+         "2014-02-23 20:05:00.000000"
+    ],
+     "realAWSCloudwatch/ec2_cpu_utilization_5f5533.csv":
+    [
+         "2014-02-19 00:22:00.000000",
+         "2014-02-24 18:37:00.000000"
+    ],
+    "realAWSCloudwatch/ec2_cpu_utilization_77c1ca.csv":
+    [
+         "2014-04-09 10:15:00.000000"
+    ],
+    "realAWSCloudwatch/ec2_cpu_utilization_825cc2.csv":
+    [
+         "2014-04-15 15:44:00.000000",
+         "2014-04-16 03:34:00.000000"
+    ],
+    "realAWSCloudwatch/ec2_cpu_utilization_ac20cd.csv":
+    [
+         "2014-04-14 23:44:00.000000"
+    ],
+    "realAWSCloudwatch/ec2_cpu_utilization_c6585a.csv": [],
+    "realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv":
+    [
+         "2014-02-17 06:12:00.000000",
+         "2014-02-22 00:02:00.000000"
+    ],
+    "realAWSCloudwatch/ec2_disk_write_bytes_1ef3de.csv":
+    [
+         "2014-03-10 21:09:00.000000"
+    ],
+    "realAWSCloudwatch/ec2_disk_write_bytes_c0d644.csv":
+    [
+         "2014-04-09 01:30:00.000000",
+         "2014-04-10 14:35:00.000000",
+         "2014-04-13 00:00:00.000000"
+    ],
+    "realAWSCloudwatch/ec2_network_in_257a54.csv":
+    [
+         "2014-04-15 16:44:00.000000"
+    ],
+    "realAWSCloudwatch/ec2_network_in_5abac7.csv":
+    [
+         "2014-03-09 20:26:00.000000",
+         "2014-03-10 18:56:00.000000",
+         "2014-03-12 21:01:00.000000"
+    ],
+    "realAWSCloudwatch/elb_request_count_8c0756.csv":
+    [
+         "2014-04-12 17:24:00.000000",
+         "2014-04-22 19:34:00.000000"
+    ],
+    "realAWSCloudwatch/grok_asg_anomaly.csv":
+    [
+         "2014-01-20 08:30:00.000000",
+         "2014-01-21 10:45:00.000000",
+         "2014-01-29 00:45:00.000000"
+    ],
+     "realAWSCloudwatch/iio_us-east-1_i-a2eb1cd9_NetworkIn.csv":
+    [
+         "2013-10-10 09:35:00.000000",
+         "2013-10-10 20:40:00.000000"
+    ],
+    "realAWSCloudwatch/rds_cpu_utilization_cc0c53.csv":
+    [
+         "2014-02-25 07:15:00.000000",
+         "2014-02-27 00:50:00.000000"
+    ],
+    "realAWSCloudwatch/rds_cpu_utilization_e47b3b.csv":
+    [
+         "2014-04-13 06:52:00.000000",
+         "2014-04-18 23:37:00.000000"
+    ],
+    "realKnownCause/ambient_temperature_system_failure.csv":
+    [
+         "2013-12-22 20:00:00.000000",
+         "2014-04-13 09:00:00.000000"
+    ],
+    "realKnownCause/cpu_utilization_asg_misconfiguration.csv":
+    [
+         "2014-07-12 02:04:00.000000",
+         "2014-07-14 21:44:00.000000"
+    ],
+    "realKnownCause/ec2_request_latency_system_failure.csv":
+    [
+         "2014-03-14 09:06:00.000000",
+         "2014-03-18 22:41:00.000000",
+         "2014-03-21 03:01:00.000000"
+    ],
+    "realKnownCause/machine_temperature_system_failure.csv":
+    [
+         "2013-12-16 17:25:00.000000",
+         "2014-01-28 13:55:00.000000",
+         "2014-02-08 14:30:00.000000"
+    ]
+}
