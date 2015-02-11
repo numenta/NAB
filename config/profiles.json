@@ -7,7 +7,7 @@
     	"tnWeight": 1.0
 	}
   },
-"false_positives": {
+"reward low FP rate": {
 	"CostMatrix": {
     	"tpWeight": 1.0,
     	"fnWeight": 0.5,
@@ -15,7 +15,7 @@
     	"tnWeight": 1.0
 	}
   },
-"false_negatives": {
+"reward low FN rate": {
 	"CostMatrix": {
     	"tpWeight": 1.0,
     	"fnWeight": 2.0,
