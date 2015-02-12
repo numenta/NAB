@@ -49,6 +49,9 @@ def main(args):
   destPath = args.destPath
   threshold = args.threshold
   verbosity = args.verbosity
+  
+  # Window size determines the FP weights in the scoring profiles, i.e.
+  # the weights will need to be modified if this paramater is changed.
   windowSize = 0.10
 
   print "Getting Corpus"
