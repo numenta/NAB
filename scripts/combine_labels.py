@@ -37,7 +37,6 @@ depth = 2
 
 root = recur(os.path.dirname, os.path.realpath(__file__), depth)
 
-
 def main(args):
   if not args.absolutePaths:
     dataDir = os.path.join(root, args.dataDir)
@@ -49,10 +48,13 @@ def main(args):
   destPath = args.destPath
   threshold = args.threshold
   verbosity = args.verbosity
-  
-  # Window size determines the FP weights in the scoring profiles, i.e.
-  # the weights will need to be modified if this paramater is changed.
+
+  # The following params are used in NAB scoring, but defined here because they
+  # impact the labeling process -- i.e. windows cannot exist in the probationary
+  # period.
   windowSize = 0.10
+  probationaryPeriod = 0.15
+
 
   print "Getting Corpus"
 
@@ -62,7 +64,7 @@ def main(args):
 
   labelCombiner = LabelCombiner(labelDir, corpus,
                                 threshold, windowSize,
-                                verbosity)
+                                probationaryPeriod, verbosity)
 
   print "Combining Labels"
 
