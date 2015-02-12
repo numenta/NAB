@@ -20,6 +20,7 @@
 
 import datetime
 import itertools
+import math
 import numpy
 import os
 import pandas
@@ -161,7 +162,9 @@ class LabelCombiner(object):
   documentation.
   """
 
-  def __init__(self, labelDir, corpus, threshold, windowSize, verbosity):
+  def __init__(self, labelDir, corpus,
+                     threshold, windowSize,
+                     probationaryPeriod, verbosity):
     """
     @param labelDir   (string)   A directory name containing user label files.
                                  This directory should contain one label file
@@ -182,6 +185,7 @@ class LabelCombiner(object):
     self.corpus = corpus
     self.threshold = threshold
     self.windowSize = windowSize
+    self.probationaryPeriod = probationaryPeriod
     self.verbosity = verbosity
 
     self.userLabels = None
@@ -208,7 +212,7 @@ class LabelCombiner(object):
       sort_keys=True, indent=4, separators=(',', ': '))
     with open(destPath, "w") as windowWriter:
       windowWriter.write(windows)
-      
+
 
   def combine(self):
     """Combine raw and known labels in anomaly windows."""
@@ -337,8 +341,9 @@ class LabelCombiner(object):
 
   def checkWindows(self):
     """
-    This takes the anomaly windows and merges overlapping windows into a
-    single window.
+    This takes the anomaly windows and checks for overlap with both each other
+    and with the probationary period. Overlapping windows are merged into a
+    single window. Overlap with the probationary period throws a ValueError.
     """
     for relativePath, windows in self.combinedWindows.iteritems():
       num_windows = len(windows)
@@ -348,6 +353,16 @@ class LabelCombiner(object):
               - pandas.to_datetime(windows[i][1])).total_seconds() <= 0:
             windows[i] = [windows[i][0], windows[i+1][1]]
             del windows[i+1]
+
+      length = len(self.corpus.dataFiles[relativePath].data)
+      probationIndex = int(math.ceil(self.probationaryPeriod*length))
+      probationTimestamp = self.corpus.dataFiles \
+                             [relativePath].data["timestamp"][probationIndex]
+      if num_windows > 0:
+        if (pandas.to_datetime(windows[0][0])
+            -probationTimestamp).total_seconds() < 0:
+          raise ValueError("The first window in %s overlaps with the"
+                           "probationary period" % relativePath)
 
 
 def bucket(rawTimes, buffer):
