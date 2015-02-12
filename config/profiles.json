@@ -3,7 +3,7 @@
 	"CostMatrix": {
     	"tpWeight": 1.0,
     	"fnWeight": 1.0,
-    	"fpWeight": 1.0,
+    	"fpWeight": 0.1,
     	"tnWeight": 1.0
 	}
   },
@@ -11,7 +11,7 @@
 	"CostMatrix": {
     	"tpWeight": 1.0,
     	"fnWeight": 0.5,
-    	"fpWeight": 2.0,
+    	"fpWeight": 0.2,
     	"tnWeight": 1.0
 	}
   },
@@ -19,7 +19,7 @@
 	"CostMatrix": {
     	"tpWeight": 1.0,
     	"fnWeight": 2.0,
-    	"fpWeight": 0.5,
+    	"fpWeight": 0.05,
     	"tnWeight": 1.0
 	}
   }
