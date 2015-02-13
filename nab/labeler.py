@@ -295,7 +295,10 @@ class LabelCombiner(object):
               " respectively:" % relativePath
         print passedAnomalies
         print trueAnomalies
-  
+
+    if self.verbosity>0:
+      print "============================================================="
+    
     self.labelIndices = labelIndices
 
 
@@ -361,8 +364,12 @@ class LabelCombiner(object):
       if num_windows > 0:
         if (pandas.to_datetime(windows[0][0])
             -probationTimestamp).total_seconds() < 0:
-          raise ValueError("The first window in %s overlaps with the"
-                           "probationary period" % relativePath)
+#          raise ValueError("The first window in %s overlaps with the"
+#                           "probationary period" % relativePath)
+          print "Uh oh, the 1st window in %s overlaps the probationary period!"\
+            % relativePath
+          del windows[0]
+          print "The bad window has been deleted!"
 
 
 def bucket(rawTimes, buffer):

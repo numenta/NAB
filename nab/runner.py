@@ -29,6 +29,7 @@ except ImportError:
 from nab.corpus import Corpus
 from nab.detectors.base import detectDataSet
 from nab.labeler import CorpusLabel
+from nab.labeler import LabelCombiner
 from nab.optimizer import optimizeThreshold
 from nab.scorer import scoreCorpus
 from nab.util import updateThresholds
@@ -47,7 +48,6 @@ class Runner(object):
                labelPath,
                profilesPath,
                thresholdPath,
-               probationaryPercent=0.15,
                numCPUs=None):
     """
     @param dataDir        (string)  Directory where all the raw datasets exist.
@@ -78,9 +78,10 @@ class Runner(object):
     self.labelPath = labelPath
     self.profilesPath = profilesPath
     self.thresholdPath = thresholdPath
-
-    self.probationaryPercent = probationaryPercent
     self.pool = multiprocessing.Pool(numCPUs)
+    
+    self.probationaryPercent = 0.15
+    self.windowSize = 0.10
 
     self.corpus = None
     self.corpusLabel = None

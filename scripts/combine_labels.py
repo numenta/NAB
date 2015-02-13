@@ -52,8 +52,8 @@ def main(args):
   # The following params are used in NAB scoring, but defined here because they
   # impact the labeling process -- i.e. windows cannot exist in the probationary
   # period.
-  windowSize = 0.10
-  probationaryPeriod = 0.15
+  windowSize = 0.08
+  probationaryPercent = 0.15
 
 
   print "Getting Corpus"
@@ -64,7 +64,7 @@ def main(args):
 
   labelCombiner = LabelCombiner(labelDir, corpus,
                                 threshold, windowSize,
-                                probationaryPeriod, verbosity)
+                                probationaryPercent, verbosity)
 
   print "Combining Labels"
 
