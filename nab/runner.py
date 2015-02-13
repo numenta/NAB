@@ -29,7 +29,6 @@ except ImportError:
 from nab.corpus import Corpus
 from nab.detectors.base import detectDataSet
 from nab.labeler import CorpusLabel
-from nab.labeler import LabelCombiner
 from nab.optimizer import optimizeThreshold
 from nab.scorer import scoreCorpus
 from nab.util import updateThresholds
