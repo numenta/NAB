@@ -346,7 +346,7 @@ class LabelCombiner(object):
     """
     This takes the anomaly windows and checks for overlap with both each other
     and with the probationary period. Overlapping windows are merged into a
-    single window. Overlap with the probationary period throws a ValueError.
+    single window. Windows overlapping with the probationary period are deleted.
     """
     for relativePath, windows in self.combinedWindows.iteritems():
       num_windows = len(windows)
