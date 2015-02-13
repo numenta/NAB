@@ -52,7 +52,7 @@ def main(args):
   # The following params are used in NAB scoring, but defined here because they
   # impact the labeling process -- i.e. windows cannot exist in the probationary
   # period.
-  windowSize = 0.08
+  windowSize = 0.10
   probationaryPercent = 0.15
 
 
