@@ -364,12 +364,8 @@ class LabelCombiner(object):
       if num_windows > 0:
         if (pandas.to_datetime(windows[0][0])
             -probationTimestamp).total_seconds() < 0:
-#          raise ValueError("The first window in %s overlaps with the"
-#                           "probationary period" % relativePath)
-          print "Uh oh, the 1st window in %s overlaps the probationary period!"\
-            % relativePath
-          del windows[0]
-          print "The bad window has been deleted!"
+          raise ValueError("The first window in %s overlaps with the"
+                           "probationary period" % relativePath)
 
 
 def bucket(rawTimes, buffer):
