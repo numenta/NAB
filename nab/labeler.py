@@ -20,6 +20,7 @@
 
 import datetime
 import itertools
+import math
 import numpy
 import os
 import pandas
@@ -161,7 +162,9 @@ class LabelCombiner(object):
   documentation.
   """
 
-  def __init__(self, labelDir, corpus, threshold, windowSize, verbosity):
+  def __init__(self, labelDir, corpus,
+                     threshold, windowSize,
+                     probationaryPeriod, verbosity):
     """
     @param labelDir   (string)   A directory name containing user label files.
                                  This directory should contain one label file
@@ -182,6 +185,7 @@ class LabelCombiner(object):
     self.corpus = corpus
     self.threshold = threshold
     self.windowSize = windowSize
+    self.probationaryPeriod = probationaryPeriod
     self.verbosity = verbosity
 
     self.userLabels = None
@@ -208,12 +212,13 @@ class LabelCombiner(object):
       sort_keys=True, indent=4, separators=(',', ': '))
     with open(destPath, "w") as windowWriter:
       windowWriter.write(windows)
-      
+
 
   def combine(self):
     """Combine raw and known labels in anomaly windows."""
     self.getRawLabels()
     self.combineLabels()
+    self.removePoorLabels()
     self.applyWindows()
     self.checkWindows()
 
@@ -284,15 +289,35 @@ class LabelCombiner(object):
                                             len(self.userLabels)*self.threshold)
 
       labelIndices[relativePath] = setTruthLabels(dataSet, trueAnomalies)
-
+      
       if self.verbosity>0:
         print "----"
         print "For %s the passed raw labels and qualified true labels are,"\
               " respectively:" % relativePath
         print passedAnomalies
         print trueAnomalies
-  
+    
     self.labelIndices = labelIndices
+
+
+  def removePoorLabels(self):
+    """
+    This removes labels that have been flagged for removal. From manually
+    looking at the data and anomaly windows, we have determined some combined
+    labels should not be included in the ground truth labels.
+    """
+    count = 0
+    for relativePath, indices in self.labelIndices.iteritems():
+    
+      if "iio_us-east-1_i-a2eb1cd9_NetworkIn" in relativePath:
+        del self.labelIndices[relativePath][0]
+    
+      count += len(indices)
+  
+
+    if self.verbosity>0:
+      print "============================================================="
+      print "Total ground truth anomalies in benchmark dataset =", count
 
 
   def applyWindows(self):
@@ -337,8 +362,9 @@ class LabelCombiner(object):
 
   def checkWindows(self):
     """
-    This takes the anomaly windows and merges overlapping windows into a
-    single window.
+    This takes the anomaly windows and checks for overlap with both each other
+    and with the probationary period. Overlapping windows are merged into a
+    single window. Windows overlapping with the probationary period are deleted.
     """
     for relativePath, windows in self.combinedWindows.iteritems():
       num_windows = len(windows)
@@ -348,6 +374,16 @@ class LabelCombiner(object):
               - pandas.to_datetime(windows[i][1])).total_seconds() <= 0:
             windows[i] = [windows[i][0], windows[i+1][1]]
             del windows[i+1]
+
+      length = len(self.corpus.dataFiles[relativePath].data)
+      probationIndex = int(math.ceil(self.probationaryPeriod*length))
+      probationTimestamp = self.corpus.dataFiles \
+                             [relativePath].data["timestamp"][probationIndex]
+      if num_windows > 0:
+        if (pandas.to_datetime(windows[0][0])
+            -probationTimestamp).total_seconds() < 0:
+          raise ValueError("The first window in %s overlaps with the"
+                           "probationary period" % relativePath)
 
 
 def bucket(rawTimes, buffer):

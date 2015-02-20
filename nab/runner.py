@@ -47,7 +47,6 @@ class Runner(object):
                labelPath,
                profilesPath,
                thresholdPath,
-               probationaryPercent=0.15,
                numCPUs=None):
     """
     @param dataDir        (string)  Directory where all the raw datasets exist.
@@ -78,9 +77,10 @@ class Runner(object):
     self.labelPath = labelPath
     self.profilesPath = profilesPath
     self.thresholdPath = thresholdPath
-
-    self.probationaryPercent = probationaryPercent
     self.pool = multiprocessing.Pool(numCPUs)
+    
+    self.probationaryPercent = 0.15
+    self.windowSize = 0.10
 
     self.corpus = None
     self.corpusLabel = None
