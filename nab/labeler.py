@@ -218,6 +218,7 @@ class LabelCombiner(object):
     """Combine raw and known labels in anomaly windows."""
     self.getRawLabels()
     self.combineLabels()
+    self.removePoorLabels()
     self.applyWindows()
     self.checkWindows()
 
@@ -288,18 +289,35 @@ class LabelCombiner(object):
                                             len(self.userLabels)*self.threshold)
 
       labelIndices[relativePath] = setTruthLabels(dataSet, trueAnomalies)
-
+      
       if self.verbosity>0:
         print "----"
         print "For %s the passed raw labels and qualified true labels are,"\
               " respectively:" % relativePath
         print passedAnomalies
         print trueAnomalies
+    
+    self.labelIndices = labelIndices
+
+
+  def removePoorLabels(self):
+    """
+    This removes labels that have been flagged for removal. From manually
+    looking at the data and anomaly windows, we have determined some combined
+    labels should not be included in the ground truth labels.
+    """
+    count = 0
+    for relativePath, indices in self.labelIndices.iteritems():
+    
+      if "iio_us-east-1_i-a2eb1cd9_NetworkIn" in relativePath:
+        del self.labelIndices[relativePath][0]
+    
+      count += len(indices)
+  
 
     if self.verbosity>0:
       print "============================================================="
-    
-    self.labelIndices = labelIndices
+      print "Total ground truth anomalies in benchmark dataset =", count
 
 
   def applyWindows(self):
