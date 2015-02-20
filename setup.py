@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------
-# Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
+# Copyright (C) 2014-2015, Numenta, Inc.  Unless you have an agreement
 # with Numenta, Inc., for a separate license for this software code, the
 # following terms and conditions apply:
 #
@@ -36,13 +36,12 @@ with open(os.path.join(os.path.dirname(__name__), "requirements.txt")) as f:
 setup(
   name = "nab",
   version = "0.1",
-  author = "Jay Gokhale",
-  author_email = "jgokhale@numenta.com",
+  author = "Alexander Lavin",
+  author_email = "nab@numenta.org",
   description = (
-    "Numenta Anomaly Benchmark: A benchmark for streaming \anomaly prediction"),
+    "Numenta Anomaly Benchmark: A benchmark for streaming anomaly prediction"),
   license = "GPL",
   packages=find_packages(),
   long_description=read("README.md"),
   install_requires=requirements,
 )
-
