@@ -1,8 +1,16 @@
 {
     "numenta": {
-        "standard": {
-            "score": -41.581236941361574,
+        "reward low FN rate": {
+            "score": 15.38206870478008,
+            "threshold": 0.9999755859375006
+        },
+        "reward low FP rate": {
+            "score": 16.436287602988894,
             "threshold": 0.9999877929687505
+        },
+        "standard": {
+            "score": 17.979126993973306,
+            "threshold": 0.9999755859375006
         },
         "type1error": {
             "score": -100.36462756695701,
@@ -14,9 +22,17 @@
         }
     },
     "random": {
-        "standard": {
-            "score": -43.0,
+        "reward low FN rate": {
+            "score": -22.387983330602946,
+            "threshold": 0.9965820312500006
+        },
+        "reward low FP rate": {
+            "score": -21.0,
             "threshold": 0.9999511718750007
+        },
+        "standard": {
+            "score": -27.398123985659414,
+            "threshold": 0.9985595703125006
         },
         "type1error": {
             "score": -21.5,
@@ -28,9 +44,17 @@
         }
     },
     "skyline": {
-        "standard": {
-            "score": -28.981989788186304,
+        "reward low FN rate": {
+            "score": -17.46533695215545,
+            "threshold": 0.8000000000000003
+        },
+        "reward low FP rate": {
+            "score": -2.8056418878204417,
             "threshold": 0.9000000000000006
+        },
+        "standard": {
+            "score": -5.235267306651327,
+            "threshold": 0.8000000000000003
         },
         "type1error": {
             "score": -30.465805595628787,
