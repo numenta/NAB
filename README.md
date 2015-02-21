@@ -54,7 +54,7 @@ You need to manually install the following:
 - [Python 2.7](https://www.python.org/download/)
 - [pip](https://pip.pypa.io/en/latest/installing.html)
 - [NumPy](http://www.numpy.org/)
-- [NuPIC](http://www.github.com/numenta/nupic) (Required only to run the Numenta detector)
+- [NuPIC](http://www.github.com/numenta/nupic)
 
 ##### Download this repository
 
