@@ -2,7 +2,7 @@ Detector,Profile,File,Threshold,Score,TP,TN,FP,FN,Total_Count
 skyline,standard,realKnownCause/ec2_request_latency_system_failure.csv,0.8000000000000003,0.09175643572099457,5,3082,0,341,4032
 skyline,standard,artificialWithAnomaly/art_daily_nojump.csv,0.8000000000000003,-1.0,0,3025,0,403,4032
 skyline,standard,realAWSCloudwatch/ec2_cpu_utilization_825cc2.csv,0.8000000000000003,0.8606755737733893,30,3025,0,373,4032
-skyline,standard,realAWSCloudwatch/grok_asg_anomaly.csv,0.8000000000000003,0.3175650492294997,18,3445,21,444,4621
+skyline,standard,realAWSCloudwatch/grok_asg_anomaly.csv,0.8000000000000003,0.6841786021274827,16,3440,23,449,4621
 skyline,standard,realAWSCloudwatch/ec2_cpu_utilization_c6585a.csv,0.8000000000000003,0.0,0,3428,0,0,4032
 skyline,standard,realAWSCloudwatch/rds_cpu_utilization_cc0c53.csv,0.8000000000000003,-0.1384454445914618,44,3026,0,358,4032
 skyline,standard,realAWSCloudwatch/ec2_cpu_utilization_ac20cd.csv,0.8000000000000003,0.8589124122602588,20,3025,0,383,4032
@@ -15,7 +15,7 @@ skyline,standard,artificialNoAnomaly/art_daily_no_noise.csv,0.8000000000000003,0
 skyline,standard,artificialWithAnomaly/art_load_balancer_spikes.csv,0.8000000000000003,-1.0,0,3025,0,403,4032
 skyline,standard,realAWSCloudwatch/ec2_disk_write_bytes_1ef3de.csv,0.8000000000000003,-1.6274469373783773,9,3524,24,464,4730
 skyline,standard,realAWSCloudwatch/ec2_disk_write_bytes_c0d644.csv,0.8000000000000003,0.544259506794138,6,3021,2,399,4032
-skyline,standard,realAWSCloudwatch/iio_us-east-1_i-a2eb1cd9_NetworkIn.csv,0.8000000000000003,-1.22,0,930,2,125,1243
+skyline,standard,realAWSCloudwatch/iio_us-east-1_i-a2eb1cd9_NetworkIn.csv,0.8000000000000003,-2.22,0,929,2,126,1243
 skyline,standard,realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv,0.8000000000000003,-0.9383744834534733,27,3000,26,375,4032
 skyline,standard,artificialNoAnomaly/art_flatline.csv,0.8000000000000003,0.0,0,3428,0,0,4032
 skyline,standard,realAWSCloudwatch/ec2_network_in_257a54.csv,0.8000000000000003,0.8606755737733893,5,3025,0,398,4032
@@ -31,4 +31,4 @@ skyline,standard,artificialWithAnomaly/art_increase_spike_density.csv,0.80000000
 skyline,standard,realKnownCause/ambient_temperature_system_failure.csv,0.8000000000000003,-2.0,0,5451,0,726,7267
 skyline,standard,realAWSCloudwatch/rds_cpu_utilization_e47b3b.csv,0.8000000000000003,1.7195739761720574,23,3026,0,379,4032
 skyline,standard,realAWSCloudwatch/ec2_cpu_utilization_24ae8d.csv,0.8000000000000003,-0.46844544459146187,2,3023,3,400,4032
-Totals,,,,-5.235267306651327,299,125818,95,13326,164136
+Totals,,,,-5.8686537537533425,297,125812,97,13332,164136

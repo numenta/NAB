@@ -1,15 +1,15 @@
 {
     "numenta": {
         "reward low FN rate": {
-            "score": 15.38206870478008,
+            "score": 17.30214002766833,
             "threshold": 0.9999755859375006
         },
         "reward low FP rate": {
-            "score": 16.436287602988894,
+            "score": 18.37220947661779,
             "threshold": 0.9999877929687505
         },
         "standard": {
-            "score": 17.979126993973306,
+            "score": 19.964830452986853,
             "threshold": 0.9999755859375006
         },
         "type1error": {
@@ -23,7 +23,7 @@
     },
     "random": {
         "reward low FN rate": {
-            "score": -22.387983330602946,
+            "score": -20.43950259121246,
             "threshold": 0.9965820312500006
         },
         "reward low FP rate": {
@@ -31,8 +31,8 @@
             "threshold": 0.9999511718750007
         },
         "standard": {
-            "score": -27.398123985659414,
-            "threshold": 0.9985595703125006
+            "score": -25.88925223914175,
+            "threshold": 0.9984497070312507
         },
         "type1error": {
             "score": -21.5,
@@ -49,7 +49,7 @@
             "threshold": 0.8000000000000003
         },
         "reward low FP rate": {
-            "score": -2.8056418878204417,
+            "score": -2.2284422450838086,
             "threshold": 0.9000000000000006
         },
         "standard": {

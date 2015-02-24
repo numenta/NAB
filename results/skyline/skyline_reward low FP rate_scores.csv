@@ -2,7 +2,7 @@ Detector,Profile,File,Threshold,Score,TP,TN,FP,FN,Total_Count
 skyline,reward low FP rate,realKnownCause/ec2_request_latency_system_failure.csv,0.9000000000000006,0.5276261469501982,3,3082,0,343,4032
 skyline,reward low FP rate,artificialWithAnomaly/art_daily_nojump.csv,0.9000000000000006,-0.5,0,3025,0,403,4032
 skyline,reward low FP rate,realAWSCloudwatch/ec2_cpu_utilization_825cc2.csv,0.9000000000000006,0.8606755737733893,6,3025,0,397,4032
-skyline,reward low FP rate,realAWSCloudwatch/grok_asg_anomaly.csv,0.9000000000000006,-0.5130540601423536,2,3462,4,460,4621
+skyline,reward low FP rate,realAWSCloudwatch/grok_asg_anomaly.csv,0.9000000000000006,0.5641455825942789,3,3460,3,462,4621
 skyline,reward low FP rate,realAWSCloudwatch/ec2_cpu_utilization_c6585a.csv,0.9000000000000006,0.0,0,3428,0,0,4032
 skyline,reward low FP rate,realAWSCloudwatch/rds_cpu_utilization_cc0c53.csv,0.9000000000000006,0.3580194207635191,1,3026,0,401,4032
 skyline,reward low FP rate,realAWSCloudwatch/ec2_cpu_utilization_ac20cd.csv,0.9000000000000006,0.8589124122602588,4,3025,0,399,4032
@@ -15,7 +15,7 @@ skyline,reward low FP rate,artificialNoAnomaly/art_daily_no_noise.csv,0.90000000
 skyline,reward low FP rate,artificialWithAnomaly/art_load_balancer_spikes.csv,0.9000000000000006,-0.5,0,3025,0,403,4032
 skyline,reward low FP rate,realAWSCloudwatch/ec2_disk_write_bytes_1ef3de.csv,0.9000000000000006,-0.5,0,3548,0,473,4730
 skyline,reward low FP rate,realAWSCloudwatch/ec2_disk_write_bytes_c0d644.csv,0.9000000000000006,-1.5,0,3023,0,405,4032
-skyline,reward low FP rate,realAWSCloudwatch/iio_us-east-1_i-a2eb1cd9_NetworkIn.csv,0.9000000000000006,-0.5,0,932,0,125,1243
+skyline,reward low FP rate,realAWSCloudwatch/iio_us-east-1_i-a2eb1cd9_NetworkIn.csv,0.9000000000000006,-1.0,0,931,0,126,1243
 skyline,reward low FP rate,realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv,0.9000000000000006,0.4872601747739431,5,3020,6,397,4032
 skyline,reward low FP rate,artificialNoAnomaly/art_flatline.csv,0.9000000000000006,0.0,0,3428,0,0,4032
 skyline,reward low FP rate,realAWSCloudwatch/ec2_network_in_257a54.csv,0.9000000000000006,0.8606755737733893,3,3025,0,400,4032
@@ -31,4 +31,4 @@ skyline,reward low FP rate,artificialWithAnomaly/art_increase_spike_density.csv,
 skyline,reward low FP rate,realKnownCause/ambient_temperature_system_failure.csv,0.9000000000000006,-1.0,0,5451,0,726,7267
 skyline,reward low FP rate,realAWSCloudwatch/rds_cpu_utilization_e47b3b.csv,0.9000000000000006,1.7159636105279883,6,3026,0,396,4032
 skyline,reward low FP rate,realAWSCloudwatch/ec2_cpu_utilization_24ae8d.csv,0.9000000000000006,-1.0,0,3026,0,402,4032
-Totals,,,,-2.8056418878204417,37,125899,14,13588,164136
+Totals,,,,-2.2284422450838086,38,125896,13,13591,164136

@@ -2,14 +2,14 @@ Detector,Profile,File,Threshold,Score,TP,TN,FP,FN,Total_Count
 numenta,reward low FP rate,artificialNoAnomaly/art_daily_small_noise.csv,0.9999877929687505,-0.22,0,3427,1,0,4032
 numenta,reward low FP rate,artificialWithAnomaly/art_load_balancer_spikes.csv,0.9999877929687505,0.2940800257595083,8,3022,3,395,4032
 numenta,reward low FP rate,realAWSCloudwatch/ec2_cpu_utilization_ac20cd.csv,0.9999877929687505,0.8589124122602588,1,3025,0,402,4032
-numenta,reward low FP rate,realAWSCloudwatch/iio_us-east-1_i-a2eb1cd9_NetworkIn.csv,0.9999877929687505,-1.1600000000000001,0,929,3,125,1243
+numenta,reward low FP rate,realAWSCloudwatch/iio_us-east-1_i-a2eb1cd9_NetworkIn.csv,0.9999877929687505,0.19144814694484757,2,930,1,124,1243
 numenta,reward low FP rate,realKnownCause/cpu_utilization_asg_misconfiguration.csv,0.9999877929687505,-1.893196821281014,28,13831,13,1471,18050
 numenta,reward low FP rate,artificialNoAnomaly/art_noisy.csv,0.9999877929687505,0.0,0,3428,0,0,4032
 numenta,reward low FP rate,realAWSCloudwatch/ec2_cpu_utilization_53ea38.csv,0.9999877929687505,1.2171339857122012,3,3024,2,399,4032
 numenta,reward low FP rate,realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv,0.9999877929687505,0.37172120737441283,1,3026,0,401,4032
 numenta,reward low FP rate,realAWSCloudwatch/ec2_cpu_utilization_825cc2.csv,0.9999877929687505,0.8589124122602588,4,3025,0,399,4032
 numenta,reward low FP rate,realAWSCloudwatch/ec2_network_in_257a54.csv,0.9999877929687505,0.8553300258375528,1,3025,0,402,4032
-numenta,reward low FP rate,realAWSCloudwatch/grok_asg_anomaly.csv,0.9999877929687505,0.26793363456220254,6,3456,10,456,4621
+numenta,reward low FP rate,realAWSCloudwatch/grok_asg_anomaly.csv,0.9999877929687505,0.8524073612462468,6,3453,10,459,4621
 numenta,reward low FP rate,artificialWithAnomaly/art_daily_jumpsdown.csv,0.9999877929687505,0.6389124122602589,1,3024,1,402,4032
 numenta,reward low FP rate,realAWSCloudwatch/ec2_cpu_utilization_c6585a.csv,0.9999877929687505,-0.66,0,3425,3,0,4032
 numenta,reward low FP rate,realKnownCause/ambient_temperature_system_failure.csv,0.9999877929687505,1.1030680208178576,4,5448,3,722,7267
@@ -22,6 +22,7 @@ numenta,reward low FP rate,realAWSCloudwatch/rds_cpu_utilization_e47b3b.csv,0.99
 numenta,reward low FP rate,realAWSCloudwatch/rds_cpu_utilization_cc0c53.csv,0.9999877929687505,0.3580194207635191,1,3026,0,401,4032
 numenta,reward low FP rate,artificialWithAnomaly/art_daily_flatmiddle.csv,0.9999877929687505,0.7313767737029511,1,3023,2,402,4032
 numenta,reward low FP rate,realAWSCloudwatch/ec2_cpu_utilization_24ae8d.csv,0.9999877929687505,1.4960388415270383,2,3025,1,400,4032
+numenta,reward low FP rate,realKnownCause/ec2_request_latency_system_failure.csv,0.9999877929687505,0.6231455231429079,2,3082,0,344,4032
 numenta,reward low FP rate,realAWSCloudwatch/ec2_network_in_5abac7.csv,0.9999877929687505,-0.03970959840619376,2,3545,2,472,4730
 numenta,reward low FP rate,artificialNoAnomaly/art_flatline.csv,0.9999877929687505,0.0,0,3428,0,0,4032
 numenta,reward low FP rate,artificialWithAnomaly/art_daily_nojump.csv,0.9999877929687505,0.5378580392410349,4,3024,1,399,4032
@@ -30,5 +31,4 @@ numenta,reward low FP rate,artificialNoAnomaly/art_daily_perfect_square_wave.csv
 numenta,reward low FP rate,realKnownCause/machine_temperature_system_failure.csv,0.9999877929687505,2.8812411724976794,12,17020,0,2259,22695
 numenta,reward low FP rate,artificialWithAnomaly/art_daily_jumpsup.csv,0.9999877929687505,0.8589124122602588,1,3025,0,402,4032
 numenta,reward low FP rate,artificialWithAnomaly/art_increase_spike_density.csv,0.9999877929687505,0.42242040413511717,1,3023,2,402,4032
-numenta,reward low FP rate,realKnownCause/ec2_request_latency_system_failure.csv,0.9999877929687505,0.6231455231429079,2,3082,0,344,4032
-Totals,,,,16.436287602988894,96,125863,50,13529,164136
+Totals,,,,18.37220947661779,98,125861,48,13531,164136
