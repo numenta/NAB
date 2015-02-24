@@ -5,7 +5,6 @@ random,reward low FN rate,artificialNoAnomaly/art_daily_no_noise.csv,0.996582031
 random,reward low FN rate,artificialNoAnomaly/art_daily_small_noise.csv,0.9965820312500006,-0.8250000000000003,0,3413,15,0,4032
 random,reward low FN rate,realAWSCloudwatch/ec2_cpu_utilization_77c1ca.csv,0.9965820312500006,0.27629028568705993,2,3012,13,401,4032
 random,reward low FN rate,realAWSCloudwatch/ec2_cpu_utilization_53ea38.csv,0.9965820312500006,-1.7840100263566359,2,3013,13,400,4032
-random,reward low FN rate,realAWSCloudwatch/ec2_network_in_5abac7.csv,0.9965820312500006,-1.8994212345182167,2,3530,17,472,4730
 random,reward low FN rate,artificialNoAnomaly/art_noisy.csv,0.9965820312500006,-0.8250000000000003,0,3413,15,0,4032
 random,reward low FN rate,realKnownCause/cpu_utilization_asg_misconfiguration.csv,0.9965820312500006,-1.3851052301412203,2,13805,39,1497,18050
 random,reward low FN rate,realAWSCloudwatch/ec2_cpu_utilization_c6585a.csv,0.9965820312500006,-0.8250000000000003,0,3413,15,0,4032
@@ -19,9 +18,9 @@ random,reward low FN rate,realAWSCloudwatch/elb_request_count_8c0756.csv,0.99658
 random,reward low FN rate,artificialWithAnomaly/art_daily_jumpsup.csv,0.9965820312500006,0.2859645504674232,2,3012,13,401,4032
 random,reward low FN rate,realAWSCloudwatch/ec2_cpu_utilization_825cc2.csv,0.9965820312500006,0.32828312519121927,2,3012,13,401,4032
 random,reward low FN rate,realAWSCloudwatch/ec2_disk_write_bytes_c0d644.csv,0.9965820312500006,-3.7593624323683055,1,3009,14,404,4032
-random,reward low FN rate,realAWSCloudwatch/grok_asg_anomaly.csv,0.9965820312500006,-1.9784493996389005,1,3448,18,461,4621
+random,reward low FN rate,realAWSCloudwatch/grok_asg_anomaly.csv,0.9965820312500006,-0.8847901974706769,3,3447,16,462,4621
 random,reward low FN rate,realAWSCloudwatch/ec2_cpu_utilization_24ae8d.csv,0.9965820312500006,-1.7312601434520656,2,3013,13,400,4032
-random,reward low FN rate,realAWSCloudwatch/iio_us-east-1_i-a2eb1cd9_NetworkIn.csv,0.9965820312500006,-2.329100446554818,0,926,6,125,1243
+random,reward low FN rate,realAWSCloudwatch/iio_us-east-1_i-a2eb1cd9_NetworkIn.csv,0.9965820312500006,-1.4742789093325608,1,926,5,125,1243
 random,reward low FN rate,realAWSCloudwatch/ec2_disk_write_bytes_1ef3de.csv,0.9965820312500006,0.17791011188696404,3,3532,16,470,4730
 random,reward low FN rate,artificialWithAnomaly/art_daily_flatmiddle.csv,0.9965820312500006,0.32141610127900666,2,3012,13,401,4032
 random,reward low FN rate,artificialWithAnomaly/art_daily_nojump.csv,0.9965820312500006,0.2859645504674232,2,3012,13,401,4032
@@ -30,5 +29,6 @@ random,reward low FN rate,realAWSCloudwatch/ec2_cpu_utilization_5f5533.csv,0.996
 random,reward low FN rate,realKnownCause/ec2_request_latency_system_failure.csv,0.9965820312500006,-3.8147730146122063,1,3068,14,345,4032
 random,reward low FN rate,realKnownCause/machine_temperature_system_failure.csv,0.9965820312500006,0.7763683518281694,9,16978,42,2262,22695
 random,reward low FN rate,artificialWithAnomaly/art_daily_jumpsdown.csv,0.9965820312500006,0.2859645504674232,2,3012,13,401,4032
+random,reward low FN rate,realAWSCloudwatch/ec2_network_in_5abac7.csv,0.9965820312500006,-1.8994212345182167,2,3530,17,472,4730
 random,reward low FN rate,artificialWithAnomaly/art_increase_spike_density.csv,0.9965820312500006,0.2923880675437962,2,3012,13,401,4032
-Totals,,,,-22.387983330602946,58,125421,492,13567,164136
+Totals,,,,-20.43950259121246,61,125420,489,13568,164136

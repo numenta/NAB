@@ -2,14 +2,14 @@ Detector,Profile,File,Threshold,Score,TP,TN,FP,FN,Total_Count
 numenta,standard,artificialNoAnomaly/art_daily_small_noise.csv,0.9999755859375006,-0.11,0,3427,1,0,4032
 numenta,standard,artificialWithAnomaly/art_load_balancer_spikes.csv,0.9999755859375006,0.6247923060442375,13,3022,3,390,4032
 numenta,standard,realAWSCloudwatch/ec2_cpu_utilization_ac20cd.csv,0.9999755859375006,0.8589124122602588,1,3025,0,402,4032
-numenta,standard,realAWSCloudwatch/iio_us-east-1_i-a2eb1cd9_NetworkIn.csv,0.9999755859375006,-1.44,0,928,4,125,1243
+numenta,standard,realAWSCloudwatch/iio_us-east-1_i-a2eb1cd9_NetworkIn.csv,0.9999755859375006,-0.13404312895868475,3,930,1,123,1243
 numenta,standard,realKnownCause/cpu_utilization_asg_misconfiguration.csv,0.9999755859375006,-1.3431968212810137,44,13823,21,1455,18050
 numenta,standard,artificialNoAnomaly/art_noisy.csv,0.9999755859375006,0.0,0,3428,0,0,4032
 numenta,standard,realAWSCloudwatch/ec2_cpu_utilization_53ea38.csv,0.9999755859375006,0.9969829247985773,3,3020,6,399,4032
 numenta,standard,realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv,0.9999755859375006,-0.12827879262558717,1,3026,0,401,4032
 numenta,standard,realAWSCloudwatch/ec2_cpu_utilization_825cc2.csv,0.9999755859375006,0.8589124122602588,4,3025,0,399,4032
 numenta,standard,realAWSCloudwatch/ec2_network_in_257a54.csv,0.9999755859375006,0.8553300258375528,1,3025,0,402,4032
-numenta,standard,realAWSCloudwatch/grok_asg_anomaly.csv,0.9999755859375006,1.005504206975723,6,3455,11,456,4621
+numenta,standard,realAWSCloudwatch/grok_asg_anomaly.csv,0.9999755859375006,1.685250794947959,6,3452,11,459,4621
 numenta,standard,artificialWithAnomaly/art_daily_jumpsdown.csv,0.9999755859375006,0.7489124122602588,1,3024,1,402,4032
 numenta,standard,realAWSCloudwatch/ec2_cpu_utilization_c6585a.csv,0.9999755859375006,-0.33,0,3425,3,0,4032
 numenta,standard,realKnownCause/ambient_temperature_system_failure.csv,0.9999755859375006,1.4330680208178574,7,5448,3,719,7267
@@ -22,6 +22,7 @@ numenta,standard,realAWSCloudwatch/rds_cpu_utilization_e47b3b.csv,0.999975585937
 numenta,standard,realAWSCloudwatch/rds_cpu_utilization_cc0c53.csv,0.9999755859375006,-0.340353552736542,1,3024,2,401,4032
 numenta,standard,artificialWithAnomaly/art_daily_flatmiddle.csv,0.9999755859375006,0.795144592981605,1,3023,2,402,4032
 numenta,standard,realAWSCloudwatch/ec2_cpu_utilization_24ae8d.csv,0.9999755859375006,1.6060388415270381,2,3025,1,400,4032
+numenta,standard,realKnownCause/ec2_request_latency_system_failure.csv,0.9999755859375006,0.12314552314290794,2,3082,0,344,4032
 numenta,standard,realAWSCloudwatch/ec2_network_in_5abac7.csv,0.9999755859375006,-0.31970959840619373,2,3545,2,472,4730
 numenta,standard,artificialNoAnomaly/art_flatline.csv,0.9999755859375006,0.0,0,3428,0,0,4032
 numenta,standard,artificialWithAnomaly/art_daily_nojump.csv,0.9999755859375006,0.6533516263035399,9,3024,1,394,4032
@@ -30,5 +31,4 @@ numenta,standard,artificialNoAnomaly/art_daily_perfect_square_wave.csv,0.9999755
 numenta,standard,realKnownCause/machine_temperature_system_failure.csv,0.9999755859375006,2.8819136455375025,20,17020,0,2251,22695
 numenta,standard,artificialWithAnomaly/art_daily_jumpsup.csv,0.9999755859375006,0.8589124122602588,2,3025,0,401,4032
 numenta,standard,artificialWithAnomaly/art_increase_spike_density.csv,0.9999755859375006,0.6424203307146716,1,3023,2,402,4032
-numenta,standard,realKnownCause/ec2_request_latency_system_failure.csv,0.9999755859375006,0.12314552314290794,2,3082,0,344,4032
-Totals,,,,17.979126993973306,150,125845,68,13475,164136
+Totals,,,,19.964830452986853,153,125844,65,13476,164136
