@@ -23,7 +23,7 @@ the [AmazonCloudwatch service](https://aws.amazon
 metrics include CPU Utilization, Network Bytes In, and Disk Read Bytes. There
 are also real world sensor readings from some large machines. 
 
-All data is included in the repository. We are in the process of adding more data, and actively searching for more data. The NAB version will be updated whenever new data is added to the corpus; NAB is currently in v0.1.
+All data is included in the repository. We are in the process of adding more data, and actively searching for more data. The NAB version will be updated whenever new data is added to the corpus; NAB is currently in v0.8.
 
 #### Task
 
@@ -36,7 +36,7 @@ This benchmark is representative of a task in human time-scales. Per-record clas
 
 It is insufficient to just catch all anomalies. A detector with a high false positive rate is of little use. I.e. many false positives will reduce or eliminate an institution's willingness to use your technique; you must minimize the cost of using your detection technique.
 
-Installing NAB 0.1
+Installing NAB 0.8
 --------------
 
 ### Supported Platforms
