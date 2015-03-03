@@ -11,14 +11,6 @@
         "standard": {
             "score": 19.964830452986853,
             "threshold": 0.9999755859375006
-        },
-        "type1error": {
-            "score": -100.36462756695701,
-            "threshold": 0.9999877929687505
-        },
-        "type2error": {
-            "score": -18.18954162856387,
-            "threshold": 0.9999877929687505
         }
     },
     "random": {
@@ -33,14 +25,6 @@
         "standard": {
             "score": -25.88925223914175,
             "threshold": 0.9984497070312507
-        },
-        "type1error": {
-            "score": -21.5,
-            "threshold": 0.9999511718750007
-        },
-        "type2error": {
-            "score": -86.0,
-            "threshold": 0.9999511718750007
         }
     },
     "skyline": {
@@ -55,14 +39,6 @@
         "standard": {
             "score": -5.235267306651327,
             "threshold": 0.8000000000000003
-        },
-        "type1error": {
-            "score": -30.465805595628787,
-            "threshold": 0.9000000000000006
-        },
-        "type2error": {
-            "score": -48.49008188446506,
-            "threshold": 0.9000000000000006
         }
     }
 }
