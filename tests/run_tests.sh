@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Run all Travis CI build tests here.
+
 echo
 echo "========================================"
 echo "Running integration tests"
