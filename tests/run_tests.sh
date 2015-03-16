@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Run all Travis CI build tests here.
+# Run the Travis CI build tests here.
 
 echo
 echo "========================================"
