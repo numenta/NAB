@@ -35,6 +35,7 @@ from nab.test_helpers import writeCorpus, writeCorpusLabel, generateTimestamps
 
 class CorpusLabelTest(unittest.TestCase):
 
+
   def setUp(self):
     self.tempDir = os.path.join(tempfile.mkdtemp(), "test")
     self.tempCorpusPath = os.path.join(self.tempDir, "data")
