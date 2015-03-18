@@ -104,7 +104,8 @@ class TruePositiveTest(unittest.TestCase):
       probationaryPeriod=0)
     (_, score2) = scorer2.getScore()
 
-    self.assertTrue(score1 > score2)
+    self.assertTrue(score1 > score2, "The earlier TP score is not greater than "
+      "the later TP. They are %f and %f, respectively." % (score1, score2))
     self._checkCounts(scorer1.counts, length-windowSize*numWindows, 1, 0,
       windowSize*numWindows-1)
     self._checkCounts(scorer2.counts, length-windowSize*numWindows, 1, 0,
@@ -173,11 +174,11 @@ class TruePositiveTest(unittest.TestCase):
     predictions2 = pandas.Series([0]*length)
     predictions2[index] = 1
 
-    scorer1 = Scorer(timestamps, predictions1, labels1, windows1, self.costMatrix,
-      probationaryPeriod=0)
+    scorer1 = Scorer(timestamps, predictions1, labels1, windows1,
+      self.costMatrix, probationaryPeriod=0)
     (_, score1) = scorer1.getScore()
-    scorer2 = Scorer(timestamps, predictions2, labels2, windows2, self.costMatrix,
-      probationaryPeriod=0)
+    scorer2 = Scorer(timestamps, predictions2, labels2, windows2,
+      self.costMatrix, probationaryPeriod=0)
     (_, score2) = scorer2.getScore()
     
     self.assertEqual(score1, score2)
