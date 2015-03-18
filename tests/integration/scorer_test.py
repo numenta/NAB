@@ -122,6 +122,7 @@ class ScorerTest(unittest.TestCase):
     
     costMatrixFN = copy.deepcopy(self.costMatrix)
     costMatrixFN["fnWeight"] = 2.0
+    costMatrixFN["fpWeight"] = 0.055
     
     scorer1 = Scorer(timestamps, predictions, labels, windows, self.costMatrix,
       probationaryPeriod=0)
@@ -156,6 +157,7 @@ class ScorerTest(unittest.TestCase):
     
     costMatrixFP = copy.deepcopy(self.costMatrix)
     costMatrixFP["fpWeight"] = 2.0
+    costMatrixFP["fnWeight"] = 0.5
     # FP
     predictions[0] = 1
 
