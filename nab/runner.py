@@ -106,7 +106,7 @@ class Runner(object):
                                         detector name and its corresponding
                                         class constructor.
     """
-    print "Running detection step"
+    print "\nRunning detection step"
     
     count = 0
     args = []
@@ -141,7 +141,7 @@ class Runner(object):
                                   dictionary containing the score and the
                                   threshold used to obtained that score.
     """
-    print "Running optimize step"
+    print "\nRunning optimize step"
     
     scoreFlag = False
     thresholds = {}
@@ -184,10 +184,11 @@ class Runner(object):
                                     another dictionary containing the score and
                                     the threshold used to obtained that score.
     """
-    print "Running scoring step"
+    print "\nRunning scoring step"
     
     scoreFlag = True
 
+    self.resultsFiles = []
     for detectorName in detectorNames:
       resultsDetectorDir = os.path.join(self.resultsDir, detectorName)
       resultsCorpus = Corpus(resultsDetectorDir)
@@ -206,8 +207,41 @@ class Runner(object):
                                  self.probationaryPercent,
                                  scoreFlag))
 
-        scorePath = os.path.join(resultsDetectorDir,
-                                 "%s_%s_scores.csv" % (detectorName, profileName))
+        scorePath = os.path.join(resultsDetectorDir, "%s_%s_scores.csv" %\
+          (detectorName, profileName))
         resultsDF.to_csv(scorePath, index=False)
-        print "%s detector benchmark scores written to %s" % (detectorName,
-                                                            scorePath)
+        print "%s detector benchmark scores written to %s" %\
+          (detectorName, scorePath)
+        self.resultsFiles.append(scorePath)
+
+
+  def normalize(self):
+    """Normalize the detectors' scores according to the Baseline.
+    
+    Function can only be called with the scoring step (i.e. runner.score())
+    preceding it.
+    This reads the total score values from the results CSVs, and
+    adds the relevant baseline value.
+    """
+    print "\nRunning score normalization step"
+
+    # Get baselines for each application profile
+    baselineDir = os.path.join(self.resultsDir, "baseline")
+    if not os.path.isdir(baselineDir):
+      raise IOError("No results directory for baseline. You must "
+        "run the baseline detector before normalizing scores.")
+    baselines = {}
+    for profileName, _ in self.profiles.iteritems():
+      fileName = baselineDir + "/baseline_" + profileName + "_scores.csv"
+      with open(fileName) as f:
+        results = pandas.read_csv(f)
+        baselines[profileName] = results["Score"][len(results)-1]
+    
+    for fileName in self.resultsFiles:
+      csvName = fileName.split("/")[-1]
+      base = baselines[csvName.split("_")[1]]
+      with open(fileName) as f:
+        results = pandas.read_csv(f)
+        score = -base + results["Score"][len(results)-1]
+      
+      print "Final score for \'%s\' = %.2f" % (csvName[:-11], score)
