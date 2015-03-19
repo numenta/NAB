@@ -1,16 +1,20 @@
 language: python
+
 python:
   - 2.7
-install:
-  - pip install numpy --upgrade
-  - pip install https://s3-us-west-2.amazonaws.com/artifacts.numenta.org/numenta/nupic/releases/nupic-0.2.1-cp27-none-linux_x86_64.whl
-  - pip install -r requirements.txt
-
-# Run tests
-script:
-  - py.test tests/
 
 # Whitelist branches
 branches:
   only:
     - master
+
+before_install:
+  - pip install --upgrade pip
+  - pip install --upgrade numpy
+
+install:
+  - pip install https://s3-us-west-2.amazonaws.com/artifacts.numenta.org/numenta/nupic/releases/nupic-0.2.1-cp27-none-linux_x86_64.whl
+
+# Run tests
+script:
+  - py.test tests/
