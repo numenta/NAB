@@ -11,6 +11,7 @@ branches:
 before_install:
   - pip install --upgrade pip
   - pip install --upgrade numpy
+  - sudo apt-get install -y python2.7 python 2.7-dev
 
 install:
   - pip install https://s3-us-west-2.amazonaws.com/artifacts.numenta.org/numenta/nupic/releases/nupic-0.2.1-cp27-none-linux_x86_64.whl
