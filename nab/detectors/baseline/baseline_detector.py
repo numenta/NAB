@@ -33,3 +33,4 @@ class BaselineDetector(AnomalyDetector):
     """The anomalyScore is simply a constant 0.5."""
     anomalyScore = 0.5
     return (anomalyScore, )
+    

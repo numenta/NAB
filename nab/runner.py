@@ -245,3 +245,4 @@ class Runner(object):
         score = -base + results["Score"][len(results)-1]
       
       print "Final score for \'%s\' = %.2f" % (csvName[:-11], score)
+      
