@@ -11,7 +11,13 @@ branches:
 before_install:
   - pip install --upgrade pip
   - pip install --upgrade numpy
-  - sudo apt-get install -y python2.7 python 2.7-dev
+  # install gcc-4.8 for C++11 compatibility, #TODO remove when Travis has gcc>=4.8, (it's used for clang too, in coveralls)
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  - sudo apt-get -qq update
+  - sudo apt-get -qq install g++-4.8
+  - alias gcc='gcc-4.8'
+  - alias g++='g++-4.8'
+
 
 install:
   - pip install https://s3-us-west-2.amazonaws.com/artifacts.numenta.org/numenta/nupic/releases/nupic-0.2.1-cp27-none-linux_x86_64.whl
