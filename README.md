@@ -2,7 +2,7 @@
 
 #### This repo is under active revision. The code does not work yet. Browse, please don't judge. :)
 
-The Numenta Anomaly Benchmark
+The Numenta Anomaly Benchmark [![Build Status](https://travis-ci.org/numenta/NAB.svg?branch=master)](https://travis-ci.org/numenta/NAB)
 -----------------------------
 
 Welcome. This repository contains the data and scripts necessary to replicate the results in the forthcoming Numenta Anomaly Benchmark (NAB) paper. Also provided are the tools to run NAB scoring on your own anomaly detection algorithms. Competitive results tied to open source code will be posted in the wiki on the [Scoreboard](https://github.com/numenta/NAB/wiki#nab-scoreboard). Let us know about your work by submitting a pull request. 
