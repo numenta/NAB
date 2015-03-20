@@ -17,7 +17,8 @@ before_install:
   - sudo apt-get -qq install g++-4.8
   - alias gcc='gcc-4.8'
   - alias g++='g++-4.8'
-
+  - export CC='gcc-4.8'
+  - export CXX='g++-4.8'
 
 install:
   - pip install https://s3-us-west-2.amazonaws.com/artifacts.numenta.org/numenta/nupic/releases/nupic-0.2.1-cp27-none-linux_x86_64.whl
