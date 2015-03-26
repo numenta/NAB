@@ -216,12 +216,16 @@ class Runner(object):
 
 
   def normalize(self):
-    """Normalize the detectors' scores according to the Baseline.
+    """Normalize the detectors' scores according to the Baseline, and print to
+    the console.
     
     Function can only be called with the scoring step (i.e. runner.score())
     preceding it.
     This reads the total score values from the results CSVs, and
-    adds the relevant baseline value.
+    adds the relevant baseline value. The scores are then normalized by
+    multiplying by 100/perfect, where the perfect score is the number of TPs
+    possible (i.e. 44.0).
+    Note the results CSVs still contain the original scores, not normalized.
     """
     print "\nRunning score normalization step"
 
@@ -242,7 +246,8 @@ class Runner(object):
       base = baselines[csvName.split("_")[1]]
       with open(fileName) as f:
         results = pandas.read_csv(f)
-        score = -base + results["Score"][len(results)-1]
+        perfect = 44.0 - base
+        score = (-base + results["Score"][len(results)-1]) * (100/perfect)
       
       print "Final score for \'%s\' = %.2f" % (csvName[:-11], score)
       
