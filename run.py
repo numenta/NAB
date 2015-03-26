@@ -34,6 +34,7 @@ from nab.util import (detectorNameToClass, checkInputs)
 from nab.detectors.numenta.numenta_detector import NumentaDetector
 from nab.detectors.skyline.skyline_detector import SkylineDetector
 from nab.detectors.random.random_detector import RandomDetector
+from nab.detectors.baseline.baseline_detector import BaselineDetector
 
 
 
@@ -80,8 +81,10 @@ def main(args):
   if args.score:
     with open(args.thresholdsFile) as thresholdConfigFile:
       detectorThresholds = json.load(thresholdConfigFile)
-
     runner.score(args.detectors, detectorThresholds)
+
+  if args.normalize:
+    runner.normalize()
 
 
 if __name__ == "__main__":
@@ -105,16 +108,15 @@ if __name__ == "__main__":
                     default=False,
                     action="store_true")
 
+  parser.add_argument("--normalize",
+                    help="Normalize the final scores",
+                    default=False,
+                    action="store_true")
+                    
   parser.add_argument("--skipConfirmation",
                     help="If specified will skip the user confirmation step",
                     default=False,
                     action="store_true")
-
-  parser.add_argument("-d", "--detectors",
-                    nargs="*",
-                    type=str,
-                    default=["numenta", "random", "skyline"],
-                    help="Space separated list of detector(s) to use.")
 
   parser.add_argument("--dataDir",
                     default="data",
@@ -129,7 +131,13 @@ if __name__ == "__main__":
                     default=os.path.join("labels", "combined_labels.json"),
                     help="JSON file containing ground truth labels for the "
                          "corpus.")
-
+                         
+  parser.add_argument("-d", "--detectors",
+                    nargs="*",
+                    type=str,
+                    default=["baseline", "numenta", "random", "skyline"],
+                    help="Space separated list of detector(s) to use.")
+                    
   parser.add_argument("-p", "--profilesFile",
                     default="config/profiles.json",
                     help="The configuration file to use while running the "
@@ -147,10 +155,15 @@ if __name__ == "__main__":
 
   args = parser.parse_args()
   
-  if not args.detect and not args.score and not args.optimize:
+  if (not args.detect
+      and not args.optimize
+      and not args.score
+      and not args.normalize):
     args.detect = True
     args.optimize = True
     args.score = True
+    args.normalize = True
 
   if args.skipConfirmation or checkInputs(args):
     main(args)
+    

@@ -10,7 +10,7 @@
 "reward low FP rate": {
 	"CostMatrix": {
     	"tpWeight": 1.0,
-    	"fnWeight": 0.5,
+    	"fnWeight": 1.0,
     	"fpWeight": 0.22,
     	"tnWeight": 1.0
 	}
@@ -19,7 +19,7 @@
 	"CostMatrix": {
     	"tpWeight": 1.0,
     	"fnWeight": 2.0,
-    	"fpWeight": 0.055,
+    	"fpWeight": 0.11,
     	"tnWeight": 1.0
 	}
   }
