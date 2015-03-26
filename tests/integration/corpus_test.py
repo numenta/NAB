@@ -19,13 +19,13 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-import os
 import copy
-import shutil
-import pandas
-import tempfile
 import numpy as np
-import unittest2 as unittest
+import os
+import pandas
+import shutil
+import tempfile
+import unittest
 
 import nab.corpus
 from nab.util import recur
@@ -47,7 +47,7 @@ class CorpusTest(unittest.TestCase):
     self.corpus = nab.corpus.Corpus(self.corpusSource)
 
 
-  def test_getDataFiles(self):
+  def testGetDataFiles(self):
     """
     Test the getDataFiles() function, specifically check if corpus.dataFiles
     is a dictionary containing DataFile objects containing pandas.DataFrame
@@ -60,7 +60,7 @@ class CorpusTest(unittest.TestCase):
         set(["timestamp", "value"]))
 
 
-  def test_addColumn(self):
+  def testAddColumn(self):
     """
     Test the addColumn() function, specificially check if a new column named
     "test" is added.
@@ -77,7 +77,7 @@ class CorpusTest(unittest.TestCase):
         set(["timestamp", "value", "test"]))
 
 
-  def test_removeColumn(self):
+  def testRemoveColumn(self):
     """
     Test the removeColumn() function, specifically check if an added column
     named "test" is removed.
@@ -96,7 +96,7 @@ class CorpusTest(unittest.TestCase):
         set(["timestamp", "value"]))
 
 
-  def test_copy(self):
+  def testCopy(self):
     """
     Test the copy() function, specifically check if it copies the whole corpus
     to another directory and that the copied corpus is the exact same as the
@@ -117,7 +117,7 @@ class CorpusTest(unittest.TestCase):
     shutil.rmtree(copyLocation)
 
 
-  def test_addDataSet(self):
+  def testAddDataSet(self):
     """
     Test the addDataSet() function, specifically check if it adds a new
     data file in the correct location in directory and into the dataFiles
@@ -135,7 +135,7 @@ class CorpusTest(unittest.TestCase):
     shutil.rmtree(copyLocation)
 
 
-  def test_getDataSubset(self):
+  def testGetDataSubset(self):
     """
     Test the getDataSubset() function, specifically check if it returns only
     dataFiles with relativePaths that contain the query given.
@@ -154,7 +154,6 @@ class CorpusTest(unittest.TestCase):
 
     for relativePath in subset2.keys():
       self.assertIn(query2, relativePath)
-
 
 
 if __name__ == '__main__':
