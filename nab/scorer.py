@@ -358,7 +358,7 @@ def scoreCorpus(threshold, args):
 
   results = pool.map(scoreDataSet, args)
 
-  # Total the 6 scoring metrics for all datasets
+  # Total the 6 scoring metrics for all data files
   totals = [None]*3 + [0]*6
   for row in results:
     for i in xrange(6):

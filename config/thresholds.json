@@ -1,4 +1,18 @@
 {
+    "baseline": {
+        "reward low FN rate": {
+            "score": -88.0,
+            "threshold": 0.6000000000000001
+        },
+        "reward low FP rate": {
+            "score": -22.0,
+            "threshold": 0.6000000000000001
+        },
+        "standard": {
+            "score": -44.0,
+            "threshold": 0.6000000000000001
+        }
+    },
     "numenta": {
         "reward low FN rate": {
             "score": 17.30214002766833,

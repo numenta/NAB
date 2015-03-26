@@ -84,7 +84,10 @@ def main(args):
     runner.score(args.detectors, detectorThresholds)
 
   if args.normalize:
-    runner.normalize()
+    try:
+      runner.normalize()
+    except AttributeError:
+      print "Error: you must run the scoring step with the normalization step"
 
 
 if __name__ == "__main__":
