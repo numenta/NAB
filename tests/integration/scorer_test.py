@@ -72,6 +72,11 @@ class ScorerTest(unittest.TestCase):
     """
     Test scaling the weight of false positives results in an approximate
     balance with the true positives.
+    
+    The contributions of TP and FP scores should approximately cancel; i.e.
+    total score =0. With x windows, this total score should on average decrease
+    x/2 because of x FNs. Thus, the acceptable range for score should be
+    centered about -x/2.
     """
     start = datetime.datetime.now()
     increment = datetime.timedelta(minutes=5)
@@ -98,9 +103,10 @@ class ScorerTest(unittest.TestCase):
       scores.append(score)
   
     avgScore = sum(scores)/float(len(scores))
-    self.assertTrue(-1.0 <= avgScore <= 1.0, "The average score across 20 sets "
+
+    self.assertTrue(-1.5 <= avgScore <= 0.5, "The average score across 20 sets "
       "of random detections is %f, which is not within the acceptable range "
-      "-1.0 to 1.0." % avgScore)
+      "-1.5 to 0.5." % avgScore)
   
 
   def testRewardLowFalseNegatives(self):
