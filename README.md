@@ -61,13 +61,20 @@ You need to manually install the following:
     cd ~/
     git clone https://github.com/numenta/NAB.git
 
-##### Install Python requirements
+##### Install the Python requirements
 
     cd NAB
     (sudo) pip install -r requirements.txt
 
-This will install the additional required modules pandas and simplejson.  
+This will install the additional required modules pandas and simplejson.
 
+##### Install NAB
+
+	(sudo) python setup.py develop
+
+Or with manual PYTHONPATH setup, rather than sudo:
+
+	python setup.py develop --prefix=/some/other/path/
 
 ### Usage
 
@@ -75,7 +82,6 @@ This will install the additional required modules pandas and simplejson.
 
     cd /path/to/nab
     python run.py
-    python setup.py develop (for now)
 
 This will produce results files for the anomaly detection methods. Included in the repo are the Numenta anomaly detection method, as well as methods from the [Etsy Skyline](https://github.com/etsy/skyline) anomaly detection library, and a random detector. This will also pass those results files to the scoring script to generate final NAB scores.
 
