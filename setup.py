@@ -35,7 +35,7 @@ with open(os.path.join(os.path.dirname(__name__), "requirements.txt")) as f:
 
 setup(
   name = "nab",
-  version = "0.1",
+  version = "0.8",
   author = "Alexander Lavin",
   author_email = "nab@numenta.org",
   description = (
