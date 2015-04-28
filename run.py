@@ -72,7 +72,8 @@ def main(args):
   runner.initialize()
 
   if args.detect:
-    detectorConstructors = getDetectorClassConstructors(args.detectors)
+    detectorConstructors = getDetectorClassConstructors(
+      args.detectors[0].split(','))
     runner.detect(detectorConstructors)
 
   if args.optimize:
@@ -137,9 +138,9 @@ if __name__ == "__main__":
                          
   parser.add_argument("-d", "--detectors",
                     nargs="*",
-                    type=str,
                     default=["baseline", "numenta", "random", "skyline"],
-                    help="Space separated list of detector(s) to use.")
+                    help="Comma separated list of detector(s) to use, e.g. "
+                         "baseline,numenta")
                     
   parser.add_argument("-p", "--profilesFile",
                     default="config/profiles.json",
