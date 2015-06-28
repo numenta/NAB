@@ -8,6 +8,14 @@
             "score": -22.0,
             "threshold": 0.6000000000000001
         },
+        "reward_low_FN_rate": {
+            "score": -88.0,
+            "threshold": 0.6000000000000001
+        },
+        "reward_low_FP_rate": {
+            "score": -44.0,
+            "threshold": 0.6000000000000001
+        },
         "standard": {
             "score": -44.0,
             "threshold": 0.6000000000000001
@@ -36,8 +44,16 @@
             "score": -21.0,
             "threshold": 0.9999511718750007
         },
+        "reward_low_FN_rate": {
+            "score": -45.889252239141754,
+            "threshold": 0.9984497070312507
+        },
+        "reward_low_FP_rate": {
+            "score": -40.59422055318891,
+            "threshold": 0.9995117187500009
+        },
         "standard": {
-            "score": -25.88925223914175,
+            "score": -25.889252239141747,
             "threshold": 0.9984497070312507
         }
     },
