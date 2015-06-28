@@ -141,8 +141,8 @@ if __name__ == "__main__":
                     nargs="*",
                     type=str,
                     default=["baseline", "numenta", "random", "skyline"],
-                    help="Space separated list of detector(s) to use, e.g. "
-                         "baseline numenta")
+                    help="Comma separated list of detector(s) to use, e.g. "
+                         "baseline,numenta")
                     
   parser.add_argument("-p", "--profilesFile",
                     default="config/profiles.json",
