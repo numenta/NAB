@@ -1,13 +1,5 @@
 {
     "baseline": {
-        "reward low FN rate": {
-            "score": -88.0,
-            "threshold": 0.6000000000000001
-        },
-        "reward low FP rate": {
-            "score": -22.0,
-            "threshold": 0.6000000000000001
-        },
         "reward_low_FN_rate": {
             "score": -88.0,
             "threshold": 0.6000000000000001
@@ -22,11 +14,11 @@
         }
     },
     "numenta": {
-        "reward low FN rate": {
+        "reward_low_FN_rate": {
             "score": 17.30214002766833,
             "threshold": 0.9999755859375006
         },
-        "reward low FP rate": {
+        "reward_low_FP_rate": {
             "score": 18.37220947661779,
             "threshold": 0.9999877929687505
         },
@@ -36,14 +28,6 @@
         }
     },
     "random": {
-        "reward low FN rate": {
-            "score": -20.43950259121246,
-            "threshold": 0.9965820312500006
-        },
-        "reward low FP rate": {
-            "score": -21.0,
-            "threshold": 0.9999511718750007
-        },
         "reward_low_FN_rate": {
             "score": -45.889252239141754,
             "threshold": 0.9984497070312507
@@ -58,11 +42,11 @@
         }
     },
     "skyline": {
-        "reward low FN rate": {
+        "reward_low_FN_rate": {
             "score": -17.46533695215545,
             "threshold": 0.8000000000000003
         },
-        "reward low FP rate": {
+        "reward_low_FP_rate": {
             "score": -2.2284422450838086,
             "threshold": 0.9000000000000006
         },
