@@ -187,6 +187,7 @@ class Runner(object):
     print "\nRunning scoring step"
     
     scoreFlag = True
+    baselines = {}
 
     self.resultsFiles = []
     for detectorName in detectorNames:
@@ -209,6 +210,7 @@ class Runner(object):
 
         scorePath = os.path.join(resultsDetectorDir, "%s_%s_scores.csv" %\
           (detectorName, profileName))
+
         resultsDF.to_csv(scorePath, index=False)
         print "%s detector benchmark scores written to %s" %\
           (detectorName, scorePath)
@@ -229,25 +231,30 @@ class Runner(object):
     """
     print "\nRunning score normalization step"
 
-    # Get baselines for each application profile
+    # Get baselines for each application profile.
     baselineDir = os.path.join(self.resultsDir, "baseline")
     if not os.path.isdir(baselineDir):
       raise IOError("No results directory for baseline. You must "
-        "run the baseline detector before normalizing scores.")
+                    "run the baseline detector before normalizing scores.")
+
     baselines = {}
     for profileName, _ in self.profiles.iteritems():
-      fileName = baselineDir + "/baseline_" + profileName + "_scores.csv"
+      fileName = os.path.join(baselineDir,
+                              "baseline_" + profileName + "_scores.csv")
       with open(fileName) as f:
         results = pandas.read_csv(f)
-        baselines[profileName] = results["Score"][len(results)-1]
-    
-    for fileName in self.resultsFiles:
-      csvName = fileName.split("/")[-1]
-      base = baselines[csvName.split("_")[1]]
-      with open(fileName) as f:
+        baselines[profileName] = results["Score"].iloc[-1]
+
+    # Normalize the score from each results file.
+    for resultsFile in self.resultsFiles:
+      profileName = [k for k in baselines.keys() if k in resultsFile][0]
+      base = baselines[profileName]
+      
+      with open(resultsFile) as f:
         results = pandas.read_csv(f)
         perfect = 44.0 - base
-        score = (-base + results["Score"][len(results)-1]) * (100/perfect)
-      
-      print "Final score for \'%s\' = %.2f" % (csvName[:-11], score)
+        score = (-base + results["Score"].iloc[-1]) * (100/perfect)
+
+      print ("Final score for \'%s\' = %.2f"
+             % (resultsFile.split('/')[-1][:-4], score))
       

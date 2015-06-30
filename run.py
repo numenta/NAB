@@ -72,7 +72,8 @@ def main(args):
   runner.initialize()
 
   if args.detect:
-    detectorConstructors = getDetectorClassConstructors(args.detectors)
+    detectorConstructors = getDetectorClassConstructors(
+      args.detectors[0].split(','))
     runner.detect(detectorConstructors)
 
   if args.optimize:
@@ -86,8 +87,9 @@ def main(args):
   if args.normalize:
     try:
       runner.normalize()
-    except AttributeError:
-      print "Error: you must run the scoring step with the normalization step"
+    except AttributeError("Error: you must run the scoring step with the "
+                          "normalization step."):
+      return
 
 
 if __name__ == "__main__":
@@ -139,7 +141,8 @@ if __name__ == "__main__":
                     nargs="*",
                     type=str,
                     default=["baseline", "numenta", "random", "skyline"],
-                    help="Space separated list of detector(s) to use.")
+                    help="Comma separated list of detector(s) to use, e.g. "
+                         "baseline,numenta")
                     
   parser.add_argument("-p", "--profilesFile",
                     default="config/profiles.json",
