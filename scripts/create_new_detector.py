@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 # ----------------------------------------------------------------------
-# Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
+# Copyright (C) 2015, Numenta, Inc.  Unless you have an agreement
 # with Numenta, Inc., for a separate license for this software code, the
 # following terms and conditions apply:
 #
@@ -23,11 +23,10 @@
 
 import argparse
 import os
+import simplejson as json
 
-try:
-  import simplejson as json
-except ImportError:
-  import json
+from nab.util import recur
+
 
 
 def createThresholds(detector_name, threshold_file):
@@ -46,39 +45,43 @@ def createThresholds(detector_name, threshold_file):
     out_file.write(json.dumps(old_thresholds,
                    sort_keys=True, indent=4, separators=(',', ': ')))
 
-  out_file.close()
-
 
 def createResultsDir(detector_name, results_dir, category_sub_dirs):
   """Create a results dir for the new detector with categorical subdirs."""
 
-  directory = results_dir+detector_name
+  directory = os.path.join(results_dir, detector_name)
 
   if not os.path.exists(directory):
     os.makedirs(directory)
 
   for category in category_sub_dirs:
-    subdir = directory+'/'+category
+    subdir = os.path.join(directory, category)
     if not os.path.exists(subdir):
       os.makedirs(subdir)
 
 
-def getCategoryNames(dataDir):
+def getCategoryNames(dataDir, root):
   """Return a list of the names of data categories based on data subdirs."""
 
-  return next(os.walk(dataDir))[1]
+  return [os.path.join(root, d) for d in next(os.walk(dataDir))[1]]
 
 
 def main(args):
 
   if not args.detector:
-    print "Error: Must specify detector name (--detector)."
-    return
+    raise ValueError("Must specify detector name (--detector).")
 
-  category_sub_dirs = getCategoryNames(args.dataDir)
+  depth = 2
 
-  createThresholds(args.detector, args.thresholdFile)
-  createResultsDir(args.detector, args.resultsDir, category_sub_dirs)
+  root = recur(os.path.dirname, os.path.realpath(__file__), depth)
+
+  category_sub_dirs = getCategoryNames(args.dataDir, root)
+
+  threshold_file = os.path.join(root, args.thresholdFile)
+  results_dir = os.path.join(root, args.resultsDir)
+
+  createThresholds(args.detector, threshold_file)
+  createResultsDir(args.detector, results_dir, category_sub_dirs)
 
 
 
@@ -89,15 +92,15 @@ if __name__ == "__main__":
                       help="The name of the new detector to be added.")
 
   parser.add_argument("--resultsDir",
-                      default="../results/",
+                      default="results",
                       help="This holds the path of the results directory.")
 
   parser.add_argument("--dataDir",
-                      default="../data/",
-                      help="This holds the path of the results directory.")
+                      default="data",
+                      help="This holds the path of the data directory.")
 
   parser.add_argument("--thresholdFile",
-                      default="../config/thresholds.json",
+                      default="config/thresholds.json",
                       help="This holds the file path of the thresholds file.")
 
   args = parser.parse_args()
