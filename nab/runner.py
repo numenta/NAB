@@ -31,7 +31,7 @@ from nab.detectors.base import detectDataSet
 from nab.labeler import CorpusLabel
 from nab.optimizer import optimizeThreshold
 from nab.scorer import scoreCorpus
-from nab.util import updateThresholds
+from nab.util import updateThresholds, updateFinalResults
 
 
 
@@ -246,15 +246,30 @@ class Runner(object):
         baselines[profileName] = results["Score"].iloc[-1]
 
     # Normalize the score from each results file.
+    finalResults = {}
     for resultsFile in self.resultsFiles:
       profileName = [k for k in baselines.keys() if k in resultsFile][0]
       base = baselines[profileName]
       
       with open(resultsFile) as f:
         results = pandas.read_csv(f)
+        
+        # Calculate score:
         perfect = 44.0 - base
         score = (-base + results["Score"].iloc[-1]) * (100/perfect)
+        
+        # Add to results dict:
+        resultsInfo = resultsFile.split('/')[-1].split('.')[0]
+        detector = resultsInfo.split('_')[0]
+        profile = resultsInfo.replace(detector + "_", "").replace("_scores", "")
+        if detector not in finalResults:
+          finalResults[detector] = {}
+        finalResults[detector][profile] = score
 
-      print ("Final score for \'%s\' = %.2f"
-             % (resultsFile.split('/')[-1][:-4], score))
-      
+      print ("Final score for \'%s\' detector on \'%s\' profile = %.2f"
+             % (detector, profile, score))
+
+    resultsPath = os.path.join(self.resultsDir, "final_results.json")
+    updateFinalResults(finalResults, resultsPath)
+    print "Final scores have been written to %s." % resultsPath
+    
