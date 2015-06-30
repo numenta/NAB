@@ -118,7 +118,6 @@ def updateThresholds(newThresholds, thresholdsFilePath):
 
 def checkInputs(args):
   """Function that displays a set of arguments and asks to proceed."""
-  args.detectors = args.detectors[0].split(',')
   pprint.pprint(vars(args))
   inp = raw_input("Proceed? (y/n): ")
 

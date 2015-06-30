@@ -170,6 +170,10 @@ if __name__ == "__main__":
     args.score = True
     args.normalize = True
 
+  if len(args.detectors) == 1:
+    # Handle comma-seperated list argument.
+    args.detectors = args.detectors[0].split(',')
+
   if args.skipConfirmation or checkInputs(args):
     main(args)
     
