@@ -204,14 +204,22 @@ class LabelCombiner(object):
     return ans
 
 
-  def write(self, destPath):
-    """Write the combined labels to a destination directory."""
-    if not os.path.isdir(destPath):
-      createPath(destPath)
+  def write(self, labelsPath, windowsPath):
+    """Write the combined labels and windows to a destination directories."""
+    if not os.path.isdir(labelsPath):
+      createPath(labelsPath)
+    if not os.path.isdir(windowsPath):
+      createPath(windowsPath)
+
+    labels = json.dumps(self.labelTimestamps,
+      sort_keys=True, indent=4, separators=(',', ': '))
     windows = json.dumps(self.combinedWindows,
       sort_keys=True, indent=4, separators=(',', ': '))
-    with open(destPath, "w") as windowWriter:
-      windowWriter.write(windows)
+
+    with open(labelsPath, "w") as f:
+      f.write(labels)
+    with open(windowsPath, "w") as f:
+      f.write(windows)
 
 
   def combine(self):
@@ -261,12 +269,14 @@ class LabelCombiner(object):
       labels = numpy.array(timestamps.isin(trueAnomalies), dtype=int)
       return [i for i in range(len(labels)) if labels[i]==1]
 
-    labelIndices = {}
+    self.labelTimestamps = {}
+    self.labelIndices = {}
     for relativePath, dataSet in self.corpus.dataFiles.iteritems():
     
       if "Known" in relativePath:
         knownAnomalies = self.knownLabels[0].windows[relativePath]
-        labelIndices[relativePath] = setTruthLabels(dataSet, knownAnomalies)
+        self.labelTimestamps[relativePath] = [str(t) for t in knownAnomalies]
+        self.labelIndices[relativePath] = setTruthLabels(dataSet, knownAnomalies)
         continue
 
       rawTimesLists = []
@@ -275,7 +285,8 @@ class LabelCombiner(object):
           rawTimesLists.append(user.windows[relativePath])
       if not rawTimesLists:
         # No labeled anomalies for this data file
-        labelIndices[relativePath] = setTruthLabels(dataSet, [])
+        self.labelTimestamps[relativePath] = []
+        self.labelIndices[relativePath] = setTruthLabels(dataSet, [])
         continue
       else:
         rawTimes = list(itertools.chain.from_iterable(rawTimesLists))
@@ -287,8 +298,8 @@ class LabelCombiner(object):
         minutes=round(granularity*len(dataSet.data)*self.windowSize/2))
       trueAnomalies, passedAnomalies = merge(bucket(rawTimes, buffer),
                                             len(self.userLabels)*self.threshold)
-
-      labelIndices[relativePath] = setTruthLabels(dataSet, trueAnomalies)
+      self.labelTimestamps[relativePath] = [str(t) for t in trueAnomalies]
+      self.labelIndices[relativePath] = setTruthLabels(dataSet, trueAnomalies)
       
       if self.verbosity>0:
         print "----"
@@ -296,8 +307,6 @@ class LabelCombiner(object):
               " respectively:" % relativePath
         print passedAnomalies
         print trueAnomalies
-    
-    self.labelIndices = labelIndices
 
 
   def editPoorLabels(self):

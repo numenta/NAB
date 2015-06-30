@@ -133,7 +133,7 @@ if __name__ == "__main__":
                     "on the data")
 
   parser.add_argument("--labelFile",
-                    default=os.path.join("labels", "combined_labels.json"),
+                    default=os.path.join("labels", "combined_windows.json"),
                     help="JSON file containing ground truth labels for the "
                          "corpus.")
                          
@@ -169,6 +169,8 @@ if __name__ == "__main__":
     args.optimize = True
     args.score = True
     args.normalize = True
+
+  args.detectors = args.detectors[0].split(',')
 
   if args.skipConfirmation or checkInputs(args):
     main(args)
