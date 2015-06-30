@@ -31,7 +31,7 @@ except ImportError:
   import json
 
 
-def _getOldDict(filePath):
+def getOldDict(filePath):
   """Loads the json given by filepath, returning the dictionary of data."""
   if os.path.exists(filePath):
     with open(filePath) as inFile:
@@ -46,6 +46,7 @@ def _getOldDict(filePath):
 
 
 def writeJSON(filePath, data):
+  """Dumps data to a nicely formatted json at filePath."""
   with open(filePath, "w") as outFile:
     outFile.write(json.dumps(data,
                              sort_keys=True,
@@ -65,7 +66,7 @@ def updateFinalResults(newResults, resultsFilePath):
 
   @return oldResults        (dict)    Updated final results.
   """
-  oldResults = _getOldDict(resultsFilePath)
+  oldResults = getOldDict(resultsFilePath)
   
   # dut: detector under test
   for dut, score in newResults.iteritems():
@@ -95,7 +96,7 @@ def updateThresholds(newThresholds, thresholdsFilePath):
 
   @return oldThresholds     (dict)    Updated threshold values.
   """
-  oldThresholds = _getOldDict(thresholdsFilePath)
+  oldThresholds = getOldDict(thresholdsFilePath)
 
   for detector, profileDictionary in newThresholds.iteritems():
     if detector not in oldThresholds:
