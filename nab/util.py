@@ -31,47 +31,87 @@ except ImportError:
   import json
 
 
+def getOldDict(filePath):
+  """Loads the json given by filepath, returning the dictionary of data."""
+  if os.path.exists(filePath):
+    with open(filePath) as inFile:
+      dataDict = json.load(inFile)
+  else:
+    dataDict = {}
+
+  if not isinstance(dataDict, dict):
+    raise ValueError("Incorrect type; expected a dict.")
+
+  return dataDict
+
+
+def writeJSON(filePath, data):
+  """Dumps data to a nicely formatted json at filePath."""
+  with open(filePath, "w") as outFile:
+    outFile.write(json.dumps(data,
+                             sort_keys=True,
+                             indent=4,
+                             separators=(',', ': ')))
+
+
+def updateFinalResults(newResults, resultsFilePath):
+  """
+  Keep final results file updated with (most recent) score normalization.
+
+  @param newResults         (dict)    Dictionary of normalized scores, from
+                                      most recent call to normalize().
+
+  @param resultsFilePath    (str)     File containing the best normalized scores
+                                      from the past runs of normalize().
+
+  @return oldResults        (dict)    Updated final results.
+  """
+  oldResults = getOldDict(resultsFilePath)
+  
+  # dut: detector under test
+  for dut, score in newResults.iteritems():
+    if dut not in oldResults:
+      oldResults[dut] = score
+
+  writeJSON(resultsFilePath, oldResults)
+
+  return oldResults
+
 
 def updateThresholds(newThresholds, thresholdsFilePath):
-  """Keep thresholds file updated with best runs of optimize_threshold.
+  """
+  Keep thresholds file updated with best runs of optimize_threshold.
 
-  The thresholds file keeps a dictionary of best thresholds and scores for
-  combinations of detector and user profiles. This function makes sure to keep
-  the best thresholds inside that file and keep them there to be used by others
-  who are using the same detector and have the same profile (cost matrix)
+  The thresholds file keeps a dictionary of best thresholds and raw scores for
+  combinations of detector and scoring profiles. This function makes sure to
+  keep the best thresholds inside that file and keep them there to be used by
+  others who are using the same detector and have the same profile (cost matrix)
 
-  @param newThresholds      (dict)    Dictionary of optimized thresholds gotten
-                                      from most recent call to optimize().
+  @param newThresholds      (dict)    Optimized thresholds, from
+                                      most recent call to optimize().
 
-  @param thresholdsFilePath (string)  File containing the best thresholds and
+  @param thresholdsFilePath (str)     File containing the best thresholds and
                                       their corresponding scores from the past
                                       runs of optimize().
+
+  @return oldThresholds     (dict)    Updated threshold values.
   """
-  if os.path.exists(thresholdsFilePath):
-    with open(thresholdsFilePath) as inFile:
-      oldThresholds = json.load(inFile)
-  else:
-    oldThresholds = {}
+  oldThresholds = getOldDict(thresholdsFilePath)
 
-  if not isinstance(oldThresholds, dict):
-    raise ValueError("Incorrect type given to updateThresholds")
-
-  for detector, usernameDictionary in newThresholds.iteritems():
+  for detector, profileDictionary in newThresholds.iteritems():
     if detector not in oldThresholds:
       oldThresholds[detector] = newThresholds[detector]
       continue
 
-    for username, data in usernameDictionary.iteritems():
-      if username not in oldThresholds[detector]:
-        oldThresholds[detector][username] = data
+    for profileName, data in profileDictionary.iteritems():
+      if profileName not in oldThresholds[detector]:
+        oldThresholds[detector][profileName] = data
         continue
 
-      if data["score"] > oldThresholds[detector][username]["score"]:
-        oldThresholds[detector][username] = data
+      if data["score"] > oldThresholds[detector][profileName]["score"]:
+        oldThresholds[detector][profileNames] = data
 
-  with open(thresholdsFilePath, "w") as outFile:
-    outFile.write(json.dumps(oldThresholds,
-             sort_keys=True, indent=4, separators=(',', ': ')))
+  writeJSON(thresholdsFilePath, oldThresholds)
 
   return oldThresholds
 
