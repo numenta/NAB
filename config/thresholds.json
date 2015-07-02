@@ -1,13 +1,5 @@
 {
     "baseline": {
-        "reward low FN rate": {
-            "score": -88.0,
-            "threshold": 0.6000000000000001
-        },
-        "reward low FP rate": {
-            "score": -22.0,
-            "threshold": 0.6000000000000001
-        },
         "reward_low_FN_rate": {
             "score": -88.0,
             "threshold": 0.6000000000000001
@@ -22,12 +14,12 @@
         }
     },
     "numenta": {
-        "reward low FN rate": {
-            "score": 17.30214002766833,
-            "threshold": 0.9999755859375006
+        "reward_low_FN_rate": {
+            "score": 2.1088326986649713,
+            "threshold": 0.9999023437500006
         },
-        "reward low FP rate": {
-            "score": 18.37220947661779,
+        "reward_low_FP_rate": {
+            "score": 8.148046147326303,
             "threshold": 0.9999877929687505
         },
         "standard": {
@@ -36,14 +28,6 @@
         }
     },
     "random": {
-        "reward low FN rate": {
-            "score": -20.43950259121246,
-            "threshold": 0.9965820312500006
-        },
-        "reward low FP rate": {
-            "score": -21.0,
-            "threshold": 0.9999511718750007
-        },
         "reward_low_FN_rate": {
             "score": -45.889252239141754,
             "threshold": 0.9984497070312507
@@ -58,17 +42,45 @@
         }
     },
     "skyline": {
-        "reward low FN rate": {
-            "score": -17.46533695215545,
+        "reward_low_FN_rate": {
+            "score": -23.868653753753343,
             "threshold": 0.8000000000000003
         },
-        "reward low FP rate": {
-            "score": -2.2284422450838086,
+        "reward_low_FP_rate": {
+            "score": -15.72844224508381,
             "threshold": 0.9000000000000006
         },
         "standard": {
             "score": -5.235267306651327,
             "threshold": 0.8000000000000003
+        }
+    },
+    "twitterADVec": {
+        "reward_low_FN_rate": {
+            "score": -30.63914483,
+            "threshold": 0.5
+        },
+        "reward_low_FP_rate": {
+            "score": -12.15798656,
+            "threshold": 0.5
+        },
+        "standard": {
+            "score": -8.639144834,
+            "threshold": 0.5
+        }
+    },
+    "twitterADTs": {
+        "reward_low_FN_rate": {
+            "score": -39.9892525,
+            "threshold": 0.5
+        },
+        "reward_low_FP_rate": {
+            "score": -19.71923553,
+            "threshold": 0.5
+        },
+        "standard": {
+            "score": -14.9892525,
+            "threshold": 0.5
         }
     }
 }

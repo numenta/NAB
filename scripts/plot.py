@@ -42,6 +42,7 @@ class PlotNAB():
   def __init__(self,
                apiKey=None,
                username=None):
+
     # Instantiate API credentials.
     try:
       self.apiKey = apiKey if apiKey else os.environ["PLOTLY_API_KEY"]
@@ -62,6 +63,7 @@ class PlotNAB():
     py.sign_in(self.username, self.apiKey)
     
     self._setupDirectories()
+    self._getThresholds()
 
 
   def _setupDirectories(self):
@@ -70,6 +72,12 @@ class PlotNAB():
     self.dataDir = os.path.abspath(os.path.join(root, "..", "data"))
     self.labelsDir = os.path.abspath(os.path.join(root, "..", "labels"))
     self.resultsDir = os.path.abspath(os.path.join(root, "..", "results"))
+
+
+  def _getThresholds(self):
+    thresholdsPath = os.path.join(self.configDir, "thresholds.json")
+    with open(thresholdsPath) as f:
+      self.thresholds = json.load(f)
 
 
   def plotRawData(self,
@@ -89,7 +97,7 @@ class PlotNAB():
                           y=rawData['value'],
                           name='Value',
                           line=Line(
-                            width=0.7
+                            width=1.5
                           ),
                           showlegend=False
                         ))
@@ -130,6 +138,8 @@ class PlotNAB():
     plot_url = py.plot(fig)
     print "Data plot URL: ", plot_url
 
+    return plot_url
+
 
   def plotResults(self,
                   resultsPath,
@@ -161,7 +171,8 @@ class PlotNAB():
                   ))
 
     # Anomaly detections trace:
-    threshold = self._getThreshold(resultsPath.split('/')[0], scoreProfile)
+#    threshold = self._getThreshold(resultsPath.split('/')[0], scoreProfile)
+    threshold = self.thresholds[resultsPath.split('/')[0]][scoreProfile]["threshold"]
     detections = resultsData[resultsData['anomaly_score'] >= threshold]
     traces.append(Scatter(
                           x=detections['timestamp'],
@@ -171,7 +182,7 @@ class PlotNAB():
                           text=['anomalous data'],
                           marker=Marker(
                             color='rgb(200, 20, 20)',
-                            size=5.0,
+                            size=10.0,
                             symbol='triangle-open'
                           )
                   ))
@@ -209,6 +220,150 @@ class PlotNAB():
     plot_url = py.plot(fig)
     print "Results plot URL: ", plot_url
 
+    return plot_url
+
+
+  def plotMultipleDetectors(self,
+                            dataPath,
+                            dataName,
+                            resultsPaths,
+                            detectors=['numenta'],
+                            scoreProfile='standard',
+                            withLabels=True,
+                            withWindows=True,
+                            withProbation=True):
+                            
+    """
+    """
+#    # Setup directories
+#    fileName = dataPath.split('/')[1].split('.')[0].replace("_", " ")
+
+    traces = []
+    
+    # Value trace:  TODO: valueTrace(self,)
+    rawData = self.getRawData(os.path.join(self.dataDir, dataPath))
+    traces.append(Scatter(
+                          x=rawData['timestamp'],
+                          y=rawData['value'],
+                          name='Value',
+                          line=Line(
+                            width=1.5
+                          ),
+                          showlegend=False
+                        ))
+
+    # Anomaly detections traces:
+    shapes = ['diamond', 'square', 'cross', 'triangle-up', 'hexagon', 'triangle-down']
+    for i,d in enumerate(detectors):
+      threshold = self.thresholds[d][scoreProfile]["threshold"]
+
+      resultsPath = resultsPaths[i]
+      resultsData = self.getResultsData(os.path.join(self.resultsDir, resultsPath))
+      
+      FP, TP = self._parseDetections(dataPath, resultsData, threshold)
+#      import pdb; pdb.set_trace()
+
+#      symbol = shapes[i] + '-open'
+      symbol = shapes[i]
+      name = 'Detection by ' + d
+      
+      # FPs:
+      traces.append(Scatter(
+                            x=FP['timestamp'],
+                            y=FP['value'],
+                            mode='markers',
+                            name=name,
+                            text=['anomalous data'],
+                            marker=Marker(
+                              color='rgb(200, 20, 20)',
+                              size=15.0,
+                              symbol=symbol
+                            )
+                    ))
+      # TPs:
+      traces.append(Scatter(
+                      x=[tp[1]['timestamp'] for tp in TP],
+                      y=[tp[1]['value'] for tp in TP],
+                      mode='markers',
+                      name=name,
+                      text=['anomalous data'],
+                      marker=Marker(
+                        color='rgb(20, 200, 20)',
+                        size=15.0,
+                        symbol=symbol
+                      )
+              ))
+    
+    if withLabels:
+      traces.append(self._addLabels(rawData, dataPath))
+    
+    if withWindows:
+      traces.append(self._addWindows(rawData, dataPath))
+    
+    if withProbation:
+      traces.append(self._addProbation(rawData))
+
+    # Create plotly Data object with the traces.
+    data = Data(traces)
+  
+    # Create plotly Layout object.
+    layout = Layout(
+                    title='Anomaly Detections for ' + dataName + ' Data',
+                    showlegend=False,
+                    width=1000,
+                    height=600,
+                    xaxis=XAxis(
+                      title='Date'
+                    ),
+                    yaxis=YAxis(
+                      title='Metric',
+                      domain=[0, 1],
+                      autorange=True,
+                      autotick=True
+                    ),
+                    barmode='stack',
+                    bargap=0
+             )
+
+    # Query plotly
+    fig = Figure(data=data, layout=layout)
+    plot_url = py.plot(fig)
+    print "Detections plot URL: ", plot_url
+
+    return plot_url
+
+
+  def _parseDetections(self, dataPath, resultsData, threshold):
+    """Return false positives and true positives."""
+  
+    windows = self.getData(
+      os.path.join(self.labelsDir, "combined_windows.json"), dataPath)
+
+    detections = resultsData[resultsData['anomaly_score'] >= threshold]
+    
+    FP = detections[detections['label'] == 0]
+    TP = []
+    for window in windows:
+      start = pd.to_datetime(window[0])
+      end = pd.to_datetime(window[1])
+      detection = self.getTPDetection(detections, (start, end))
+      if detection:
+        TP.append(detection)
+
+    return FP, TP
+
+
+  @staticmethod
+  def getTPDetection(detections, windowTimes): ## TODO: use generator to yield each time, rather than looping through all detections
+    """Returns the first occurence of a detection w/in the window times."""
+    for detection in detections.iterrows():
+      detectionTime = pd.to_datetime(detection[1]['timestamp'])
+      if detectionTime > windowTimes[0] and detectionTime < windowTimes[1]:
+          return detection
+    return None
+
+  
+
 
   def _addLabels(self, df, dataPath):
     # Anomaly labels trace.
@@ -230,8 +385,8 @@ class PlotNAB():
                    text=['anomalous instance'],
                    marker=Marker(
                      color='rgb(200, 20, 20)',
-                     size=7.0,
-                     symbol='circle-open'
+                     size=15.0,
+                     symbol='circle'
                    )
            )
 
@@ -277,8 +432,14 @@ class PlotNAB():
                marker=Marker(
                  color='rgb(0, 0, 200)'
                ),
-               opacity=0.3
+               opacity=0.2
            )
+
+
+  def _getPlotTitle():
+
+
+    return
 
 
   @staticmethod
@@ -310,13 +471,6 @@ class PlotNAB():
     return dataDict[key]
 
 
-  def _getThreshold(self, detector, profile):
-    thresholdsPath = os.path.join(self.configDir, "thresholds.json")
-    with open(thresholdsPath) as f:
-      thresholds = json.load(f)
-    return thresholds[detector][profile]["threshold"]
-
-
 if __name__ == "__main__":
 
   # Example:
@@ -337,31 +491,46 @@ if __name__ == "__main__":
 #    'Numenta HTM Detections - AWS CLoudwatch CPU Utilization']
 
   dataFiles = [
-    'realAWSCloudwatch/rds_cpu_utilization_cc0c53.csv',
-    'realAWSCloudwatch/rds_cpu_utilization_cc0c53.csv']
+    'realKnownCause/machine_temperature_system_failure.csv',
+    'realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv']
   dataNames = [
-    '',
-    '']
+    'Machine Temperature Sensor',
+    'AWS Cloudwatch CPU Utilization']
   resultsFiles = [
-    'numenta/realAWSCloudwatch/numenta_rds_cpu_utilization_cc0c53.csv',
-    'skyline/realAWSCloudwatch/skyline_rds_cpu_utilization_cc0c53.csv']
+    'numenta/realKnownCause/numenta_machine_temperature_system_failure.csv',
+    'skyline/realKnownCause/skyline_machine_temperature_system_failure.csv',
+    'twitterADVec/realKnownCause/twitter_machine_temperature_system_failure.csv',
+    'twitterADTs/realKnownCause/twitter_machine_temperature_system_failure.csv']
+
   resultsNames = [
-    'Numenta HTM Detections - ',
-    'Skyline Detections - ']
+    'Anomaly Detections - Machine Temperature Sensor Data']
 
-  for i in xrange(len(dataFiles)):
-    plotter.plotRawData(
-      dataFiles[i],
-      dataNames[i],
-      withLabels=True,
-      withWindows=True,
-      withProbation=False
-    )
-    plotter.plotResults(
-      resultsFiles[i],
-      resultsNames[i],
-      scoreProfile='standard',
-      withWindows=dataFiles[i],
-      withProbation=True
-    )
+  plotter.plotMultipleDetectors(
+                            dataFiles[0],
+                            dataNames[0],
+                            resultsFiles,
+                            detectors=['numenta', 'skyline', 'twitterADVec', 'twitterADTs'],
+                            scoreProfile='standard',
+                            withLabels=False,
+                            withWindows=True,
+                            withProbation=True)
 
+
+#  for i in xrange(len(dataFiles)):
+#    plotter.plotRawData(
+#      dataFiles[i],
+#      dataNames[i],
+#      withLabels=True,
+#      withWindows=True,
+#      withProbation=True
+#    )
+#    plotter.plotResults(
+#      resultsFiles[i],
+#      resultsNames[i],
+#      scoreProfile='standard',
+#      withWindows=dataFiles[i],
+#      withProbation=True
+#    )
+
+  goodlist = ['realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv']
+  goodforshowingdiffprofiles = 'realKnownCause/cpu_utilization_asg_misconfiguration.csv'
