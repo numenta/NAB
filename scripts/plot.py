@@ -55,7 +55,7 @@ class PlotNAB(object):
 
   def __init__(self,
                apiKey=None,
-               username=None):  ## TODO: handle datafile stuff here (i.e. rawData) b/c all use it
+               username=None):  ## TODO: handle datafile stuff here (i.e. rawData) b/c all subclasses use it
 
     # Instantiate API credentials.
     try:
@@ -202,8 +202,7 @@ class PlotNAB(object):
 
 
   def plot():
-    """
-    """
+    """Generate plot by buidling plotly objects and querying plotly API."""
     raise NotImplementedError
 
 
@@ -273,8 +272,7 @@ class PlotMultipleDetectors(PlotNAB):
            withLabels=True,
            withWindows=True,
            withProbation=True):
-    """
-    """
+
     if scoreProfile is not 'standard' or not 'reward_low_fn_rate' or not 'reward_low_fp_rate':
       raise ValueError("Invalid scoring profile. Must be one of \'standard\' or \'reward low fn rate\' or \'reward low fp rate\'.")
 
@@ -349,6 +347,7 @@ class PlotMultipleDetectors(PlotNAB):
 
 
   def _addDetections(self, name, symbol, FP, TP):
+    symbol = symbol + '-open'
     # FPs:
     fpTrace = Scatter(
                       x=FP['timestamp'],
@@ -358,9 +357,13 @@ class PlotMultipleDetectors(PlotNAB):
                       text=['anomalous data'],
                       marker=Marker(
                         color='rgb(200, 20, 20)',
-                        size=10.0,
-                        symbol=symbol
-                      )
+                        size=15.0,
+                        symbol=symbol,
+                        line=Line(
+                          color='rgb(200, 20, 20)',
+                          width=2
+                        )
+                      ),
               )
     # TPs:
     tpTrace = Scatter(
@@ -370,10 +373,14 @@ class PlotMultipleDetectors(PlotNAB):
                       name=name,
                       text=['anomalous data'],
                       marker=Marker(
-                        color='rgb(0, 0, 0)',
-                        size=10.0,
-                        symbol=symbol
-                      )
+                        color='rgb(20, 200, 20)',
+                        size=15.0,
+                        symbol=symbol,
+                        line=Line(
+                          color='rgb(20, 200, 20)',
+                          width=2
+                        )
+                      ),
               )
 
     return fpTrace, tpTrace
@@ -395,6 +402,15 @@ if __name__ == "__main__":
     'twitterADVec/realKnownCause/twitter_machine_temperature_system_failure.csv',
     'twitterADTs/realKnownCause/twitter_machine_temperature_system_failure.csv']
 
+  for i in xrange(len(dataFiles)):
+    dataPlotter = PlotRawData(
+      dataFiles[i],
+      dataNames[i])
+    dataPlotter.plot(
+      withLabels=True,
+      withWindows=False,
+      withProbation=False)
+
   resultsPlotter = PlotMultipleDetectors(
     dataFiles[0],
     dataNames[0])
@@ -405,12 +421,3 @@ if __name__ == "__main__":
     withLabels=False,
     withWindows=True,
     withProbation=True)
-
-#  for i in xrange(len(dataFiles)):
-#    dataPlotter = PlotRawData(
-#      dataFiles[i],
-#      dataNames[i])
-#    dataPlotter.plot(
-#      withLabels=True,
-#      withWindows=False,
-#      withProbation=False)
