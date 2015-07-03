@@ -45,10 +45,6 @@ def main(args):
     dataDir = args.dataDir
     labelDir = args.labelDir
 
-  destPath = args.destPath
-  threshold = args.threshold
-  verbosity = args.verbosity
-
   # The following params are used in NAB scoring, but defined here because they
   # impact the labeling process -- i.e. windows cannot exist in the probationary
   # period.
@@ -57,31 +53,25 @@ def main(args):
 
 
   print "Getting Corpus"
-
   corpus = Corpus(dataDir)
 
   print "Creating LabelCombiner"
-
   labelCombiner = LabelCombiner(labelDir, corpus,
-                                threshold, windowSize,
-                                probationaryPercent, verbosity)
+                                args.threshold, windowSize,
+                                probationaryPercent, args.verbosity)
 
   print "Combining Labels"
-
   labelCombiner.combine()
 
   print "Writing combined labels"
-
-  labelCombiner.write(destPath)
+  labelCombiner.write(args.combinedLabelsPath, args.combinedWindowsPath)
 
   print "Attempting to load objects as a test"
-
-  corpusLabel = CorpusLabel(destPath, corpus)
+  corpusLabel = CorpusLabel(args.combinedWindowsPath, corpus)
   corpusLabel.validateLabels()
 
   print "Successfully combined labels!"
-
-  print "Resulting windows stored in:", destPath
+  print "Resulting windows stored in:", args.combinedWindowsPath
 
 
 if __name__ == "__main__":
@@ -95,9 +85,13 @@ if __name__ == "__main__":
                       default="data",
                       help="This holds all the data files for the corpus")
 
-  parser.add_argument("--destPath",
+  parser.add_argument("--combinedLabelsPath",
                       default="labels/combined_labels.json",
                       help="Where the combined labels file will be stored")
+
+  parser.add_argument("--combinedWindowsPath",
+                      default="labels/combined_windows.json",
+                      help="Where the combined windows file will be stored")
 
   parser.add_argument("--absolutePaths",
                       default=False,
