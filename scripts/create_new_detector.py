@@ -23,27 +23,24 @@
 
 import argparse
 import os
-import simplejson as json
 
-from nab.util import recur
+from nab.util import getOldDict, recur, writeJSON
+
+try:
+  import simplejson as json
+except ImportError:
+  import json
 
 
-
-def createThresholds(detector_name, threshold_file):
+def createThresholds(detectorName, thresholdFile):
   """"Create an entry in the threshold file for the new detector."""
 
-  if os.path.exists(threshold_file):
-    with open(threshold_file) as in_file:
-      old_thresholds = json.load(in_file)
-  else:
-    old_thresholds = {}
+  oldThresholds = getOldDict(thresholdFile)
 
-  if detector_name not in old_thresholds:
-    old_thresholds[detector_name] = {}
+  if detectorName not in oldThresholds:
+    oldThresholds[detectorName] = {}
 
-  with open(threshold_file, "w") as out_file:
-    out_file.write(json.dumps(old_thresholds,
-                   sort_keys=True, indent=4, separators=(',', ': ')))
+  writeJSON(thresholdFile, oldThresholds)
 
 
 def createResultsDir(detectorName, resultsDir, categorySubDirs):
