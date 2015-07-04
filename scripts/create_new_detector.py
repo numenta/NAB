@@ -46,15 +46,15 @@ def createThresholds(detector_name, threshold_file):
                    sort_keys=True, indent=4, separators=(',', ': ')))
 
 
-def createResultsDir(detector_name, results_dir, category_sub_dirs):
+def createResultsDir(detectorName, resultsDir, categorySubDirs):
   """Create a results dir for the new detector with categorical subdirs."""
 
-  directory = os.path.join(results_dir, detector_name)
+  directory = os.path.join(resultsDir, detectorName)
 
   if not os.path.exists(directory):
     os.makedirs(directory)
 
-  for category in category_sub_dirs:
+  for category in categorySubDirs:
     subdir = os.path.join(directory, category)
     if not os.path.exists(subdir):
       os.makedirs(subdir)
@@ -63,7 +63,7 @@ def createResultsDir(detector_name, results_dir, category_sub_dirs):
 def getCategoryNames(dataDir, root):
   """Return a list of the names of data categories based on data subdirs."""
 
-  return [os.path.join(root, d) for d in next(os.walk(dataDir))[1]]
+  return [d for d in next(os.walk(dataDir))[1]]
 
 
 def main(args):
@@ -71,17 +71,15 @@ def main(args):
   if not args.detector:
     raise ValueError("Must specify detector name (--detector).")
 
-  depth = 2
+  root = recur(os.path.dirname, os.path.realpath(__file__), 2)
+  thresholdFile = os.path.join(root, args.thresholdFile)
+  resultsDir = os.path.join(root, args.resultsDir)
 
-  root = recur(os.path.dirname, os.path.realpath(__file__), depth)
+  categorySubDirs = getCategoryNames(args.dataDir, root)
 
-  category_sub_dirs = getCategoryNames(args.dataDir, root)
-
-  threshold_file = os.path.join(root, args.thresholdFile)
-  results_dir = os.path.join(root, args.resultsDir)
-
-  createThresholds(args.detector, threshold_file)
-  createResultsDir(args.detector, results_dir, category_sub_dirs)
+  createThresholds(args.detector, thresholdFile)
+  
+  createResultsDir(args.detector, resultsDir, categorySubDirs)
 
 
 
