@@ -33,7 +33,8 @@ from nab.util import (absoluteFilePaths,
                       strf,
                       strp,
                       deepmap,
-                      createPath)
+                      createPath,
+                      writeJSON)
 
 
 
@@ -211,15 +212,8 @@ class LabelCombiner(object):
     if not os.path.isdir(windowsPath):
       createPath(windowsPath)
 
-    labels = json.dumps(self.labelTimestamps,
-      sort_keys=True, indent=4, separators=(',', ': '))
-    windows = json.dumps(self.combinedWindows,
-      sort_keys=True, indent=4, separators=(',', ': '))
-
-    with open(labelsPath, "w") as f:
-      f.write(labels)
-    with open(windowsPath, "w") as f:
-      f.write(windows)
+    writeJSON(labelsPath, self.labelTimestamps)
+    writeJSON(windowsPath, self.combinedWindows)
 
 
   def combine(self):

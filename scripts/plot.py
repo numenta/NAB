@@ -110,27 +110,6 @@ class PlotNAB(object):
            )
 
 
-  def _createLayout(self, title):
-    """Return plotly Layout object"""
-    return Layout(
-                  title=title,
-                  showlegend=False,
-                  width=1000,
-                  height=600,
-                  xaxis=XAxis(
-                    title='Date'
-                  ),
-                  yaxis=YAxis(
-                    title='Metric',
-                    domain=[0, 1],
-                    autorange=True,
-                    autotick=True
-                  ),
-                  barmode='stack',
-                  bargap=0
-           )
-
-
   def _addLabels(self):
     """Return plotly trace for anomaly labels."""
     labels = getJSONData(
@@ -198,6 +177,28 @@ class PlotNAB(object):
                  color='rgb(0, 0, 200)'
                ),
                opacity=0.2
+           )
+
+
+  @staticmethod
+  def _createLayout(title):
+    """Return plotly Layout object"""
+    return Layout(
+                  title=title,
+                  showlegend=False,
+                  width=1000,
+                  height=600,
+                  xaxis=XAxis(
+                    title='Date'
+                  ),
+                  yaxis=YAxis(
+                    title='Metric',
+                    domain=[0, 1],
+                    autorange=True,
+                    autotick=True
+                  ),
+                  barmode='stack',
+                  bargap=0
            )
 
 
