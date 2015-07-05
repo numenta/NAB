@@ -63,7 +63,7 @@ def main(args):
   print "Combining Labels"
   labelCombiner.combine()
 
-  print "Writing combined labels"
+  print "Writing combined labels files"
   labelCombiner.write(args.combinedLabelsPath, args.combinedWindowsPath)
 
   print "Attempting to load objects as a test"
