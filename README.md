@@ -1,6 +1,3 @@
-### Under Construction
-
-#### This repo is under active revision. The code does not work yet. Browse, please don't judge. :)
 
 The Numenta Anomaly Benchmark [![Build Status](https://travis-ci.org/numenta/NAB.svg?branch=master)](https://travis-ci.org/numenta/NAB)
 -----------------------------
