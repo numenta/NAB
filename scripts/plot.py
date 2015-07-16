@@ -115,7 +115,7 @@ class PlotNAB(object):
 
 
   def _addValues(self):
-    """Data values trace"""
+    """Return data values trace."""
     return Scatter(x=self.rawData["timestamp"],
                    y=self.rawData["value"],
                    name="Value",
@@ -192,7 +192,7 @@ class PlotNAB(object):
 
   @staticmethod
   def _createLayout(title):
-    """Return plotly Layout object"""
+    """Return plotly Layout object."""
     return Layout(title=title,
                   showlegend=False,
                   width=1000,
@@ -225,13 +225,14 @@ class PlotNAB(object):
 
     return {"dataFile": self.dataFile,
             "dataName": self.dataName,
-            "dataPath": dataPath}
+            "dataPath": self.dataPath}
 
 
   def plotRawData(self,
                   withLabels=False,
                   withWindows=False,
                   withProbation=False):
+    """Plot the data stream."""
 
     if self.rawData is None:
       self.rawData = getCSVData(self.dataPath)
@@ -357,6 +358,7 @@ class PlotNAB(object):
 
 
   def _addDetections(self, name, symbol, FP, TP):
+    """Plot markers at anomaly detections; standard is for open shapes."""
     symbol = symbol + "-open"
     # FPs:
     fpTrace = Scatter(x=FP["timestamp"],
