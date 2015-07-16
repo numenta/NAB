@@ -27,7 +27,11 @@ import os
 import pandas as pd
 import plotly.plotly as py
 
-from plotly.graph_objs import *
+from plotly.graph_objs import (Bar,
+                               Layout,
+                               Line,
+                               Marker,
+                               Scatter)
 
 try:
   import simplejson as json
@@ -79,8 +83,9 @@ class PlotNAB(object):
     self._setupDirectories()
     self._getThresholds()
     
-    self.markers = ['circle', 'diamond', 'square', 'cross', 'triangle-up',
-      'hexagon', 'triangle-down']  # for open shapes, append '-open'
+    # For open shape markers, append "-open" to strings below:
+    self.markers = ["circle", "diamond", "square", "cross", "triangle-up",
+                    "hexagon", "triangle-down"]
 
 
   def _setupDirectories(self):
@@ -99,15 +104,13 @@ class PlotNAB(object):
 
   def _addValues(self):
     """Data values trace"""
-    return Scatter(
-                   x=self.rawData['timestamp'],
-                   y=self.rawData['value'],
-                   name='Value',
+    return Scatter(x=self.rawData["timestamp"],
+                   y=self.rawData["value"],
+                   name="Value",
                    line=Line(
                      width=1.5
                    ),
-                   showlegend=False
-           )
+                   showlegend=False)
 
 
   def _addLabels(self):
@@ -119,21 +122,19 @@ class PlotNAB(object):
     y = []
     for label in labels:
       row = self.rawData[self.rawData.timestamp == label]
-      x.append(row['timestamp'])
-      y.append(row['value'])
+      x.append(row["timestamp"])
+      y.append(row["value"])
     
-    return Scatter(
-                   x=x,
+    return Scatter(x=x,
                    y=y,
-                   mode='markers',
-                   name='Ground Truth Anomaly',
-                   text=['anomalous instance'],
+                   mode="markers",
+                   name="Ground Truth Anomaly",
+                   text=["anomalous instance"],
                    marker=Marker(
-                     color='rgb(200, 20, 20)',
+                     color="rgb(200, 20, 20)",
                      size=10.0,
                      symbol=self.markers[0]
-                   )
-           )
+                   ))
 
 
   def _addWindows(self):
@@ -142,69 +143,64 @@ class PlotNAB(object):
       os.path.join(self.labelsDir, "combined_windows.json"))[self.dataFile]
     
     x = []
-    delta = pd.to_datetime(self.rawData['timestamp'][1]) - pd.to_datetime(self.rawData['timestamp'][0])
+    delta = pd.to_datetime(self.rawData["timestamp"][1]) -
+            pd.to_datetime(self.rawData["timestamp"][0])
     minutes = int(delta.total_seconds() / 60)
     for window in windows:
       start = pd.to_datetime(window[0])
       end = pd.to_datetime(window[1])
-      x.append(pd.date_range(start, end, freq=str(minutes) + 'Min').tolist())
+      x.append(pd.date_range(start, end, freq=str(minutes) + "Min").tolist())
 
     x = list(itertools.chain.from_iterable(x))
     y = [self.rawData.value.max() for _ in x]
 
-    return Bar(
-               x=x,
+    return Bar(x=x,
                y=y,
-               name='Anomaly Window',
+               name="Anomaly Window",
                marker=Marker(
-                 color='rgb(220, 100, 100)'
+                 color="rgb(220, 100, 100)"
                ),
-               opacity=0.3
-           )
+               opacity=0.3)
 
 
   def _addProbation(self):
     # Probationary period trace.
     length = int(0.15 * len(self.rawData))
-    x = self.rawData['timestamp'].ix[:length]
+    x = self.rawData["timestamp"].ix[:length]
     y = [self.rawData.value.max() for _ in x]
 
-    return Bar(
-               x=x,
+    return Bar(x=x,
                y=y,
-               name='Probationary Period',
+               name="Probationary Period",
                marker=Marker(
-                 color='rgb(0, 0, 200)'
+                 color="rgb(0, 0, 200)"
                ),
-               opacity=0.2
-           )
+               opacity=0.2)
 
 
   @staticmethod
   def _createLayout(title):
     """Return plotly Layout object"""
-    return Layout(
-                  title=title,
+    return Layout(title=title,
                   showlegend=False,
                   width=1000,
                   height=600,
                   xaxis=XAxis(
-                    title='Date'
+                    title="Date"
                   ),
                   yaxis=YAxis(
-                    title='Metric',
+                    title="Metric",
                     domain=[0, 1],
                     autorange=True,
                     autotick=True
                   ),
-                  barmode='stack',
-                  bargap=0
-           )
+                  barmode="stack",
+                  bargap=0)
 
 
   def plot():
     """Generate plot by buidling plotly objects and querying plotly API."""
-    raise NotImplementedError
+    raise NotImplementedError()
 
 
 
@@ -243,7 +239,7 @@ class PlotRawData(PlotNAB):
 
     # Create plotly Data and Layout objects:
     data = Data(traces)
-    layout = self._createLayout('Raw Data for ' + self.dataName)
+    layout = self._createLayout("Raw Data for " + self.dataName)
 
     # Query plotly
     fig = Figure(data=data, layout=layout)
@@ -268,13 +264,13 @@ class PlotMultipleDetectors(PlotNAB):
   
   def plot(self,
            resultsPaths,  ## TODO: auto-generate paths from dataFile and detectors
-           detectors=['numenta'],
-           scoreProfile='standard',
+           detectors=["numenta"],
+           scoreProfile="standard",
            withLabels=True,
            withWindows=True,
            withProbation=True):
 
-    if scoreProfile is not 'standard' or not 'reward_low_fn_rate' or not 'reward_low_fp_rate':
+    if scoreProfile is not "standard" or not "reward_low_fn_rate" or not "reward_low_fp_rate":
       raise ValueError("Invalid scoring profile. Must be one of \'standard\' or \'reward low fn rate\' or \'reward low fp rate\'.")
 
     
@@ -308,7 +304,7 @@ class PlotMultipleDetectors(PlotNAB):
 
     # Create plotly Data and Layout objects:
     data = Data(traces)
-    layout = self._createLayout('Anomaly Detections for ' + self.dataName)
+    layout = self._createLayout("Anomaly Detections for " + self.dataName)
 
     # Query plotly
     fig = Figure(data=data, layout=layout)
@@ -323,9 +319,9 @@ class PlotMultipleDetectors(PlotNAB):
     windows = getJSONData(
       os.path.join(self.labelsDir, "combined_windows.json"))[self.dataFile]
 
-    detections = resultsData[resultsData['anomaly_score'] >= threshold]
+    detections = resultsData[resultsData["anomaly_score"] >= threshold]
     
-    FP = detections[detections['label'] == 0]
+    FP = detections[detections["label"] == 0]
     TP = []
     for window in windows:
       start = pd.to_datetime(window[0])
@@ -341,48 +337,44 @@ class PlotMultipleDetectors(PlotNAB):
   def getTPDetection(detections, windowTimes):  ## TODO: use generator to yield each time, rather than looping through all detections
     """Returns the first occurence of a detection w/in the window times."""
     for detection in detections.iterrows():
-      detectionTime = pd.to_datetime(detection[1]['timestamp'])
+      detectionTime = pd.to_datetime(detection[1]["timestamp"])
       if detectionTime > windowTimes[0] and detectionTime < windowTimes[1]:
           return detection
     return None
 
 
   def _addDetections(self, name, symbol, FP, TP):
-    symbol = symbol + '-open'
+    symbol = symbol + "-open"
     # FPs:
-    fpTrace = Scatter(
-                      x=FP['timestamp'],
-                      y=FP['value'],
-                      mode='markers',
+    fpTrace = Scatter(x=FP["timestamp"],
+                      y=FP["value"],
+                      mode="markers",
                       name=name,
-                      text=['anomalous data'],
+                      text=["anomalous data"],
                       marker=Marker(
-                        color='rgb(200, 20, 20)',
+                        color="rgb(200, 20, 20)",
                         size=15.0,
                         symbol=symbol,
                         line=Line(
-                          color='rgb(200, 20, 20)',
+                          color="rgb(200, 20, 20)",
                           width=2
                         )
-                      ),
-              )
+                      ))
     # TPs:
-    tpTrace = Scatter(
-                      x=[tp[1]['timestamp'] for tp in TP],
-                      y=[tp[1]['value'] for tp in TP],
-                      mode='markers',
+    tpTrace = Scatter(x=[tp[1]["timestamp"] for tp in TP],
+                      y=[tp[1]["value"] for tp in TP],
+                      mode="markers",
                       name=name,
-                      text=['anomalous data'],
+                      text=["anomalous data"],
                       marker=Marker(
-                        color='rgb(20, 200, 20)',
+                        color="rgb(20, 200, 20)",
                         size=15.0,
                         symbol=symbol,
                         line=Line(
-                          color='rgb(20, 200, 20)',
+                          color="rgb(20, 200, 20)",
                           width=2
                         )
-                      ),
-              )
+                      ))
 
     return fpTrace, tpTrace
 
@@ -392,16 +384,16 @@ if __name__ == "__main__":
   # Examples:
   
   dataFiles = [
-    'realKnownCause/machine_temperature_system_failure.csv',
-    'realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv']
+    "realKnownCause/machine_temperature_system_failure.csv",
+    "realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv"]
   dataNames = [
-    'Machine Temperature Sensor Data',
-    'AWS Cloudwatch CPU Utilization Data']
+    "Machine Temperature Sensor Data",
+    "AWS Cloudwatch CPU Utilization Data"]
   resultsFiles = [
-    'numenta/realKnownCause/numenta_machine_temperature_system_failure.csv',
-    'skyline/realKnownCause/skyline_machine_temperature_system_failure.csv',
-    'twitterADVec/realKnownCause/twitter_machine_temperature_system_failure.csv',
-    'twitterADTs/realKnownCause/twitter_machine_temperature_system_failure.csv']
+    "numenta/realKnownCause/numenta_machine_temperature_system_failure.csv",
+    "skyline/realKnownCause/skyline_machine_temperature_system_failure.csv",
+    "twitterADVec/realKnownCause/twitter_machine_temperature_system_failure.csv",
+    "twitterADTs/realKnownCause/twitter_machine_temperature_system_failure.csv"]
 
   for i in xrange(len(dataFiles)):
     dataPlotter = PlotRawData(
@@ -417,8 +409,8 @@ if __name__ == "__main__":
     dataNames[0])
   resultsPlotter.plot(
     resultsFiles,
-    detectors=['numenta', 'skyline', 'twitterADVec', 'twitterADTs'],
-    scoreProfile='standard',
+    detectors=["numenta", "skyline", "twitterADVec", "twitterADTs"],
+    scoreProfile="standard",
     withLabels=False,
     withWindows=True,
     withProbation=True)
