@@ -28,10 +28,14 @@ import pandas as pd
 import plotly.plotly as py
 
 from plotly.graph_objs import (Bar,
+                               Data,
+                               Figure,
                                Layout,
                                Line,
                                Marker,
-                               Scatter)
+                               Scatter,
+                               XAxis,
+                               YAxis)
 
 try:
   import simplejson as json
@@ -59,7 +63,9 @@ class PlotNAB(object):
 
   def __init__(self,
                apiKey=None,
-               username=None):  ## TODO: handle datafile stuff here (i.e. rawData) b/c all subclasses use it
+               username=None,
+               dataFile=None,
+               dataName=""):
 
     # Instantiate API credentials.
     try:
@@ -82,6 +88,12 @@ class PlotNAB(object):
     
     self._setupDirectories()
     self._getThresholds()
+    
+    # Setup data
+    self.dataFile = dataFile
+    self.dataName = dataName if dataName else dataFile
+    self.dataPath = os.path.join(self.dataDir, dataFile)
+    self.rawData = getCSVData(self.dataPath) if self.dataPath else None
     
     # For open shape markers, append "-open" to strings below:
     self.markers = ["circle", "diamond", "square", "cross", "triangle-up",
@@ -143,8 +155,8 @@ class PlotNAB(object):
       os.path.join(self.labelsDir, "combined_windows.json"))[self.dataFile]
     
     x = []
-    delta = pd.to_datetime(self.rawData["timestamp"][1]) -
-            pd.to_datetime(self.rawData["timestamp"][0])
+    delta = (pd.to_datetime(self.rawData["timestamp"][1]) -
+             pd.to_datetime(self.rawData["timestamp"][0]))
     minutes = int(delta.total_seconds() / 60)
     for window in windows:
       start = pd.to_datetime(window[0])
@@ -198,32 +210,32 @@ class PlotNAB(object):
                   bargap=0)
 
 
-  def plot():
-    """Generate plot by buidling plotly objects and querying plotly API."""
-    raise NotImplementedError()
+  def setDataFile(self, filename):
+    """Set the data file name; i.e. path from self.dataDir."""
+    self.dataFile = filename
 
 
+  def setDataName(self, name):
+    """Set the name of this data; prints to plot title."""
+    self.dataName = name
 
-class PlotRawData(PlotNAB):
-  """Class to plot raw data values of time-series data files."""
-  
-  def __init__(self,
-               dataFile,
-               dataName=""):
-    super(PlotRawData, self).__init__()
-  
-    self.dataFile = dataFile
-    self.dataName = dataName if dataName else dataFile
-    self.dataPath = os.path.join(self.dataDir, dataFile)
-  
-  
-  
-  def plot(self,
-           withLabels=False,
-           withWindows=False,
-           withProbation=False):
-  
-    self.rawData = getCSVData(self.dataPath)
+
+  def getDataInfo(self):
+    """Return member variables dataFile, dataName, and dataPath."""
+
+    return {"dataFile": self.dataFile,
+            "dataName": self.dataName,
+            "dataPath": dataPath}
+
+
+  def plotRawData(self,
+                  withLabels=False,
+                  withWindows=False,
+                  withProbation=False):
+
+    if self.rawData is None:
+      self.rawData = getCSVData(self.dataPath)
+    
     traces = []
 
     traces.append(self._addValues())
@@ -247,34 +259,30 @@ class PlotRawData(PlotNAB):
     print "Data plot URL: ", plot_url
 
     return plot_url
-
-
-
-class PlotMultipleDetectors(PlotNAB):
-  """Class to plot detector results on a data file."""
-  def __init__(self,
-               dataFile,
-               dataName=""):
-    super(PlotMultipleDetectors, self).__init__()
-  
-    self.dataFile = dataFile
-    self.dataName = dataName if dataName else dataFile
-    self.dataPath = os.path.join(self.dataDir, dataFile)
   
   
-  def plot(self,
-           resultsPaths,  ## TODO: auto-generate paths from dataFile and detectors
-           detectors=["numenta"],
-           scoreProfile="standard",
-           withLabels=True,
-           withWindows=True,
-           withProbation=True):
-
-    if scoreProfile is not "standard" or not "reward_low_fn_rate" or not "reward_low_fp_rate":
-      raise ValueError("Invalid scoring profile. Must be one of \'standard\' or \'reward low fn rate\' or \'reward low fp rate\'.")
-
+  def plotMultipleDetectors(self,
+                            resultsPaths,
+                            detectors=["numenta"],
+                            scoreProfile="standard",
+                            withLabels=True,
+                            withWindows=True,
+                            withProbation=True):
+    """
+    Plot detector results on a data file.
     
-    self.rawData = getCSVData(os.path.join(self.dataPath))
+    TODO: auto-generate paths from dataFile and detectors.
+    """
+
+    if scoreProfile is (not "standard"
+                    or not "reward_low_fn_rate"
+                    or not "reward_low_fp_rate"):
+      raise ValueError("Invalid scoring profile. Must be one of \'standard\' "
+                       "or \'reward low fn rate\' or \'reward low fp rate\'.")
+
+    if self.rawData is None:
+      self.rawData = getCSVData(os.path.join(self.dataPath))
+    
     traces = []
     
     traces.append(self._addValues())
@@ -288,7 +296,7 @@ class PlotMultipleDetectors(PlotNAB):
       FP, TP = self._parseDetections(resultsData, threshold)
       
       fpTrace, tpTrace = self._addDetections(
-        "Detection by " + d, self.markers[i+1], FP, TP)
+          "Detection by " + d, self.markers[i+1], FP, TP)
       
       traces.append(fpTrace)
       traces.append(tpTrace)
@@ -334,8 +342,13 @@ class PlotMultipleDetectors(PlotNAB):
 
 
   @staticmethod
-  def getTPDetection(detections, windowTimes):  ## TODO: use generator to yield each time, rather than looping through all detections
-    """Returns the first occurence of a detection w/in the window times."""
+  def getTPDetection(detections, windowTimes):
+    """
+    Returns the first occurence of a detection w/in the window times.
+    
+    TODO: use generator to yield each time, rather than looping through all 
+    detections
+    """
     for detection in detections.iterrows():
       detectionTime = pd.to_datetime(detection[1]["timestamp"])
       if detectionTime > windowTimes[0] and detectionTime < windowTimes[1]:
@@ -384,33 +397,33 @@ if __name__ == "__main__":
   # Examples:
   
   dataFiles = [
-    "realKnownCause/machine_temperature_system_failure.csv",
-    "realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv"]
+      "realKnownCause/machine_temperature_system_failure.csv",
+      "realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv"]
   dataNames = [
-    "Machine Temperature Sensor Data",
-    "AWS Cloudwatch CPU Utilization Data"]
+      "Machine Temperature Sensor Data",
+      "AWS Cloudwatch CPU Utilization Data"]
   resultsFiles = [
-    "numenta/realKnownCause/numenta_machine_temperature_system_failure.csv",
-    "skyline/realKnownCause/skyline_machine_temperature_system_failure.csv",
-    "twitterADVec/realKnownCause/twitter_machine_temperature_system_failure.csv",
-    "twitterADTs/realKnownCause/twitter_machine_temperature_system_failure.csv"]
+      "numenta/realKnownCause/numenta_machine_temperature_system_failure.csv",
+      "skyline/realKnownCause/skyline_machine_temperature_system_failure.csv",
+      "twitterADVec/realKnownCause/twitter_machine_temperature_system_failure.csv",
+      "twitterADTs/realKnownCause/twitter_machine_temperature_system_failure.csv"]
 
   for i in xrange(len(dataFiles)):
-    dataPlotter = PlotRawData(
-      dataFiles[i],
-      dataNames[i])
-    dataPlotter.plot(
-      withLabels=True,
-      withWindows=False,
-      withProbation=False)
+    dataPlotter = PlotNAB(
+        dataFile=dataFiles[i],
+        dataName=dataNames[i])
+    dataPlotter.plotRawData(
+        withLabels=True,
+        withWindows=False,
+        withProbation=False)
 
-  resultsPlotter = PlotMultipleDetectors(
-    dataFiles[0],
-    dataNames[0])
-  resultsPlotter.plot(
-    resultsFiles,
-    detectors=["numenta", "skyline", "twitterADVec", "twitterADTs"],
-    scoreProfile="standard",
-    withLabels=False,
-    withWindows=True,
-    withProbation=True)
+  resultsPlotter = PlotNAB(
+      dataFile=dataFiles[0],
+      dataName=dataNames[0])
+  resultsPlotter.plotMultipleDetectors(
+      resultsFiles,
+      detectors=["numenta", "skyline", "twitterADVec", "twitterADTs"],
+      scoreProfile="standard",
+      withLabels=False,
+      withWindows=True,
+      withProbation=True)
