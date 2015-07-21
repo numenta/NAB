@@ -31,7 +31,7 @@ root = recur(os.path.dirname, os.path.realpath(__file__), depth)
 def sortData(input_filename, output_filename):
   df = pandas.read_csv(input_filename)
   df.sort(columns='timestamp', inplace=True)
-  return df.to_csv(output_filename)
+  return df.to_csv(output_filename, index=False)
 
 
 def main(args):
