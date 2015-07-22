@@ -27,15 +27,8 @@ import os
 import pandas as pd
 import plotly.plotly as py
 
-from plotly.graph_objs import (Bar,
-                               Data,
-                               Figure,
-                               Layout,
-                               Line,
-                               Marker,
-                               Scatter,
-                               XAxis,
-                               YAxis)
+from plotly.graph_objs import (
+    Bar, Data, Figure, Layout, Line, Marker, Scatter, XAxis, YAxis)
 
 try:
   import simplejson as json
@@ -398,17 +391,17 @@ if __name__ == "__main__":
 
   # Examples:
   
-  dataFiles = [
+  dataFiles = (
       "realKnownCause/machine_temperature_system_failure.csv",
-      "realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv"]
-  dataNames = [
+      "realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv")
+  dataNames = (
       "Machine Temperature Sensor Data",
-      "AWS Cloudwatch CPU Utilization Data"]
-  resultsFiles = [
+      "AWS Cloudwatch CPU Utilization Data")
+  resultsFiles = (
       "numenta/realKnownCause/numenta_machine_temperature_system_failure.csv",
       "skyline/realKnownCause/skyline_machine_temperature_system_failure.csv",
       "twitterADVec/realKnownCause/twitter_machine_temperature_system_failure.csv",
-      "twitterADTs/realKnownCause/twitter_machine_temperature_system_failure.csv"]
+      "twitterADTs/realKnownCause/twitter_machine_temperature_system_failure.csv")
 
   for i in xrange(len(dataFiles)):
     dataPlotter = PlotNAB(
