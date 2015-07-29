@@ -2,7 +2,7 @@
 The Numenta Anomaly Benchmark [![Build Status](https://travis-ci.org/numenta/NAB.svg?branch=master)](https://travis-ci.org/numenta/NAB)
 -----------------------------
 
-Welcome. This repository contains the data and scripts necessary to replicate the results in the forthcoming Numenta Anomaly Benchmark (NAB) paper. Also provided are the tools to run NAB scoring on your own anomaly detection algorithms. Competitive results tied to open source code will be posted in the wiki on the [Scoreboard](https://github.com/numenta/NAB/wiki#nab-scoreboard). Let us know about your work by submitting a pull request. 
+Welcome. This repository contains the data and scripts necessary to replicate the results in the forthcoming Numenta Anomaly Benchmark (NAB) conference publication. Also provided are the tools to run NAB scoring on your own anomaly detection algorithms; see the [NAB entry points info](https://github.com/numenta/NAB/wiki#nab-entry-points). Competitive results tied to open source code will be posted in the wiki on the [Scoreboard](https://github.com/numenta/NAB/wiki#nab-scoreboard). Let us know about your work by submitting a pull request. 
 
 This readme is a brief overview and contains details for setting up NAB. **Please refer to the [NAB Whitepaper](https://github.com/numenta/NAB/wiki#nab-whitepaper) in the wiki for more details about NAB scoring, data, motivation, etc.**
 
@@ -99,9 +99,9 @@ Then follow build directions in the [NuPIC "README.md"](https://github.com/numen
 
 ##### Data and results files
 
-This repo contains a corpus of 32 data files of time-series data. The format of the CSV files is specified in Appendix G of the [NAB Whitepaper](https://github.com/numenta/NAB/wiki#nab-whitepaper). The detector under test will read in, and be scored on, all data files in the corpus. The format of results files is also specified in the whitepaper posted in the wiki.
+This repo contains a corpus of 32 data files of time-series data. The format of the CSV files is specified in Appendix F of the [NAB Whitepaper](https://github.com/numenta/NAB/wiki#nab-whitepaper). The detector under test will read in, and be scored on, all data files in the corpus. The format of results files is also specified in the whitepaper posted in the wiki.
 
-##### Data visualizer
+##### Data and results visualization
 
 There is currently a simple data visualizer available, useful in hand labeling datasets. To use it do the following:
 
@@ -125,3 +125,9 @@ To get a string of the timestamp at a data point, simply click on the data point
 To zoom in on a region of data, drag the cursor to highlight the section of interest. To zoom back out, double-click the screen.
 
 To view result files, click on "look at results" first.
+
+There is a plotting script available in the scripts directory, which will generate plots via the [plotly API](https://plot.ly/); requires a (free) API key. To generate examples, run from the NAB directory:
+
+	python scripts/plot.py
+
+Modify the script to plot specific NAB data and/or results files.
