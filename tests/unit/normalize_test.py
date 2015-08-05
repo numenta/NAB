@@ -23,19 +23,22 @@
 to baseline."""
 
 import csv
-import json
 import os
 import shutil
 import tempfile
 import unittest
+try:
+  import simplejson as json
+except ImportError:
+  import json
 
 from nab.runner import Runner
 
 
-def createTemporaryCsv(parentDir, fileName, data):
-  """Write a temporary CSV file for testing.
+def createCsv(parentDir, fileName, data):
+  """Write a CSV file for testing.
 
-  @param parentDir a tempfile temporary directory
+  @param parentDir string a directory path
   @param fileName string name of file
   @param data list of lists to write to CSV
   """
@@ -71,18 +74,18 @@ def createRunner(resultsDir, profileName, resultsName=None):
 class NormalizationTest(unittest.TestCase):
 
   def setUp(self):
-    self._tmpDirs = [] # stores absolute paths of dirs created during testing
+    self.tmpDir = None
     self.resultsHeaders = ['Detector','Profile','Score']
 
 
   def tearDown(self):
-    for tmpDir in self._tmpDirs:
-      shutil.rmtree(tmpDir)
+    if self.tmpDir is not None:
+      shutil.rmtree(self.tmpDir)
 
 
   def _createTemporaryResultsDir(self):
     tmpResultsDir = tempfile.mkdtemp()
-    self._tmpDirs.append(tmpResultsDir)
+    self.tmpDir = tmpResultsDir
     return tmpResultsDir
 
 
@@ -124,13 +127,13 @@ class NormalizationTest(unittest.TestCase):
     baselineFile = 'baseline/baseline_standard_scores.csv'
     baselineRow = ['baseline','standard','0.0']
     baselineData = [self.resultsHeaders, baselineRow]
-    createTemporaryCsv(tmpResultsDir, baselineFile, baselineData)
+    createCsv(tmpResultsDir, baselineFile, baselineData)
 
     # Create the fake results file
     fakeFile = 'fake/fake_standard_scores.csv'
     fakeRow = ['fake','standard','1.0']
     fakeData = [self.resultsHeaders, fakeRow]
-    createTemporaryCsv(tmpResultsDir, fakeFile, fakeData)
+    createCsv(tmpResultsDir, fakeFile, fakeData)
 
     testRunner = createRunner(tmpResultsDir, 'standard', 'fake')
     testRunner.normalize()
@@ -153,13 +156,13 @@ class NormalizationTest(unittest.TestCase):
     baselineFile = 'baseline/baseline_standard_scores.csv'
     baselineRow = ['baseline','standard','4.0']
     baselineData = [self.resultsHeaders, baselineRow]
-    createTemporaryCsv(tmpResultsDir, baselineFile, baselineData)
+    createCsv(tmpResultsDir, baselineFile, baselineData)
 
     # Create the fake results file
     fakeFile = 'fake/fake_standard_scores.csv'
     fakeRow = ['fake','standard','8.0']
     fakeData = [self.resultsHeaders, fakeRow]
-    createTemporaryCsv(tmpResultsDir, fakeFile, fakeData)
+    createCsv(tmpResultsDir, fakeFile, fakeData)
 
     testRunner = createRunner(tmpResultsDir, 'standard', 'fake')
     testRunner.normalize()
