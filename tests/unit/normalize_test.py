@@ -18,9 +18,10 @@
 #
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
-
-"""Tests normalization scheme for normalizing detectors' scores according
-to baseline."""
+"""
+Tests normalization scheme for normalizing detectors' scores according
+to baseline.
+"""
 
 import csv
 import os
@@ -35,12 +36,13 @@ except ImportError:
 from nab.runner import Runner
 
 
-def createCsv(parentDir, fileName, data):
-  """Write a CSV file for testing.
+def createCSV(parentDir, fileName, data):
+  """
+  Write a CSV file for testing.
 
-  @param parentDir string a directory path
-  @param fileName string name of file
-  @param data list of lists to write to CSV
+  @param parentDir      (str)             a directory path
+  @param fileName       (str)             name of file
+  @param data           (list)            list of lists to write to CSV
   """
   filePath = os.path.join(parentDir, fileName)
 
@@ -127,13 +129,13 @@ class NormalizationTest(unittest.TestCase):
     baselineFile = 'baseline/baseline_standard_scores.csv'
     baselineRow = ['baseline','standard','0.0']
     baselineData = [self.resultsHeaders, baselineRow]
-    createCsv(tmpResultsDir, baselineFile, baselineData)
+    createCSV(tmpResultsDir, baselineFile, baselineData)
 
     # Create the fake results file
     fakeFile = 'fake/fake_standard_scores.csv'
     fakeRow = ['fake','standard','1.0']
     fakeData = [self.resultsHeaders, fakeRow]
-    createCsv(tmpResultsDir, fakeFile, fakeData)
+    createCSV(tmpResultsDir, fakeFile, fakeData)
 
     testRunner = createRunner(tmpResultsDir, 'standard', 'fake')
     testRunner.normalize()
@@ -156,13 +158,13 @@ class NormalizationTest(unittest.TestCase):
     baselineFile = 'baseline/baseline_standard_scores.csv'
     baselineRow = ['baseline','standard','4.0']
     baselineData = [self.resultsHeaders, baselineRow]
-    createCsv(tmpResultsDir, baselineFile, baselineData)
+    createCSV(tmpResultsDir, baselineFile, baselineData)
 
     # Create the fake results file
     fakeFile = 'fake/fake_standard_scores.csv'
     fakeRow = ['fake','standard','8.0']
     fakeData = [self.resultsHeaders, fakeRow]
-    createCsv(tmpResultsDir, fakeFile, fakeData)
+    createCSV(tmpResultsDir, fakeFile, fakeData)
 
     testRunner = createRunner(tmpResultsDir, 'standard', 'fake')
     testRunner.normalize()
