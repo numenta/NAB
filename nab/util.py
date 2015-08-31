@@ -109,7 +109,7 @@ def updateThresholds(newThresholds, thresholdsFilePath):
         continue
 
       if data["score"] > oldThresholds[detector][profileName]["score"]:
-        oldThresholds[detector][profileNames] = data
+        oldThresholds[detector][profileName] = data
 
   writeJSON(thresholdsFilePath, oldThresholds)
 
