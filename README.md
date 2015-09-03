@@ -51,7 +51,7 @@ You need to manually install the following:
 - [Python 2.7](https://www.python.org/download/)
 - [pip](https://pip.pypa.io/en/latest/installing.html)
 - [NumPy](http://www.numpy.org/)
-- [NuPIC](http://www.github.com/numenta/nupic)
+- [NuPIC](http://www.github.com/numenta/nupic) (only required if running the Numenta detector)
 
 ##### Download this repository
 
@@ -80,7 +80,7 @@ Or with manual PYTHONPATH setup, rather than sudo:
     cd /path/to/nab
     python run.py
 
-This will produce results files for the anomaly detection methods. Included in the repo are the Numenta anomaly detection method, as well as methods from the [Etsy Skyline](https://github.com/etsy/skyline) anomaly detection library, and a random detector. This will also pass those results files to the scoring script to generate final NAB scores.
+This will produce results files for the anomaly detection methods. Included in the repo are the Numenta anomaly detection method, as well as methods from the [Etsy Skyline](https://github.com/etsy/skyline) anomaly detection library, a random detector, and a baseline detector. This will also pass those results files to the scoring script to generate final NAB scores.
 
 For details on how to run your own detector please see the [NAB Entry Points diagram](https://github.com/numenta/NAB/wiki#nab-entry-diagram) in the wiki.
 
