@@ -37,6 +37,48 @@ from nab.util import (absoluteFilePaths,
                       writeJSON)
 
 
+def bucket(rawTimes, buffer):
+  """
+  Buckets (groups) timestamps that are within the amount of time specified by
+  buffer.
+  """
+  bucket = []
+  rawBuckets = []
+  
+  current = None
+  for t in rawTimes:
+    if current is None:
+      current = t
+      bucket = [current]
+      continue
+    if (t - current) <= buffer:
+      bucket.append(t)
+    else:
+      rawBuckets.append(bucket)
+      current = t
+      bucket = [current]
+  if bucket:
+    rawBuckets.append(bucket)
+    
+  return rawBuckets
+
+
+def merge(rawBuckets, threshold):
+  """
+  Merges bucketed timestamps into one timestamp (most frequent, or earliest).
+  """
+  truths = []
+  passed = []
+  
+  for bucket in rawBuckets:
+    if len(bucket) >= threshold:
+      truths.append(max(bucket, key=bucket.count))
+    else:
+      passed.append(bucket)
+
+  return truths, passed
+
+
 
 class CorpusLabel(object):
   """
@@ -210,7 +252,7 @@ class LabelCombiner(object):
 
 
   def write(self, labelsPath, windowsPath):
-    """Write the combined labels and windows to a destination directories."""
+    """Write the combined labels and windows to destination directories."""
     if not os.path.isdir(labelsPath):
       createPath(labelsPath)
     if not os.path.isdir(windowsPath):
@@ -250,7 +292,7 @@ class LabelCombiner(object):
     Combines raw user labels to create set of true anomaly labels.
     A buffer is used to bucket labels that identify the same anomaly. The buffer
     is half the estimated window size of an anomaly -- approximates an average
-    of two anomalies per dataset, and no window can have >1 anomaly.
+    of two anomalies per dataset, and no window can have > 1 anomaly.
     After bucketing, a label becomes a true anomaly if it was labeled by a
     proportion of the users greater than the defined threshold. Then the bucket
     is merged into one timestamp -- the ground truth label.
@@ -258,7 +300,7 @@ class LabelCombiner(object):
     labeled because we know the direct causes of the anomalies. They are added
     as if they are the result of the bucket-merge process.
     
-    If verbosity>0, the dictionary passedLabels -- the raw labels that did not
+    If verbosity > 0, the dictionary passedLabels -- the raw labels that did not
     pass the threshold qualification -- is printed to the console.
     """
     def setTruthLabels(dataSet, trueAnomalies):
@@ -270,7 +312,6 @@ class LabelCombiner(object):
     self.labelTimestamps = {}
     self.labelIndices = {}
     for relativePath, dataSet in self.corpus.dataFiles.iteritems():
-    
       if "Known" in relativePath:
         knownAnomalies = self.knownLabels[0].windows[relativePath]
         self.labelTimestamps[relativePath] = [str(t) for t in knownAnomalies]
@@ -278,11 +319,14 @@ class LabelCombiner(object):
         continue
 
       rawTimesLists = []
+      userCount = 0
       for user in self.userLabels:
-        if user.windows[relativePath]:
+        if user.windows.get(relativePath):
+          # the user has labels for this file
           rawTimesLists.append(user.windows[relativePath])
+          userCount += 1
       if not rawTimesLists:
-        # No labeled anomalies for this data file
+        # no labeled anomalies for this data file
         self.labelTimestamps[relativePath] = []
         self.labelIndices[relativePath] = setTruthLabels(dataSet, [])
         continue
@@ -290,12 +334,15 @@ class LabelCombiner(object):
         rawTimes = list(itertools.chain.from_iterable(rawTimesLists))
         rawTimes.sort()
       
-      # Bucket and merge the anomaly timestamps
-      granularity = 5
-      buffer = datetime.timedelta(
-        minutes=round(granularity*len(dataSet.data)*self.windowSize/2))
-      trueAnomalies, passedAnomalies = merge(bucket(rawTimes, buffer),
-                                            len(self.userLabels)*self.threshold)
+      # Bucket and merge the anomaly timestamps.
+      granularity = dataSet.data['timestamp'][1] - dataSet.data['timestamp'][0]
+      buffer = datetime.timedelta(minutes=
+        granularity.total_seconds()/60 * len(dataSet.data) * self.windowSize/2)
+      threshold = userCount * self.threshold
+
+      trueAnomalies, passedAnomalies = merge(
+        bucket(rawTimes, buffer), threshold)
+
       self.labelTimestamps[relativePath] = [str(t) for t in trueAnomalies]
       self.labelIndices[relativePath] = setTruthLabels(dataSet, trueAnomalies)
       
@@ -321,7 +368,7 @@ class LabelCombiner(object):
     
       count += len(indices)
   
-    if self.verbosity>0:
+    if self.verbosity > 0:
       print "============================================================="
       print "Total ground truth anomalies in benchmark dataset =", count
 
@@ -332,7 +379,7 @@ class LabelCombiner(object):
     adds a standard window. The window length is the class variable windowSize,
     and the location is centered on the anomaly timestamp.
     
-    If verbosity=2, the window metrics are printed to the console.
+    If verbosity = 2, the window metrics are printed to the console.
     """
     allWindows = {}
     for relativePath, anomalies in self.labelIndices.iteritems():
@@ -373,60 +420,25 @@ class LabelCombiner(object):
     single window. Windows overlapping with the probationary period are deleted.
     """
     for relativePath, windows in self.combinedWindows.iteritems():
-      num_windows = len(windows)
-      if num_windows > 1:
-        for i in range(num_windows-1):
-          if (pandas.to_datetime(windows[i+1][0])
-              - pandas.to_datetime(windows[i][1])).total_seconds() <= 0:
-            windows[i] = [windows[i][0], windows[i+1][1]]
-            del windows[i+1]
+      numWindows = len(windows)
+      if numWindows > 0:
+      
+        fileLength = len(self.corpus.dataFiles[relativePath].data)
+        probationIndex = int(math.ceil(self.probationaryPeriod * fileLength))
+        probationTimestamp = self.corpus.dataFiles[relativePath].data[
+          "timestamp"][probationIndex]
 
-      length = len(self.corpus.dataFiles[relativePath].data)
-      probationIndex = int(math.ceil(self.probationaryPeriod*length))
-      probationTimestamp = self.corpus.dataFiles \
-                             [relativePath].data["timestamp"][probationIndex]
-      if num_windows > 0:
         if (pandas.to_datetime(windows[0][0])
             -probationTimestamp).total_seconds() < 0:
-          raise ValueError("The first window in %s overlaps with the"
-                           "probationary period" % relativePath)
-
-
-def bucket(rawTimes, buffer):
-  """
-  Buckets (groups) timestamps that are within the amount of time specified by
-  buffer.
-  """
-  bucket = []
-  rawBuckets = []
-  
-  current = None
-  for t in rawTimes:
-    if current is None:
-      current = t
-      bucket = [current]
-      continue
-    if (t - current) <= buffer:
-      bucket.append(t)
-    else:
-      rawBuckets.append(bucket)
-      current = t
-      bucket = [current]
-  if bucket:
-    rawBuckets.append(bucket)
-    
-  return rawBuckets
-
-
-def merge(rawBuckets, threshold):
-  """Merges bucketed timestamps into one (most frequent, or earliest)."""
-  truths = []
-  passed = []
-  
-  for bucket in rawBuckets:
-    if len(bucket) >= threshold:
-      truths.append(max(bucket, key=bucket.count))
-    else:
-      passed.append(bucket)
-
-  return truths, passed
+          del windows[0]
+          print ("The first window in {} overlaps with the probationary period "
+                 ", so we're deleting it.".format(relativePath))
+        
+        i = 0
+        while len(windows)-1 > i:
+          if (pandas.to_datetime(windows[i+1][0])
+              - pandas.to_datetime(windows[i][1])).total_seconds() <= 0:
+            # merge windows
+            windows[i] = [windows[i][0], windows[i+1][1]]
+            del windows[i+1]
+          i += 1
