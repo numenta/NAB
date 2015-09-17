@@ -72,8 +72,7 @@ def main(args):
   runner.initialize()
 
   if args.detect:
-    detectorConstructors = getDetectorClassConstructors(
-      args.detectors[0].split(','))
+    detectorConstructors = getDetectorClassConstructors(args.detectors)
     runner.detect(detectorConstructors)
 
   if args.optimize:
