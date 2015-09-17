@@ -72,8 +72,7 @@ def main(args):
   runner.initialize()
 
   if args.detect:
-    detectorConstructors = getDetectorClassConstructors(
-      args.detectors[0].split(','))
+    detectorConstructors = getDetectorClassConstructors(args.detectors)
     runner.detect(detectorConstructors)
 
   if args.optimize:
@@ -132,7 +131,7 @@ if __name__ == "__main__":
                     help="This will hold the results after running detectors "
                     "on the data")
 
-  parser.add_argument("--labelFile",
+  parser.add_argument("--windowsFile",
                     default=os.path.join("labels", "combined_windows.json"),
                     help="JSON file containing ground truth labels for the "
                          "corpus.")
