@@ -139,18 +139,22 @@ class CorpusLabel(object):
     self.labels = {}
 
     for relativePath, dataSet in self.corpus.dataFiles.iteritems():
-      windows = self.windows[relativePath]
+      if self.windows.has_key(relativePath):
+        windows = self.windows[relativePath]
 
-      labels = pandas.DataFrame({"timestamp": dataSet.data["timestamp"]})
-      labels['label'] = 0
+        labels = pandas.DataFrame({"timestamp": dataSet.data["timestamp"]})
+        labels['label'] = 0
 
-      for t1, t2 in windows:
-        moreThanT1 = labels[labels["timestamp"] >= t1]
-        betweenT1AndT2 = moreThanT1[moreThanT1["timestamp"] <= t2]
-        indices = betweenT1AndT2.loc[:,"label"].index
-        labels["label"].values[indices.values] = 1
+        for t1, t2 in windows:
+          moreThanT1 = labels[labels["timestamp"] >= t1]
+          betweenT1AndT2 = moreThanT1[moreThanT1["timestamp"] <= t2]
+          indices = betweenT1AndT2.loc[:,"label"].index
+          labels["label"].values[indices.values] = 1
 
-      self.labels[relativePath] = labels
+        self.labels[relativePath] = labels
+
+      else:
+        print "Warning: no label for datafile",relativePath
 
 
 class LabelCombiner(object):
