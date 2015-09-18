@@ -246,6 +246,13 @@ class Runner(object):
         results = pandas.read_csv(f)
         baselines[profileName] = results["Score"].iloc[-1]
 
+    # Get total number of TPs
+    with open(self.labelPath, "rb") as f:
+      labelsDict = json.load(f)
+    tpCount = 0
+    for labels in labelsDict.values():
+      tpCount += len(labels)
+
     # Normalize the score from each results file.
     finalResults = {}
     for resultsFile in self.resultsFiles:
@@ -256,7 +263,7 @@ class Runner(object):
         results = pandas.read_csv(f)
         
         # Calculate score:
-        perfect = 44.0 - base
+        perfect = tpCount - base
         score = (-base + results["Score"].iloc[-1]) * (100/perfect)
         
         # Add to results dict:
