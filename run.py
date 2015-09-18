@@ -57,13 +57,13 @@ def main(args):
   numCPUs = int(args.numCPUs) if args.numCPUs is not None else None
 
   dataDir = os.path.join(root, args.dataDir)
-  labelFile = os.path.join(root, args.labelFile)
+  windowsFile = os.path.join(root, args.windowsFile)
   resultsDir = os.path.join(root, args.resultsDir)
   profilesFile = os.path.join(root, args.profilesFile)
   thresholdsFile = os.path.join(root, args.thresholdsFile)
   
   runner = Runner(dataDir=dataDir,
-                  labelPath=labelFile,
+                  labelPath=windowsFile,
                   resultsDir=resultsDir,
                   profilesPath=profilesFile,
                   thresholdPath=thresholdsFile,
