@@ -78,16 +78,16 @@ class PlotNAB(object):
       raise OSError("Missing username.")
 
     py.sign_in(self.username, self.apiKey)
-    
+
     self._setupDirectories()
     self._getThresholds()
-    
+
     # Setup data
     self.dataFile = dataFile
     self.dataName = dataName if dataName else dataFile
     self.dataPath = os.path.join(self.dataDir, dataFile)
     self.rawData = getCSVData(self.dataPath) if self.dataPath else None
-    
+
     # For open shape markers, append "-open" to strings below:
     self.markers = ["circle", "diamond", "square", "cross", "triangle-up",
                     "hexagon", "triangle-down"]
@@ -122,14 +122,14 @@ class PlotNAB(object):
     """Return plotly trace for anomaly labels."""
     labels = getJSONData(
       os.path.join(self.labelsDir, "combined_labels.json"))[self.dataFile]
-    
+
     x = []
     y = []
     for label in labels:
       row = self.rawData[self.rawData.timestamp == label]
       x.append(row["timestamp"])
       y.append(row["value"])
-    
+
     return Scatter(x=x,
                    y=y,
                    mode="markers",
@@ -146,7 +146,7 @@ class PlotNAB(object):
     """Return plotly trace for anomaly windows."""
     windows = getJSONData(
       os.path.join(self.labelsDir, "combined_windows.json"))[self.dataFile]
-    
+
     x = []
     delta = (pd.to_datetime(self.rawData["timestamp"][1]) -
              pd.to_datetime(self.rawData["timestamp"][0]))
@@ -229,17 +229,17 @@ class PlotNAB(object):
 
     if self.rawData is None:
       self.rawData = getCSVData(self.dataPath)
-    
+
     traces = []
 
     traces.append(self._addValues())
-    
+
     if withLabels:
       traces.append(self._addLabels())
-    
+
     if withWindows:
       traces.append(self._addWindows())
-    
+
     if withProbation:
       traces.append(self._addProbation())
 
@@ -253,8 +253,8 @@ class PlotNAB(object):
     print "Data plot URL: ", plot_url
 
     return plot_url
-  
-  
+
+
   def plotMultipleDetectors(self,
                             resultsPaths,
                             detectors=["numenta"],
@@ -264,7 +264,7 @@ class PlotNAB(object):
                             withProbation=True):
     """
     Plot detector results on a data file.
-    
+
     TODO: auto-generate paths from dataFile and detectors.
     """
 
@@ -276,9 +276,9 @@ class PlotNAB(object):
 
     if self.rawData is None:
       self.rawData = getCSVData(os.path.join(self.dataPath))
-    
+
     traces = []
-    
+
     traces.append(self._addValues())
 
     # Anomaly detections traces:
@@ -286,21 +286,21 @@ class PlotNAB(object):
       threshold = self.thresholds[d][scoreProfile]["threshold"]
 
       resultsData = getCSVData(os.path.join(self.resultsDir, resultsPaths[i]))
-      
+
       FP, TP = self._parseDetections(resultsData, threshold)
-      
+
       fpTrace, tpTrace = self._addDetections(
           "Detection by " + d, self.markers[i+1], FP, TP)
-      
+
       traces.append(fpTrace)
       traces.append(tpTrace)
-    
+
     if withLabels:
       traces.append(self._addLabels())
-    
+
     if withWindows:
       traces.append(self._addWindows())
-    
+
     if withProbation:
       traces.append(self._addProbation())
 
@@ -322,7 +322,7 @@ class PlotNAB(object):
       os.path.join(self.labelsDir, "combined_windows.json"))[self.dataFile]
 
     detections = resultsData[resultsData["anomaly_score"] >= threshold]
-    
+
     FP = detections[detections["label"] == 0]
     TP = []
     for window in windows:
@@ -339,8 +339,8 @@ class PlotNAB(object):
   def getTPDetection(detections, windowTimes):
     """
     Returns the first occurence of a detection w/in the window times.
-    
-    TODO: use generator to yield each time, rather than looping through all 
+
+    TODO: use generator to yield each time, rather than looping through all
     detections
     """
     for detection in detections.iterrows():
@@ -393,7 +393,7 @@ if __name__ == "__main__":
 
   # Sample 1: shows how to plot a set of raw data files with their labels.
   # You can optionally show the windows or probationary period.
-  
+
   dataFiles = (
       "realKnownCause/machine_temperature_system_failure.csv",
       "realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv")
@@ -406,7 +406,7 @@ if __name__ == "__main__":
   for i in xrange(len(dataFiles)):
     dataPlotter = PlotNAB(
         dataFile=dataFiles[i],
-        dataName=dataNames[i])
+        dataName="Labels inspection for " + dataFiles[i])
     dataPlotter.plotRawData(
         withLabels=True,
         withWindows=False,
