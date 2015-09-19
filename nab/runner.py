@@ -113,20 +113,21 @@ class Runner(object):
     for detectorName, detectorConstructor in detectors.iteritems():
       for relativePath, dataSet in self.corpus.dataFiles.iteritems():
 
-        args.append(
-          (
-            count,
-            detectorConstructor(
-              dataSet=dataSet,
-              probationaryPercent=self.probationaryPercent),
-            detectorName,
-            self.corpusLabel.labels[relativePath]["label"],
-            self.resultsDir,
-            relativePath
+        if self.corpusLabel.labels.has_key(relativePath):
+          args.append(
+            (
+              count,
+              detectorConstructor(
+                dataSet=dataSet,
+                probationaryPercent=self.probationaryPercent),
+              detectorName,
+              self.corpusLabel.labels[relativePath]["label"],
+              self.resultsDir,
+              relativePath
+            )
           )
-        )
 
-        count += 1
+          count += 1
     
     self.pool.map(detectDataSet, args)
 
