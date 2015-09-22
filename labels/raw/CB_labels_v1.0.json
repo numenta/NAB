@@ -48,7 +48,7 @@
         "2015-03-29 16:27:53.000000"
     ],
 
-    "realMole/mole_cpu_usage.csv": [
+    "realRogueAgent/rogue_agent_cpu_usage.csv": [
         "2014-06-06 10:05:00.000000",
         "2014-06-07 12:00:00.000000",
         "2014-06-14 16:00:00.000000",
@@ -58,13 +58,13 @@
         "2014-06-18 12:00:00.000000"
 
     ],
-    "realMole/mole_memory_percent.csv": [
+    "realRogueAgent/rogue_agent_memory_percent.csv": [
         "2014-05-31 14:50:00.000000",
         "2014-06-07 13:00:00.000000",
         "2014-06-10 13:55:00.000000",
         "2014-06-14 21:20:00.000000"
     ],
-    "realMole/mole_network_percent.csv": [
+    "realRogueAgent/rogue_agent_network_percent.csv": [
         "2014-05-31 09:05:00.000000",
         "2014-06-11 14:45:00.000000",
         "2014-06-14 21:50:00.000000"
