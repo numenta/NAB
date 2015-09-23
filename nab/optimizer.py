@@ -37,19 +37,19 @@ def optimizeThreshold(args):
         "score"     (float)   The score from the objective function given the
                               threshold.
   """
-  result = twiddle(
+  optimizedThreshold, optimizedScore = twiddle(
     objFunction=objectiveFunction,
     args=args,
     initialGuess=0.5,
-    tolerance=.00001)
+    tolerance=.0000001)
 
-  answer = {}
+  print "Optimizer found a max score of {} with anomaly threshold {}.".format(
+    optimizedScore, optimizedThreshold)
 
-  answer['threshold'] = result['parameter']
-
-  answer['score'] = result['score']
-
-  return answer
+  return {
+    "threshold": optimizedThreshold,
+    "score": optimizedScore
+  }
 
 
 def twiddle(objFunction, args, initialGuess=0.5, tolerance=0.00001,
@@ -69,15 +69,12 @@ def twiddle(objFunction, args, initialGuess=0.5, tolerance=0.00001,
                               particular parameter choice is.
 
   @param init       (float)   Initial value of the parameter.
-  
+
   @param domain     (tuple)   Domain of parameter values, as (min, max).
 
-  @return (dict) Contains:
-        "parameter" (float)   Threshold that returns the largest score from the
-                              Objective function.
-
-        "score"     (float)   The score from the objective function given the
-                              threshold.
+  @return           (tuple)   Two-tuple, with first item the parameter value
+                              yielding the best score, and second item the
+                              optimum score from the objective function.
   """
   pastCalls = {}
   x = initialGuess
@@ -87,7 +84,7 @@ def twiddle(objFunction, args, initialGuess=0.5, tolerance=0.00001,
   pastCalls[x] = bestScore
 
   while delta > tolerance:
-  
+
     # Keep x within bounds
     if x+delta > domain[1]:
       delta = abs(domain[1] - x) / 2
@@ -127,8 +124,12 @@ def twiddle(objFunction, args, initialGuess=0.5, tolerance=0.00001,
     print "Step size:", delta
     print
 
-  return {"parameter": x,
-          "score": bestScore}
+  # Return the threshold from pastCalls dict. Due to numerical precision, the
+  # the while loop may not always yield the threshold that reflects the max
+  # score (bestScore).
+  bestParam = max(pastCalls.iterkeys(), key=lambda key: pastCalls[key])
+
+  return (bestParam, pastCalls[bestParam])
 
 
 def objectiveFunction(threshold, args):

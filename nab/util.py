@@ -67,7 +67,7 @@ def updateFinalResults(newResults, resultsFilePath):
   @return oldResults        (dict)    Updated final results.
   """
   oldResults = getOldDict(resultsFilePath)
-  
+
   # dut: detector under test
   for dut, score in newResults.iteritems():
     if dut not in oldResults:
@@ -80,36 +80,32 @@ def updateFinalResults(newResults, resultsFilePath):
 
 def updateThresholds(newThresholds, thresholdsFilePath):
   """
-  Keep thresholds file updated with best runs of optimize_threshold.
+  The thresholds file keeps a dictionary of thresholds and raw scores for
+  combinations of detector and scoring profiles. This function updates the file
+  with the new thresholds.
 
-  The thresholds file keeps a dictionary of best thresholds and raw scores for
-  combinations of detector and scoring profiles. This function makes sure to
-  keep the best thresholds inside that file and keep them there to be used by
-  others who are using the same detector and have the same profile (cost matrix)
+  @param newThresholds      (dict)    Optimized thresholds, as returned by
+                                      optimizeThreshold() in the optimizer.
 
-  @param newThresholds      (dict)    Optimized thresholds, from
-                                      most recent call to optimize().
+  @param thresholdsFilePath (str)     JSON of thresholds and their corresponding
+                                      raw scores.
 
-  @param thresholdsFilePath (str)     File containing the best thresholds and
-                                      their corresponding scores from the past
-                                      runs of optimize().
-
-  @return oldThresholds     (dict)    Updated threshold values.
+  @return oldThresholds     (dict)    Updated thresholds.
   """
   oldThresholds = getOldDict(thresholdsFilePath)
 
   for detector, profileDictionary in newThresholds.iteritems():
     if detector not in oldThresholds:
+      # add an entry for a new detector
       oldThresholds[detector] = newThresholds[detector]
       continue
 
     for profileName, data in profileDictionary.iteritems():
       if profileName not in oldThresholds[detector]:
+        # add an entry for a new scoring profile under this detector
         oldThresholds[detector][profileName] = data
         continue
-
-      if data["score"] > oldThresholds[detector][profileName]["score"]:
-        oldThresholds[detector][profileName] = data
+      oldThresholds[detector][profileName] = data
 
   writeJSON(thresholdsFilePath, oldThresholds)
 
