@@ -115,19 +115,34 @@ class CorpusLabelTest(unittest.TestCase):
             % (row[1]["timestamp"], relativePath))
 
 
-  def testNonexistentDataFileForLabels(self):
+  def testNonexistentDatafileOrLabelsThrowsError(self):
+    """
+    A KeyError should be thrown when there are not corresponding windows labels
+    for a data file (or vice-versa) in the corpus.
+    """
     data = pandas.DataFrame({"timestamp" :
       generateTimestamps(strp("2014-01-01"),
       datetime.timedelta(minutes=5), 10)})
 
     windows = [["2014-01-01 00:15", "2014-01-01 00:30"]]
 
+    # Case 1: nonexistent datafile for window labels
     writeCorpus(self.tempCorpusPath, {"test_data_file.csv": data})
     writeCorpusLabel(self.tempCorpusLabelPath,
       {"test_data_file.csv": windows, "non_existent_data_file.csv": windows})
     
     corpus = nab.corpus.Corpus(self.tempCorpusPath)
+
+    self.assertRaises(
+      KeyError, nab.labeler.CorpusLabel, self.tempCorpusLabelPath, corpus)
+  
+    # Case 2: nonexistent window labels for datafile
+    writeCorpus(self.tempCorpusPath,
+      {"test_data_file.csv": data, "non_existent_data_file.csv": data})
+    writeCorpusLabel(self.tempCorpusLabelPath, {"test_data_file.csv": windows})
     
+    corpus = nab.corpus.Corpus(self.tempCorpusPath)
+
     self.assertRaises(
       KeyError, nab.labeler.CorpusLabel, self.tempCorpusLabelPath, corpus)
 
