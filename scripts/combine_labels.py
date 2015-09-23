@@ -19,7 +19,7 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 """
-Combines a set of raw label files
+Combines a set of raw label files.
 """
 
 import argparse
@@ -33,12 +33,9 @@ from nab.util import recur, checkInputs
 
 
 
-depth = 2
-
-root = recur(os.path.dirname, os.path.realpath(__file__), depth)
-
 def main(args):
   if not args.absolutePaths:
+    root = recur(os.path.dirname, os.path.realpath(__file__), 2)
     dataDir = os.path.join(root, args.dataDir)
     labelDir = os.path.join(root, args.labelDir)
   else:
@@ -52,21 +49,21 @@ def main(args):
   probationaryPercent = 0.15
 
 
-  print "Getting Corpus"
+  print "Getting corpus."
   corpus = Corpus(dataDir)
 
-  print "Creating LabelCombiner"
+  print "Creating LabelCombiner."
   labelCombiner = LabelCombiner(labelDir, corpus,
                                 args.threshold, windowSize,
                                 probationaryPercent, args.verbosity)
 
-  print "Combining Labels"
+  print "Combining labels."
   labelCombiner.combine()
 
-  print "Writing combined labels files"
+  print "Writing combined labels files."
   labelCombiner.write(args.combinedLabelsPath, args.combinedWindowsPath)
 
-  print "Attempting to load objects as a test"
+  print "Attempting to load objects as a test."
   corpusLabel = CorpusLabel(args.combinedWindowsPath, corpus)
   corpusLabel.validateLabels()
 
@@ -101,15 +98,16 @@ if __name__ == "__main__":
   parser.add_argument("--threshold",
                       default=0.5,
                       type=float,
-                      help="The percentage agreement you would like between all\
-                      labelers for a record to be considered anomalous (should \
-                      be a number between 0 and 1)")
+                      help="The percentage agreement you would like between "
+                           "all labelers for a record to be considered "
+                           "anomalous.")
                       
   parser.add_argument("--verbosity",
                       default=1,
                       type=int,
-                      help="Set the level of verbosity; to print out labeling \
-                      metrics during the process, acceptable values are 0,1,2")
+                      help="Set the level of verbosity; to print out labeling "
+                           "metrics during the process, acceptable values are "
+                           "0, 1, and 2.")
 
   parser.add_argument("--skipConfirmation",
                     default=False,
