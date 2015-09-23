@@ -124,9 +124,9 @@ def twiddle(objFunction, args, initialGuess=0.5, tolerance=0.00001,
     print "Step size:", delta
     print
 
-  # Return the threshold from pastCalls dict because due to numerical precision
-  # variations the while loop may not always yield the threshold with the max
-  # score as bestScore.
+  # Return the threshold from pastCalls dict. Due to numerical precision, the
+  # the while loop may not always yield the threshold that reflects the max
+  # score (bestScore).
   bestParam = max(pastCalls.iterkeys(), key=lambda key: pastCalls[key])
 
   return (bestParam, pastCalls[bestParam])
