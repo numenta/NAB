@@ -55,20 +55,6 @@
             "threshold": 0.8000000000000003
         }
     },
-    "twitterADVec": {
-        "reward_low_FN_rate": {
-            "score": -30.63914483,
-            "threshold": 0.5
-        },
-        "reward_low_FP_rate": {
-            "score": -12.15798656,
-            "threshold": 0.5
-        },
-        "standard": {
-            "score": -8.639144834,
-            "threshold": 0.5
-        }
-    },
     "twitterADTs": {
         "reward_low_FN_rate": {
             "score": -39.9892525,
@@ -80,6 +66,20 @@
         },
         "standard": {
             "score": -14.9892525,
+            "threshold": 0.5
+        }
+    },
+    "twitterADVec": {
+        "reward_low_FN_rate": {
+            "score": -30.63914483,
+            "threshold": 0.5
+        },
+        "reward_low_FP_rate": {
+            "score": -12.15798656,
+            "threshold": 0.5
+        },
+        "standard": {
+            "score": -8.639144834,
             "threshold": 0.5
         }
     }
