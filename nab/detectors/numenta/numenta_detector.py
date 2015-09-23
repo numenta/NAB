@@ -51,23 +51,18 @@ class NumentaDetector(AnomalyDetector):
     Internally to NuPIC "anomalyScore" corresponds to "likelihood_score"
     and "rawScore" corresponds to "anomaly_score". Sorry about that.
     """
-    # print type(self.model)
-    # print "inputData: %s" % str(inputData)
     # Send it to Numenta detector and get back the results
     result = self.model.run(inputData)
 
-    # print "result: %s" % str(result)
     # Retrieve the anomaly score and write it to a file
     rawScore = result.inferences["anomalyScore"]
 
-    # print "rawScore: %s" %(rawScore)
-    # Compute the Anomaly Likelihood
-    anomalyScore = self.anomalyLikelihood.likelihood(inputData["value"],
-                                                     rawScore,
-                                                     inputData["timestamp"])
-    # print "anomalyScore: %s" % str(anomalyScore)
+    # Compute log(anomaly likelihood)
+    anomalyScore = self.anomalyLikelihood.anomalyProbability(
+      inputData["value"], rawScore, inputData["timestamp"])
+    logScore = self.anomalyLikelihood.computeLogLikelihood(anomalyScore)
 
-    return (anomalyScore, rawScore)
+    return (logScore, rawScore)
 
 
   def initialize(self):
@@ -98,69 +93,10 @@ class NumentaDetector(AnomalyDetector):
 
     self.model.enableInference({"predictedField": "value"})
 
-    # The anomaly likelihood object
+    # Initialize the anomaly likelihood object
     numentaLearningPeriod = math.floor(self.probationaryPeriod / 2.0)
-    self.anomalyLikelihood = AnomalyLikelihood(self.probationaryPeriod,
-                                               numentaLearningPeriod)
-
-#############################################################################
-
-class AnomalyLikelihood(object):
-  """Helper class for running anomaly likelihood computation."""
-
-  def __init__(self, probationaryPeriod = 600, numentaLearningPeriod = 300):
-    """
-    probationaryPeriod - no anomaly scores are reported for this many
-    iterations.  This should be numentaLearningPeriod + some number of records
-    for getting a decent likelihood estimation.
-
-    numentaLearningPeriod - the number of iterations required for the Numenta
-    detector to learn some of the patterns in the dataset.
-    """
-    self._iteration          = 0
-    self._historicalScores   = []
-    self._distribution       = None
-    self._probationaryPeriod = probationaryPeriod
-    self._numentaLearningPeriod  = numentaLearningPeriod
-
-
-  def _computeLogLikelihood(self, likelihood):
-    """
-    Compute a log scale representation of the likelihood value. Since the
-    likelihood computations return low probabilities that often go into 4 9"s or
-    5 9"s, a log value is more useful for visualization, thresholding, etc.
-    """
-    # The log formula is:
-    # Math.log(1.0000000001 - likelihood) / Math.log(1.0 - 0.9999999999);
-    return math.log(1.0000000001 - likelihood) / -23.02585084720009
-
-
-  def likelihood(self, value, anomalyScore, dttm):
-    """
-    Given the current metric value, plus the current anomaly score, output the
-    anomalyLikelihood for this record.
-    """
-    dataPoint = (dttm, value, anomalyScore)
-    # We ignore the first probationaryPeriod data points
-    if len(self._historicalScores) < self._probationaryPeriod:
-      likelihood = 0.5
-    else:
-      # On a rolling basis we re-estimate the distribution every 100 iterations
-      if self._distribution is None or (self._iteration % 100 == 0):
-        _, _, self._distribution = (
-          anomaly_likelihood.estimateAnomalyLikelihoods(
-            self._historicalScores,
-            skipRecords = self._numentaLearningPeriod)
-          )
-
-      likelihoods, _, self._distribution = (
-        anomaly_likelihood.updateAnomalyLikelihoods([dataPoint],
-          self._distribution)
-      )
-      likelihood = 1.0 - likelihoods[0]
-
-    # Before we exit update historical scores and iteration
-    self._historicalScores.append(dataPoint)
-    self._iteration += 1
-
-    return likelihood
+    self.anomalyLikelihood = anomaly_likelihood.AnomalyLikelihood(
+      claLearningPeriod=numentaLearningPeriod,
+      estimationSamples=self.probationaryPeriod-numentaLearningPeriod,
+      reestimationPeriod=100
+    )

@@ -61,8 +61,8 @@
             "seed": 1956,
             "spVerbosity": 0,
             "spatialImp": "cpp",
-            "synPermActiveInc": 0.0015,
-            "synPermConnected": 0.1,
+            "synPermActiveInc": 0.002,
+            "synPermConnected": 0.2,
             "synPermInactiveDec": 0.0005
         },
         "tpEnable": true,
