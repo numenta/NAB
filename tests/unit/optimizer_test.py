@@ -71,16 +71,16 @@ class OptimizerTest(unittest.TestCase):
     Optimizer should return 0 at x=0"""
     
     # Start arbitrarily w/in domain
-    result = twiddle(objFunction=negativeXSquared,
+    optimizedThreshold, optimizedScore = twiddle(objFunction=negativeXSquared,
       args = (),
       initialGuess = 42,
       domain = (-50, 50))
 
-    self.assertTrue(abs(result['parameter'] - 0.0) <= 0.00001,
+    self.assertTrue(abs(optimizedThreshold - 0.0) <= 0.00001,
       "Optimizer returned x = %r, which is not within the tolerance of \
-      the maximum location x = 0.0" % result['parameter'])
-    self.assertTrue(abs(result['score'] - 0) <= math.sqrt(0.00001),
-      "Optimizer returned a max value of %r, but expected 0" % result['score'])
+      the maximum location x = 0.0" % optimizedThreshold)
+    self.assertTrue(abs(optimizedScore - 0) <= math.sqrt(0.00001),
+      "Optimizer returned a max value of %r, but expected 0" % optimizedScore)
 
 
   def testMaxOfXSquared(self):
@@ -88,17 +88,17 @@ class OptimizerTest(unittest.TestCase):
     Optimizer should return 100 at x=10"""
     
     # Start right of global min
-    result = twiddle(objFunction=xSquared,
+    optimizedThreshold, optimizedScore = twiddle(objFunction=xSquared,
       args = (),
       initialGuess = 1,
       domain = (0, 10))
       
-    self.assertTrue(abs(result['parameter'] - 10.0) <= 0.00001,
+    self.assertTrue(abs(optimizedThreshold - 10.0) <= 0.00001,
       "Optimizer returned x = %r, which is not within the tolerance of \
-      the maximum location x = 10.0" % result['parameter'])
-    self.assertTrue(abs(result['score'] - 100) <= math.sqrt(0.00001),
+      the maximum location x = 10.0" % optimizedThreshold)
+    self.assertTrue(abs(optimizedScore - 100) <= math.sqrt(0.00001),
       "Optimizer returned a max value of %r, but expected 100"
-      % result['score'])
+      % optimizedScore)
 
 
   def testMaxOfSine(self):
@@ -106,52 +106,52 @@ class OptimizerTest(unittest.TestCase):
     Optimizer should return 1.0 at x={pi/2, 3pi/2}"""
 
     # Start left of local max pi/2
-    result = twiddle(objFunction=sine,
+    optimizedThreshold, optimizedScore = twiddle(objFunction=sine,
       args = (),
       initialGuess = math.pi*(0.5 - 0.1),
       domain = (0, 2*math.pi))
 
-    self.assertTrue(abs(result['parameter'] - math.pi/2) <= 0.00001,
+    self.assertTrue(abs(optimizedThreshold - math.pi/2) <= 0.00001,
       "Optimizer returned x = %r, which is not within the tolerance of the \
-      maximum location x = %r" % (result['parameter'], math.pi/2))
-    self.assertTrue(abs(result['score'] - 1.0) <= 0.00001,
-      "Optimizer returned max value of %r, but expected 1.0" % result['score'])
+      maximum location x = %r" % (optimizedThreshold, math.pi/2))
+    self.assertTrue(abs(optimizedScore - 1.0) <= 0.00001,
+      "Optimizer returned max value of %r, but expected 1.0" % optimizedScore)
 
     # Start right of local max pi/2
-    result = twiddle(objFunction=sine,
+    optimizedThreshold, optimizedScore = twiddle(objFunction=sine,
       args = (),
       initialGuess = math.pi*(0.5 + 0.1),
       domain = (0, 2*math.pi))
 
-    self.assertTrue(abs(result['parameter'] - math.pi/2) <= 0.00001,
+    self.assertTrue(abs(optimizedThreshold - math.pi/2) <= 0.00001,
       "Optimizer returned x = %r, which is not within the tolerance of the \
-      maximum location x = %r" % (result['parameter'], math.pi/2))
-    self.assertTrue(abs(result['score'] - 1.0) <= 0.00001,
-      "Optimizer returned max value of %r, but expected 1.0" % result['score'])
+      maximum location x = %r" % (optimizedThreshold, math.pi/2))
+    self.assertTrue(abs(optimizedScore - 1.0) <= 0.00001,
+      "Optimizer returned max value of %r, but expected 1.0" % optimizedScore)
 
     # Start left of local min
-    result = twiddle(objFunction=sine,
+    optimizedThreshold, optimizedScore = twiddle(objFunction=sine,
       args = (),
       initialGuess = math.pi*(1.5 - 0.1),
       domain = (0, 2*math.pi))
 
-    self.assertTrue(abs(result['parameter'] - math.pi/2) <= 0.00001,
+    self.assertTrue(abs(optimizedThreshold - math.pi/2) <= 0.00001,
       "Optimizer returned x = %r, which is not within the tolerance of the \
-      maximum location x = %r" % (result['parameter'], math.pi/2))
-    self.assertTrue(abs(result['score'] - 1.0) <= 0.00001,
-      "Optimizer returned max value of %r, but expected 1.0" % result['score'])
+      maximum location x = %r" % (optimizedThreshold, math.pi/2))
+    self.assertTrue(abs(optimizedScore - 1.0) <= 0.00001,
+      "Optimizer returned max value of %r, but expected 1.0" % optimizedScore)
 
     # Start right of local min
-    result = twiddle(objFunction=sine,
+    optimizedThreshold, optimizedScore = twiddle(objFunction=sine,
       args = (),
       initialGuess = math.pi*(1.5 + 0.1),
       domain = (0, 3*math.pi))
 
-    self.assertTrue(abs(result['parameter'] - math.pi*5/2) <= 0.00001,
+    self.assertTrue(abs(optimizedThreshold - math.pi*5/2) <= 0.00001,
       "Optimizer returned x = %r, which is not within the tolerance of the \
-      maximum location x = %r" % (result['parameter'], math.pi*5/2))
-    self.assertTrue(abs(result['score'] - 1.0) <= 0.00001,
-      "Optimizer returned max value of %r, but expected 1.0" % result['score'])
+      maximum location x = %r" % (optimizedThreshold, math.pi*5/2))
+    self.assertTrue(abs(optimizedScore - 1.0) <= 0.00001,
+      "Optimizer returned max value of %r, but expected 1.0" % optimizedScore)
 
 
   def testMaxOfGLFunction(self):
@@ -160,27 +160,27 @@ class OptimizerTest(unittest.TestCase):
     Optimizer should return 5.0625 +/- tolerance at x=2.5"""
 
     # Start right of a local min
-    result = twiddle(objFunction=GLFunction,
+    optimizedThreshold, optimizedScore = twiddle(objFunction=GLFunction,
       args = (),
       initialGuess = 1,
       domain = (0.5, 2.5))
 
-    self.assertTrue(abs(result['parameter'] - 2.5) <= 0.00001,
+    self.assertTrue(abs(optimizedThreshold - 2.5) <= 0.00001,
       "Optimizer returned x = %r, which is not within the tolerance of the \
-      maximum location x = 2.5" % result['parameter'])
-    self.assertTrue(abs(result['score'] - 5.0625) <= 0.00001,
+      maximum location x = 2.5" % optimizedThreshold)
+    self.assertTrue(abs(optimizedScore - 5.0625) <= 0.00001,
       "Optimizer returned a max value of %r, but expected 5.0625"
-      % result['score'])
+      % optimizedScore)
 
     # Start at a local max
-    result = twiddle(objFunction=GLFunction,
+    optimizedThreshold, optimizedScore = twiddle(objFunction=GLFunction,
       args = (),
       initialGuess = 1.25,
       domain = (0.5, 2.5))
 
-    self.assertFalse(abs(result['parameter'] - 2.5) <= 0.00001,
+    self.assertFalse(abs(optimizedThreshold - 2.5) <= 0.00001,
       "Optimizer found the max at the correct x = 2.5 but should not have")
-    self.assertFalse(abs(result['score'] - 5.0625) <= 0.00001,
+    self.assertFalse(abs(optimizedScore - 5.0625) <= 0.00001,
       "Optimizer found the global max value of 5.0625 but should not have")
 
 
