@@ -166,14 +166,13 @@ class CorpusLabelTest(unittest.TestCase):
       generateTimestamps(strp("2015-12-01"),
       datetime.timedelta(days=1), 31)})
     dataFileName = "test_data_file.csv"
+    writeCorpus(self.tempCorpusPath, {dataFileName : data})
 
     labels = ["2015-12-25 00:00:00",
               "2015-12-26 00:00:00",
               "2015-12-31 00:00:00"]
     labelsDir = self.tempCorpusLabelPath.replace(
       "/label.json", "/raw/label.json")
-
-    writeCorpus(self.tempCorpusPath, {dataFileName : data})
     writeCorpusLabel(labelsDir, {dataFileName: labels})
 
     corpus = nab.corpus.Corpus(self.tempCorpusPath)
@@ -189,31 +188,24 @@ class CorpusLabelTest(unittest.TestCase):
       generateTimestamps(strp("2015-12-01"),
       datetime.timedelta(days=1), 31)})
     dataFileName = "test_data_file.csv"
-
-    labels01 = ["2015-12-24 00:00:00",
-                "2015-12-31 00:00:00"]
-    labels02 = ["2015-12-01 00:00:00",
-                "2015-12-25 00:00:00",
-                "2015-12-31 00:00:00"]
-    labels03 = ["2015-12-25 00:00:00"]
-
-    labelsDir01 = self.tempCorpusLabelPath.replace(
-      "/label.json", "/raw/label01.json")
-    labelsDir02 = self.tempCorpusLabelPath.replace(
-      "/label.json", "/raw/label02.json")
-    labelsDir03 = self.tempCorpusLabelPath.replace(
-      "/label.json", "/raw/label03.json")
-
     writeCorpus(self.tempCorpusPath, {dataFileName : data})
-    writeCorpusLabel(labelsDir01, {"test_data_file.csv": labels01})
-    writeCorpusLabel(labelsDir02, {"test_data_file.csv": labels02})
-    writeCorpusLabel(labelsDir03, {"test_data_file.csv": labels03})
+
+    rawLabels = (["2015-12-24 00:00:00",
+                  "2015-12-31 00:00:00"],
+                 ["2015-12-01 00:00:00",
+                  "2015-12-25 00:00:00",
+                  "2015-12-31 00:00:00"],
+                 ["2015-12-25 00:00:00"])
+
+    for i, labels in enumerate(rawLabels):
+      labelsPath = self.tempCorpusLabelPath.replace(
+        "/label.json", "/raw/label{}.json".format(i))
+      writeCorpusLabel(labelsPath, {"test_data_file.csv": labels})
+    labelsDir = labelsPath.replace("/label{}.json".format(i), "")
 
     corpus = nab.corpus.Corpus(self.tempCorpusPath)
-    labDir = labelsDir01.replace("/label01.json", "")
     labelCombiner = nab.labeler.LabelCombiner(
-      labDir, corpus, 0.5, 0.10, 0.15, 0)
-
+      labelsDir, corpus, 0.5, 0.10, 0.15, 0)
     labelCombiner.getRawLabels()
     labelTimestamps, _ = labelCombiner.combineLabels()
 
