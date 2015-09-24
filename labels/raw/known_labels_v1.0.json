@@ -21,12 +21,12 @@
          "2014-01-28 13:55:00.000000",
          "2014-02-08 14:30:00.000000"
     ],
-    "realKnownCause/mole_key_hold.csv":
+    "realKnownCause/rogue_agent_key_hold.csv":
     [
         "2014-07-15 08:30:00.000000",
         "2014-07-17 09:50:00.000000"
     ],
-    "realKnownCause/mole_key_updown.csv":
+    "realKnownCause/rogue_agent_key_updown.csv":
     [
         "2014-07-15 04:00:00.000000",
         "2014-07-17 08:50:00.000000"
