@@ -357,6 +357,8 @@ class LabelCombiner(object):
         print passedAnomalies
         print trueAnomalies
 
+    return self.labelTimestamps, self.labelIndices
+
 
   def editPoorLabels(self):
     """

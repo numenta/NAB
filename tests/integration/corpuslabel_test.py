@@ -78,7 +78,7 @@ class CorpusLabelTest(unittest.TestCase):
     # Windows both in and out of order
     windows = [["2014-01-01 00:45", "2014-01-01 00:00"],
                ["2014-01-01 10:15", "2014-01-01 11:15"]]
-    
+
     writeCorpus(self.tempCorpusPath, {"test_data_file.csv" : data})
     writeCorpusLabel(self.tempCorpusLabelPath, {"test_data_file.csv": windows})
 
@@ -125,7 +125,7 @@ class CorpusLabelTest(unittest.TestCase):
     writeCorpus(self.tempCorpusPath, {"test_data_file.csv": data})
     writeCorpusLabel(self.tempCorpusLabelPath,
       {"test_data_file.csv": windows, "non_existent_data_file.csv": windows})
-    
+
     corpus = nab.corpus.Corpus(self.tempCorpusPath)
 
     self.assertRaises(
@@ -143,7 +143,7 @@ class CorpusLabelTest(unittest.TestCase):
 
     windows = [["2014-01-01 00:00", "2014-01-01 00:10"],
                ["2014-01-01 00:10", "2014-01-01 00:15"]]
-    
+
     writeCorpus(self.tempCorpusPath, {"test_data_file.csv" : data})
     writeCorpusLabel(self.tempCorpusLabelPath, {"test_data_file.csv": windows})
 
@@ -159,6 +159,32 @@ class CorpusLabelTest(unittest.TestCase):
           if (w[0] <= t and t <= w[1]):
             self.assertEqual(lab, 1,
               "Incorrect label value for timestamp %r" % t)
+
+
+  def testRemoveRedundantTimestamps(self):
+    data = pandas.DataFrame({"timestamp" :
+      generateTimestamps(strp("2015-12-01"),
+      datetime.timedelta(days=1), 31)})
+    dataFileName = "test_data_file.csv"
+
+    labels = ["2015-12-25 00:00:00", "2015-12-26 00:00:00", "2015-12-31 00:00:00"]
+    labelsDir = self.tempCorpusLabelPath.replace("/label.json", "/raw/label.json")
+
+    writeCorpus(self.tempCorpusPath, {dataFileName : data})
+    writeCorpusLabel(labelsDir, {dataFileName: labels})
+
+    corpus = nab.corpus.Corpus(self.tempCorpusPath)
+    labDir = labelsDir.replace("/label.json", "")
+    labelCombiner = nab.labeler.LabelCombiner(labDir, corpus,
+                                0.5, 0.10,
+                                0.15, 0)
+    # labelCombiner.combine()
+    labelCombiner.getRawLabels()
+    labelTimestamps, _ = labelCombiner.combineLabels()
+    uniqueLabels = [labels[0], labels[2]]
+    self.assertEqual(uniqueLabels, labelTimestamps[dataFileName],
+      "The combined labels are not as expected.")
+
 
 
 if __name__ == '__main__':
