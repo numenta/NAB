@@ -161,29 +161,65 @@ class CorpusLabelTest(unittest.TestCase):
               "Incorrect label value for timestamp %r" % t)
 
 
-  def testRemoveRedundantTimestamps(self):
+  def testRedundantTimestampsRaiseException(self):
     data = pandas.DataFrame({"timestamp" :
       generateTimestamps(strp("2015-12-01"),
       datetime.timedelta(days=1), 31)})
     dataFileName = "test_data_file.csv"
 
-    labels = ["2015-12-25 00:00:00", "2015-12-26 00:00:00", "2015-12-31 00:00:00"]
-    labelsDir = self.tempCorpusLabelPath.replace("/label.json", "/raw/label.json")
+    labels = ["2015-12-25 00:00:00",
+              "2015-12-26 00:00:00",
+              "2015-12-31 00:00:00"]
+    labelsDir = self.tempCorpusLabelPath.replace(
+      "/label.json", "/raw/label.json")
 
     writeCorpus(self.tempCorpusPath, {dataFileName : data})
     writeCorpusLabel(labelsDir, {dataFileName: labels})
 
     corpus = nab.corpus.Corpus(self.tempCorpusPath)
     labDir = labelsDir.replace("/label.json", "")
-    labelCombiner = nab.labeler.LabelCombiner(labDir, corpus,
-                                0.5, 0.10,
-                                0.15, 0)
-    # labelCombiner.combine()
+    labelCombiner = nab.labeler.LabelCombiner(
+      labDir, corpus, 0.5, 0.10, 0.15, 0)
+
+    self.assertRaises(ValueError, labelCombiner.combine)
+
+
+  def testBucketMerge(self):
+    data = pandas.DataFrame({"timestamp" :
+      generateTimestamps(strp("2015-12-01"),
+      datetime.timedelta(days=1), 31)})
+    dataFileName = "test_data_file.csv"
+
+    labels01 = ["2015-12-24 00:00:00",
+                "2015-12-31 00:00:00"]
+    labels02 = ["2015-12-01 00:00:00",
+                "2015-12-25 00:00:00",
+                "2015-12-31 00:00:00"]
+    labels03 = ["2015-12-25 00:00:00"]
+
+    labelsDir01 = self.tempCorpusLabelPath.replace(
+      "/label.json", "/raw/label01.json")
+    labelsDir02 = self.tempCorpusLabelPath.replace(
+      "/label.json", "/raw/label02.json")
+    labelsDir03 = self.tempCorpusLabelPath.replace(
+      "/label.json", "/raw/label03.json")
+
+    writeCorpus(self.tempCorpusPath, {dataFileName : data})
+    writeCorpusLabel(labelsDir01, {"test_data_file.csv": labels01})
+    writeCorpusLabel(labelsDir02, {"test_data_file.csv": labels02})
+    writeCorpusLabel(labelsDir03, {"test_data_file.csv": labels03})
+
+    corpus = nab.corpus.Corpus(self.tempCorpusPath)
+    labDir = labelsDir01.replace("/label01.json", "")
+    labelCombiner = nab.labeler.LabelCombiner(
+      labDir, corpus, 0.5, 0.10, 0.15, 0)
+
     labelCombiner.getRawLabels()
     labelTimestamps, _ = labelCombiner.combineLabels()
-    uniqueLabels = [labels[0], labels[2]]
-    self.assertEqual(uniqueLabels, labelTimestamps[dataFileName],
-      "The combined labels are not as expected.")
+
+    expectedLabels = ['2015-12-25 00:00:00', '2015-12-31 00:00:00']
+    self.assertEqual(expectedLabels, labelTimestamps[dataFileName],
+      "The combined labels did not bucket and merge as expected.")
 
 
 

@@ -79,6 +79,18 @@ def merge(rawBuckets, threshold):
   return truths, passed
 
 
+def checkForOverlap(labels, buffer, fileName):
+  """
+  Raise a ValueError if the difference between any consecutive labels is smaller
+  than the buffer.
+  """
+  for i in xrange(len(labels)-1):
+    if labels[i+1] - labels[i] <= buffer:
+      raise ValueError("The labels {} and {} in data file {} are too close to "
+        "each other to be considered distinct anomalies. Please relabel."
+        .format(labels[i], labels[i+1], fileName))
+
+
 
 class CorpusLabel(object):
   """
@@ -329,9 +341,8 @@ class LabelCombiner(object):
       for user in self.userLabels:
         if user.windows.get(relativePath):
           # the user has labels for this file
-          # remove redundant labels
-          uniqueLabels = bucket(user.windows[relativePath], buffer)
-          rawTimesLists.append([label[0] for label in uniqueLabels])
+          checkForOverlap(user.windows[relativePath], buffer, relativePath)
+          rawTimesLists.append(user.windows[relativePath])
           userCount += 1
       if not rawTimesLists:
         # no labeled anomalies for this data file
