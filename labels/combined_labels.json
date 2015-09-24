@@ -130,11 +130,11 @@
         "2014-01-28 13:55:00",
         "2014-02-08 14:30:00"
     ],
-    "realKnownCause/mole_key_hold.csv": [
+    "realKnownCause/rogue_agent_key_hold.csv": [
         "2014-07-15 08:30:00",
         "2014-07-17 09:50:00"
     ],
-    "realKnownCause/mole_key_updown.csv": [
+    "realKnownCause/rogue_agent_key_updown.csv": [
         "2014-07-15 04:00:00",
         "2014-07-17 08:50:00"
     ],
@@ -231,6 +231,5 @@
     "realTweets/Twitter_volume_UPS.csv": [
         "2015-03-24 18:17:53",
         "2015-03-29 16:27:53"
-    ],
-    "tmp/speed_7578.csv": []
+    ]
 }
