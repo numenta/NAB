@@ -9,18 +9,10 @@ This readme is a brief overview and contains details for setting up NAB. **Pleas
 #### Corpus
 
 The NAB corpus of timeseries data files is designed to provide data for research
-in streaming anomaly detection. It is comprised of both artificial and
-real-world timeseries data containing labeled anomalous periods of behavior.
+in streaming anomaly detection. It is comprised of both
+real-world and artifical timeseries data containing labeled anomalous periods of behavior.
 
-All data are ordered, timestamped, single-valued metrics collected at 5-minute intervals.
-
-Much of the real-world data are values from AWS server metrics as collected by 
-the [AmazonCloudwatch service](https://aws.amazon
-.com/documentation/cloudwatch/). Example
-metrics include CPU Utilization, Network Bytes In, and Disk Read Bytes. There
-are also real world sensor readings from some large machines. 
-
-All data is included in the repository. We are in the process of adding more data, and actively searching for more data. The NAB version will be updated whenever new data is added to the corpus; NAB is currently in v0.8.
+The majority of the data is real-world from a variety of sources such as AWS server metrics, Twitter volume, advertisement clicking metrics, traffic data, and more. All data is included in the repository, with more details in the [data readme](https://github.com/numenta/NAB/tree/master/data). We are in the process of adding more data, and actively searching for more data. The NAB version will be updated whenever new data (and corresponding labels) is added to the corpus; NAB is currently in v0.8.
 
 #### Task
 
