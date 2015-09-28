@@ -86,6 +86,7 @@ def checkForOverlap(labels, buffer, labelsFileName, dataFileName):
   """
   for i in xrange(len(labels)-1):
     if labels[i+1] - labels[i] <= buffer:
+      # import pdb; pdb.set_trace()
       raise ValueError("The labels {} and {} in \'{}\' labels for data file "
         "\'{}\' are too close to each other to be considered distinct "
         "anomalies. Please relabel."
@@ -333,9 +334,9 @@ class LabelCombiner(object):
 
       # Calculate the window buffer -- used for bucketing labels identifying
       # the same anomaly.
-      granularity = dataSet.data['timestamp'][1] - dataSet.data['timestamp'][0]
+      granularity = dataSet.data["timestamp"][1] - dataSet.data["timestamp"][0]
       buffer = datetime.timedelta(minutes=
-        granularity.total_seconds()/60 * len(dataSet.data) * self.windowSize/2)
+        granularity.total_seconds()/60 * len(dataSet.data) * self.windowSize/10)
 
       rawTimesLists = []
       userCount = 0
@@ -343,7 +344,7 @@ class LabelCombiner(object):
         if user.windows.get(relativePath):
           # the user has labels for this file
           checkForOverlap(
-            user.windows[relativePath], buffer/2, user.path, relativePath)
+            user.windows[relativePath], buffer, user.path, relativePath)
           rawTimesLists.append(user.windows[relativePath])
           userCount += 1
       if not rawTimesLists:
