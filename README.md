@@ -2,9 +2,30 @@
 The Numenta Anomaly Benchmark [![Build Status](https://travis-ci.org/numenta/NAB.svg?branch=master)](https://travis-ci.org/numenta/NAB)
 -----------------------------
 
-Welcome. This repository contains the data and scripts necessary to replicate the results in the forthcoming Numenta Anomaly Benchmark (NAB) conference publication. Also provided are the tools to run NAB scoring on your own anomaly detection algorithms; see the [NAB entry points info](https://github.com/numenta/NAB/wiki#nab-entry-points). Competitive results tied to open source code will be posted in the wiki on the [Scoreboard](https://github.com/numenta/NAB/wiki#nab-scoreboard). Let us know about your work by submitting a pull request. 
+Welcome. This repository contains the data and scripts comprising the Numenta
+Anomaly Benchmark (NAB). NAB is a novel benchmark for evaluating
+algorithms for anomaly detection in streaming, real-time applications. It is
+comprised of over 50 labeled real-world and artificial timeseries data files plus a
+novel scoring mechanism designed for real-time applications.
 
-This readme is a brief overview and contains details for setting up NAB. **Please refer to the [NAB Whitepaper](https://github.com/numenta/NAB/wiki#nab-whitepaper) in the wiki for more details about NAB scoring, data, motivation, etc.**
+Included are the tools to allow you to easily run NAB on your
+own anomaly detection algorithms; see the [NAB entry points
+info](https://github.com/numenta/NAB/wiki#nab-entry-points). Competitive results
+tied to open source code will be posted in the wiki on the
+[Scoreboard](https://github.com/numenta/NAB/wiki#nab-scoreboard). Let us know
+about your work by submitting a pull request.
+
+This readme is a brief overview and contains details for setting up NAB.
+Please refer to the NAB publication (forthcoming) or the [NAB
+Whitepaper](https://github.com/numenta/NAB/wiki#nab-whitepaper) in the wiki for
+more details about NAB scoring, data, motivation, etc.
+
+Please cite the following publication when referring to NAB (link and PDF
+forthcoming):
+
+Lavin, Alex and Ahmad, Subutai. *"Evaluating Real-time Anomaly Detection
+Algorithms – the Numenta Anomaly Benchmark"*, Fourteenth International Conference
+on Machine Learning and Applications, December 2015.
 
 #### Corpus
 
@@ -12,7 +33,16 @@ The NAB corpus of timeseries data files is designed to provide data for research
 in streaming anomaly detection. It is comprised of both
 real-world and artifical timeseries data containing labeled anomalous periods of behavior.
 
-The majority of the data is real-world from a variety of sources such as AWS server metrics, Twitter volume, advertisement clicking metrics, traffic data, and more. All data is included in the repository, with more details in the [data readme](https://github.com/numenta/NAB/tree/master/data). We are in the process of adding more data, and actively searching for more data. The NAB version will be updated whenever new data (and corresponding labels) is added to the corpus; NAB is currently in v0.8.
+The majority of the data is real-world from a variety of sources such as AWS
+server metrics, Twitter volume, advertisement clicking metrics, traffic data,
+and more. All data is included in the repository, with more details in the [data
+readme](https://github.com/numenta/NAB/tree/master/data). We are in the process
+of adding more data, and actively searching for more data. Please contact us at
+nab@numenta.org if you have similar data (ideally with known anomalies) that you
+would like to see incorporated into NAB.
+
+The NAB version will be updated whenever new data (and corresponding labels) is
+added to the corpus; NAB is currently in v0.8.
 
 #### Task
 
