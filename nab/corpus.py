@@ -126,21 +126,18 @@ class Corpus(object):
 
   def getDataFiles(self):
     """
-    Collect datafiles from self.srcRoot where datafiles are stored in a dictionary
-    in which the path relative to the self.srcRoot is their key.
+    Collect all CSV data files from self.srcRoot directory.
 
-    @return (dict)    Dictionary containing key value pairs of a relative path
-                      and its corresponding datafile.
+    @return (dict)    Keys are relative paths (from self.srcRoot) and values are
+                      the corresponding data files.
     """
     filePaths = absoluteFilePaths(self.srcRoot)
-    dataSets = [DataFile(path) for path in filePaths]
+    dataSets = [DataFile(path) for path in filePaths if ".csv" in path]
 
     def getRelativePath(srcRoot, srcPath):
       return srcPath[srcPath.index(srcRoot)+len(srcRoot):].strip("/")
 
-    dataSets = {getRelativePath(self.srcRoot, d.srcPath) : d \
-                                                            for d in dataSets}
-    return dataSets
+    return {getRelativePath(self.srcRoot, d.srcPath) : d for d in dataSets}
 
 
   def addColumn(self, columnName, data, write=False):

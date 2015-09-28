@@ -79,16 +79,17 @@ def merge(rawBuckets, threshold):
   return truths, passed
 
 
-def checkForOverlap(labels, buffer, fileName):
+def checkForOverlap(labels, buffer, labelsFileName, dataFileName):
   """
   Raise a ValueError if the difference between any consecutive labels is smaller
   than the buffer.
   """
   for i in xrange(len(labels)-1):
     if labels[i+1] - labels[i] <= buffer:
-      raise ValueError("The labels {} and {} in data file {} are too close to "
-        "each other to be considered distinct anomalies. Please relabel."
-        .format(labels[i], labels[i+1], fileName))
+      raise ValueError("The labels {} and {} in \'{}\' labels for data file "
+        "\'{}\' are too close to each other to be considered distinct "
+        "anomalies. Please relabel."
+        .format(labels[i], labels[i+1], labelsFileName, dataFileName))
 
 
 
@@ -324,7 +325,7 @@ class LabelCombiner(object):
     self.labelTimestamps = {}
     self.labelIndices = {}
     for relativePath, dataSet in self.corpus.dataFiles.iteritems():
-      if "Known" in relativePath:
+      if ("Known" in relativePath) or ("artificial" in relativePath):
         knownAnomalies = self.knownLabels[0].windows[relativePath]
         self.labelTimestamps[relativePath] = [str(t) for t in knownAnomalies]
         self.labelIndices[relativePath] = setTruthLabels(dataSet, knownAnomalies)
@@ -341,7 +342,8 @@ class LabelCombiner(object):
       for user in self.userLabels:
         if user.windows.get(relativePath):
           # the user has labels for this file
-          checkForOverlap(user.windows[relativePath], buffer, relativePath)
+          checkForOverlap(
+            user.windows[relativePath], buffer/2, user.path, relativePath)
           rawTimesLists.append(user.windows[relativePath])
           userCount += 1
       if not rawTimesLists:
