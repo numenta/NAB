@@ -164,10 +164,15 @@ class Scorer(object):
 
 
   def getScore(self):
-    """Score the entire datafile and return a single floating point score.
+    """
+    Score the entire datafile and return a single floating point score.
     The position in a given window is calculated as the distance from the end
-    of the window, normalized [-1,0]. I.e. positions 1.0 and 0.0 are at the very
-    front and back of the anomaly window, respectively.
+    of the window, normalized [-1,0]. I.e. positions -1.0 and 0.0 are at the
+    very front and back of the anomaly window, respectively.
+
+    Flat scoring option: If you'd like to run a flat scorer that does not apply
+    the scaled sigmoid weighting, comment out the two scaledSigmoid() lines
+    below, and uncomment the replacement lines to calculate thisTP and thisFP.
 
     @return  (float)    Score at each timestamp of the datafile.
     """
@@ -195,6 +200,7 @@ class Scorer(object):
         # True positive
         position = -(window.indices[-1] - tpIndex + 1)/float(window.length)
         thisTP = scaledSigmoid(position)*self.costMatrix["tpWeight"] / maxTP
+        # thisTP = self.costMatrix["tpWeight"]  # flat scoring
         scores.iloc[window.indices[0]] = thisTP
         tpScore += thisTP
 
@@ -213,6 +219,7 @@ class Scorer(object):
         window = self.windows[windowId]
         position = abs(window.indices[-1] - i)/float(window.length-1)
         thisFP = scaledSigmoid(position)*self.costMatrix["fpWeight"]
+        # thisFP = self.costMatrix["fpWeight"]  # flat scoring
         scores.iloc[i] = thisFP
         fpScore += thisFP
 
