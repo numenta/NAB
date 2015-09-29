@@ -341,7 +341,7 @@ class LabelCombiner(object):
       rawTimesLists = []
       userCount = 0
       for user in self.userLabels:
-        if user.windows.get(relativePath):
+        if relativePath in user.windows:
           # the user has labels for this file
           checkForOverlap(
             user.windows[relativePath], buffer, user.path, relativePath)

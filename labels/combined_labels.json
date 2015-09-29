@@ -44,9 +44,7 @@
     "realAWSCloudwatch/ec2_cpu_utilization_ac20cd.csv": [
         "2014-04-15 00:49:00"
     ],
-    "realAWSCloudwatch/ec2_cpu_utilization_c6585a.csv": [
-        "2014-04-15 03:19:00"
-    ],
+    "realAWSCloudwatch/ec2_cpu_utilization_c6585a.csv": [],
     "realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv": [
         "2014-02-17 06:12:00",
         "2014-02-22 00:02:00"
@@ -88,8 +86,7 @@
         "2014-04-18 23:27:00"
     ],
     "realAdExchange/exchange-2_cpc_results.csv": [
-        "2011-07-14 13:00:01",
-        "2011-08-06 16:00:01"
+        "2011-07-14 13:00:01"
     ],
     "realAdExchange/exchange-2_cpm_results.csv": [
         "2011-07-26 06:00:01",
@@ -169,7 +166,6 @@
         "2015-08-11 12:07:00"
     ],
     "realTraffic/occupancy_6005.csv": [
-        "2015-09-14 06:28:00",
         "2015-09-15 06:55:00"
     ],
     "realTraffic/occupancy_t4013.csv": [
