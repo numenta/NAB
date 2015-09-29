@@ -1,4 +1,5 @@
 {
+
     "realKnownCause/ambient_temperature_system_failure.csv":
     [
          "2013-12-22 20:00:00.000000",
@@ -38,5 +39,39 @@
         "2014-12-25 15:00:00.000000",
         "2015-01-01 01:00:00.000000",
         "2015-01-27 00:00:00.000000"
+    ],
+
+    "realAdExchange/exchange-2_cpc_results.csv": [
+    ],
+
+    "artificialNoAnomaly/art_daily_no_noise.csv": [],
+    "artificialNoAnomaly/art_daily_perfect_square_wave.csv": [],
+    "artificialNoAnomaly/art_daily_small_noise.csv": [],
+    "artificialNoAnomaly/art_flatline.csv": [],
+    "artificialNoAnomaly/art_noisy.csv": [],
+    "artificialWithAnomaly/art_daily_flatmiddle.csv":
+    [
+        "2014-04-11 00:00:00.000000"
+    ],
+    "artificialWithAnomaly/art_daily_jumpsdown.csv":
+    [
+        "2014-04-11 09:00:00.000000"
+    ],
+    "artificialWithAnomaly/art_daily_jumpsup.csv":
+    [
+        "2014-04-11 09:00:00.000000"
+    ],
+     "artificialWithAnomaly/art_daily_nojump.csv":
+    [
+         "2014-04-11 09:00:00.000000"
+    ],
+    "artificialWithAnomaly/art_increase_spike_density.csv":
+    [
+         "2014-04-07 23:10:00.000000"
+    ],
+    "artificialWithAnomaly/art_load_balancer_spikes.csv":
+    [
+         "2014-04-11 04:35:00.000000"
     ]
+
 }

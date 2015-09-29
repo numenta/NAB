@@ -1,33 +1,4 @@
 {
-    "artificialNoAnomaly/art_daily_no_noise.csv": [],
-    "artificialNoAnomaly/art_daily_perfect_square_wave.csv": [],
-    "artificialNoAnomaly/art_daily_small_noise.csv": [],
-    "artificialNoAnomaly/art_flatline.csv": [],
-    "artificialNoAnomaly/art_noisy.csv": [],
-    "artificialWithAnomaly/art_daily_flatmiddle.csv":
-    [
-         "2014-04-11 00:00:00.000000"
-    ],
-    "artificialWithAnomaly/art_daily_jumpsdown.csv":
-    [
-         "2014-04-11 09:00:00.000000"
-    ],
-    "artificialWithAnomaly/art_daily_jumpsup.csv":
-    [
-         "2014-04-11 09:00:00.000000"
-    ],
-     "artificialWithAnomaly/art_daily_nojump.csv":
-    [
-         "2014-04-11 10:00:00.000000"
-    ],
-    "artificialWithAnomaly/art_increase_spike_density.csv":
-    [
-         "2014-04-07 23:10:00.000000"
-    ],
-    "artificialWithAnomaly/art_load_balancer_spikes.csv":
-    [
-         "2014-04-11 10:00:00.000000"
-    ],
     "realAWSCloudwatch/ec2_cpu_utilization_24ae8d.csv":
     [
          "2014-02-26 22:05:00.000000",
