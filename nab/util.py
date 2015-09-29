@@ -66,16 +66,14 @@ def updateFinalResults(newResults, resultsFilePath):
 
   @return oldResults        (dict)    Updated final results.
   """
-  oldResults = getOldDict(resultsFilePath)
+  results = getOldDict(resultsFilePath)
 
-  # dut: detector under test
-  for dut, score in newResults.iteritems():
-    if dut not in oldResults:
-      oldResults[dut] = score
+  for detector, score in newResults.iteritems():
+    results[detector] = score
 
-  writeJSON(resultsFilePath, oldResults)
+  writeJSON(resultsFilePath, results)
 
-  return oldResults
+  return results
 
 
 def updateThresholds(newThresholds, thresholdsFilePath):
