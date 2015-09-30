@@ -144,19 +144,6 @@
         "2014-07-15 04:00:00",
         "2014-07-17 08:50:00"
     ],
-    "realRogueAgent/rogue_agent_cpu_usage.csv": [
-        "2014-06-06 09:40:00",
-        "2014-06-14 15:50:00",
-        "2014-06-17 12:35:00"
-    ],
-    "realRogueAgent/rogue_agent_memory_percent.csv": [
-        "2014-06-10 13:55:00",
-        "2014-06-14 19:45:00"
-    ],
-    "realRogueAgent/rogue_agent_network_percent.csv": [
-        "2014-05-31 08:55:00",
-        "2014-06-11 14:45:00"
-    ],
     "realTraffic/TravelTime_387.csv": [
         "2015-07-30 12:29:00",
         "2015-08-18 16:26:00",
