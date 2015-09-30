@@ -23,7 +23,8 @@ import os
 import pandas
 
 from nab.util import (convertResultsPathToDataPath,
-                      convertAnomalyScoresToDetections)
+                      convertAnomalyScoresToDetections,
+                      getProbationPeriod)
 
 
 
@@ -346,7 +347,8 @@ def scoreCorpus(threshold, args):
     windows = corpusLabel.windows[relativePath]
     labels = corpusLabel.labels[relativePath]
 
-    probationaryPeriod = math.floor(probationaryPercent * labels.shape[0])
+    probationaryPeriod = getProbationPeriod(
+      probationaryPercent, labels.shape[0])
 
     predicted = convertAnomalyScoresToDetections(
       dataSet.data["anomaly_score"], threshold)

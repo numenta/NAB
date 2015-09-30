@@ -19,13 +19,12 @@
 # ----------------------------------------------------------------------
 
 import abc
-import math
 import os
 import pandas
 import sys
 
 from datetime import datetime
-from nab.util import createPath
+from nab.util import createPath, getProbationPeriod
 
 
 
@@ -41,8 +40,8 @@ class AnomalyDetector(object):
                 probationaryPercent):
 
     self.dataSet = dataSet
-    self.probationaryPeriod = math.floor(
-      probationaryPercent * dataSet.data.shape[0])
+    self.probationaryPeriod = getProbationPeriod(
+      probationaryPercent, dataSet.data.shape[0])
 
     self.inputMin = self.dataSet.data["value"].min()
     self.inputMax = self.dataSet.data["value"].max()
