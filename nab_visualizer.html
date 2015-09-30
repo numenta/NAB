@@ -134,9 +134,8 @@ function render(path) {
 
               var left = g.toDomCoords(rowTime, rowVal)[0];
 
-
-              row = Math.round(0.15*g.numRows());
-
+              // probationary period
+              row = Math.min(Math.round(0.15 * g.numRows()), 750);
               rowVal = g.getValue(row,1);
               rowTime = g.getValue(row,0);
 
