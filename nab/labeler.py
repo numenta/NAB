@@ -20,7 +20,6 @@
 
 import datetime
 import itertools
-import math
 import numpy
 import os
 import pandas
@@ -30,11 +29,13 @@ except ImportError:
   import json
 
 from nab.util import (absoluteFilePaths,
+                      getProbationPeriod,
                       strf,
                       strp,
                       deepmap,
                       createPath,
                       writeJSON)
+
 
 
 def bucket(rawTimes, buffer):
@@ -225,7 +226,7 @@ class LabelCombiner(object):
 
   def __init__(self, labelDir, corpus,
                      threshold, windowSize,
-                     probationaryPeriod, verbosity):
+                     probationaryPercent, verbosity):
     """
     @param labelDir   (string)   A directory name containing user label files.
                                  This directory should contain one label file
@@ -246,7 +247,7 @@ class LabelCombiner(object):
     self.corpus = corpus
     self.threshold = threshold
     self.windowSize = windowSize
-    self.probationaryPeriod = probationaryPeriod
+    self.probationaryPercent = probationaryPercent
     self.verbosity = verbosity
 
     self.userLabels = None
@@ -443,8 +444,10 @@ class LabelCombiner(object):
       numWindows = len(windows)
       if numWindows > 0:
 
-        fileLength = len(self.corpus.dataFiles[relativePath].data)
-        probationIndex = int(math.ceil(self.probationaryPeriod * fileLength))
+        fileLength = self.corpus.dataFiles[relativePath].data.shape[0]
+        probationIndex = getProbationPeriod(
+          self.probationaryPercent, fileLength)
+
         probationTimestamp = self.corpus.dataFiles[relativePath].data[
           "timestamp"][probationIndex]
 
