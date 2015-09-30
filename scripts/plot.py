@@ -427,7 +427,7 @@ if __name__ == "__main__":
   #     "Machine Temperature Sensor Data",
   #     "Ambient Temperature System Failure"
   # )
-  # detectors=["numenta", "baseline"]
+  # detectors=["numenta", "null"]
   #
   # assert len(dataFiles) == len(dataNames)
   #
