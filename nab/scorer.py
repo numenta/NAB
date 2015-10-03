@@ -220,7 +220,7 @@ class Scorer(object):
         window = self.windows[windowId]
         position = abs(window.indices[-1] - i)/float(window.length-1)
         thisFP = scaledSigmoid(position)*self.costMatrix["fpWeight"]
-        # thisFP = self.costMatrix["fpWeight"]  # flat scoring
+        # thisFP = -self.costMatrix["fpWeight"]  # flat scoring
         scores.iloc[i] = thisFP
         fpScore += thisFP
 
