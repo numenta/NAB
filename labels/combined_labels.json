@@ -47,7 +47,8 @@
     "realAWSCloudwatch/ec2_cpu_utilization_c6585a.csv": [],
     "realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv": [
         "2014-02-17 06:12:00",
-        "2014-02-22 00:02:00"
+        "2014-02-22 00:02:00",
+        "2014-02-23 15:17:00"
     ],
     "realAWSCloudwatch/ec2_disk_write_bytes_1ef3de.csv": [
         "2014-03-10 21:09:00"
@@ -125,6 +126,7 @@
         "2014-03-21 03:01:00"
     ],
     "realKnownCause/machine_temperature_system_failure.csv": [
+        "2013-12-11 06:00:00",
         "2013-12-16 17:25:00",
         "2014-01-28 13:55:00",
         "2014-02-08 14:30:00"
