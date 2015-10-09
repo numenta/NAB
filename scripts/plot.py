@@ -306,7 +306,7 @@ class PlotNAB(object):
 
     # Create plotly Data and Layout objects:
     data = Data(traces)
-    layout = self._createLayout(self.dataName)
+    layout = self._createLayout("Anomaly Detections for " + self.dataName)
 
     # Query plotly
     fig = Figure(data=data, layout=layout)
@@ -422,7 +422,7 @@ if __name__ == "__main__":
   # )
   # dataNames = (
   #     "Machine Temperature Sensor Data",
-  #     "Ambient Temperature System Failure"
+  #     "Ambient Temperature System Failure Data"
   # )
   # detectors=["numenta", "baseline"]
   #
