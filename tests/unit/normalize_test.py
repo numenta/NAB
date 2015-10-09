@@ -19,8 +19,7 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 """
-Tests normalization scheme for normalizing detectors' scores according
-to baseline.
+Tests the score normalization scheme.
 """
 
 import csv
@@ -56,13 +55,23 @@ def createCSV(parentDir, fileName, data):
 
 def createRunner(resultsDir, profileName, resultsName=None):
   """Create a nab.runner.Runner object for testing."""
+  root = os.path.dirname(os.path.realpath(__file__))
+  labelPath = os.path.abspath(
+    os.path.join(root, "..", "test_labels/labels.json"))
+
   testRunner = Runner(dataDir=None,
                       resultsDir=resultsDir,
-                      labelPath=None,
+                      labelPath=labelPath,
                       profilesPath=None,
                       thresholdPath=None)
 
-  testRunner.profiles = json.loads('{"'+profileName+'": {}}')
+  testRunner.profiles = {
+    profileName: {
+      "CostMatrix": {
+        "tpWeight": 1.0
+      }
+    }
+  }
 
   if resultsName is not None:
     resultsFile = resultsName+'_'+profileName+'_scores.csv'
@@ -76,23 +85,23 @@ def createRunner(resultsDir, profileName, resultsName=None):
 class NormalizationTest(unittest.TestCase):
 
   def setUp(self):
-    self.tmpDir = None
+    self._tmpDirs = []
     self.resultsHeaders = ['Detector','Profile','Score']
 
 
   def tearDown(self):
-    if self.tmpDir is not None:
-      shutil.rmtree(self.tmpDir)
+    for tmpDir in self._tmpDirs:
+      shutil.rmtree(tmpDir)
 
 
   def _createTemporaryResultsDir(self):
     tmpResultsDir = tempfile.mkdtemp()
-    self.tmpDir = tmpResultsDir
+    self._tmpDirs.append(tmpResultsDir)
     return tmpResultsDir
 
 
-  def testBaselineScoreLoading(self):
-    """Tests that we fail apropriately if baseline scores are absent."""
+  def testNullScoreLoading(self):
+    """Tests that we fail apropriately if null detector scores are absent."""
 
     testRunner = Runner(dataDir=None,
                         resultsDir='',
@@ -100,16 +109,16 @@ class NormalizationTest(unittest.TestCase):
                         profilesPath=None,
                         thresholdPath=None)
 
-    # Should fail due to resultsDir/baseline not being a directory.
+    # Should fail due to resultsDir/null not being a directory.
     with self.assertRaises(IOError):
       testRunner.normalize()
 
     tmpResultsDir = self._createTemporaryResultsDir()
-    os.makedirs(os.path.join(tmpResultsDir,'baseline'))
+    os.makedirs(os.path.join(tmpResultsDir,'null'))
 
     testRunner2 = createRunner(tmpResultsDir, 'standard')
 
-    # Should fail due to resultsDir/baseline being empty.
+    # Should fail due to resultsDir/null being empty.
     with self.assertRaises(IOError):
       testRunner2.normalize()
 
@@ -118,18 +127,18 @@ class NormalizationTest(unittest.TestCase):
     """Tests that scores are correctly updated in final_results.json."""
 
     tmpResultsDir = self._createTemporaryResultsDir()
-    os.makedirs(os.path.join(tmpResultsDir,'baseline'))
+    os.makedirs(os.path.join(tmpResultsDir,'null'))
     os.makedirs(os.path.join(tmpResultsDir,'fake'))
     finalResults = os.path.join(tmpResultsDir, "final_results.json")
 
     self.assertFalse(os.path.exists(finalResults),
       "final_results.json already exists in temporary directory")
 
-    # Create the baseline file
-    baselineFile = 'baseline/baseline_standard_scores.csv'
-    baselineRow = ['baseline','standard','0.0']
-    baselineData = [self.resultsHeaders, baselineRow]
-    createCSV(tmpResultsDir, baselineFile, baselineData)
+    # Create the null detector score file
+    nullFile = 'null/null_standard_scores.csv'
+    nullRow = ['null','standard','0.0']
+    nullData = [self.resultsHeaders, nullRow]
+    createCSV(tmpResultsDir, nullFile, nullData)
 
     # Create the fake results file
     fakeFile = 'fake/fake_standard_scores.csv'
@@ -147,22 +156,22 @@ class NormalizationTest(unittest.TestCase):
     """Tests that scores are properly normalized."""
 
     tmpResultsDir = self._createTemporaryResultsDir()
-    os.makedirs(os.path.join(tmpResultsDir,'baseline'))
+    os.makedirs(os.path.join(tmpResultsDir,'null'))
     os.makedirs(os.path.join(tmpResultsDir,'fake'))
     finalResults = os.path.join(tmpResultsDir, "final_results.json")
 
     self.assertFalse(os.path.exists(finalResults),
       "final_results.json already exists in temporary directory")
 
-    # Create the baseline file
-    baselineFile = 'baseline/baseline_standard_scores.csv'
-    baselineRow = ['baseline','standard','4.0']
-    baselineData = [self.resultsHeaders, baselineRow]
-    createCSV(tmpResultsDir, baselineFile, baselineData)
+    # Create the null dtector score file
+    nullFile = 'null/null_standard_scores.csv'
+    nullRow = ['null','standard','-5.0']
+    nullData = [self.resultsHeaders, nullRow]
+    createCSV(tmpResultsDir, nullFile, nullData)
 
     # Create the fake results file
     fakeFile = 'fake/fake_standard_scores.csv'
-    fakeRow = ['fake','standard','8.0']
+    fakeRow = ['fake','standard','2.0']
     fakeData = [self.resultsHeaders, fakeRow]
     createCSV(tmpResultsDir, fakeFile, fakeData)
 
@@ -174,8 +183,10 @@ class NormalizationTest(unittest.TestCase):
       resultsDict = json.load(finalResultsFile)
       score = resultsDict['fake']['standard']
 
-      self.assertEqual(score, 10.0,
+      self.assertEqual(score, 70.0,
         "normalized score of %f is not the expected 10.0" % score)
+
+
 
 if __name__ == '__main__':
   unittest.main()

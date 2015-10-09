@@ -27,10 +27,9 @@ from nab.detectors.base import AnomalyDetector
 
 
 
-class BaselineDetector(AnomalyDetector):
+class NullDetector(AnomalyDetector):
 
   def handleRecord(self, inputData):
-    """The anomalyScore is simply a constant 0.5."""
+    """The anomaly score is simply a constant 0.5."""
     anomalyScore = 0.5
     return (anomalyScore, )
-    

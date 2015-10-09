@@ -78,7 +78,7 @@ class Runner(object):
     self.profilesPath = profilesPath
     self.thresholdPath = thresholdPath
     self.pool = multiprocessing.Pool(numCPUs)
-    
+
     self.probationaryPercent = 0.15
     self.windowSize = 0.10
 
@@ -107,7 +107,7 @@ class Runner(object):
                                         class constructor.
     """
     print "\nRunning detection step"
-    
+
     count = 0
     args = []
     for detectorName, detectorConstructor in detectors.iteritems():
@@ -128,7 +128,7 @@ class Runner(object):
           )
 
           count += 1
-    
+
     self.pool.map(detectDataSet, args)
 
 
@@ -143,7 +143,7 @@ class Runner(object):
                                   threshold used to obtained that score.
     """
     print "\nRunning optimize step"
-    
+
     scoreFlag = False
     thresholds = {}
 
@@ -186,7 +186,7 @@ class Runner(object):
                                     the threshold used to obtained that score.
     """
     print "\nRunning scoring step"
-    
+
     scoreFlag = True
     baselines = {}
 
@@ -196,7 +196,7 @@ class Runner(object):
       resultsCorpus = Corpus(resultsDetectorDir)
 
       for profileName, profile in self.profiles.iteritems():
-      
+
         threshold = thresholds[detectorName][profileName]["threshold"]
         resultsDF = scoreCorpus(threshold,
                                 (self.pool,
@@ -219,29 +219,32 @@ class Runner(object):
 
 
   def normalize(self):
-    """Normalize the detectors' scores according to the Baseline, and print to
-    the console.
-    
+    """
+    Normalize the detectors' scores according to the baseline defined by the
+    null detector, and print to the console.
+
     Function can only be called with the scoring step (i.e. runner.score())
     preceding it.
+
     This reads the total score values from the results CSVs, and
-    adds the relevant baseline value. The scores are then normalized by
-    multiplying by 100/perfect, where the perfect score is the number of TPs
-    possible (i.e. 44.0).
+    subtracts the relevant baseline value. The scores are then normalized by
+    multiplying by 100 and dividing by perfect less the baseline, where the
+    perfect score is the number of TPs possible.
+
     Note the results CSVs still contain the original scores, not normalized.
     """
     print "\nRunning score normalization step"
 
-    # Get baselines for each application profile.
-    baselineDir = os.path.join(self.resultsDir, "baseline")
-    if not os.path.isdir(baselineDir):
-      raise IOError("No results directory for baseline. You must "
-                    "run the baseline detector before normalizing scores.")
+    # Get baseline scores for each application profile.
+    nullDir = os.path.join(self.resultsDir, "null")
+    if not os.path.isdir(nullDir):
+      raise IOError("No results directory for null detector. You must "
+                    "run the null detector before normalizing scores.")
 
     baselines = {}
     for profileName, _ in self.profiles.iteritems():
-      fileName = os.path.join(baselineDir,
-                              "baseline_" + profileName + "_scores.csv")
+      fileName = os.path.join(nullDir,
+                              "null_" + profileName + "_scores.csv")
       with open(fileName) as f:
         results = pandas.read_csv(f)
         baselines[profileName] = results["Score"].iloc[-1]
@@ -258,14 +261,14 @@ class Runner(object):
     for resultsFile in self.resultsFiles:
       profileName = [k for k in baselines.keys() if k in resultsFile][0]
       base = baselines[profileName]
-      
+
       with open(resultsFile) as f:
         results = pandas.read_csv(f)
-        
+
         # Calculate score:
-        perfect = tpCount - base
-        score = (-base + results["Score"].iloc[-1]) * (100/perfect)
-        
+        perfect = tpCount * self.profiles[profileName]["CostMatrix"]["tpWeight"]
+        score = 100 * (results["Score"].iloc[-1] - base) / (perfect - base)
+
         # Add to results dict:
         resultsInfo = resultsFile.split('/')[-1].split('.')[0]
         detector = resultsInfo.split('_')[0]
@@ -280,4 +283,4 @@ class Runner(object):
     resultsPath = os.path.join(self.resultsDir, "final_results.json")
     updateFinalResults(finalResults, resultsPath)
     print "Final scores have been written to %s." % resultsPath
-    
+

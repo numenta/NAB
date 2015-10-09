@@ -34,7 +34,7 @@ from nab.util import (detectorNameToClass, checkInputs)
 from nab.detectors.numenta.numenta_detector import NumentaDetector
 from nab.detectors.skyline.skyline_detector import SkylineDetector
 from nab.detectors.random.random_detector import RandomDetector
-from nab.detectors.baseline.baseline_detector import BaselineDetector
+from nab.detectors.null.null_detector import NullDetector
 
 
 
@@ -139,9 +139,9 @@ if __name__ == "__main__":
   parser.add_argument("-d", "--detectors",
                     nargs="*",
                     type=str,
-                    default=["baseline", "numenta", "random", "skyline"],
+                    default=["null", "numenta", "random", "skyline"],
                     help="Comma separated list of detector(s) to use, e.g. "
-                         "baseline,numenta")
+                         "null,numenta")
                     
   parser.add_argument("-p", "--profilesFile",
                     default="config/profiles.json",
