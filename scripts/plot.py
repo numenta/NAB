@@ -148,8 +148,8 @@ class PlotNAB(object):
       os.path.join(self.labelsDir, "combined_windows.json"))[self.dataFile]
 
     x = []
-    delta = (pd.to_datetime(self.rawData["timestamp"][1]) -
-             pd.to_datetime(self.rawData["timestamp"][0]))
+    delta = (pd.to_datetime(self.rawData["timestamp"].iloc[1]) -
+             pd.to_datetime(self.rawData["timestamp"].iloc[0]))
     minutes = int(delta.total_seconds() / 60)
     for window in windows:
       start = pd.to_datetime(window[0])
@@ -171,7 +171,7 @@ class PlotNAB(object):
   def _addProbation(self):
     # Probationary period trace.
     length = min(int(0.15 * len(self.rawData)), 750)
-    x = self.rawData["timestamp"].ix[:length]
+    x = self.rawData["timestamp"].iloc[:length]
     y = [self.rawData.value.max() for _ in x]
 
     return Bar(x=x,
@@ -245,7 +245,7 @@ class PlotNAB(object):
 
     # Create plotly Data and Layout objects:
     data = Data(traces)
-    layout = self._createLayout("Raw Data for " + self.dataName)
+    layout = self._createLayout(self.dataName)
 
     # Query plotly
     fig = Figure(data=data, layout=layout)
@@ -275,7 +275,7 @@ class PlotNAB(object):
                        "or \'reward low fn rate\' or \'reward low fp rate\'.")
 
     if self.rawData is None:
-      self.rawData = getCSVData(os.path.join(self.dataPath))
+      self.rawData = getCSVData(self.dataPath)
 
     traces = []
 
@@ -337,12 +337,7 @@ class PlotNAB(object):
 
   @staticmethod
   def getTPDetection(detections, windowTimes):
-    """
-    Returns the first occurence of a detection w/in the window times.
-
-    TODO: use generator to yield each time, rather than looping through all
-    detections
-    """
+    """Returns the first occurence of a detection w/in the window times."""
     for detection in detections.iterrows():
       detectionTime = pd.to_datetime(detection[1]["timestamp"])
       if detectionTime > windowTimes[0] and detectionTime < windowTimes[1]:
@@ -425,7 +420,7 @@ if __name__ == "__main__":
   # )
   # dataNames = (
   #     "Machine Temperature Sensor Data",
-  #     "Ambient Temperature System Failure"
+  #     "Ambient Temperature System Failure Data"
   # )
   # detectors=["numenta", "null"]
   #
