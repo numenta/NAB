@@ -1,0 +1,13 @@
+{
+  "artificialWithAnomaly/art_daily_nojump.csv": [
+        "2014-04-11 09:00:00"
+    ],
+  "realAWSCloudwatch/ec2_cpu_utilization_5f5533.csv": [
+        "2014-02-19 00:22:00",
+        "2014-02-24 18:37:00"
+    ],
+  "realAWSCloudwatch/iio_us-east-1_i-a2eb1cd9_NetworkIn.csv": [
+        "2013-10-10 09:35:00",
+        "2013-10-10 20:40:00"
+    ]
+}
