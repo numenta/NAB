@@ -338,8 +338,6 @@ class PlotNAB(object):
   @staticmethod
   def getTPDetection(detections, windowTimes):
     """Returns the first occurence of a detection w/in the window times."""
-    # TODO: use generator to yield each time, rather than looping through all
-    # detections
     for detection in detections.iterrows():
       detectionTime = pd.to_datetime(detection[1]["timestamp"])
       if detectionTime > windowTimes[0] and detectionTime < windowTimes[1]:
