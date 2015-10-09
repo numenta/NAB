@@ -31,7 +31,8 @@
     "realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv":
     [
          "2014-02-17 06:12:00.000000",
-         "2014-02-22 00:02:00.000000"
+         "2014-02-22 00:02:00.000000",
+         "2014-02-23 15:17:00.000000"
     ],
     "realAWSCloudwatch/ec2_disk_write_bytes_1ef3de.csv":
     [

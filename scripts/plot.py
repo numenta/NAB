@@ -170,7 +170,7 @@ class PlotNAB(object):
 
   def _addProbation(self):
     # Probationary period trace.
-    length = int(0.15 * len(self.rawData))
+    length = min(int(0.15 * len(self.rawData)), 750)
     x = self.rawData["timestamp"].ix[:length]
     y = [self.rawData.value.max() for _ in x]
 
