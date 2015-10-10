@@ -24,7 +24,7 @@ more details about NAB scoring, data, motivation, etc.
 Please cite the following publication when referring to NAB (link and PDF
 forthcoming):
 
-Lavin, Alex and Ahmad, Subutai. *"Evaluating Real-time Anomaly Detection
+Lavin, Alexander and Ahmad, Subutai. *"Evaluating Real-time Anomaly Detection
 Algorithms – the Numenta Anomaly Benchmark"*, Fourteenth International Conference
 on Machine Learning and Applications, December 2015.
 
@@ -68,7 +68,7 @@ You need to manually install the following:
 
 ##### Download this repository
 
-    Use the Github links provided in the right sidebar.
+Use the Github links provided in the right sidebar.
 
 ##### Install the Python requirements
 
@@ -95,8 +95,8 @@ There are several different use cases for NAB:
 1. If you just want to look at all
 the results we reported in the paper, there is no need to run anything.
 All the data files are in the data subdirectory and all individual detections
-for reported algorithms are checked in the results subdirectory. Please see
-the README files there.
+for reported algorithms are checked in to the results subdirectory. Please see
+the README files in those locations.
 
 1. If you have your own algorithm and want to run the NAB benchmark, please see
 the [NAB Entry Points](https://github.com/numenta/NAB/wiki#nab-entry-diagram)
@@ -108,7 +108,7 @@ algorithm, which is written in R.)
 1. If you are a NuPIC user and just want to run the Numenta HTM detector follow
 the directions below to "Run HTM with NAB".
 
-1. If you want to run everything including the included Skyline detector follow
+1. If you want to run everything including the bundled Skyline detector follow
 the directions below to "Run full NAB". Note that this will take hours as the
 Skyline code is quite slow.
 
@@ -121,12 +121,12 @@ First make sure NuPIC is installed and working properly. Then:
     python run.py -d numenta --detect --score --normalize
 
 This will run the Numenta detector only and produce normalized scores. Note that
-by default it tries to use all the cores on your machine. This should take about
-20-30 minutes on a current powerful laptop with 4-8 cores.  For debugging
-you can run subsets of the data files by modifying and specifying specific label
-files. Please type:
+by default it tries to use all the cores on your machine. The above command
+should take about 20-30 minutes on a current powerful laptop with 4-8 cores.
+For debugging you can run subsets of the data files by modifying and specifying
+specific label files. Please type:
 
-   python run.py --help
+    python run.py --help
 
 to see all the options.
 
@@ -135,6 +135,8 @@ the specific version of NuPIC (and associated nupic.core) that is noted in the
 [Scoreboard](https://github.com/numenta/NAB/wiki/NAB%20Scoreboard):
 
     cd /path/to/nupic/
+    git checkout -b nab {TAG NAME}
+    cd /path/to/nupic.core/
     git checkout -b nab {TAG NAME}
 
 

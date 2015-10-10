@@ -33,14 +33,14 @@ From the scripts directory, type:
 
     python -m SimpleHTTPServer 12345
  
-Then, open Chrome (only works on Chrome!)and type this into the url window:
- 
+Then, open Chrome (only works on Chrome!) and type this into the url window:
+
     localhost:12345/nab_visualizer.html
  
 To view data, click on "look at data", click in query window and then
 press RETURN key. This should show all the data files. You can also filter
 the files by keyword with the query window; it will filter for filenames that
-contain the entered characters.
+contain the (case-sensitive) entered characters.
 
 To get a string of the timestamp at a data point, simply click on the data point.
 
