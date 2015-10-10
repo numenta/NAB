@@ -43,16 +43,16 @@
     },
     "skyline": {
         "reward_low_FN_rate": {
-            "score": -17.46533695215545,
-            "threshold": 0.8000000000000003
+            "score": -77.20605964639174,
+            "threshold": 0.8031250000000002
         },
         "reward_low_FP_rate": {
-            "score": -2.2284422450838086,
-            "threshold": 0.9000000000000006
+            "score": -53.17159266153103,
+            "threshold": 0.8996093750000005
         },
         "standard": {
-            "score": -5.235267306651327,
-            "threshold": 0.8000000000000003
+            "score": -33.206059646391715,
+            "threshold": 0.8031250000000002
         }
     },
     "twitterADTs": {
