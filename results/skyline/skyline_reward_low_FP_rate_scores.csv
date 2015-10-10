@@ -1,12 +1,14 @@
 Detector,Profile,File,Threshold,Score,TP,TN,FP,FN,Total_Count
 skyline,reward_low_FP_rate,realKnownCause/ec2_request_latency_system_failure.csv,0.899609375,0.0276216701321,3,3082,0,343,4032
 skyline,reward_low_FP_rate,realAWSCloudwatch/ec2_cpu_utilization_825cc2.csv,0.899609375,0.956537840284,6,3085,0,337,4032
+skyline,reward_low_FP_rate,realTraffic/speed_6005.csv,0.899609375,0.842622001756,3,1886,0,236,2500
 skyline,reward_low_FP_rate,realTraffic/TravelTime_451.csv,0.899609375,-1.0,0,1621,0,217,2162
 skyline,reward_low_FP_rate,realAWSCloudwatch/grok_asg_anomaly.csv,0.899609375,0.064138071413,3,3460,3,462,4621
 skyline,reward_low_FP_rate,realAWSCloudwatch/ec2_cpu_utilization_c6585a.csv,0.899609375,0.0,0,3428,0,0,4032
 skyline,reward_low_FP_rate,artificialWithAnomaly/art_daily_nojump.csv,0.899609375,-1.0,0,3025,0,403,4032
 skyline,reward_low_FP_rate,realKnownCause/rogue_agent_key_updown.csv,0.899609375,-2.0,0,4035,0,530,5315
 skyline,reward_low_FP_rate,realTraffic/occupancy_6005.csv,0.899609375,-1.0,0,1784,0,239,2380
+skyline,reward_low_FP_rate,realTweets/Twitter_volume_GOOG.csv,0.899609375,-0.919636237876,10,13652,8,1422,15842
 skyline,reward_low_FP_rate,realTweets/Twitter_volume_UPS.csv,0.899609375,-4.62226097793,29,13487,44,1556,15866
 skyline,reward_low_FP_rate,realAWSCloudwatch/ec2_cpu_utilization_ac20cd.csv,0.899609375,0.858908670438,4,3025,0,399,4032
 skyline,reward_low_FP_rate,artificialNoAnomaly/art_daily_no_noise.csv,0.899609375,0.0,0,3428,0,0,4032
@@ -21,7 +23,6 @@ skyline,reward_low_FP_rate,realAWSCloudwatch/ec2_disk_write_bytes_1ef3de.csv,0.8
 skyline,reward_low_FP_rate,realAWSCloudwatch/ec2_disk_write_bytes_c0d644.csv,0.899609375,-3.0,0,3023,0,405,4032
 skyline,reward_low_FP_rate,realTweets/Twitter_volume_PFE.csv,0.899609375,-4.0,0,13520,0,1588,15858
 skyline,reward_low_FP_rate,realAWSCloudwatch/iio_us-east-1_i-a2eb1cd9_NetworkIn.csv,0.899609375,-2.0,0,931,0,126,1243
-skyline,reward_low_FP_rate,realTraffic/speed_6005.csv,0.899609375,0.842622001756,3,1886,0,236,2500
 skyline,reward_low_FP_rate,realTraffic/TravelTime_387.csv,0.899609375,-0.303296561381,4,1872,4,245,2500
 skyline,reward_low_FP_rate,realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv,0.899609375,-0.515012036883,5,3017,6,400,4032
 skyline,reward_low_FP_rate,realTraffic/speed_7578.csv,0.899609375,-0.387668912236,5,841,1,111,1127
@@ -54,7 +55,6 @@ skyline,reward_low_FP_rate,realAdExchange/exchange-3_cpm_results.csv,0.899609375
 skyline,reward_low_FP_rate,artificialWithAnomaly/art_increase_spike_density.csv,0.899609375,-1.0,0,3025,0,403,4032
 skyline,reward_low_FP_rate,realAdExchange/exchange-2_cpm_results.csv,0.899609375,-2.0,0,1219,0,162,1624
 skyline,reward_low_FP_rate,realKnownCause/ambient_temperature_system_failure.csv,0.899609375,-2.0,0,5791,0,726,7267
-skyline,reward_low_FP_rate,realTweets/Twitter_volume_GOOG.csv,0.899609375,-0.919636237876,10,13652,8,1422,15842
 skyline,reward_low_FP_rate,realAWSCloudwatch/rds_cpu_utilization_e47b3b.csv,0.899609375,1.71595613499,6,3026,0,396,4032
 skyline,reward_low_FP_rate,realAWSCloudwatch/ec2_cpu_utilization_24ae8d.csv,0.899609375,-2.0,0,3026,0,402,4032
 Totals,,,,-53.1715926615,150,299228,119,33345,365558
