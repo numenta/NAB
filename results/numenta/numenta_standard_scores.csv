@@ -2,14 +2,13 @@ Detector,Profile,File,Threshold,Score,TP,TN,FP,FN,Total_Count
 numenta,standard,artificialNoAnomaly/art_daily_small_noise.csv,0.5,-0.11,0,3427,1,0,4032
 numenta,standard,realAWSCloudwatch/ec2_disk_write_bytes_c0d644.csv,0.5,0.661131181228,4,3022,1,401,4032
 numenta,standard,realTweets/Twitter_volume_FB.csv,0.5,1.38958392964,2,13498,3,1580,15833
-numenta,standard,realAdExchange/exchange-2_cpc_results.csv,0.5,0.527598742377,1,1215,3,162,1624
 numenta,standard,realTweets/Twitter_volume_IBM.csv,0.5,-0.843682145765,3,13529,24,1587,15893
 numenta,standard,realTweets/Twitter_volume_AAPL.csv,0.5,1.20961375717,5,13557,7,1583,15902
 numenta,standard,realTraffic/occupancy_6005.csv,0.5,0.732622001756,1,1783,1,238,2380
 numenta,standard,artificialWithAnomaly/art_load_balancer_spikes.csv,0.5,0.624788146524,5,3022,3,398,4032
 numenta,standard,realAWSCloudwatch/ec2_cpu_utilization_ac20cd.csv,0.5,0.875727409493,1,3025,0,402,4032
-numenta,standard,artificialNoAnomaly/art_daily_perfect_square_wave.csv,0.5,0.0,0,3428,0,0,4032
 numenta,standard,realKnownCause/cpu_utilization_asg_misconfiguration.csv,0.5,-0.683201033126,28,15786,15,1471,18050
+numenta,standard,realAdExchange/exchange-2_cpc_results.csv,0.5,0.527598742377,1,1215,3,162,1624
 numenta,standard,realTraffic/occupancy_t4013.csv,0.5,1.6150312654,2,1874,1,248,2500
 numenta,standard,realTraffic/speed_6005.csv,0.5,0.509318715936,2,1883,3,237,2500
 numenta,standard,artificialNoAnomaly/art_noisy.csv,0.5,0.0,0,3428,0,0,4032
@@ -50,6 +49,7 @@ numenta,standard,artificialNoAnomaly/art_flatline.csv,0.5,0.0,0,3428,0,0,4032
 numenta,standard,artificialWithAnomaly/art_daily_nojump.csv,0.5,-1.22,0,3023,2,403,4032
 numenta,standard,realAdExchange/exchange-3_cpc_results.csv,0.5,-1.17886345046,1,1155,0,152,1538
 numenta,standard,realAdExchange/exchange-4_cpc_results.csv,0.5,0.579221119204,4,1230,2,161,1643
+numenta,standard,artificialNoAnomaly/art_daily_perfect_square_wave.csv,0.5,0.0,0,3428,0,0,4032
 numenta,standard,realTweets/Twitter_volume_AMZN.csv,0.5,0.942803797348,4,13494,7,1576,15831
 numenta,standard,realKnownCause/machine_temperature_system_failure.csv,0.5,2.96987778726,11,19669,8,2257,22695
 numenta,standard,realTweets/Twitter_volume_KO.csv,0.5,2.35255901032,4,13511,3,1583,15851

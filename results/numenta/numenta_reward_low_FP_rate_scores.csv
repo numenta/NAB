@@ -2,14 +2,13 @@ Detector,Profile,File,Threshold,Score,TP,TN,FP,FN,Total_Count
 numenta,reward_low_FP_rate,artificialNoAnomaly/art_daily_small_noise.csv,0.5,-0.22,0,3427,1,0,4032
 numenta,reward_low_FP_rate,realAWSCloudwatch/ec2_disk_write_bytes_c0d644.csv,0.5,0.551142776343,4,3022,1,401,4032
 numenta,reward_low_FP_rate,realTweets/Twitter_volume_FB.csv,0.5,1.05958392964,2,13498,3,1580,15833
-numenta,reward_low_FP_rate,realAdExchange/exchange-2_cpc_results.csv,0.5,0.197598742377,1,1215,3,162,1624
 numenta,reward_low_FP_rate,realTweets/Twitter_volume_IBM.csv,0.5,-3.40783724748,3,13529,24,1587,15893
 numenta,reward_low_FP_rate,realTweets/Twitter_volume_AAPL.csv,0.5,0.604725985551,5,13557,7,1583,15902
 numenta,reward_low_FP_rate,realTraffic/occupancy_6005.csv,0.5,0.622622001756,1,1783,1,238,2380
 numenta,reward_low_FP_rate,artificialWithAnomaly/art_load_balancer_spikes.csv,0.5,0.294788146524,5,3022,3,398,4032
 numenta,reward_low_FP_rate,realAWSCloudwatch/ec2_cpu_utilization_ac20cd.csv,0.5,0.875727409493,1,3025,0,402,4032
-numenta,reward_low_FP_rate,artificialNoAnomaly/art_daily_perfect_square_wave.csv,0.5,0.0,0,3428,0,0,4032
 numenta,reward_low_FP_rate,realKnownCause/cpu_utilization_asg_misconfiguration.csv,0.5,-2.33320103313,28,15786,15,1471,18050
+numenta,reward_low_FP_rate,realAdExchange/exchange-2_cpc_results.csv,0.5,0.197598742377,1,1215,3,162,1624
 numenta,reward_low_FP_rate,realTraffic/occupancy_t4013.csv,0.5,1.5050312654,2,1874,1,248,2500
 numenta,reward_low_FP_rate,realTraffic/speed_6005.csv,0.5,0.179318715936,2,1883,3,237,2500
 numenta,reward_low_FP_rate,artificialNoAnomaly/art_noisy.csv,0.5,0.0,0,3428,0,0,4032
@@ -50,6 +49,7 @@ numenta,reward_low_FP_rate,artificialNoAnomaly/art_flatline.csv,0.5,0.0,0,3428,0
 numenta,reward_low_FP_rate,artificialWithAnomaly/art_daily_nojump.csv,0.5,-1.44,0,3023,2,403,4032
 numenta,reward_low_FP_rate,realAdExchange/exchange-3_cpc_results.csv,0.5,-1.17886345046,1,1155,0,152,1538
 numenta,reward_low_FP_rate,realAdExchange/exchange-4_cpc_results.csv,0.5,0.359478313122,4,1230,2,161,1643
+numenta,reward_low_FP_rate,artificialNoAnomaly/art_daily_perfect_square_wave.csv,0.5,0.0,0,3428,0,0,4032
 numenta,reward_low_FP_rate,realTweets/Twitter_volume_AMZN.csv,0.5,0.229695292953,4,13494,7,1576,15831
 numenta,reward_low_FP_rate,realKnownCause/machine_temperature_system_failure.csv,0.5,2.15999797887,11,19669,8,2257,22695
 numenta,reward_low_FP_rate,realTweets/Twitter_volume_KO.csv,0.5,2.02295202117,4,13511,3,1583,15851
