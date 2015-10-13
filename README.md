@@ -16,17 +16,17 @@ tied to open source code will be posted in the wiki on the
 about your work by emailing us at [nab@numenta.org](mailto:nab@numenta.org) or
 submitting a pull request.
 
-This readme is a brief overview and contains details for setting up NAB.
-Please refer to the NAB publication (forthcoming) or the [NAB
+This readme is a brief overview and contains details for setting up NAB. Please
+refer to the [NAB publication](http://arxiv.org/abs/1510.03336) or the [NAB
 Whitepaper](https://github.com/numenta/NAB/wiki#nab-whitepaper) in the wiki for
 more details about NAB scoring, data, motivation, etc.
 
-Please cite the following publication when referring to NAB (link and PDF
-forthcoming):
+Please cite the following publication when referring to NAB:
 
 Lavin, Alexander and Ahmad, Subutai. *"Evaluating Real-time Anomaly Detection
-Algorithms – the Numenta Anomaly Benchmark"*, Fourteenth International Conference
-on Machine Learning and Applications, December 2015.
+Algorithms – the Numenta Anomaly Benchmark"*, Fourteenth International
+Conference on Machine Learning and Applications, December 2015.
+[[PDF]](http://arxiv.org/abs/1510.03336)
 
 #### Corpus
 
