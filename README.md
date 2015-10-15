@@ -28,6 +28,21 @@ Algorithms – the Numenta Anomaly Benchmark"*, Fourteenth International
 Conference on Machine Learning and Applications, December 2015.
 [[PDF]](http://arxiv.org/abs/1510.03336)
 
+#### Scoreboard
+
+The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the perfect detector), and a baseline of 0.0 is determined by the "null" detector (which makes no detections).
+
+| Detector      | Version | Standard Profile | Reward Low FP | Reward Low FN |
+|---------------|---------|------------------|---------------|---------------|
+| Perfect       | N/A     | 100.0            | 100.0         | 100.0         |
+| [Numenta HTM](https://github.com/numenta/nupic)   | 81ec26f | 64.7             | 56.5          | 69.3          |
+| [Twitter ADVec](https://github.com/twitter/AnomalyDetection) | v1.0.0    | 47.1             | 33.6          | 53.5          |
+| [Etsy Skyline](https://github.com/etsy/skyline)  | ???     | 35.7             | 27.1          | 44.5          |
+| Random        | N/A     | 16.8             | 5.8          | 25.9          |
+| Null          | N/A     | 0.0              | 0.0           | 0.0           |
+
+*As of NAB v1.0*
+
 #### Corpus
 
 The NAB corpus of 58 timeseries data files is designed to provide data for research
