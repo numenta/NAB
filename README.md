@@ -21,7 +21,7 @@ refer to the [NAB publication](http://arxiv.org/abs/1510.03336) or the [NAB
 Whitepaper](https://github.com/numenta/NAB/wiki#nab-whitepaper) in the wiki for
 more details about NAB scoring, data, motivation, etc.
 
-Please cite the following publication when referring to NAB:
+We encourage you to publish your results on running NAB, and share them with us at [nab@numenta.org](nab@numenta.org). Please cite the following publication when referring to NAB:
 
 Lavin, Alexander and Ahmad, Subutai. *"Evaluating Real-time Anomaly Detection
 Algorithms – the Numenta Anomaly Benchmark"*, Fourteenth International
