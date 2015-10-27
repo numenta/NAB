@@ -29,13 +29,6 @@ except ImportError:
 from nab.runner import Runner
 from nab.util import (detectorNameToClass, checkInputs)
 
-# The following imports are necessary for getDetectorClassConstructors to
-# automatically figure out the detector classes
-from nab.detectors.numenta.numenta_detector import NumentaDetector
-from nab.detectors.skyline.skyline_detector import SkylineDetector
-from nab.detectors.random.random_detector import RandomDetector
-from nab.detectors.null.null_detector import NullDetector
-
 
 
 def getDetectorClassConstructors(detectors):
@@ -172,6 +165,15 @@ if __name__ == "__main__":
   if len(args.detectors) == 1:
     # Handle comma-seperated list argument.
     args.detectors = args.detectors[0].split(',')
+
+  # The following imports are necessary for getDetectorClassConstructors to
+  # automatically figure out the detector classes.
+  # Only import numenta detector if used so as to avoid unnecessary dependency
+  if "numenta" in args.detectors:
+    from nab.detectors.numenta.numenta_detector import NumentaDetector
+  from nab.detectors.skyline.skyline_detector import SkylineDetector
+  from nab.detectors.random.random_detector import RandomDetector
+  from nab.detectors.null.null_detector import NullDetector
 
   if args.skipConfirmation or checkInputs(args):
     main(args)
