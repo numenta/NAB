@@ -35,12 +35,12 @@ with open(os.path.join(os.path.dirname(__name__), "requirements.txt")) as f:
 
 setup(
   name = "nab",
-  version = "0.8",
+  version = "1.0",
   author = "Alexander Lavin",
   author_email = "nab@numenta.org",
   description = (
     "Numenta Anomaly Benchmark: A benchmark for streaming anomaly prediction"),
-  license = "GPL",
+  license = "AGPL",
   packages=find_packages(),
   long_description=read("README.md"),
   install_requires=requirements,
