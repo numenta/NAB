@@ -173,7 +173,7 @@ def absoluteFilePaths(directory):
   for dirpath,_,filenames in os.walk(directory):
     filenames = [f for f in filenames if not f[0] == "."]
     for f in filenames:
-      yield os.path.abspath(os.path.join(dirpath, f))
+      yield os.path.abspath(os.path.normpath(os.path.join(dirpath, f)))
 
 
 def makeDirsExist(dirname):
@@ -250,7 +250,7 @@ def convertResultsPathToDataPath(path):
 
   @return     (string)  Path to dataset result in the result directory.
   """
-  path = path.split("/")
+  path = path.split(os.path.sep)
   detector = path[0]
   path = path[1:]
 

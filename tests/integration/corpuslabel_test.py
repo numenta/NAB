@@ -199,9 +199,9 @@ class CorpusLabelTest(unittest.TestCase):
 
     for i, labels in enumerate(rawLabels):
       labelsPath = self.tempCorpusLabelPath.replace(
-        "/label.json", "/raw/label{}.json".format(i))
+        os.path.sep+"label.json", os.path.sep+"raw"+os.path.sep+"label{}.json".format(i))
       writeCorpusLabel(labelsPath, {"test_data_file.csv": labels})
-    labelsDir = labelsPath.replace("/label{}.json".format(i), "")
+    labelsDir = labelsPath.replace(os.path.sep+"label{}.json".format(i), "")
 
     corpus = nab.corpus.Corpus(self.tempCorpusPath)
     labelCombiner = nab.labeler.LabelCombiner(

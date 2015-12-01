@@ -137,12 +137,12 @@ if __name__ == "__main__":
                          "null,numenta")
                     
   parser.add_argument("-p", "--profilesFile",
-                    default="config/profiles.json",
+                    default=os.path.join("config", "profiles.json"),
                     help="The configuration file to use while running the "
                     "benchmark.")
 
   parser.add_argument("-t", "--thresholdsFile",
-                    default="config/thresholds.json",
+                    default=os.path.join("config", "thresholds.json"),
                     help="The configuration file that stores thresholds for "
                     "each combination of detector and username")
 
