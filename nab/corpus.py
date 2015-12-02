@@ -135,7 +135,8 @@ class Corpus(object):
     dataSets = [DataFile(path) for path in filePaths if ".csv" in path]
 
     def getRelativePath(srcRoot, srcPath):
-      return srcPath[srcPath.index(srcRoot)+len(srcRoot):].strip("/")
+      return srcPath[srcPath.index(srcRoot)+len(srcRoot):]\
+        .strip(os.path.sep).replace(os.path.sep, "/")
 
     return {getRelativePath(self.srcRoot, d.srcPath) : d for d in dataSets}
 
@@ -180,8 +181,8 @@ class Corpus(object):
     @param newRoot      (string)      Location of new directory to copy corpus
                                       to.
     """
-    if newRoot[-1] != "/":
-      newRoot += "/"
+    if newRoot[-1] != os.path.sep:
+      newRoot += os.path.sep
     if os.path.isdir(newRoot):
       print "directory already exists"
       return None

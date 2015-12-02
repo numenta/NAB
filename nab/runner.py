@@ -270,7 +270,7 @@ class Runner(object):
         score = 100 * (results["Score"].iloc[-1] - base) / (perfect - base)
 
         # Add to results dict:
-        resultsInfo = resultsFile.split('/')[-1].split('.')[0]
+        resultsInfo = resultsFile.split(os.path.sep)[-1].split('.')[0]
         detector = resultsInfo.split('_')[0]
         profile = resultsInfo.replace(detector + "_", "").replace("_scores", "")
         if detector not in finalResults:

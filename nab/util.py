@@ -250,7 +250,7 @@ def convertResultsPathToDataPath(path):
 
   @return     (string)  Path to dataset result in the result directory.
   """
-  path = path.split("/")
+  path = path.split(os.path.sep)
   detector = path[0]
   path = path[1:]
 
