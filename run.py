@@ -174,6 +174,17 @@ if __name__ == "__main__":
   from nab.detectors.skyline.skyline_detector import SkylineDetector
   from nab.detectors.random.random_detector import RandomDetector
   from nab.detectors.null.null_detector import NullDetector
+  detectors = []
+  for detector in args.detectors:
+      if ':' in detector:
+        package, name = detector.split(':', 2)
+        className = detectorNameToClass(name)
+        imprt = __import__(package, fromlist=[className])
+        globals().update({className: getattr(imprt, className)})
+        detectors.append(name)
+      else:
+        detectors.append(detector)
+  args.detectors = detectors
 
   if args.skipConfirmation or checkInputs(args):
     main(args)
