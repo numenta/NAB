@@ -100,7 +100,7 @@ class AnomalyDetector(object):
 
     headers = self.getHeader()
 
-    ans = pandas.DataFrame(columns=headers)
+    rows = []
     for i, row in self.dataSet.data.iterrows():
 
       inputData = row.to_dict()
@@ -109,13 +109,14 @@ class AnomalyDetector(object):
 
       outputRow = list(row) + list(detectorValues)
 
-      ans.loc[i] = outputRow
+      rows.append(outputRow)
 
       # Progress report
       if (i % 1000) == 0:
         print ".",
         sys.stdout.flush()
 
+    ans = pandas.DataFrame(rows, columns=headers)
     return ans
 
 
