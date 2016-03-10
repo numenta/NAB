@@ -69,8 +69,14 @@ class NumentaDetector(AnomalyDetector):
 
   def initialize(self):
     # Get config params, setting the RDSE resolution
+    rangePadding = abs(self.inputMax - self.inputMin) * 0.2
+
     modelParams = getScalarMetricWithTimeOfDayAnomalyParams(
-      self.dataSet.data["value"], minResolution=0.001)["modelConfig"]
+      metricData=[0],
+      minVal=self.inputMin-rangePadding,
+      maxVal=self.inputMax+rangePadding,
+      minResolution=0.001
+    )["modelConfig"]
 
     self._setupEncoderParams(
       modelParams["modelParams"]["sensorParams"]["encoders"])
