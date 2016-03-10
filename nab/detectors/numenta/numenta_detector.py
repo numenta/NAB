@@ -23,6 +23,8 @@ import math
 import simplejson as json
 
 from nupic.algorithms import anomaly_likelihood
+from nupic.frameworks.opf.common_models.cluster_params import (
+  getScalarMetricWithTimeOfDayAnomalyParams)
 from nupic.frameworks.opf.modelfactory import ModelFactory
 
 from nab.detectors.base import AnomalyDetector
@@ -66,28 +68,12 @@ class NumentaDetector(AnomalyDetector):
 
 
   def initialize(self):
-    calcRange = abs(self.inputMax - self.inputMin)
-    calcPad = calcRange * .2
+    # Get config params, setting the RDSE resolution
+    modelParams = getScalarMetricWithTimeOfDayAnomalyParams(
+      self.dataSet.data["value"], minResolution=0.001)["modelConfig"]
 
-    self.inputMin = self.inputMin - calcPad
-    self.inputMax = self.inputMax + calcPad
-    # Load the model params JSON
-
-    paramsPath = os.path.join(os.path.split(__file__)[0],
-                "modelParams",
-                "model_params.json")
-    with open(paramsPath) as fp:
-      modelParams = json.load(fp)
-
-    self.sensorParams = modelParams["modelParams"]["sensorParams"]\
-                                   ["encoders"]["value"]
-
-    # RDSE - resolution calculation
-    resolution = max(0.001,
-                     (self.inputMax - self.inputMin) / \
-                     self.sensorParams.pop("numBuckets")
-                    )
-    self.sensorParams["resolution"] = resolution
+    self._setupEncoderParams(
+      modelParams["modelParams"]["sensorParams"]["encoders"])
 
     self.model = ModelFactory.create(modelParams)
 
@@ -100,3 +86,17 @@ class NumentaDetector(AnomalyDetector):
       estimationSamples=self.probationaryPeriod-numentaLearningPeriod,
       reestimationPeriod=100
     )
+
+
+  def _setupEncoderParams(self, encoderParams):
+    # The encoder must expect the NAB-specific datafile headers
+    encoderParams["timestamp_dayOfWeek"] = encoderParams.pop("c0_dayOfWeek")
+    encoderParams["timestamp_timeOfDay"] = encoderParams.pop("c0_timeOfDay")
+    encoderParams["timestamp_timeOfDay"]["fieldname"] = "timestamp"
+    encoderParams["timestamp_timeOfDay"]["name"] = "timestamp"
+    encoderParams["timestamp_weekend"] = encoderParams.pop("c0_weekend")
+    encoderParams["value"] = encoderParams.pop("c1")
+    encoderParams["value"]["fieldname"] = "value"
+    encoderParams["value"]["name"] = "value"
+
+    self.sensorParams = encoderParams["value"]
