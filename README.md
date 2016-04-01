@@ -158,6 +158,21 @@ the specific version of NuPIC (and associated nupic.core) that is noted in the
     cd /path/to/nupic.core/
     git checkout -b nab {TAG NAME}
 
+##### Run htm.java with NAB
+
+First make sure you have __java 8__ installed.
+ 
+    java -version
+        
+Build __htm.java__ NAB detector:
+  
+    cd nab/detectors/htmjava
+    ./gradlew clean build
+    
+Run __htm.java__ NAB detector:
+
+    cd /path/to/nab
+    python run.py -d htmjava --detect --score --normalize
 
 ##### Run full NAB
 

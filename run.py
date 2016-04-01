@@ -171,6 +171,8 @@ if __name__ == "__main__":
   # Only import numenta detector if used so as to avoid unnecessary dependency
   if "numenta" in args.detectors:
     from nab.detectors.numenta.numenta_detector import NumentaDetector
+  if "htmjava" in args.detectors:
+    from nab.detectors.htmjava.htmjava_detector import HtmjavaDetector
   from nab.detectors.skyline.skyline_detector import SkylineDetector
   from nab.detectors.random.random_detector import RandomDetector
   from nab.detectors.null.null_detector import NullDetector

@@ -5,6 +5,7 @@
 data_test/
 deprecated/
 nab.egg-info/
+.idea/
 
 # Generated files
 

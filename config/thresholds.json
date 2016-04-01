@@ -1,4 +1,18 @@
 {
+    "htmjava": {
+        "reward_low_FN_rate": {
+            "score": -148.72315970823016,
+            "threshold": 0.5
+        },
+        "reward_low_FP_rate": {
+            "score": -96.63988587550608,
+            "threshold": 0.5126953125
+        },
+        "standard": {
+            "score": -72.72315970823018,
+            "threshold": 0.5
+        }
+    },
     "null": {
         "reward_low_FN_rate": {
             "score": -88.0,
