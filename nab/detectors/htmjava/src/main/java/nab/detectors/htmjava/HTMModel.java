@@ -58,16 +58,12 @@ public class HTMModel {
         // Create NAB Network
         network = Network.create("NAB Network", parameters)
                 .add(Network.createRegion("NAB Region")
-                    .add(Network.createLayer("TemporalMemory", parameters)
-                            .add(Anomaly.create())
-                            .add(new TemporalMemory()))
-                    .add(Network.createLayer("SpatialPooler", parameters)
-                            .add(new SpatialPooler()))
-                    .add(Network.createLayer("Sensor", parameters)
-                            .add(Sensor.create(ObservableSensor::create,
-                                    SensorParams.create(SensorParams.Keys::obs, "Manual Input", publisher))))
-                    .connect("TemporalMemory", "SpatialPooler")
-                    .connect("SpatialPooler", "Sensor"));
+                    .add(Network.createLayer("NAB Layer", parameters)
+                        .add(Anomaly.create())
+                        .add(new TemporalMemory())
+                        .add(new SpatialPooler())
+                        .add(Sensor.create(ObservableSensor::create,
+                                SensorParams.create(SensorParams.Keys::obs, "Manual Input", publisher)))));
 
     }
 
@@ -192,8 +188,8 @@ public class HTMModel {
 
     public void showDebugInfo() {
         Region region = network.getHead();
-        Layer<?> spatialPooler = region.lookup("SpatialPooler");
-        Connections connections = spatialPooler.getConnections();
+        Layer<?> layer = region.lookup("NAB Layer");
+        Connections connections = layer.getConnections();
         double[] cycles = connections.getActiveDutyCycles();
         int spActive = 0;
         for (int i = 0; i < cycles.length; i++) {
@@ -233,10 +229,7 @@ public class HTMModel {
 
             // Parse OPF Model Parameters
             ObjectMapper mapper = new ObjectMapper();
-            JsonNode params = null;
-            if (args.length > 0) {
-                params = mapper.readTree(modelParams);
-            }
+            JsonNode params = mapper.readTree(modelParams);
 
             // Create NAB Network Model
             HTMModel model = new HTMModel(params);
