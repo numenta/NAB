@@ -1,4 +1,18 @@
 {
+    "bayesChangePt": {
+        "reward_low_FN_rate": {
+            "score": -119.66446343370035,
+            "threshold": 0.9804565429687504
+        },
+        "reward_low_FP_rate": {
+            "score": -97.98138757736466,
+            "threshold": 0.9987243652343758
+        },
+        "standard": {
+            "score": -78.62683179062375,
+            "threshold": 0.9845581054687506
+        }
+    },
     "null": {
         "reward_low_FN_rate": {
             "score": -88.0,
