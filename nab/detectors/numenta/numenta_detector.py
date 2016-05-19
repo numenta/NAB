@@ -72,7 +72,7 @@ class NumentaDetector(AnomalyDetector):
     rangePadding = abs(self.inputMax - self.inputMin) * 0.2
     modelParams = getScalarMetricWithTimeOfDayAnomalyParams(
       metricData=[0],
-      detectorType="numenta",
+      tmImplementation="cpp",
       minVal=self.inputMin-rangePadding,
       maxVal=self.inputMax+rangePadding,
       minResolution=0.001

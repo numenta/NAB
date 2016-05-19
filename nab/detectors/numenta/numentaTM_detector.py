@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------
-# Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
+# Copyright (C) 2016, Numenta, Inc.  Unless you have an agreement
 # with Numenta, Inc., for a separate license for this software code, the
 # following terms and conditions apply:
 #
@@ -31,11 +31,11 @@ from nab.detectors.base import AnomalyDetector
 
 
 
-class NumentaNewDetector(AnomalyDetector):
+class NumentaTMDetector(AnomalyDetector):
 
   def __init__(self, *args, **kwargs):
 
-    super(NumentaNewDetector, self).__init__(*args, **kwargs)
+    super(NumentaTMDetector, self).__init__(*args, **kwargs)
 
     self.model = None
     self.sensorParams = None
@@ -53,7 +53,7 @@ class NumentaNewDetector(AnomalyDetector):
     Internally to NuPIC "anomalyScore" corresponds to "likelihood_score"
     and "rawScore" corresponds to "anomaly_score". Sorry about that.
     """
-    # Send it to NumentaNew detector and get back the results
+    # Send it to NumentaTM detector and get back the results
     result = self.model.run(inputData)
 
     # Retrieve the anomaly score and write it to a file
@@ -72,7 +72,7 @@ class NumentaNewDetector(AnomalyDetector):
     rangePadding = abs(self.inputMax - self.inputMin) * 0.2
     modelParams = getScalarMetricWithTimeOfDayAnomalyParams(
       metricData=[0],
-      detectorType="numentaNew",
+      tmImplementation="tm_cpp",
       minVal=self.inputMin-rangePadding,
       maxVal=self.inputMax+rangePadding,
       minResolution=0.001

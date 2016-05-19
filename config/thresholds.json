@@ -27,7 +27,7 @@
             "threshold": 0.5126953125
         }
     },
-    "numentaNew":{
+    "numentaTM":{
         "reward_low_FN_rate": {
             "score": 9.432068022614288,
             "threshold": 0.5126953125
