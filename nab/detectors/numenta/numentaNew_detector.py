@@ -31,11 +31,11 @@ from nab.detectors.base import AnomalyDetector
 
 
 
-class NumentaDetector(AnomalyDetector):
+class NumentaNewDetector(AnomalyDetector):
 
   def __init__(self, *args, **kwargs):
 
-    super(NumentaDetector, self).__init__(*args, **kwargs)
+    super(NumentaNewDetector, self).__init__(*args, **kwargs)
 
     self.model = None
     self.sensorParams = None
@@ -53,7 +53,7 @@ class NumentaDetector(AnomalyDetector):
     Internally to NuPIC "anomalyScore" corresponds to "likelihood_score"
     and "rawScore" corresponds to "anomaly_score". Sorry about that.
     """
-    # Send it to Numenta detector and get back the results
+    # Send it to NumentaNew detector and get back the results
     result = self.model.run(inputData)
 
     # Retrieve the anomaly score and write it to a file
@@ -72,7 +72,7 @@ class NumentaDetector(AnomalyDetector):
     rangePadding = abs(self.inputMax - self.inputMin) * 0.2
     modelParams = getScalarMetricWithTimeOfDayAnomalyParams(
       metricData=[0],
-      detectorType="numenta",
+      detectorType="numentaNew",
       minVal=self.inputMin-rangePadding,
       maxVal=self.inputMax+rangePadding,
       minResolution=0.001
