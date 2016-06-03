@@ -36,6 +36,7 @@ The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the 
 |---------------|---------|------------------|---------------|---------------|
 | Perfect       | N/A     | 100.0            | 100.0         | 100.0         |
 | [Numenta HTM](https://github.com/numenta/nupic)   | current* | 64.7             | 56.5          | 69.3          |
+| [Numenta HTM (new temporal memory)](https://github.com/numenta/nupic)   | ? | 61.2             | 52.4         | 66.1          |
 | [Twitter ADVec](https://github.com/twitter/AnomalyDetection) | v1.0.0    | 47.1             | 33.6          | 53.5          |
 | [Etsy Skyline](https://github.com/etsy/skyline)  | ???     | 35.7             | 27.1          | 44.5          |
 | Random        | N/A     | 16.8             | 5.8          | 25.9          |
