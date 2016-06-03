@@ -1,0 +1,219 @@
+
+Running detection step
+0: Beginning detection with numentaTM for realTraffic/speed_6005.csv
+1: Beginning detection with numentaTM for realTweets/Twitter_volume_KO.csv
+2: Beginning detection with numentaTM for realTweets/Twitter_volume_UPS.csv
+3: Beginning detection with numentaTM for realKnownCause/rogue_agent_key_updown.csv
+4: Beginning detection with numentaTM for artificialWithAnomaly/art_daily_nojump.csv
+5: Beginning detection with numentaTM for realAdExchange/exchange-2_cpm_results.csv
+6: Beginning detection with numentaTM for artificialNoAnomaly/art_daily_perfect_square_wave.csv
+7: Beginning detection with numentaTM for realAWSCloudwatch/ec2_cpu_utilization_5f5533.csv
+8: Beginning detection with numentaTM for realTraffic/speed_7578.csv
+9: Beginning detection with numentaTM for realAdExchange/exchange-3_cpc_results.csv
+10: Beginning detection with numentaTM for realAWSCloudwatch/rds_cpu_utilization_cc0c53.csv
+11: Beginning detection with numentaTM for realAdExchange/exchange-2_cpc_results.csv
+12: Beginning detection with numentaTM for realAWSCloudwatch/ec2_cpu_utilization_77c1ca.csv
+13: Beginning detection with numentaTM for realTraffic/TravelTime_387.csv
+14: Beginning detection with numentaTM for realTweets/Twitter_volume_PFE.csv
+15: Beginning detection with numentaTM for realAWSCloudwatch/elb_request_count_8c0756.csv
+/usr/local/lib/python2.7/dist-packages/matplotlib/font_manager.py:273: UserWarning: Matplotlib is building the font cache using fc-list. This may take a moment.
+  warnings.warn('Matplotlib is building the font cache using fc-list. This may take a moment.')
+/usr/local/lib/python2.7/dist-packages/matplotlib/font_manager.py:273: UserWarning: Matplotlib is building the font cache using fc-list. This may take a moment.
+  warnings.warn('Matplotlib is building the font cache using fc-list. This may take a moment.')
+/usr/local/lib/python2.7/dist-packages/matplotlib/font_manager.py:273: UserWarning: Matplotlib is building the font cache using fc-list. This may take a moment.
+  warnings.warn('Matplotlib is building the font cache using fc-list. This may take a moment.')
+/usr/local/lib/python2.7/dist-packages/matplotlib/font_manager.py:273: UserWarning: Matplotlib is building the font cache using fc-list. This may take a moment.
+  warnings.warn('Matplotlib is building the font cache using fc-list. This may take a moment.')
+/usr/local/lib/python2.7/dist-packages/matplotlib/font_manager.py:273: UserWarning: Matplotlib is building the font cache using fc-list. This may take a moment.
+  warnings.warn('Matplotlib is building the font cache using fc-list. This may take a moment.')
+/usr/local/lib/python2.7/dist-packages/matplotlib/font_manager.py:273: UserWarning: Matplotlib is building the font cache using fc-list. This may take a moment.
+  warnings.warn('Matplotlib is building the font cache using fc-list. This may take a moment.')
+/usr/local/lib/python2.7/dist-packages/matplotlib/font_manager.py:273: UserWarning: Matplotlib is building the font cache using fc-list. This may take a moment.
+  warnings.warn('Matplotlib is building the font cache using fc-list. This may take a moment.')
+/usr/local/lib/python2.7/dist-packages/matplotlib/font_manager.py:273: UserWarning: Matplotlib is building the font cache using fc-list. This may take a moment.
+  warnings.warn('Matplotlib is building the font cache using fc-list. This may take a moment.')
+/usr/local/lib/python2.7/dist-packages/matplotlib/font_manager.py:273: UserWarning: Matplotlib is building the font cache using fc-list. This may take a moment.
+  warnings.warn('Matplotlib is building the font cache using fc-list. This may take a moment.')
+/usr/local/lib/python2.7/dist-packages/matplotlib/font_manager.py:273: UserWarning: Matplotlib is building the font cache using fc-list. This may take a moment.
+  warnings.warn('Matplotlib is building the font cache using fc-list. This may take a moment.')
+/usr/local/lib/python2.7/dist-packages/matplotlib/font_manager.py:273: UserWarning: Matplotlib is building the font cache using fc-list. This may take a moment.
+  warnings.warn('Matplotlib is building the font cache using fc-list. This may take a moment.')
+/usr/local/lib/python2.7/dist-packages/matplotlib/font_manager.py:273: UserWarning: Matplotlib is building the font cache using fc-list. This may take a moment.
+  warnings.warn('Matplotlib is building the font cache using fc-list. This may take a moment.')
+/usr/local/lib/python2.7/dist-packages/matplotlib/font_manager.py:273: UserWarning: Matplotlib is building the font cache using fc-list. This may take a moment.
+  warnings.warn('Matplotlib is building the font cache using fc-list. This may take a moment.')
+/usr/local/lib/python2.7/dist-packages/matplotlib/font_manager.py:273: UserWarning: Matplotlib is building the font cache using fc-list. This may take a moment.
+  warnings.warn('Matplotlib is building the font cache using fc-list. This may take a moment.')
+/usr/local/lib/python2.7/dist-packages/matplotlib/font_manager.py:273: UserWarning: Matplotlib is building the font cache using fc-list. This may take a moment.
+  warnings.warn('Matplotlib is building the font cache using fc-list. This may take a moment.')
+/usr/local/lib/python2.7/dist-packages/matplotlib/font_manager.py:273: UserWarning: Matplotlib is building the font cache using fc-list. This may take a moment.
+  warnings.warn('Matplotlib is building the font cache using fc-list. This may take a moment.')
+................ . . . . . . . . . . . . . . 8: Completed processing 1127 records at 2016-05-24 16:04:04.439252
+8: Results have been written to /mnt/results/numentaTM/realTraffic/numentaTM_speed_7578.csv
+16: Beginning detection with numentaTM for realTweets/Twitter_volume_AAPL.csv
+. . . . . 5: Completed processing 1624 records at 2016-05-24 16:04:12.536963
+5: Results have been written to /mnt/results/numentaTM/realAdExchange/numentaTM_exchange-2_cpm_results.csv
+17: Beginning detection with numentaTM for artificialWithAnomaly/art_daily_jumpsdown.csv
+. . . . 9: Completed processing 1538 records at 2016-05-24 16:04:14.053449
+9: Results have been written to /mnt/results/numentaTM/realAdExchange/numentaTM_exchange-3_cpc_results.csv
+18: Beginning detection with numentaTM for realAWSCloudwatch/ec2_cpu_utilization_24ae8d.csv
+ . .. 11: Completed processing 1624 records at 2016-05-24 16:04:14.746811
+11: Results have been written to /mnt/results/numentaTM/realAdExchange/numentaTM_exchange-2_cpc_results.csv
+19: Beginning detection with numentaTM for realAWSCloudwatch/ec2_network_in_5abac7.csv
+. . . . . . . . . . 13: Completed processing 2500 records at 2016-05-24 16:04:31.429539
+13: Results have been written to /mnt/results/numentaTM/realTraffic/numentaTM_TravelTime_387.csv
+20: Beginning detection with numentaTM for artificialNoAnomaly/art_daily_small_noise.csv
+. . . . . . . . . . . 6: Completed processing 4032 records at 2016-05-24 16:04:38.271068
+6: Results have been written to /mnt/results/numentaTM/artificialNoAnomaly/numentaTM_art_daily_perfect_square_wave.csv
+21: Beginning detection with numentaTM for realTweets/Twitter_volume_IBM.csv
+ 10: Completed processing 4032 records at 2016-05-24 16:04:38.598032
+10: Results have been written to /mnt/results/numentaTM/realAWSCloudwatch/numentaTM_rds_cpu_utilization_cc0c53.csv
+22: Beginning detection with numentaTM for realAdExchange/exchange-4_cpm_results.csv
+.. . . . . . . . . . . . 22: Completed processing 1643 records at 2016-05-24 16:04:57.887335
+22: Results have been written to /mnt/results/numentaTM/realAdExchange/numentaTM_exchange-4_cpm_results.csv
+23: Beginning detection with numentaTM for realKnownCause/nyc_taxi.csv
+ .. 4: Completed processing 4032 records at 2016-05-24 16:04:59.636024
+4: Results have been written to /mnt/results/numentaTM/artificialWithAnomaly/numentaTM_art_daily_nojump.csv
+24: Beginning detection with numentaTM for artificialNoAnomaly/art_flatline.csv
+. . . . . . 0: Completed processing 2500 records at 2016-05-24 16:05:08.065868
+0: Results have been written to /mnt/results/numentaTM/realTraffic/numentaTM_speed_6005.csv
+25: Beginning detection with numentaTM for realAWSCloudwatch/ec2_cpu_utilization_825cc2.csv
+. . . . 17: Completed processing 4032 records at 2016-05-24 16:05:11.686037
+17: Results have been written to /mnt/results/numentaTM/artificialWithAnomaly/numentaTM_art_daily_jumpsdown.csv
+26: Beginning detection with numentaTM for realAWSCloudwatch/ec2_cpu_utilization_c6585a.csv
+. . . . . 18: Completed processing 4032 records at 2016-05-24 16:05:20.699649
+18: Results have been written to /mnt/results/numentaTM/realAWSCloudwatch/numentaTM_ec2_cpu_utilization_24ae8d.csv
+27: Beginning detection with numentaTM for realTweets/Twitter_volume_CVS.csv
+ . .. . . . . . . 19: Completed processing 4730 records at 2016-05-24 16:05:36.838875
+19: Results have been written to /mnt/results/numentaTM/realAWSCloudwatch/numentaTM_ec2_network_in_5abac7.csv
+28: Beginning detection with numentaTM for realKnownCause/rogue_agent_key_hold.csv
+ .. . 20: Completed processing 4032 records at 2016-05-24 16:05:38.205764
+20: Results have been written to /mnt/results/numentaTM/artificialNoAnomaly/numentaTM_art_daily_small_noise.csv
+29: Beginning detection with numentaTM for realTraffic/occupancy_6005.csv
+ .. . 12: Completed processing 4032 records at 2016-05-24 16:05:40.250538
+12: Results have been written to /mnt/results/numentaTM/realAWSCloudwatch/numentaTM_ec2_cpu_utilization_77c1ca.csv
+30: Beginning detection with numentaTM for realAWSCloudwatch/grok_asg_anomaly.csv
+ .. . . . . . . . 3: Completed processing 5315 records at 2016-05-24 16:05:55.280378
+3: Results have been written to /mnt/results/numentaTM/realKnownCause/numentaTM_rogue_agent_key_updown.csv
+31: Beginning detection with numentaTM for realKnownCause/machine_temperature_system_failure.csv
+ .. . . 28: Completed processing 1882 records at 2016-05-24 16:05:59.812177
+28: Results have been written to /mnt/results/numentaTM/realKnownCause/numentaTM_rogue_agent_key_hold.csv
+32: Beginning detection with numentaTM for realAWSCloudwatch/rds_cpu_utilization_e47b3b.csv
+. . . . . . . . . 26: Completed processing 4032 records at 2016-05-24 16:06:16.061980
+26: Results have been written to /mnt/results/numentaTM/realAWSCloudwatch/numentaTM_ec2_cpu_utilization_c6585a.csv
+ .33: Beginning detection with numentaTM for realTraffic/occupancy_t4013.csv
+. . . . . . . . 29: Completed processing 2380 records at 2016-05-24 16:06:40.856818
+29: Results have been written to /mnt/results/numentaTM/realTraffic/numentaTM_occupancy_6005.csv
+34: Beginning detection with numentaTM for artificialWithAnomaly/art_load_balancer_spikes.csv
+. . . . . . . 7: Completed processing 4032 records at 2016-05-24 16:06:51.377669
+7: Results have been written to /mnt/results/numentaTM/realAWSCloudwatch/numentaTM_ec2_cpu_utilization_5f5533.csv
+35: Beginning detection with numentaTM for realTraffic/TravelTime_451.csv
+. 24: Completed processing 4032 records at 2016-05-24 16:06:52.678396
+24: Results have been written to /mnt/results/numentaTM/artificialNoAnomaly/numentaTM_art_flatline.csv
+36: Beginning detection with numentaTM for realAdExchange/exchange-4_cpc_results.csv
+. . . . . . . . . 30: Completed processing 4621 records at 2016-05-24 16:07:02.634772
+30: Results have been written to /mnt/results/numentaTM/realAWSCloudwatch/numentaTM_grok_asg_anomaly.csv
+37: Beginning detection with numentaTM for realAdExchange/exchange-3_cpm_results.csv
+. 15: Completed processing 4032 records at 2016-05-24 16:07:03.890134
+15: Results have been written to /mnt/results/numentaTM/realAWSCloudwatch/numentaTM_elb_request_count_8c0756.csv
+38: Beginning detection with numentaTM for realTweets/Twitter_volume_FB.csv
+ .. 25: Completed processing 4032 records at 2016-05-24 16:07:06.086388
+25: Results have been written to /mnt/results/numentaTM/realAWSCloudwatch/numentaTM_ec2_cpu_utilization_825cc2.csv
+39: Beginning detection with numentaTM for realAWSCloudwatch/ec2_cpu_utilization_fe7f93.csv
+. . 36: Completed processing 1643 records at 2016-05-24 16:07:09.899614
+36: Results have been written to /mnt/results/numentaTM/realAdExchange/numentaTM_exchange-4_cpc_results.csv
+40: Beginning detection with numentaTM for realTweets/Twitter_volume_AMZN.csv
+ .. 32: Completed processing 4032 records at 2016-05-24 16:07:11.084567
+32: Results have been written to /mnt/results/numentaTM/realAWSCloudwatch/numentaTM_rds_cpu_utilization_e47b3b.csv
+41: Beginning detection with numentaTM for realTweets/Twitter_volume_GOOG.csv
+ .. . . 33: Completed processing 2500 records at 2016-05-24 16:07:14.121319
+33: Results have been written to /mnt/results/numentaTM/realTraffic/numentaTM_occupancy_t4013.csv
+42: Beginning detection with numentaTM for realAWSCloudwatch/ec2_cpu_utilization_ac20cd.csv
+. . . . . . 37: Completed processing 1538 records at 2016-05-24 16:07:23.090038
+37: Results have been written to /mnt/results/numentaTM/realAdExchange/numentaTM_exchange-3_cpm_results.csv
+43: Beginning detection with numentaTM for realTweets/Twitter_volume_CRM.csv
+. . 35: Completed processing 2162 records at 2016-05-24 16:07:24.287313
+35: Results have been written to /mnt/results/numentaTM/realTraffic/numentaTM_TravelTime_451.csv
+44: Beginning detection with numentaTM for artificialWithAnomaly/art_daily_flatmiddle.csv
+. . . . . . . . . . . . . . . . . . . . . . . 42: Completed processing 4032 records at 2016-05-24 16:08:06.281277
+42: Results have been written to /mnt/results/numentaTM/realAWSCloudwatch/numentaTM_ec2_cpu_utilization_ac20cd.csv
+45: Beginning detection with numentaTM for realKnownCause/cpu_utilization_asg_misconfiguration.csv
+. . . . . 44: Completed processing 4032 records at 2016-05-24 16:08:16.418653
+44: Results have been written to /mnt/results/numentaTM/artificialWithAnomaly/numentaTM_art_daily_flatmiddle.csv
+46: Beginning detection with numentaTM for realAWSCloudwatch/iio_us-east-1_i-a2eb1cd9_NetworkIn.csv
+ .. . . . . . 46: Completed processing 1243 records at 2016-05-24 16:08:29.212460
+46: Results have been written to /mnt/results/numentaTM/realAWSCloudwatch/numentaTM_iio_us-east-1_i-a2eb1cd9_NetworkIn.csv
+47: Beginning detection with numentaTM for artificialNoAnomaly/art_daily_no_noise.csv
+. 34: Completed processing 4032 records at 2016-05-24 16:08:30.645399
+34: Results have been written to /mnt/results/numentaTM/artificialWithAnomaly/numentaTM_art_load_balancer_spikes.csv
+48: Beginning detection with numentaTM for artificialNoAnomaly/art_noisy.csv
+. . . 39: Completed processing 4032 records at 2016-05-24 16:08:35.623659
+39: Results have been written to /mnt/results/numentaTM/realAWSCloudwatch/numentaTM_ec2_cpu_utilization_fe7f93.csv
+49: Beginning detection with numentaTM for realKnownCause/ambient_temperature_system_failure.csv
+. . . . . . . . . . . . . . . . . . 47: Completed processing 4032 records at 2016-05-24 16:09:16.432391
+47: Results have been written to /mnt/results/numentaTM/artificialNoAnomaly/numentaTM_art_daily_no_noise.csv
+50: Beginning detection with numentaTM for realTraffic/speed_t4013.csv
+. . . . . . . . . . . . . . 50: Completed processing 2495 records at 2016-05-24 16:10:08.861215
+50: Results have been written to /mnt/results/numentaTM/realTraffic/numentaTM_speed_t4013.csv
+51: Beginning detection with numentaTM for realAWSCloudwatch/ec2_disk_write_bytes_1ef3de.csv
+ .. . . . . . . . . . . . . . . . . . 23: Completed processing 10320 records at 2016-05-24 16:11:16.923557
+23: Results have been written to /mnt/results/numentaTM/realKnownCause/numentaTM_nyc_taxi.csv
+52: Beginning detection with numentaTM for realAWSCloudwatch/ec2_disk_write_bytes_c0d644.csv
+. . . 51: Completed processing 4730 records at 2016-05-24 16:11:30.518113
+51: Results have been written to /mnt/results/numentaTM/realAWSCloudwatch/numentaTM_ec2_disk_write_bytes_1ef3de.csv
+53: Beginning detection with numentaTM for artificialWithAnomaly/art_increase_spike_density.csv
+. . . . . . . . . 48: Completed processing 4032 records at 2016-05-24 16:11:59.186983
+48: Results have been written to /mnt/results/numentaTM/artificialNoAnomaly/numentaTM_art_noisy.csv
+54: Beginning detection with numentaTM for realAWSCloudwatch/ec2_network_in_257a54.csv
+. . . . . . . . . . . . 53: Completed processing 4032 records at 2016-05-24 16:12:37.040824
+53: Results have been written to /mnt/results/numentaTM/artificialWithAnomaly/numentaTM_art_increase_spike_density.csv
+55: Beginning detection with numentaTM for realAWSCloudwatch/ec2_cpu_utilization_53ea38.csv
+. . . 52: Completed processing 4032 records at 2016-05-24 16:12:44.129480
+52: Results have been written to /mnt/results/numentaTM/realAWSCloudwatch/numentaTM_ec2_disk_write_bytes_c0d644.csv
+56: Beginning detection with numentaTM for realKnownCause/ec2_request_latency_system_failure.csv
+. . . . . . . . . . . . 54: Completed processing 4032 records at 2016-05-24 16:13:19.687791
+54: Results have been written to /mnt/results/numentaTM/realAWSCloudwatch/numentaTM_ec2_network_in_257a54.csv
+57: Beginning detection with numentaTM for artificialWithAnomaly/art_daily_jumpsup.csv
+. . . . . . . . 56: Completed processing 4032 records at 2016-05-24 16:13:46.490259
+56: Results have been written to /mnt/results/numentaTM/realKnownCause/numentaTM_ec2_request_latency_system_failure.csv
+ . . . . . . 57: Completed processing 4032 records at 2016-05-24 16:14:14.436406
+57: Results have been written to /mnt/results/numentaTM/artificialWithAnomaly/numentaTM_art_daily_jumpsup.csv
+ . . . . . . 49: Completed processing 7267 records at 2016-05-24 16:14:47.800789
+49: Results have been written to /mnt/results/numentaTM/realKnownCause/numentaTM_ambient_temperature_system_failure.csv
+ . . . . . . . . 55: Completed processing 4032 records at 2016-05-24 16:15:39.420898
+55: Results have been written to /mnt/results/numentaTM/realAWSCloudwatch/numentaTM_ec2_cpu_utilization_53ea38.csv
+ . . . . . . . . . . . . . . . . . . 1: Completed processing 15851 records at 2016-05-24 16:18:15.012247
+1: Results have been written to /mnt/results/numentaTM/realTweets/numentaTM_Twitter_volume_KO.csv
+ . . . . . . . . . . . . . . . . 16: Completed processing 15902 records at 2016-05-24 16:20:52.230975
+16: Results have been written to /mnt/results/numentaTM/realTweets/numentaTM_Twitter_volume_AAPL.csv
+ . . 38: Completed processing 15833 records at 2016-05-24 16:21:54.340208
+38: Results have been written to /mnt/results/numentaTM/realTweets/numentaTM_Twitter_volume_FB.csv
+ 40: Completed processing 15831 records at 2016-05-24 16:21:55.165015
+40: Results have been written to /mnt/results/numentaTM/realTweets/numentaTM_Twitter_volume_AMZN.csv
+ 2: Completed processing 15866 records at 2016-05-24 16:22:02.190338
+2: Results have been written to /mnt/results/numentaTM/realTweets/numentaTM_Twitter_volume_UPS.csv
+ 27: Completed processing 15853 records at 2016-05-24 16:22:16.021887
+27: Results have been written to /mnt/results/numentaTM/realTweets/numentaTM_Twitter_volume_CVS.csv
+ . . . . . . . . . . . . . . . . . . . . . . . . 43: Completed processing 15902 records at 2016-05-24 16:28:16.031403
+43: Results have been written to /mnt/results/numentaTM/realTweets/numentaTM_Twitter_volume_CRM.csv
+ . . . 45: Completed processing 18050 records at 2016-05-24 16:28:45.012148
+45: Results have been written to /mnt/results/numentaTM/realKnownCause/numentaTM_cpu_utilization_asg_misconfiguration.csv
+ . . 21: Completed processing 15893 records at 2016-05-24 16:30:01.091508
+21: Results have been written to /mnt/results/numentaTM/realTweets/numentaTM_Twitter_volume_IBM.csv
+ . . 31: Completed processing 22695 records at 2016-05-24 16:31:03.992718
+31: Results have been written to /mnt/results/numentaTM/realKnownCause/numentaTM_machine_temperature_system_failure.csv
+ . . . . 14: Completed processing 15858 records at 2016-05-24 16:36:51.855183
+14: Results have been written to /mnt/results/numentaTM/realTweets/numentaTM_Twitter_volume_PFE.csv
+ 41: Completed processing 15842 records at 2016-05-24 16:37:39.448707
+41: Results have been written to /mnt/results/numentaTM/realTweets/numentaTM_Twitter_volume_GOOG.csv
+
+Running scoring step
+numentaTM detector benchmark scores written to /mnt/results/numentaTM/numentaTM_reward_low_FP_rate_scores.csv
+numentaTM detector benchmark scores written to /mnt/results/numentaTM/numentaTM_reward_low_FN_rate_scores.csv
+numentaTM detector benchmark scores written to /mnt/results/numentaTM/numentaTM_standard_scores.csv
+
+Running score normalization step
+Final score for 'numentaTM' detector on 'reward_low_FP_rate' profile = 18.36
+Final score for 'numentaTM' detector on 'reward_low_FN_rate' profile = 30.60
+Final score for 'numentaTM' detector on 'standard' profile = 29.09
+Final scores have been written to /mnt/results/final_results.json.
