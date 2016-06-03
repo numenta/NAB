@@ -142,8 +142,13 @@ public class HTMModel {
         p.setParameterByKey(KEY.PERMANENCE_INCREMENT, tpParams.get("permanenceInc").asDouble());
         p.setParameterByKey(KEY.MIN_THRESHOLD, tpParams.get("minThreshold").asInt());
         p.setParameterByKey(KEY.TM_VERBOSITY, tpParams.get("verbosity").asInt());
+        // +        "globalDecay": 0.0,
         p.setParameterByKey(KEY.INITIAL_PERMANENCE, tpParams.get("initialPerm").asDouble());
+        // +        "maxAge": 0,
+        // +        "maxSegmentsPerCell": 128,
+        // +        "maxSynapsesPerSegment": 128,
         p.setParameterByKey(KEY.PERMANENCE_DECREMENT, tpParams.get("permanenceDec").asDouble());
+        p.setParameterByKey(KEY.PREDICTED_SEGMENT_DECREMENT, tpParams.get("predictedSegmentDecrement").asDouble());
         p.setParameterByKey(KEY.SEED, tpParams.get("seed").asInt());
         p.setParameterByKey(KEY.MAX_NEW_SYNAPSE_COUNT, tpParams.get("newSynapseCount").intValue());
 

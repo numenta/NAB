@@ -1,4 +1,9 @@
 {
+    "htmjava": {
+        "reward_low_FN_rate": 12.80037041235632,
+        "reward_low_FP_rate": 3.7401232426724107,
+        "standard": 9.28676251491379
+    },
     "null": {
         "reward_low_FN_rate": 0.0,
         "reward_low_FP_rate": 0.0,

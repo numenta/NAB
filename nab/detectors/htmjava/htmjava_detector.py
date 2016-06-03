@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------
-# Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
+# Copyright (C) 2016, Numenta, Inc.  Unless you have an agreement
 # with Numenta, Inc., for a separate license for this software code, the
 # following terms and conditions apply:
 #
@@ -78,7 +78,8 @@ class HtmjavaDetector(AnomalyDetector):
       metricData=[0],
       minVal=self.inputMin-rangePadding,
       maxVal=self.inputMax+rangePadding,
-      minResolution=0.001
+      minResolution=0.001,
+      tmImplementation="tm_cpp"
     )["modelConfig"]
 
     self._setupEncoderParams(
@@ -92,14 +93,17 @@ class HtmjavaDetector(AnomalyDetector):
       reestimationPeriod=100
     )
 
+
+  def _stopModel(self):
+    """
+    Stop HTM Java model process
+    """
     if self.model:
       self.model.terminate()
       self.model = None
 
 
   def run(self):
-    if self.model:
-      self.model.terminate()
 
     # Launch HTM Java detector per process passing OPF model parameters
     self.model = Popen(["java", "-jar",
@@ -111,8 +115,7 @@ class HtmjavaDetector(AnomalyDetector):
 
     # Terminate HTM Java
     self.model.stdin.writelines("\n")
-    self.model.terminate()
-    self.model = None
+    self._stopModel()
     return response
 
 

@@ -1,17 +1,17 @@
 {
     "htmjava": {
         "reward_low_FN_rate": {
-            "score": -148.72315970823016,
-            "threshold": 0.5
-        },
-        "reward_low_FP_rate": {
-            "score": -96.63988587550608,
-            "threshold": 0.5126953125
-        },
-        "standard": {
-            "score": -72.72315970823018,
-            "threshold": 0.5
-        }
+            "score": -2.001699542878321,
+             "threshold": 0.5
+         },
+         "reward_low_FP_rate": {
+             "score": 5.5435154724804185,
+             "threshold": 0.549999237060547
+         },
+         "standard": {
+             "score": 25.99830045712168,
+             "threshold": 0.5
+         }
     },
     "null": {
         "reward_low_FN_rate": {
