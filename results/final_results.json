@@ -23,5 +23,10 @@
         "reward_low_FN_rate": 53.50107495100574,
         "reward_low_FP_rate": 33.610051641206894,
         "standard": 47.06195725408189
+    },
+    "windowedGaussian": {
+        "reward_low_FN_rate": 15.162406947988508,
+        "reward_low_FP_rate": 1.733780787931028,
+        "standard": 10.558148293965518
     }
 }
