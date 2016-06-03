@@ -65,6 +65,15 @@ known anomalies) that you would like to see incorporated into NAB.
 The NAB version will be updated whenever new data (and corresponding labels) is
 added to the corpus; NAB is currently in v1.0.
 
+#### Additional Scores
+
+Here are the NAB scores for some additional flavors of HTM. HTM detector with tm_cpp uses a modified temporal memory implementation. HTM detector with no likelihood uses the raw anomaly scores directly.
+
+| Detector      | Standard Profile | Reward Low FP | Reward Low FN |
+|---------------|------------------|---------------|---------------|
+| [HTM, tm_cpp](https://github.com/numenta/nupic)   | 61.2             | 52.4         | 66.1          |
+| [HTM, no likelihood] | 52.52             | 41.09          | 58.25          |
+
 
 Installing NAB 1.0
 ------------------
