@@ -66,7 +66,7 @@ added to the corpus; NAB is currently in v1.0.
 
 #### Additional Scores
 
-Here are the NAB scores for some additional flavors of HTM. HTM detector with tm_cpp uses the implementation of temporal memory in (https://github.com/numenta/nupic.core/blob/master/src/nupic/algorithms/TemporalMemory.hpp). HTM detector with no likelihood uses the raw anomaly scores directly.
+Here are the NAB scores for some additional flavors of HTM. HTM detector with tm_cpp uses the implementation of temporal memory in https://github.com/numenta/nupic.core/blob/master/src/nupic/algorithms/TemporalMemory.hpp. HTM detector with no likelihood uses the raw anomaly scores directly.
 
 | Detector      | Standard Profile | Reward Low FP | Reward Low FN |
 |---------------|------------------|---------------|---------------|
