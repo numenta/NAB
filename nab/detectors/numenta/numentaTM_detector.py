@@ -33,16 +33,12 @@ from nab.detectors.numenta.numenta_detector import NumentaDetector
 
 class NumentaTMDetector(NumentaDetector):
   """
-  This detector is derived from NumentaDetector and uses HTM with a modified temporal memory implementation i.e "tm_cpp" instead of "cpp". It differs from its parent detector in temporal memory implementation and its parameters.
+  This detector is derived from NumentaDetector and uses the implementation of temporal memory in https://github.com/numenta/nupic.core/blob/master/src/nupic/algorithms/TemporalMemory.hpp. It differs from its parent detector in temporal memory implementation and its parameters.
   """
 
   def __init__(self, *args, **kwargs):
 
     super(NumentaTMDetector, self).__init__(*args, **kwargs)
-
-    self.model = None
-    self.sensorParams = None
-    self.anomalyLikelihood = None
 
   def initialize(self):
     # Get config params, setting the RDSE resolution
