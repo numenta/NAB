@@ -85,16 +85,16 @@
     },
     "windowedGaussian": {
         "reward_low_FN_rate": {
-            "score": -179.2348238208603,
-            "threshold": 0.9996101379394536
+            "score": -161.07145385575882,
+            "threshold": 0.9999515533447273
         },
         "reward_low_FP_rate": {
-            "score": -111.97762857217187,
-            "threshold": 0.9999885559082036
+            "score": -107.08336761980524,
+            "threshold": 0.9999931335449225
         },
         "standard": {
-            "score": -91.50509595799201,
-            "threshold": 0.9999885559082036
+            "score": -83.07145385575879,
+            "threshold": 0.9999515533447273
         }
     }
 }

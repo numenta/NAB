@@ -33,7 +33,7 @@ class WindowedGaussianDetector(AnomalyDetector):
         # Initialize the parent
         super(WindowedGaussianDetector, self).__init__(*args, **kwargs)
 
-        self.windowSize = 20
+        self.windowSize = 15
         self.windowData = []  # list storing sliding window data points
         self.stepBuffer = []  # list storing data points to be added to the window to slide it forward by stepSize
         self.stepSize = 1
@@ -42,7 +42,9 @@ class WindowedGaussianDetector(AnomalyDetector):
 
     def handleRecord(self, inputData):
         """Returns a tuple (anomalyScore).
-        The anomalyScore is the tail probability of the gaussian (normal) distribution over a sliding window of inputData values. The tail probability is based on the Q-function.
+        The anomalyScore is the tail probability of the gaussian (normal) distribution
+        over a sliding window of inputData values. The tail probability is based on the
+        Q-function. The windowSize has been tuned to give best performance on NAB.
         """
 
         anomalyScore = 0.0
@@ -50,27 +52,28 @@ class WindowedGaussianDetector(AnomalyDetector):
         if len(self.windowData) > 0:
             anomalyScore = anomaly_likelihood.normalProbability(inputValue, {"mean": self.mean, "stdev": self.std})
 
-        windowUpdated = False
         if len(self.windowData) < self.windowSize:
             self.windowData.append(inputValue)
-            windowUpdated = True
+            self._updateWindow()
         else:
             self.stepBuffer.append(inputValue)
             if len(self.stepBuffer) == self.stepSize:
                 # slide window forward by stepSize
                 self.windowData = self.windowData[self.stepSize:]
                 self.windowData.extend(self.stepBuffer)
-                windowUpdated = True
                 # reset stepBuffer
                 self.stepBuffer = []
-
-        if windowUpdated:
-            self.mean = np.mean(self.windowData)
-            self.std = np.std(self.windowData)
-            if self.std == 0.0:
-                self.std = 1
+                self._updateWindow()
 
         return (anomalyScore, )
+
+    def _updateWindow(self):
+        self.mean = np.mean(self.windowData)
+        self.std = np.std(self.windowData)
+        if self.std == 0.0:
+            self.std = 0.000001
+
+
 
 
 
