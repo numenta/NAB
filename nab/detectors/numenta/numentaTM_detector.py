@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------
-# Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
+# Copyright (C) 2016, Numenta, Inc.  Unless you have an agreement
 # with Numenta, Inc., for a separate license for this software code, the
 # following terms and conditions apply:
 #
@@ -27,55 +27,32 @@ from nupic.frameworks.opf.common_models.cluster_params import (
   getScalarMetricWithTimeOfDayAnomalyParams)
 from nupic.frameworks.opf.modelfactory import ModelFactory
 
-from nab.detectors.base import AnomalyDetector
+from nab.detectors.numenta.numenta_detector import NumentaDetector
 
 
 
-class NumentaDetector(AnomalyDetector):
+class NumentaTMDetector(NumentaDetector):
+  """
+  This detector uses the implementation of temporal memory in
+  https://github.com/numenta/nupic.core/blob/master/src/nupic/algorithms/TemporalMemory.hpp.
+  It differs from its parent detector in temporal memory and its parameters.
+  """
 
   def __init__(self, *args, **kwargs):
 
-    super(NumentaDetector, self).__init__(*args, **kwargs)
-
-    self.model = None
-    self.sensorParams = None
-    self.anomalyLikelihood = None
-
-
-  def getAdditionalHeaders(self):
-    """Returns a list of strings."""
-    return ["raw_score"]
-
-
-  def handleRecord(self, inputData):
-    """Returns a tuple (anomalyScore, rawScore).
-
-    Internally to NuPIC "anomalyScore" corresponds to "likelihood_score"
-    and "rawScore" corresponds to "anomaly_score". Sorry about that.
-    """
-    # Send it to Numenta detector and get back the results
-    result = self.model.run(inputData)
-
-    # Retrieve the anomaly score and write it to a file
-    rawScore = result.inferences["anomalyScore"]
-
-    # Compute log(anomaly likelihood)
-    anomalyScore = self.anomalyLikelihood.anomalyProbability(
-      inputData["value"], rawScore, inputData["timestamp"])
-    logScore = self.anomalyLikelihood.computeLogLikelihood(anomalyScore)
-
-    return (logScore, rawScore)
+    super(NumentaTMDetector, self).__init__(*args, **kwargs)
 
 
   def initialize(self):
     # Get config params, setting the RDSE resolution
     rangePadding = abs(self.inputMax - self.inputMin) * 0.2
+
     modelParams = getScalarMetricWithTimeOfDayAnomalyParams(
       metricData=[0],
       minVal=self.inputMin-rangePadding,
       maxVal=self.inputMax+rangePadding,
       minResolution=0.001,
-      tmImplementation = "cpp"
+      tmImplementation="tm_cpp"
     )["modelConfig"]
 
     self._setupEncoderParams(
@@ -92,17 +69,3 @@ class NumentaDetector(AnomalyDetector):
       estimationSamples=self.probationaryPeriod-numentaLearningPeriod,
       reestimationPeriod=100
     )
-
-
-  def _setupEncoderParams(self, encoderParams):
-    # The encoder must expect the NAB-specific datafile headers
-    encoderParams["timestamp_dayOfWeek"] = encoderParams.pop("c0_dayOfWeek")
-    encoderParams["timestamp_timeOfDay"] = encoderParams.pop("c0_timeOfDay")
-    encoderParams["timestamp_timeOfDay"]["fieldname"] = "timestamp"
-    encoderParams["timestamp_timeOfDay"]["name"] = "timestamp"
-    encoderParams["timestamp_weekend"] = encoderParams.pop("c0_weekend")
-    encoderParams["value"] = encoderParams.pop("c1")
-    encoderParams["value"]["fieldname"] = "value"
-    encoderParams["value"]["name"] = "value"
-
-    self.sensorParams = encoderParams["value"]
