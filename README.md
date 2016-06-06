@@ -67,8 +67,7 @@ added to the corpus; NAB is currently in v1.0.
 #### Additional Scores
 
 Here are the NAB scores for some additional flavors of HTM. NumentaTM HTM
-detector uses the implementation of temporal memory in https://github
-.com/numenta/nupic.core/blob/master/src/nupic/algorithms/TemporalMemory.hpp.
+detector uses the implementation of temporal memory in https://github.com/numenta/nupic.core/blob/master/src/nupic/algorithms/TemporalMemory.hpp.
 Numenta HTM detector with no likelihood uses the raw anomaly scores directly.
 
 | Detector      | Version |Standard Profile | Reward Low FP | Reward Low FN |
