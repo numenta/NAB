@@ -23,55 +23,58 @@ from nab.detectors.base import AnomalyDetector
 from nupic.algorithms import anomaly_likelihood
 
 
+
 class WindowedGaussianDetector(AnomalyDetector):
+  """
+      A sliding window detector that computes anomaly score of a data point by computing
+      its probability from the gaussian distribution over a window of previous data points.
+  """
+
+  def __init__(self, *args, **kwargs):
+    # Initialize the parent
+    super(WindowedGaussianDetector, self).__init__(*args, **kwargs)
+
+    self.windowSize = 1000
+    self.windowData = []
+    self.stepBuffer = []
+    self.stepSize = 1
+    self.mean = 0
+    self.std = 1
+
+
+  def handleRecord(self, inputData):
+    """Returns a tuple (anomalyScore).
+    The anomalyScore is the tail probability of the gaussian (normal) distribution
+    over a sliding window of inputData values. The tail probability is based on the
+    Q-function. The windowSize has been tuned to give best performance on NAB.
     """
-        A sliding window detector that computes anomaly score of a data point by computing its probability from the gaussian distribution over a window of previous data points.
-    """
 
-    def __init__(self, *args, **kwargs):
+    anomalyScore = 0.0
+    inputValue = inputData["value"]
+    if len(self.windowData) > 0:
+      anomalyScore = anomaly_likelihood.normalProbability(inputValue, {"mean": self.mean, "stdev": self.std})
 
-        # Initialize the parent
-        super(WindowedGaussianDetector, self).__init__(*args, **kwargs)
+    if len(self.windowData) < self.windowSize:
+      self.windowData.append(inputValue)
+      self._updateWindow()
+    else:
+      self.stepBuffer.append(inputValue)
+      if len(self.stepBuffer) == self.stepSize:
+        # slide window forward by stepSize
+        self.windowData = self.windowData[self.stepSize:]
+        self.windowData.extend(self.stepBuffer)
+        # reset stepBuffer
+        self.stepBuffer = []
+        self._updateWindow()
 
-        self.windowSize = 15
-        self.windowData = []  # list storing sliding window data points
-        self.stepBuffer = []  # list storing data points to be added to the window to slide it forward by stepSize
-        self.stepSize = 1
-        self.mean = 0
-        self.std = 1
+    return (anomalyScore, )
 
-    def handleRecord(self, inputData):
-        """Returns a tuple (anomalyScore).
-        The anomalyScore is the tail probability of the gaussian (normal) distribution
-        over a sliding window of inputData values. The tail probability is based on the
-        Q-function. The windowSize has been tuned to give best performance on NAB.
-        """
 
-        anomalyScore = 0.0
-        inputValue = inputData["value"]
-        if len(self.windowData) > 0:
-            anomalyScore = anomaly_likelihood.normalProbability(inputValue, {"mean": self.mean, "stdev": self.std})
-
-        if len(self.windowData) < self.windowSize:
-            self.windowData.append(inputValue)
-            self._updateWindow()
-        else:
-            self.stepBuffer.append(inputValue)
-            if len(self.stepBuffer) == self.stepSize:
-                # slide window forward by stepSize
-                self.windowData = self.windowData[self.stepSize:]
-                self.windowData.extend(self.stepBuffer)
-                # reset stepBuffer
-                self.stepBuffer = []
-                self._updateWindow()
-
-        return (anomalyScore, )
-
-    def _updateWindow(self):
-        self.mean = np.mean(self.windowData)
-        self.std = np.std(self.windowData)
-        if self.std == 0.0:
-            self.std = 0.000001
+  def _updateWindow(self):
+    self.mean = np.mean(self.windowData)
+    self.std = np.std(self.windowData)
+    if self.std == 0.0:
+      self.std = 0.000001
 
 
 
