@@ -25,16 +25,17 @@ from nupic.algorithms import anomaly_likelihood
 
 
 class WindowedGaussianDetector(AnomalyDetector):
-  """
-      A sliding window detector that computes anomaly score of a data point by computing
-      its probability from the gaussian distribution over a window of previous data points.
+  """ A sliding window detector that computes anomaly score of a data point
+  by computing its probability from the gaussian distribution over a window
+  of previous data points. The windowSize is tuned to give best performance
+  on NAB.
   """
 
   def __init__(self, *args, **kwargs):
     # Initialize the parent
     super(WindowedGaussianDetector, self).__init__(*args, **kwargs)
 
-    self.windowSize = 1000
+    self.windowSize = 20
     self.windowData = []
     self.stepBuffer = []
     self.stepSize = 1
@@ -52,7 +53,8 @@ class WindowedGaussianDetector(AnomalyDetector):
     anomalyScore = 0.0
     inputValue = inputData["value"]
     if len(self.windowData) > 0:
-      anomalyScore = anomaly_likelihood.normalProbability(inputValue, {"mean": self.mean, "stdev": self.std})
+      anomalyScore = anomaly_likelihood.normalProbability(inputValue,
+                                                          {"mean": self.mean, "stdev": self.std})
 
     if len(self.windowData) < self.windowSize:
       self.windowData.append(inputValue)
