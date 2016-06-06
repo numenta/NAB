@@ -53,7 +53,7 @@ class WindowedGaussianDetector(AnomalyDetector):
     anomalyScore = 0.0
     inputValue = inputData["value"]
     if len(self.windowData) > 0:
-      anomalyScore = anomaly_likelihood.normalProbability(inputValue,
+      anomalyScore = 1 - anomaly_likelihood.normalProbability(inputValue,
                                                           {"mean": self.mean, "stdev": self.std})
 
     if len(self.windowData) < self.windowSize:
