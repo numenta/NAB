@@ -35,10 +35,10 @@ class WindowedGaussianDetector(AnomalyDetector):
     # Initialize the parent
     super(WindowedGaussianDetector, self).__init__(*args, **kwargs)
 
-    self.windowSize = 20
+    self.windowSize = 6400
     self.windowData = []
     self.stepBuffer = []
-    self.stepSize = 1
+    self.stepSize = 100
     self.mean = 0
     self.std = 1
 
@@ -54,11 +54,12 @@ class WindowedGaussianDetector(AnomalyDetector):
     inputValue = inputData["value"]
     if len(self.windowData) > 0:
       anomalyScore = 1 - anomaly_likelihood.normalProbability(inputValue,
-                                                          {"mean": self.mean, "stdev": self.std})
+                                                              {"mean": self.mean,"stdev": self.std})
 
     if len(self.windowData) < self.windowSize:
       self.windowData.append(inputValue)
       self._updateWindow()
+
     else:
       self.stepBuffer.append(inputValue)
       if len(self.stepBuffer) == self.stepSize:
