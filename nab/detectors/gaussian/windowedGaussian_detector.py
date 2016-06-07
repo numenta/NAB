@@ -59,7 +59,6 @@ class WindowedGaussianDetector(AnomalyDetector):
     if len(self.windowData) < self.windowSize:
       self.windowData.append(inputValue)
       self._updateWindow()
-
     else:
       self.stepBuffer.append(inputValue)
       if len(self.stepBuffer) == self.stepSize:
