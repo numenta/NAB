@@ -41,11 +41,11 @@ class BayesChangePtDetector(AnomalyDetector):
     self.previousMaxRun = 1
 
     # Define algorithm's helpers.
-    self.observationLikelihoood = StudentT(alpha=0.1,
-                                           beta=0.001,
-                                           kappa=1.0,
-                                           mu=0.0)
-    self.hazardFunction = partial(constantHazard, 250)
+    self.observationLikelihoood = StudentTDistribution(alpha=0.1,
+                                                       beta=0.001,
+                                                       kappa=1.0,
+                                                       mu=0.0)
+    self.hazardFunction = partial(constantHazard, lambdaConst=250)
 
 
   def handleRecord(self, inputData):
@@ -66,7 +66,8 @@ class BayesChangePtDetector(AnomalyDetector):
     predProbs = self.observationLikelihoood.pdf(x)
 
     # Evaluate the hazard function for this interval
-    hazard = self.hazardFunction(numpy.array(range(self.timestep+1)))
+    import pdb; pdb.set_trace()  # how does partial affect this? step in...
+    hazard = self.hazardFunction(self.timestep+1)
 
     # We only keep use the calculate probabilites up to maxRunLength.
     if self.timestep < self.maxRunLength:
@@ -121,13 +122,15 @@ class BayesChangePtDetector(AnomalyDetector):
 
 
 
-def constantHazard(lam, r):
-  return 1/float(lam) * numpy.ones(r.shape)
-  # return numpy.ones(r.shape)/float(lam)
+def constantHazard(lambdaConst, arraySize):
+  """ The hazard function helps estimate the changepoint prior. Parameter
+  lambdaConst is the timescale on the prior distribution of the changepoint.
+  """
+  return numpy.ones(arraySize) / float(lambdaConst)
 
 
 
-class StudentT:
+class StudentTDistribution:
 
   def __init__(self, alpha, beta, kappa, mu):
     self.alpha0 = self.alpha = numpy.array([alpha])
@@ -137,6 +140,11 @@ class StudentT:
 
 
   def pdf(self, data):
+    """
+    Probability density function for the Student’s T continuous random variable.
+    Details of this pdf can be found here:
+    http://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.t.html
+    """
     return stats.t.pdf(x=data,
                        df=2*self.alpha,
                        loc=self.mu,
@@ -146,6 +154,7 @@ class StudentT:
 
 
   def updateTheta(self, data):
+    """ Update parameters of the distribution."""
     muT0 = numpy.concatenate(
       (self.mu0, (self.kappa * self.mu + data) / (self.kappa + 1)))
     kappaT0 = numpy.concatenate((self.kappa0, self.kappa + 1.))
