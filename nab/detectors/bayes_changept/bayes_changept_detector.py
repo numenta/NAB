@@ -1,16 +1,23 @@
-"""
-Anomaly detection algorithm that implements Bayesian changepoint detection, as
-described in
-  Ryan P. Adams, David J.C. MacKay, Bayesian Online Changepoint Detection,
-arXiv 0710.3742 (2007).
+# ----------------------------------------------------------------------
+# Copyright (C) 2016, Numenta, Inc.  Unless you have an agreement
+# with Numenta, Inc., for a separate license for this software code, the
+# following terms and conditions apply:
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero Public License version 3 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU Affero Public License for more details.
+#
+# You should have received a copy of the GNU Affero Public License
+# along with this program.  If not, see http://www.gnu.org/licenses.
+#
+# http://numenta.org/licenses/
+# ----------------------------------------------------------------------
 
-For the author's implementation (in MATLAB) please see
-http://hips.seas.harvard.edu/content/bayesian-online-changepoint-detection
-
-It has been modified from the author's code to run online: rather than
-initializing a run-length matrix with the size of the dataset, we use an array
-that recursively overwrites old data (no longer needed by the algorithm).
-"""
 from functools import partial
 import numpy
 from scipy import stats
@@ -21,6 +28,31 @@ from nab.detectors.base import AnomalyDetector
 
 class BayesChangePtDetector(AnomalyDetector):
 
+  """ Implementation of the online Bayesian changepoint detection algorithm as
+  described in Ryan P. Adams, David J.C. MacKay, "Bayesian Online Changepoint
+  Detection", arXiv 0710.3742 (2007).
+
+  The algorithm computes, for each record at step x in a data stream, the
+  probability that the current record is part of a stream of length n for all
+  n <= x. For a given record, if the maximimum of all the probabilities
+  corresponds to a stream length of zero, the record represents a changepoint in
+  the data stream. These probabilities are used to calculate anomaly scores for
+  NAB results.
+
+  The algorithm implemented here is a port from MATLAB code posted by R. Adams
+  (http://hips.seas.harvard.edu/content/bayesian-online-changepoint-detection).
+  It has been modified from the author's code to run online: rather than
+  initializing a run-length matrix with the size of the dataset, we use an array
+  that recursively overwrites old data (that is no longer needed by the
+  algorithm).
+
+  We started with the parameters specified in the publication above, as well as
+  those found in the author's MATLAB implementation. Attempts at tuning these
+  parameters showed insignificant change in the overall NAB score. The
+  maxRunLength parameter (for this online implementation) was tuned to yield
+  the best NAB score.
+  """
+
   def __init__(self, *args, **kwargs):
 
     super(BayesChangePtDetector, self).__init__(*args, **kwargs)
@@ -28,16 +60,16 @@ class BayesChangePtDetector(AnomalyDetector):
     # Setup the matrix that will hold our beliefs about the current
     # run lengths. We'll initialize it all to zero at first. For efficiency
     # we preallocate a data structure to hold only the info we need to detect
-    # change points: columns for the current timestep t and t+1, and a
+    # change points: columns for the current and next recordNumber, and a
     # sufficient number of rows (where each row represents probabilites of a
     # run of that length).
     self.maxRunLength = 500
     self.runLengthProbs = numpy.zeros((self.maxRunLength + 2, 2))
-    # Time t=0 is a boundary condition, where we know the run length is 0.
+    # Record 0 is a boundary condition, where we know the run length is 0.
     self.runLengthProbs[0, 0] = 1.0
 
     # Init variables for state.
-    self.timestep = 0
+    self.recordNumber = 0
     self.previousMaxRun = 1
 
     # Define algorithm's helpers.
@@ -45,47 +77,42 @@ class BayesChangePtDetector(AnomalyDetector):
                                                        beta=0.001,
                                                        kappa=1.0,
                                                        mu=0.0)
-    self.hazardFunction = partial(constantHazard, lambdaConst=250)
+    self.lambdaConst = 250
+    self.hazardFunction = constantHazard
 
 
   def handleRecord(self, inputData):
     """ Returns a list [anomalyScore]. Algorithm details are in the comments."""
-    # To accomodate this next timestep, shift the columns of the run length
+    # To accomodate this next record, shift the columns of the run length
     # probabilities matrix.
-    if self.timestep > 0:
-      for row in self.runLengthProbs:
-        row[0] = row[1]
-        row[1] = 0.0
-
-    x = inputData["value"]
+    if self.recordNumber > 0:
+      self.runLengthProbs[:,0] = self.runLengthProbs[:,1]
+      self.runLengthProbs[:,1] = 0
 
     # Evaluate the predictive distribution for the new datum under each of
     # the parameters. This is standard Bayesian inference.
-    predProbs = self.observationLikelihoood.pdf(x)
+    predProbs = self.observationLikelihoood.pdf(inputData["value"])
 
     # Evaluate the hazard function for this interval
-    hazard = self.hazardFunction(self.timestep+1)
+    hazard = self.hazardFunction(self.recordNumber+1, self.lambdaConst)
 
-    # We only keep use the calculate probabilites up to maxRunLength.
-    if self.timestep < self.maxRunLength:
-      timestep = self.timestep
-    else:
-      timestep = self.maxRunLength
+    # We only care about the probabilites up to maxRunLength.
+    runLengthIndex = min(self.recordNumber, self.maxRunLength)
 
     # Evaluate the growth probabilities -- shift the probabilities down and to
     # the right, scaled by the hazard function and the predictive probabilities.
-    self.runLengthProbs[1:timestep+2, 1] = (
-        self.runLengthProbs[:timestep+1, 0] *
-        predProbs[:self.maxRunLength+1] *
-        (1-hazard)[:self.maxRunLength+1]
+    self.runLengthProbs[1:runLengthIndex+2, 1] = (
+        self.runLengthProbs[:runLengthIndex+1, 0] *
+        predProbs[:runLengthIndex+1] *
+        (1-hazard)[:runLengthIndex+1]
     )
 
     # Evaluate the probability that there *was* a changepoint and we're
     # accumulating the probability mass back down at run length = 0.
     self.runLengthProbs[0, 1] = numpy.sum(
-        self.runLengthProbs[:timestep+1, 0] *
-        predProbs[:self.maxRunLength+1] *
-        hazard[:self.maxRunLength+1]
+        self.runLengthProbs[:runLengthIndex+1, 0] *
+        predProbs[:runLengthIndex+1] *
+        hazard[:runLengthIndex+1]
     )
 
     # Renormalize the run length probabilities for improved numerical stability.
@@ -93,7 +120,7 @@ class BayesChangePtDetector(AnomalyDetector):
                                  self.runLengthProbs[:, 1].sum())
 
     # Update the parameter sets for each possible run length.
-    self.observationLikelihoood.updateTheta(x)
+    self.observationLikelihoood.updateTheta(inputData["value"])
 
     # Get the current run length with the highest probability.
     maxRecursiveRunLength = self.runLengthProbs[:, 1].argmax()
@@ -112,7 +139,7 @@ class BayesChangePtDetector(AnomalyDetector):
       anomalyScore = 0.0
 
     # Update state vars.
-    self.timestep += 1
+    self.recordNumber += 1
     self.previousMaxRun = maxRecursiveRunLength
 
     return [anomalyScore]

@@ -27,7 +27,7 @@ bayesChangePt,standard,artificialNoAnomaly/art_daily_perfect_square_wave.csv,0.9
 bayesChangePt,standard,realAdExchange/exchange-3_cpm_results.csv,0.984596252441,0.422098587352,1,1151,4,152,1538
 bayesChangePt,standard,realKnownCause/ambient_temperature_system_failure.csv,0.984596252441,-2.0,0,5791,0,726,7267
 bayesChangePt,standard,realKnownCause/nyc_taxi.csv,0.984596252441,-5.0,0,8535,0,1035,10320
-bayesChangePt,standard,realTraffic/speed_6005.csv,0.984596252441,0.732622001756,1,1885,1,238,2500
+bayesChangePt,standard,realTraffic/speed_6005.csv,0.984596252441,0.622622001756,1,1884,2,238,2500
 bayesChangePt,standard,realTraffic/occupancy_t4013.csv,0.984596252441,-2.0,0,1875,0,250,2500
 bayesChangePt,standard,artificialNoAnomaly/art_daily_small_noise.csv,0.984596252441,-2.42,0,3406,22,0,4032
 bayesChangePt,standard,artificialWithAnomaly/art_daily_jumpsup.csv,0.984596252441,-1.26363969293,2,3005,20,401,4032
@@ -41,7 +41,7 @@ bayesChangePt,standard,realAWSCloudwatch/rds_cpu_utilization_e47b3b.csv,0.984596
 bayesChangePt,standard,realTweets/Twitter_volume_AMZN.csv,0.984596252441,-0.354130784825,4,13484,17,1576,15831
 bayesChangePt,standard,realAWSCloudwatch/ec2_cpu_utilization_77c1ca.csv,0.984596252441,-1.90094717874,0,3016,9,403,4032
 bayesChangePt,standard,artificialNoAnomaly/art_flatline.csv,0.984596252441,0.0,0,3428,0,0,4032
-bayesChangePt,standard,realKnownCause/ec2_request_latency_system_failure.csv,0.984596252441,0.159103212564,2,3082,0,344,4032
+bayesChangePt,standard,realKnownCause/ec2_request_latency_system_failure.csv,0.984596252441,-0.280896151476,2,3078,4,344,4032
 bayesChangePt,standard,realAdExchange/exchange-3_cpc_results.csv,0.984596252441,0.623232500997,2,1154,1,151,1538
 bayesChangePt,standard,artificialNoAnomaly/art_noisy.csv,0.984596252441,0.0,0,3428,0,0,4032
 bayesChangePt,standard,realAdExchange/exchange-2_cpc_results.csv,0.984596252441,-1.4399994339,0,1214,4,163,1624
@@ -56,5 +56,5 @@ bayesChangePt,standard,realAdExchange/exchange-4_cpm_results.csv,0.984596252441,
 bayesChangePt,standard,realAWSCloudwatch/ec2_cpu_utilization_ac20cd.csv,0.984596252441,0.877312777016,1,3025,0,402,4032
 bayesChangePt,standard,realTweets/Twitter_volume_FB.csv,0.984596252441,-1.73483304242,7,13467,34,1575,15833
 bayesChangePt,standard,realAWSCloudwatch/ec2_network_in_5abac7.csv,0.984596252441,-1.59709611461,1,3532,15,473,4730
-bayesChangePt,standard,realAWSCloudwatch/ec2_cpu_utilization_53ea38.csv,0.984596252441,-0.117315808487,3,3017,9,399,4032
-Totals,,,,-75.015699875,101,298587,760,33394,365558
+bayesChangePt,standard,realAWSCloudwatch/ec2_cpu_utilization_53ea38.csv,0.984596252441,0.544912855057,3,3016,10,399,4032
+Totals,,,,-74.9034705755,101,298581,766,33394,365558
