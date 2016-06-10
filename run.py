@@ -165,23 +165,26 @@ if __name__ == "__main__":
 
   if len(args.detectors) == 1:
     # Handle comma-seperated list argument.
-    args.detectors = args.detectors[0].split(',')
+    args.detectors = args.detectors[0].split(",")
 
   # The following imports are necessary for getDetectorClassConstructors to
   # automatically figure out the detector classes.
-  # Only import numenta detector if used so as to avoid unnecessary dependency
-  if "numenta" in args.detectors:
-    from nab.detectors.numenta.numenta_detector import NumentaDetector
-  if "skyline" in args.detectors:
-    from nab.detectors.skyline.skyline_detector import SkylineDetector
-  if "random" in args.detectors:
-    from nab.detectors.random.random_detector import RandomDetector
-  if "null" in args.detectors:
-    from nab.detectors.null.null_detector import NullDetector
+  # Only import detectors if used so as to avoid unnecessary dependency.
   if "bayesChangePt" in args.detectors:
     from nab.detectors.bayes_changept.bayes_changept_detector import (
       BayesChangePtDetector)
+  if "numenta" in args.detectors:
+    from nab.detectors.numenta.numenta_detector import NumentaDetector
+  if "numentaTM" in args.detectors:
+    from nab.detectors.numenta.numentaTM_detector import NumentaTMDetector
+  if "null" in args.detectors:
+    from nab.detectors.null.null_detector import NullDetector
+  if "random" in args.detectors:
+    from nab.detectors.random.random_detector import RandomDetector
+  if "skyline" in args.detectors:
+    from nab.detectors.skyline.skyline_detector import SkylineDetector
+  if "windowedGaussian" in args.detectors:
+    import WindowedGaussianDetector
 
   if args.skipConfirmation or checkInputs(args):
     main(args)
-
