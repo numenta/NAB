@@ -49,9 +49,7 @@ class BayesChangePtDetector(AnomalyDetector):
 
 
   def handleRecord(self, inputData):
-    """
-    Returns a list [anomalyScore]. Algorithm details are in the comments below.
-    """
+    """ Returns a list [anomalyScore]. Algorithm details are in the comments."""
     # To accomodate this next timestep, shift the columns of the run length
     # probabilities matrix.
     if self.timestep > 0:
@@ -66,7 +64,6 @@ class BayesChangePtDetector(AnomalyDetector):
     predProbs = self.observationLikelihoood.pdf(x)
 
     # Evaluate the hazard function for this interval
-    import pdb; pdb.set_trace()  # how does partial affect this? step in...
     hazard = self.hazardFunction(self.timestep+1)
 
     # We only keep use the calculate probabilites up to maxRunLength.
@@ -122,7 +119,7 @@ class BayesChangePtDetector(AnomalyDetector):
 
 
 
-def constantHazard(lambdaConst, arraySize):
+def constantHazard(arraySize, lambdaConst):
   """ The hazard function helps estimate the changepoint prior. Parameter
   lambdaConst is the timescale on the prior distribution of the changepoint.
   """
@@ -140,9 +137,8 @@ class StudentTDistribution:
 
 
   def pdf(self, data):
-    """
-    Probability density function for the Student’s T continuous random variable.
-    Details of this pdf can be found here:
+    """ Probability density function for the Student's T continuous random
+    variable. More details here:
     http://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.t.html
     """
     return stats.t.pdf(x=data,
