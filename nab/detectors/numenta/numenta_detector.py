@@ -18,9 +18,7 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-import os
 import math
-import simplejson as json
 
 from nupic.algorithms import anomaly_likelihood
 from nupic.frameworks.opf.common_models.cluster_params import (
@@ -32,6 +30,9 @@ from nab.detectors.base import AnomalyDetector
 
 
 class NumentaDetector(AnomalyDetector):
+  """
+  This detector uses an HTM based anomaly detection technique.
+  """
 
   def __init__(self, *args, **kwargs):
 
@@ -40,6 +41,12 @@ class NumentaDetector(AnomalyDetector):
     self.model = None
     self.sensorParams = None
     self.anomalyLikelihood = None
+
+    # Set this to False if you want to get results based on raw scores
+    # without using AnomalyLikelihood. This will give worse results, but
+    # useful for checking the efficacy of AnomalyLikelihood. You will need
+    # to re-optimize the thresholds when running with this setting.
+    self.useLikelihood = True
 
 
   def getAdditionalHeaders(self):
@@ -59,12 +66,14 @@ class NumentaDetector(AnomalyDetector):
     # Retrieve the anomaly score and write it to a file
     rawScore = result.inferences["anomalyScore"]
 
-    # Compute log(anomaly likelihood)
-    anomalyScore = self.anomalyLikelihood.anomalyProbability(
-      inputData["value"], rawScore, inputData["timestamp"])
-    logScore = self.anomalyLikelihood.computeLogLikelihood(anomalyScore)
+    if self.useLikelihood:
+      # Compute log(anomaly likelihood)
+      anomalyScore = self.anomalyLikelihood.anomalyProbability(
+        inputData["value"], rawScore, inputData["timestamp"])
+      logScore = self.anomalyLikelihood.computeLogLikelihood(anomalyScore)
+      return (logScore, rawScore)
 
-    return (logScore, rawScore)
+    return (rawScore, rawScore)
 
 
   def initialize(self):
@@ -85,13 +94,14 @@ class NumentaDetector(AnomalyDetector):
 
     self.model.enableInference({"predictedField": "value"})
 
-    # Initialize the anomaly likelihood object
-    numentaLearningPeriod = math.floor(self.probationaryPeriod / 2.0)
-    self.anomalyLikelihood = anomaly_likelihood.AnomalyLikelihood(
-      claLearningPeriod=numentaLearningPeriod,
-      estimationSamples=self.probationaryPeriod-numentaLearningPeriod,
-      reestimationPeriod=100
-    )
+    if self.useLikelihood:
+      # Initialize the anomaly likelihood object
+      numentaLearningPeriod = math.floor(self.probationaryPeriod / 2.0)
+      self.anomalyLikelihood = anomaly_likelihood.AnomalyLikelihood(
+        claLearningPeriod=numentaLearningPeriod,
+        estimationSamples=self.probationaryPeriod-numentaLearningPeriod,
+        reestimationPeriod=100
+      )
 
 
   def _setupEncoderParams(self, encoderParams):
