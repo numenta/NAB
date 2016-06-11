@@ -74,11 +74,16 @@ Numenta HTM detector with no likelihood uses the raw anomaly scores directly.
 | Detector      | Version |Standard Profile | Reward Low FP | Reward Low FN |
 |---------------|---------|------------------|---------------|---------------|
 | NumentaTM HTM | current* |61.2             | 52.4         | 66.1          |
-| Numenta HTM, no likelihood | |52.52             | 41.09          | 58.25   |
+| Numenta HTM, no likelihood+ | |52.52             | 41.09          | 58.25   |
 
 *As of NAB v1.0*
 
-\* The results correspond to NuPIC and nupic.core SHAs 42f701d and c030b84 respectively, but the latest version of NuPIC should still work (the results may not be identical).
+\* The results correspond to NuPIC and nupic.core SHAs 42f701d and c030b84
+respectively, but the latest version of NuPIC should still work (the results may
+not be identical).
+
+\+ To run without likelihood, set the variable self.useLikelihood in
+nab/detectors/numenta/numenta_detector.py to False.
 
 Installing NAB 1.0
 ------------------
