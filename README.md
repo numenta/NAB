@@ -38,12 +38,15 @@ The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the 
 | [Numenta HTM](https://github.com/numenta/nupic)   | current* | 65.3             | 58.6          | 69.4          |
 | [Twitter ADVec](https://github.com/twitter/AnomalyDetection) | v1.0.0    | 47.1             | 33.6          | 53.5          |
 | [Etsy Skyline](https://github.com/etsy/skyline)  | ???     | 35.7             | 27.1          | 44.5          |
-| Random        | N/A     | 16.8             | 5.8          | 25.9          |
+| [Windowed Gaussian](https://github.com/numenta/NAB/blob/master/nab/detectors/gaussian/windowedGaussian_detector.py)  | N/A     | 14.4             | -27.4          | 29.7          |
+| Random**        | N/A     | 11.0             | 1.2          | 19.5          |
 | Null          | N/A     | 0.0              | 0.0           | 0.0           |
 
 *As of NAB v1.0*
 
 \* The results correspond to NuPIC and nupic.core SHAs 42f701d and c030b84 respectively, but the latest version of NuPIC should still work (the results may not be identical).
+
+** Scores reflect the mean across a range of random seeds. The spread of scores for each profile are 7.95 to 16.83 for Standard, -1.56 to 2.14 for Reward Low FP, and 11.34 to 23.68 for Reward Low FN.
 
 Please see [the wiki section on contributing algorithms](https://github.com/numenta/NAB/wiki/NAB-Contributions-Criteria#anomaly-detection-algorithms) for discussion on posting algorithms to the scoreboard.
 
