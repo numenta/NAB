@@ -1,4 +1,9 @@
 {
+    "bayesChangePt": {
+        "reward_low_FN_rate": 32.256563780459771,
+        "reward_low_FP_rate": 3.2065793456896587,
+        "standard": 17.714021303663792
+    },
     "null": {
         "reward_low_FN_rate": 0.0,
         "reward_low_FP_rate": 0.0,
