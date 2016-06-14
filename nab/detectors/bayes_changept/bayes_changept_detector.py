@@ -50,7 +50,9 @@ class BayesChangePtDetector(AnomalyDetector):
   those found in the author's MATLAB implementation. Attempts at tuning these
   parameters showed insignificant change in the overall NAB score. The
   maxRunLength parameter (for this online implementation) was tuned to yield
-  the best NAB score.
+  the best NAB score. We tried a variety of methods for calculating anomaly
+  scores from run length probabilities, and implemented the best performing
+  option -- discussed in the comments at the end of handleRecord().
   """
 
   def __init__(self, *args, **kwargs):

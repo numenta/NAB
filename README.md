@@ -46,7 +46,7 @@ The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the 
 
 \* The results correspond to NuPIC and nupic.core SHAs 42f701d and c030b84 respectively, but the latest version of NuPIC should still work (the results may not be identical).
 
-\** Details of the implementation are in the [detector's code](https://github.com/numenta/NAB/tree/master/nab/detectors/bayes_changept/bayes_changept_detector.py).
+\** Details of the implementation and parameter tuning are in the [detector's code](https://github.com/numenta/NAB/tree/master/nab/detectors/bayes_changept/bayes_changept_detector.py).
 
 Please see [the wiki section on contributing algorithms](https://github.com/numenta/NAB/wiki/NAB-Contributions-Criteria#anomaly-detection-algorithms) for discussion on posting algorithms to the scoreboard.
 
