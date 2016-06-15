@@ -18,7 +18,6 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-from functools import partial
 import numpy
 from scipy import stats
 
@@ -44,7 +43,8 @@ class BayesChangePtDetector(AnomalyDetector):
   It has been modified from the author's code to run online: rather than
   initializing a run-length matrix with the size of the dataset, we use an array
   that recursively overwrites old data (that is no longer needed by the
-  algorithm).
+  algorithm). Calculating anomaly scores for this changepoint algorithm is not
+  in the author's original code -- this is our own contribution.
 
   We started with the parameters specified in the publication above, as well as
   those found in the author's MATLAB implementation. Attempts at tuning these
