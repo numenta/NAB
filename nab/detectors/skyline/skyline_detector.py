@@ -13,10 +13,10 @@ from nab.detectors.skyline.algorithms import (median_absolute_deviation,
 class SkylineDetector(AnomalyDetector):
   """ Detects anomalies using Etsy Skyline's ensemble of algorithms from
   https://github.com/etsy/skyline/blob/master/src/analyzer/algorithms.py.
-  The scoring of this detector differs slightly from Skyline. Skyline
-  relies on consensus of algorithms in the ensemble based on majority voting to
-  classify a metric as anomalous whereas this detector combines the votes of
-  all algorithms and assigns an average anomaly score.
+  Each algorithm in the ensemble gives a binary vote for the data record.
+  The original implementation used a majority voting scheme to classify a record
+  as anomalous. Here we improve the detector's performance by taking
+  average over all the votes to get an anomaly score.
   """
 
   def __init__(self, *args, **kwargs):
