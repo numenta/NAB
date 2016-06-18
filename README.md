@@ -38,7 +38,7 @@ The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the 
 | [Twitter ADVec](https://github.com/twitter/AnomalyDetection) | v1.0.0    | 47.1             | 33.6          | 53.5          |
 | [Etsy Skyline](https://github.com/etsy/skyline)  | ???     | 35.7             | 27.1          | 44.5          |
 | Bayesian Changepoint**          | N/A     | 17.7              | 3.2           | 32.2           |
-| [Windowed Gaussian](https://github.com/numenta/NAB/blob/master/nab/detectors/gaussian/windowedGaussian_detector.py)  | N/A     | 14.4             | -27.4          | 29.7          |
+| [Sliding Threshold](https://github.com/numenta/NAB/blob/master/nab/detectors/gaussian/windowedGaussian_detector.py)  | N/A     | 15.0             | -26.2          | 30.1          |
 | Random***        | N/A     | 11.0             | 1.2          | 19.5          |
 | Null          | N/A     | 0.0              | 0.0           | 0.0           |
 
