@@ -18,9 +18,33 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-import numpy as np
+import math
+import numpy
+
 from nab.detectors.base import AnomalyDetector
-from nupic.algorithms import anomaly_likelihood
+
+
+
+def normalProbability(x, distributionParams):
+  """
+  Given the normal distribution specified by the mean and standard deviation in
+  distributionParams, return the probability of getting samples > x. This is the
+  Q-function: the tail probability of the normal distribution.
+
+  :param distributionParams: dict with values for keys "mean" and "stdev"
+  """
+  if "mean" not in distributionParams or "stdev" not in distributionParams:
+    raise RuntimeError("Insufficient parameters to specify the distribution.")
+
+  if x < distributionParams["mean"]:
+    # Gaussian is symmetrical around mean, so flip to get the tail probability
+    xp = 2*distributionParams["mean"] - x
+    return 1.0 - normalProbability(xp, distributionParams)
+
+  # Calculate the Q function with the complementary error function, explained
+  # here: http://www.gaussianwaves.com/2012/07/q-function-and-error-functions
+  z = (x - distributionParams["mean"]) / distributionParams["stdev"]
+  return 0.5 * math.erfc(z/math.sqrt(2))
 
 
 
@@ -32,7 +56,6 @@ class WindowedGaussianDetector(AnomalyDetector):
   """
 
   def __init__(self, *args, **kwargs):
-    # Initialize the parent
     super(WindowedGaussianDetector, self).__init__(*args, **kwargs)
 
     self.windowSize = 6400
@@ -53,8 +76,8 @@ class WindowedGaussianDetector(AnomalyDetector):
     anomalyScore = 0.0
     inputValue = inputData["value"]
     if len(self.windowData) > 0:
-      anomalyScore = 1 - anomaly_likelihood.normalProbability(
-        inputValue, {"mean": self.mean,"stdev": self.std})
+      anomalyScore = 1 - normalProbability(
+          inputValue, {"mean": self.mean, "stdev": self.std})
 
     if len(self.windowData) < self.windowSize:
       self.windowData.append(inputValue)
@@ -73,7 +96,7 @@ class WindowedGaussianDetector(AnomalyDetector):
 
 
   def _updateWindow(self):
-    self.mean = np.mean(self.windowData)
-    self.std = np.std(self.windowData)
+    self.mean = numpy.mean(self.windowData)
+    self.std = numpy.std(self.windowData)
     if self.std == 0.0:
       self.std = 0.000001
