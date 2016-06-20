@@ -133,7 +133,7 @@ if __name__ == "__main__":
                     nargs="*",
                     type=str,
                     default=["null", "numenta", "random", "skyline",
-                             "bayesChangePt"],
+                             "bayesChangePt", "windowedGaussian"],
                     help="Comma separated list of detector(s) to use, e.g. "
                          "null,numenta")
 
@@ -184,7 +184,8 @@ if __name__ == "__main__":
   if "skyline" in args.detectors:
     from nab.detectors.skyline.skyline_detector import SkylineDetector
   if "windowedGaussian" in args.detectors:
-    import WindowedGaussianDetector
+    from nab.detectors.gaussian.windowedGaussian_detector import (
+      WindowedGaussianDetector)
 
   if args.skipConfirmation or checkInputs(args):
     main(args)
