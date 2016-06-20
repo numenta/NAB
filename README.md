@@ -76,10 +76,10 @@ detector uses the implementation of temporal memory found [here]
 (https://github.com/numenta/nupic.core/blob/master/src/nupic/algorithms/TemporalMemory.hpp).
 Numenta HTM detector with no likelihood uses the raw anomaly scores directly.
 
-| Detector      | Version |Standard Profile | Reward Low FP | Reward Low FN |
+| Detector      |Standard Profile | Reward Low FP | Reward Low FN |
 |---------------|---------|------------------|---------------|---------------|
-| NumentaTM HTM | current* |61.2             | 52.4         | 66.1          |
-| Numenta HTM, no likelihood | |52.52             | 41.09          | 58.25   |
+| NumentaTM HTM* |61.2             | 52.4         | 66.1          |
+| Numenta HTM*, no likelihood |52.52             | 41.09          | 58.25   |
 
 *As of NAB v1.0*
 
