@@ -133,7 +133,7 @@ if __name__ == "__main__":
                     nargs="*",
                     type=str,
                     default=["null", "numenta", "random", "skyline",
-                             "bayesChangePt"],
+                             "bayesChangePt", "windowedGaussian"],
                     help="Comma separated list of detector(s) to use, e.g. "
                          "null,numenta")
 
