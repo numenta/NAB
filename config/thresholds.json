@@ -15,16 +15,16 @@
     },
     "null": {
         "reward_low_FN_rate": {
-            "score": -88.0,
-            "threshold": 0.6000000000000001
+            "score": -232.0,
+            "threshold": 0.6250000000000001
         },
         "reward_low_FP_rate": {
-            "score": -44.0,
-            "threshold": 0.6000000000000001
+            "score": -116.0,
+            "threshold": 0.6250000000000001
         },
         "standard": {
-            "score": -44.0,
-            "threshold": 0.6000000000000001
+            "score": -116.0,
+            "threshold": 0.6250000000000001
         }
     },
     "numenta": {
@@ -81,20 +81,6 @@
         "standard": {
             "score": -33.206059646391715,
             "threshold": 0.8031250000000002
-        }
-    },
-    "twitterADTs": {
-        "reward_low_FN_rate": {
-            "score": -39.9892525,
-            "threshold": 0.5
-        },
-        "reward_low_FP_rate": {
-            "score": -19.71923553,
-            "threshold": 0.5
-        },
-        "standard": {
-            "score": -14.9892525,
-            "threshold": 0.5
         }
     },
     "twitterADVec": {
