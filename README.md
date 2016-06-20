@@ -31,16 +31,16 @@ Conference on Machine Learning and Applications, December 2015.
 
 The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the perfect detector), and a baseline of 0.0 is determined by the "null" detector (which makes no detections).
 
-| Detector      | Version | Standard Profile | Reward Low FP | Reward Low FN |
-|---------------|---------|------------------|---------------|---------------|
-| Perfect       | N/A     | 100.0            | 100.0         | 100.0         |
-| [Numenta HTM](https://github.com/numenta/nupic)   | current* | 65.3             | 58.6          | 69.4          |
-| [Twitter ADVec](https://github.com/twitter/AnomalyDetection) | v1.0.0    | 47.1             | 33.6          | 53.5          |
-| [Etsy Skyline](https://github.com/etsy/skyline)  | ???     | 35.7             | 27.1          | 44.5          |
-| Bayesian Changepoint**          | N/A     | 17.7              | 3.2           | 32.2           |
-| [Sliding Threshold](https://github.com/numenta/NAB/blob/master/nab/detectors/gaussian/windowedGaussian_detector.py)  | N/A     | 15.0             | -26.2          | 30.1          |
-| Random***        | N/A     | 11.0             | 1.2          | 19.5          |
-| Null          | N/A     | 0.0              | 0.0           | 0.0           |
+| Detector      | Standard Profile | Reward Low FP | Reward Low FN |
+|---------------|------------------|---------------|---------------|
+| Perfect       | 100.0            | 100.0         | 100.0         |
+| [Numenta HTM*](https://github.com/numenta/nupic) | 65.3          | 58.6          | 69.4          |
+| [Twitter ADVec v1.0.0](https://github.com/twitter/AnomalyDetection)| 47.1             | 33.6          | 53.5          |
+| [Etsy Skyline](https://github.com/etsy/skyline) | 35.7             | 27.1          | 44.5          |
+| Bayesian Changepoint**          | 17.7              | 3.2           | 32.2           |
+| [Sliding Threshold](https://github.com/numenta/NAB/blob/master/nab/detectors/gaussian/windowedGaussian_detector.py) | 15.0             | -26.2          | 30.1          |
+| Random***       | 11.0             | 1.2          | 19.5          |
+| Null          | 0.0              | 0.0           | 0.0           |
 
 *As of NAB v1.0*
 
@@ -76,10 +76,10 @@ detector uses the implementation of temporal memory found [here]
 (https://github.com/numenta/nupic.core/blob/master/src/nupic/algorithms/TemporalMemory.hpp).
 Numenta HTM detector with no likelihood uses the raw anomaly scores directly.
 
-| Detector      | Version |Standard Profile | Reward Low FP | Reward Low FN |
+| Detector      |Standard Profile | Reward Low FP | Reward Low FN |
 |---------------|---------|------------------|---------------|---------------|
-| NumentaTM HTM | current* |61.2             | 52.4         | 66.1          |
-| Numenta HTM, no likelihood | |52.52             | 41.09          | 58.25   |
+| NumentaTM HTM* |61.2             | 52.4         | 66.1          |
+| Numenta HTM*, no likelihood |52.52             | 41.09          | 58.25   |
 
 *As of NAB v1.0*
 
