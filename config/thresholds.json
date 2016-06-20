@@ -110,5 +110,19 @@
             "score": -82.60645095987644,
             "threshold": 0.9999998092651373
         }
+    },
+    "knncad": {
+        "reward_low_FN_rate": {
+            "score": 0.0,
+            "threshold": 1.0
+        },
+        "reward_low_FP_rate": {
+            "score": 0.0,
+            "threshold": 1.0
+        },
+        "standard": {
+            "score": 0.0,
+            "threshold": 1.0
+        }
     }
 }
