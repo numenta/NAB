@@ -6,13 +6,13 @@ as long as you return a boolean that determines whether the input
 timeseries is anomalous or not.
 
 To add an algorithm, define it here, and add its name to settings.ALGORITHMS.
+
+Some algorithms from the original skyline implementation are commented out and
+the best combination of algorithms for NAB is included below.
 """
 
 import pandas
 import numpy as np
-import traceback
-from time import time
-
 from datetime import datetime, timedelta
 
 
@@ -58,12 +58,13 @@ def median_absolute_deviation(timeseries):
     return False
 
 
+# The method below is excluded because it is computationally inefficient
 # def grubbs(timeseries):
 #     """
 #     A timeseries is anomalous if the Z score is greater than the Grubb's
 # score.
 #     """
-
+#
 #     series = np.array([x[1] for x in timeseries])
 #     stdDev = np.std(series)
 #     mean = np.mean(series)
@@ -73,8 +74,8 @@ def median_absolute_deviation(timeseries):
 #     threshold = scipy.stats.t.isf(.05 / (2 * len_series), len_series - 2)
 #     threshold_squared = threshold * threshold
 #     grubbs_score = ((len_series - 1) / np.sqrt(len_series)) * np.sqrt(
-  # threshold_squared / (len_series - 2 + threshold_squared))
-
+#   threshold_squared / (len_series - 2 + threshold_squared))
+#
 #     return z_score > grubbs_score
 
 
@@ -198,6 +199,8 @@ def histogram_bins(timeseries):
   return False
 
 
+# The method below is excluded because it uses floating point time whereas NAB
+# uses datetime timestamp
 # def ks_test(timeseries):
 #     """
 #     A timeseries is anomalous if 2 sample Kolmogorov-Smirnov test indicates
@@ -224,7 +227,8 @@ def histogram_bins(timeseries):
 
 #     return False
 
-
+# The method below is excluded because it has no affect on the final skyline
+# scores for NAB
 # def is_anomalously_anomalous(metric_name, ensemble, datapoint):
 #     """
 #     This method runs a meta-analysis on the metric to determine whether the
