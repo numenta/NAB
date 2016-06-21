@@ -34,7 +34,7 @@ The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the 
 | Detector      | Standard Profile | Reward Low FP | Reward Low FN |
 |---------------|------------------|---------------|---------------|
 | Perfect       | 100.0            | 100.0         | 100.0         |
-| [Numenta HTM*](https://github.com/numenta/nupic) | 65.3          | 58.6          | 69.4          |
+| [Numenta HTM](https://github.com/numenta/nupic)* | 65.3          | 58.6          | 69.4          |
 | [Twitter ADVec v1.0.0](https://github.com/twitter/AnomalyDetection)| 47.1             | 33.6          | 53.5          |
 | [Etsy Skyline](https://github.com/etsy/skyline) | 35.7             | 27.1          | 44.5          |
 | Bayesian Changepoint**          | 17.7              | 3.2           | 32.2           |
@@ -71,19 +71,24 @@ added to the corpus; NAB is currently in v1.0.
 
 #### Additional Scores
 
-Here are the NAB scores for some additional flavors of HTM. NumentaTM HTM
-detector uses the implementation of temporal memory found [here]
-(https://github.com/numenta/nupic.core/blob/master/src/nupic/algorithms/TemporalMemory.hpp).
-Numenta HTM detector with no likelihood uses the raw anomaly scores directly.
+For comparison, here are the NAB V1.0 scores for some additional flavors of HTM.
+NumentaTM HTM detector uses the implementation of temporal memory found
+[here](https://github.com/numenta/nupic.core/blob/master/src/nupic/algorithms/TemporalMemory.hpp).
+Numenta HTM detector with no likelihood uses the raw anomaly scores directly. To
+run without likelihood, set the variable `self.useLikelihood` in
+[numenta_detector.py](https://github.com/numenta/NAB/blob/master/nab/detectors/numenta/numenta_detector.py)
+to `False`.
+
 
 | Detector      |Standard Profile | Reward Low FP | Reward Low FN |
 |---------------|---------|------------------|---------------|---------------|
-| NumentaTM HTM* |61.2             | 52.4         | 66.1          |
-| Numenta HTM*, no likelihood |52.52             | 41.09          | 58.25   |
+| Numenta HTM*   | 65.3             | 58.6       | 69.4          |
+| [NumentaTM HTM](https://github.com/numenta/NAB/blob/master/nab/detectors/numenta/numentaTM_detector.py)* | 61.2             | 52.4       | 66.1          |
+| Numenta HTM*, no likelihood | 52.52 | 41.09    | 58.25         |
 
-*As of NAB v1.0*
-
-\* The results correspond to NuPIC and nupic.core SHAs 42f701d and c030b84 respectively, but the latest version of NuPIC should still work (the results may not be identical).
+\* The results correspond to NuPIC and nupic.core SHAs 42f701d and c030b84
+respectively, but the latest version of NuPIC should still work (the results may
+not be identical).
 
 Installing NAB 1.0
 ------------------
