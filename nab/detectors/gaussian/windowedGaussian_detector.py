@@ -25,25 +25,20 @@ from nab.detectors.base import AnomalyDetector
 
 
 
-def normalProbability(x, distributionParams):
+def normalProbability(x, mean, std):
   """
-  Given the normal distribution specified by the mean and standard deviation in
-  distributionParams, return the probability of getting samples > x. This is the
+  Given the normal distribution specified by the mean and standard deviation
+  args, return the probability of getting samples > x. This is the
   Q-function: the tail probability of the normal distribution.
-
-  :param distributionParams: dict with values for keys "mean" and "stdev"
   """
-  if "mean" not in distributionParams or "stdev" not in distributionParams:
-    raise RuntimeError("Insufficient parameters to specify the distribution.")
-
-  if x < distributionParams["mean"]:
+  if x < mean:
     # Gaussian is symmetrical around mean, so flip to get the tail probability
-    xp = 2*distributionParams["mean"] - x
-    return 1.0 - normalProbability(xp, distributionParams)
+    xp = 2*mean - x
+    return 1.0 - normalProbability(xp, mean, std)
 
   # Calculate the Q function with the complementary error function, explained
   # here: http://www.gaussianwaves.com/2012/07/q-function-and-error-functions
-  z = (x - distributionParams["mean"]) / distributionParams["stdev"]
+  z = (x - mean) / std
   return 0.5 * math.erfc(z/math.sqrt(2))
 
 
@@ -76,8 +71,7 @@ class WindowedGaussianDetector(AnomalyDetector):
     anomalyScore = 0.0
     inputValue = inputData["value"]
     if len(self.windowData) > 0:
-      anomalyScore = 1 - normalProbability(
-          inputValue, {"mean": self.mean, "stdev": self.std})
+      anomalyScore = 1 - normalProbability(inputValue, self.mean, self.std)
 
     if len(self.windowData) < self.windowSize:
       self.windowData.append(inputValue)
