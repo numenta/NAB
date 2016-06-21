@@ -64,7 +64,7 @@ def median_absolute_deviation(timeseries):
 #     A timeseries is anomalous if the Z score is greater than the Grubb's
 # score.
 #     """
-#
+
 #     series = np.array([x[1] for x in timeseries])
 #     stdDev = np.std(series)
 #     mean = np.mean(series)
@@ -75,7 +75,7 @@ def median_absolute_deviation(timeseries):
 #     threshold_squared = threshold * threshold
 #     grubbs_score = ((len_series - 1) / np.sqrt(len_series)) * np.sqrt(
 #   threshold_squared / (len_series - 2 + threshold_squared))
-#
+
 #     return z_score > grubbs_score
 
 
