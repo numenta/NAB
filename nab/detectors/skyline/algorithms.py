@@ -1,5 +1,3 @@
-
-
 """
 Some algorithms from the original skyline implementation are commented out and
 the best combination of algorithms for NAB is included below.
