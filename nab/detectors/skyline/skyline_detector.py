@@ -15,8 +15,8 @@ class SkylineDetector(AnomalyDetector):
   https://github.com/etsy/skyline/blob/master/src/analyzer/algorithms.py.
   Each algorithm in the ensemble gives a binary vote for the data record.
   The original implementation used a majority voting scheme to classify a record
-  as anomalous. Here we improve the detector's performance by taking
-  average over all the votes to get an anomaly score.
+  as anomalous. Here we improve the detector's performance by using the average
+  of the algorithms' votes as an anomaly score.
   """
 
   def __init__(self, *args, **kwargs):
@@ -47,5 +47,5 @@ class SkylineDetector(AnomalyDetector):
     for algo in self.algorithms:
       score += algo(self.timeseries)
 
-    averageScore = score / len(self.algorithms)
+    averageScore = score / (len(self.algorithms) + 1)
     return [averageScore]

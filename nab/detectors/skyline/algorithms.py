@@ -1,12 +1,6 @@
 
 
 """
-This is no man's land. Do anything you want in here,
-as long as you return a boolean that determines whether the input
-timeseries is anomalous or not.
-
-To add an algorithm, define it here, and add its name to settings.ALGORITHMS.
-
 Some algorithms from the original skyline implementation are commented out and
 the best combination of algorithms for NAB is included below.
 """
@@ -227,7 +221,7 @@ def histogram_bins(timeseries):
 
 #     return False
 
-# The method below is excluded because it has no affect on the final skyline
+# The method below is excluded because it has no effect on the final skyline
 # scores for NAB
 # def is_anomalously_anomalous(metric_name, ensemble, datapoint):
 #     """
