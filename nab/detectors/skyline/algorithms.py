@@ -191,8 +191,7 @@ def histogram_bins(timeseries):
   return False
 
 
-# The method below is excluded because it uses floating point time whereas NAB
-# uses datetime timestamp
+# The method below is excluded because it is computationally inefficient
 # def ks_test(timeseries):
 #     """
 #     A timeseries is anomalous if 2 sample Kolmogorov-Smirnov test indicates
