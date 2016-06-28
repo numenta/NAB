@@ -20,7 +20,7 @@ We used sum of distances to *k* nearest neighbors in matrix *X* as anomaly score
 ![](https://cloud.githubusercontent.com/assets/5317319/16424390/964f9736-3d68-11e6-83c0-9c3476bd7ec3.png)
 
 #### Contributors
-Vladislav Ishimtsev (ishvlad28@gmail.com)\
+Vladislav Ishimtsev (ishvlad28@gmail.com)  
 Evgeny Burnaev (burnaevevgeny@gmail.com)
 
 
