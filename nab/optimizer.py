@@ -18,134 +18,267 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-from nab.scorer import scoreCorpus
+import collections
+import copy
+import os
+
+from nab.scorer import scaledSigmoid
+from nab import util
+
+DataRow = collections.namedtuple("DataRow", ("anomalyScore", "label"))
+"""Input format for optimizer.
+
+:param anomalyScore: the score returned by the detetor
+:param label: the ground truth - True if the point is inside a window,
+    False otherwise
+"""
+
+ThresholdResult = collections.namedtuple("ThresholdResult",
+                                         ("score", "threshold", "counts"))
+"""The return format from the optimizer.
+
+:param score: the score computed for this detector with the corresponding
+    threshold
+:param threshold: the threshold used to compute the corresponding score
+:param counts: a dict containing the number of points for:
+    "tp" - true positives
+    "tn" - true negatives
+    "fp" - false positives
+    "fn" - false negatives
+"""
+
+_WindowInfo = collections.namedtuple("_WindowInfo",
+                                     ("start", "end", "detectedAnomalies"))
+"""Private class with preprocessed window info.
+
+:param start: the file-specific index of the first point in the window
+:param end: the file-specific index of the last point in the window
+:detectedAnomalies: a list of indices of points where the detector's
+    anomaly score is higher than the current threshold. This is updated
+    each time the threshold is lowered.
+"""
+
+_DataInfo = collections.namedtuple("_DataInfo",
+                                   ("anomalyScore", "idx", "lastWindow"))
+"""Private class with preprocessed info about a data row.
+
+:param anomalyScore: the score returned by the detector
+:param idx: the file-specific index of this row
+:param lastWindow: The _WindowInfo instance that this row is in, or the
+    last window precedign this row if this row is outside any window. None
+    if no window has been seen yet in this file.
+"""
 
 
 
-def optimizeThreshold(args):
-  """Optimize the threshold for a given combination of detector and profile.
+def _processWindows(data):
+  """Process the windows into a format for easy processing.
 
-  @param args       (tuple)   Arguments necessary for the objective function.
-
-  @param tolerance  (float)   Number used to determine when optimization has
-                              converged to a sufficiently good score.
-
-  @return (dict) Contains:
-        "threshold" (float)   Threshold that returns the largest score from the
-                              Objective function.
-
-        "score"     (float)   The score from the objective function given the
-                              threshold.
+  :param data: a dict mapping each data file path to a list of DataRow
+      instances for that file
+  :returns: dict mapping data file path to list of _WindowInfo instances
   """
-  optimizedThreshold, optimizedScore = twiddle(
-    objFunction=objectiveFunction,
-    args=args,
-    initialGuess=0.5,
-    tolerance=.0000001)
+  anomalyWindows = collections.defaultdict(list)
+  for path, rows in data.iteritems():
+    start = None
+    for i, row in enumerate(rows):
+      if start is None and row.label:
+        # Keep track of the start of the window
+        start = i
+      elif ((start is not None and not row.label) or
+            (start is not None and i == len(rows) - 1)):
+        # Store the window
+        windowInfo = _WindowInfo(start=start, end=i-1,
+                                 detectedAnomalies=[])
+        anomalyWindows[path].append(windowInfo)
+        start = None
+    assert start is None
 
-  print "Optimizer found a max score of {} with anomaly threshold {}.".format(
-    optimizedScore, optimizedThreshold)
-
-  return {
-    "threshold": optimizedThreshold,
-    "score": optimizedScore
-  }
+  return anomalyWindows
 
 
-def twiddle(objFunction, args, initialGuess=0.5, tolerance=0.00001,
-            domain=(float("-inf"), float("inf"))):
-  """Optimize a single parameter given an objective function.
 
-  This is a local hill-climbing algorithm. Here is a simple description of it:
-  https://www.youtube.com/watch?v=2uQ2BSzDvXs
+def _processData(data, anomalyWindows, probationaryFraction):
+  """Process the data rows into a format for easy processing.
 
-  @param args       (tuple)   Arguments necessary for the objective function.
+  The resulting _DataInfo instances that fall into the same window will
+  have references to the same _WindowInfo instance and thus can see which
+  other data rows have been detected so far in the
+  _WindowInfo.detectedAnomalies list.
 
-  @param tolerance  (float)   Number used to determine when optimization has
-                              converged to a sufficiently good score. Should be
-                              very low to yield precise likelihood values.
+  :param data: a dict mapping each data file path to a list of ordered
+      _DataRow instances for that file
+  :param anomalyWindows: a dict mapping each data file path to a list of
+      ordered _WindowInfo instances
+  :param probationaryFraction: a float corresponding to the fraction of
+      rows in each file that belong to the probationary period
 
-  @param objFunction(function)Objective Function used to quantify how good a
-                              particular parameter choice is.
-
-  @param init       (float)   Initial value of the parameter.
-
-  @param domain     (tuple)   Domain of parameter values, as (min, max).
-
-  @return           (tuple)   Two-tuple, with first item the parameter value
-                              yielding the best score, and second item the
-                              optimum score from the objective function.
+  :returns: a list of _DataInfo instances for each row in all files
   """
-  pastCalls = {}
-  x = initialGuess
-  delta = 0.1
-  bestScore = objFunction(x, args)
+  # All data points sorted by anomaly score. Each element is a tuple of
+  # (anomalyScore, timestamp, mostRecentWindow, indexInFile)
+  output = []
+  for path, rows in data.iteritems():
+    numRecords = len(rows)
+    probationaryPeriod = util.getProbationPeriod(probationaryFraction,
+                                                 numRecords)
+    if len(os.path.split(path)[0]) == 0:
+      print "Skipping summary file: ", path
+      continue
+    lastWindow = None
+    nextWindowIdx = 0
+    for i, row in enumerate(rows):
+      if (len(anomalyWindows[path]) > nextWindowIdx and
+          i >= anomalyWindows[path][nextWindowIdx].start):
+        lastWindow = anomalyWindows[path][nextWindowIdx]
+        nextWindowIdx += 1
 
-  pastCalls[x] = bestScore
-
-  while delta > tolerance:
-
-    # Keep x within bounds
-    if x+delta > domain[1]:
-      delta = abs(domain[1] - x) / 2
-    x += delta
-
-    if x not in pastCalls:
-      score = objFunction(x, args)
-      pastCalls[x] = score
-
-    score = pastCalls[x]
-
-    if score > bestScore:
-      bestScore = score
-      delta *= 2
-
-    else:
-      # Keep x within bounds
-      if x-delta < domain[0]:
-        delta = abs(domain[0] - x) / 2
-      x -= 2*delta
-
-      if x not in pastCalls:
-        score = objFunction(x, args)
-        pastCalls[x] = score
-
-      score = pastCalls[x]
-
-      if score > bestScore:
-        bestScore = score
-        delta *= 2
+      if i < probationaryPeriod:
+        dataIdx = None
       else:
-        x += delta
-        delta *= 0.5
+        dataIdx = i
+      output.append(_DataInfo(anomalyScore=row.anomalyScore,
+                            idx=dataIdx,
+                            lastWindow=lastWindow))
+      if output[-1].idx is None:
+        assert output[-1].lastWindow is None, (output[-1], probationaryPeriod, path, len(rows))
 
-    print "Parameter:", x
-    print "Best score:", bestScore
-    print "Step size:", delta
-    print
-
-  # Return the threshold from pastCalls dict. Due to numerical precision, the
-  # the while loop may not always yield the threshold that reflects the max
-  # score (bestScore).
-  bestParam = max(pastCalls.iterkeys(), key=lambda key: pastCalls[key])
-
-  return (bestParam, pastCalls[bestParam])
+  return output
 
 
-def objectiveFunction(threshold, args):
-  """Objective function that scores the corpus given a specific threshold.
 
-  @param threshold  (float)   Threshold value to convert an anomaly score value
-                              to a detection.
+def _windowRange(window):
+  return window.end - window.start + 1
 
-  @param args       (tuple)   Arguments necessary to call scoreHelper.
 
-  @return score     (float)   Score of corpus.
+
+def computeScaledScoreInsideWindow(dataInfo):
+  relativePosition = (float(dataInfo.idx - dataInfo.lastWindow.end - 1) /
+                      _windowRange(dataInfo.lastWindow))
+  return scaledSigmoid(relativePosition) / scaledSigmoid(-1.0)
+
+
+
+def computeScaledScoreOutsideWindow(dataInfo):
+  relativePosition = (float(dataInfo.idx - dataInfo.lastWindow.end) /
+                      (_windowRange(dataInfo.lastWindow) - 1))
+  return scaledSigmoid(relativePosition)
+
+
+
+def _computeScoreChange(dataInfo, costMatrix):
+  scoreChange = 0.0
+  countsChange = collections.defaultdict(int)
+  if dataInfo.lastWindow is None:
+    # False positive before any windows
+    if dataInfo.idx is not None:
+      # Probationary period has passed
+      scoreChange -= costMatrix["fpWeight"]
+
+      # Update countsChange
+      countsChange["tn"] -= 1
+      countsChange["fp"] += 1
+    else:
+      # Do nothing, don't count the FP
+      pass
+  elif dataInfo.idx > dataInfo.lastWindow.end:
+    # Outside window, contribute false positive
+    scoreChange += (computeScaledScoreOutsideWindow(dataInfo) *
+                    costMatrix["fpWeight"])
+
+    # Update countsChange
+    countsChange["tn"] -= 1
+    countsChange["fp"] += 1
+  elif len(dataInfo.lastWindow.detectedAnomalies) == 0:
+    # First anomaly detected inside the window
+    scoreChange += costMatrix["fnWeight"]
+    scoreChange += (computeScaledScoreInsideWindow(dataInfo) *
+                    costMatrix["tpWeight"])
+    # Update the last windows list of detected anomalies
+    dataInfo.lastWindow.detectedAnomalies.append(dataInfo)
+    dataInfo.lastWindow.detectedAnomalies.sort(key=lambda di: di.idx)
+
+    # Update countsChange
+    countsChange["fn"] -= 1
+    countsChange["tp"] += 1
+  elif dataInfo.idx < dataInfo.lastWindow.detectedAnomalies[0]:
+    # Not first instance of a detected anomaly but earliest in window
+    windowRange = _windowRange(dataInfo.lastWindow)
+
+    prevDataInfo = dataInfo.lastWindow.detectedAnomalies[0]
+    scoreChange -= (computeScaledScoreInsideWindow(prevDataInfo) *
+                    costMatrix["tpWeight"])
+
+    scoreChange += (computeScaledScoreInsideWindow(dataInfo) *
+                    costMatrix["tpWeight"])
+
+    dataInfo.lastWindow.detectedAnomalies.append(dataInfo)
+    dataInfo.lastWindow.detectedAnomalies.sort(key=lambda di: di.idx)
+
+    # Update countsChange
+    countsChange["fn"] -= 1
+    countsChange["tp"] += 1
+  else:
+    # Not first or earliest anomaly in window
+    dataInfo.lastWindow.detectedAnomalies.append(dataInfo)
+    dataInfo.lastWindow.detectedAnomalies.sort(key=lambda di: di.idx)
+
+    # Update countsChange
+    countsChange["fn"] -= 1
+    countsChange["tp"] += 1
+
+  return scoreChange, countsChange
+
+
+
+def _computeThresholdScores(data, numWindows, costMatrix):
+  # Set up stats
+  counts = {
+    "tn": len(data),
+    "tp": 0,
+    "fp": 0,
+    "fn": 0,
+  }
+  for dataInfo in data:
+    if (dataInfo.lastWindow is not None and
+        dataInfo.idx <= dataInfo.lastWindow.end):
+      counts["tn"] -= 1
+      counts["fn"] += 1
+
+  # Now we iteratively compute the score for every possible threshold
+  data = sorted(data, key=lambda di: di.anomalyScore, reverse=True)
+  score = -(numWindows * costMatrix["fnWeight"])
+  threshold = 2.0
+  resultMap = {threshold: ThresholdResult(
+      score=score, threshold=threshold, counts=copy.deepcopy(counts))}
+  for dataInfo in data:
+    threshold = dataInfo.anomalyScore
+    scoreChange, countsChange = _computeScoreChange(dataInfo, costMatrix)
+    score += scoreChange
+    for k, v in countsChange.iteritems():
+      counts[k] += v
+
+    # Make sure that you replace any previous, intermediate score with the
+    # same threshold since that would be an erroneous score.
+    resultMap[threshold] = ThresholdResult(
+      score=score, threshold=threshold, counts=copy.deepcopy(counts))
+
+  return sorted(resultMap.values(), reverse=True, key=lambda v: v.score)
+
+
+
+def optimizeThreshold(costMatrix, data, probationaryFraction):
+  """Calcuate and return the optimal threshold.
+
+  :param costMatrix: a dict containing the weights for true/false
+      positive/negative
   """
-  if not 0 <= threshold <= 1:
-    return float("-inf")
+  anomalyWindows = _processWindows(data)
 
-  resultsDF = scoreCorpus(threshold, args)
-  score = float(resultsDF["Score"].iloc[-1])
+  numWindows = sum([len(windows) for _, windows in anomalyWindows.iteritems()])
 
-  return score
+  data = _processData(data, anomalyWindows, probationaryFraction)
+
+  results = _computeThresholdScores(data, numWindows, costMatrix)
+  print "Done, best result: ", results[0:5]
+  return results

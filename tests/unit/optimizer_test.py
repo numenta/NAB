@@ -19,170 +19,153 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-"""Tests nab.optimizer for finding the local/global maxima of several 
+"""Tests nab.optimizer for finding the local/global maxima of several
 functions"""
 
-import math
+import datetime
 import unittest
 
-from nab.optimizer import twiddle
+import pandas
+
+from nab import corpus, labeler, optimizer, scorer
+
+COST_MATRIX = {
+  "tpWeight": 1.0,
+  "fnWeight": 1.0,
+  "fpWeight": 0.11,
+  "tnWeight": 1.0,
+}
 
 
-def negativeXSquared(x, args):
-  """
-  -(x^2) function, with arguments as expected by nab.optimizer
-  Global maximum: x = 0; -(x^2) = 0
-  """
-  return -x*x
+
+def _getData1():
+  window1 = optimizer._WindowInfo(start=3, end=6, detectedAnomalies=[])
+  window2 = optimizer._WindowInfo(start=9, end=11, detectedAnomalies=[])
+
+  return [
+    optimizer._DataInfo(anomalyScore=0.0, idx=None, lastWindow=None),
+    optimizer._DataInfo(anomalyScore=0.2, idx=1, lastWindow=None),
+    optimizer._DataInfo(anomalyScore=0.1, idx=2, lastWindow=None),
+    optimizer._DataInfo(anomalyScore=0.1, idx=3, lastWindow=window1),
+    optimizer._DataInfo(anomalyScore=0.3, idx=4, lastWindow=window1),
+    optimizer._DataInfo(anomalyScore=0.4, idx=5, lastWindow=window1),
+    optimizer._DataInfo(anomalyScore=0.1, idx=6, lastWindow=window1),
+    optimizer._DataInfo(anomalyScore=0.1, idx=7, lastWindow=window1),
+    optimizer._DataInfo(anomalyScore=0.1, idx=8, lastWindow=window1),
+    optimizer._DataInfo(anomalyScore=0.9, idx=9, lastWindow=window2),
+    optimizer._DataInfo(anomalyScore=0.7, idx=10, lastWindow=window2),
+    optimizer._DataInfo(anomalyScore=0.1, idx=11, lastWindow=window2),
+    optimizer._DataInfo(anomalyScore=0.3, idx=12, lastWindow=window2),
+    optimizer._DataInfo(anomalyScore=0.2, idx=13, lastWindow=window2),
+    optimizer._DataInfo(anomalyScore=0.01, idx=14, lastWindow=window2),
+    optimizer._DataInfo(anomalyScore=0.11, idx=15, lastWindow=window2),
+  ]
 
 
-def xSquared(x, args):
-  """
-  x^2 function, with arguments as expected by nab.optimizer
-  Global maximum (unbounded) is infinite
-  """
-  return x*x
+
+def _getData2():
+  return [
+    optimizer._DataInfo(anomalyScore=0.12, idx=None, lastWindow=None),
+    optimizer._DataInfo(anomalyScore=0.31, idx=1, lastWindow=None),
+    optimizer._DataInfo(anomalyScore=0.41, idx=2, lastWindow=None),
+    optimizer._DataInfo(anomalyScore=0.21, idx=3, lastWindow=None),
+  ]
 
 
-def sine(x, args):
-  """
-  sine function, with arguments as expected by nab.optimizer
-  Local maximum 1: x = pi/2; sin(x) = 1.0
-  Local maximum 2: x = 3pi/2; sin(x) = 1.0
-  """
-  return math.sin(x)
 
+def _getData3():
+  window1 = optimizer._WindowInfo(start=1, end=2, detectedAnomalies=[])
 
-def GLFunction(x, args):
-  """
-  Gramacy & Lee function, with arguments as expected by nab.optimizer
-  GL function is 1-dimensional optimization test function, evaluated 
-  on the domain x=[0.5,2.5]
-  Global maximum: x = 2.5; GL(x) = 5.0625
-  """
-  return math.sin(10*math.pi*x) / (2*x) + (x-1)**4
+  return [
+    optimizer._DataInfo(anomalyScore=0.0, idx=None, lastWindow=None),
+    optimizer._DataInfo(anomalyScore=0.6, idx=1, lastWindow=window1),
+    optimizer._DataInfo(anomalyScore=0.9, idx=2, lastWindow=window1),
+    optimizer._DataInfo(anomalyScore=0.4, idx=3, lastWindow=window1),
+  ]
 
 
 
 class OptimizerTest(unittest.TestCase):
 
-  def testMaxOfNegativeXSquared(self):
-    """Tests ability to locate the single local/global max
-    Optimizer should return 0 at x=0"""
-    
-    # Start arbitrarily w/in domain
-    optimizedThreshold, optimizedScore = twiddle(objFunction=negativeXSquared,
-      args = (),
-      initialGuess = 42,
-      domain = (-50, 50))
 
-    self.assertTrue(abs(optimizedThreshold - 0.0) <= 0.00001,
-      "Optimizer returned x = %r, which is not within the tolerance of \
-      the maximum location x = 0.0" % optimizedThreshold)
-    self.assertTrue(abs(optimizedScore - 0) <= math.sqrt(0.00001),
-      "Optimizer returned a max value of %r, but expected 0" % optimizedScore)
+  def testComputeScoreChangeFalsePositiveNoWindow(self):
+    dataInfo = optimizer._DataInfo(idx=1, anomalyScore=0.1, lastWindow=None)
+    scoreChange = optimizer._computeScoreChange(dataInfo, COST_MATRIX)
+    self.assertAlmostEqual(-COST_MATRIX["fpWeight"], scoreChange[0])
+    self.assertSetEqual(set(("tn", "fp")), set(scoreChange[1].keys()))
+    self.assertEqual(1, scoreChange[1]["fp"])
+    self.assertEqual(-1, scoreChange[1]["tn"])
 
 
-  def testMaxOfXSquared(self):
-    """Tests ability to locate the max constrained by domain boundaries
-    Optimizer should return 100 at x=10"""
-    
-    # Start right of global min
-    optimizedThreshold, optimizedScore = twiddle(objFunction=xSquared,
-      args = (),
-      initialGuess = 1,
-      domain = (0, 10))
-      
-    self.assertTrue(abs(optimizedThreshold - 10.0) <= 0.00001,
-      "Optimizer returned x = %r, which is not within the tolerance of \
-      the maximum location x = 10.0" % optimizedThreshold)
-    self.assertTrue(abs(optimizedScore - 100) <= math.sqrt(0.00001),
-      "Optimizer returned a max value of %r, but expected 100"
-      % optimizedScore)
+  def testComputeScoreChangeFalsePositiveWithFarWindow(self):
+    windowInfo = optimizer._WindowInfo(start=3, end=5, detectedAnomalies=[])
+    dataInfo = optimizer._DataInfo(idx=150, anomalyScore=0.1,
+                                   lastWindow=windowInfo)
+    scoreChange = optimizer._computeScoreChange(dataInfo, COST_MATRIX)
+    self.assertAlmostEqual(-COST_MATRIX["fpWeight"], scoreChange[0])
+    self.assertSetEqual(set(("tn", "fp")), set(scoreChange[1].keys()))
+    self.assertEqual(1, scoreChange[1]["fp"])
+    self.assertEqual(-1, scoreChange[1]["tn"])
 
 
-  def testMaxOfSine(self):
-    """Tests ability to distinguish between several local/global maxima
-    Optimizer should return 1.0 at x={pi/2, 3pi/2}"""
-
-    # Start left of local max pi/2
-    optimizedThreshold, optimizedScore = twiddle(objFunction=sine,
-      args = (),
-      initialGuess = math.pi*(0.5 - 0.1),
-      domain = (0, 2*math.pi))
-
-    self.assertTrue(abs(optimizedThreshold - math.pi/2) <= 0.00001,
-      "Optimizer returned x = %r, which is not within the tolerance of the \
-      maximum location x = %r" % (optimizedThreshold, math.pi/2))
-    self.assertTrue(abs(optimizedScore - 1.0) <= 0.00001,
-      "Optimizer returned max value of %r, but expected 1.0" % optimizedScore)
-
-    # Start right of local max pi/2
-    optimizedThreshold, optimizedScore = twiddle(objFunction=sine,
-      args = (),
-      initialGuess = math.pi*(0.5 + 0.1),
-      domain = (0, 2*math.pi))
-
-    self.assertTrue(abs(optimizedThreshold - math.pi/2) <= 0.00001,
-      "Optimizer returned x = %r, which is not within the tolerance of the \
-      maximum location x = %r" % (optimizedThreshold, math.pi/2))
-    self.assertTrue(abs(optimizedScore - 1.0) <= 0.00001,
-      "Optimizer returned max value of %r, but expected 1.0" % optimizedScore)
-
-    # Start left of local min
-    optimizedThreshold, optimizedScore = twiddle(objFunction=sine,
-      args = (),
-      initialGuess = math.pi*(1.5 - 0.1),
-      domain = (0, 2*math.pi))
-
-    self.assertTrue(abs(optimizedThreshold - math.pi/2) <= 0.00001,
-      "Optimizer returned x = %r, which is not within the tolerance of the \
-      maximum location x = %r" % (optimizedThreshold, math.pi/2))
-    self.assertTrue(abs(optimizedScore - 1.0) <= 0.00001,
-      "Optimizer returned max value of %r, but expected 1.0" % optimizedScore)
-
-    # Start right of local min
-    optimizedThreshold, optimizedScore = twiddle(objFunction=sine,
-      args = (),
-      initialGuess = math.pi*(1.5 + 0.1),
-      domain = (0, 3*math.pi))
-
-    self.assertTrue(abs(optimizedThreshold - math.pi*5/2) <= 0.00001,
-      "Optimizer returned x = %r, which is not within the tolerance of the \
-      maximum location x = %r" % (optimizedThreshold, math.pi*5/2))
-    self.assertTrue(abs(optimizedScore - 1.0) <= 0.00001,
-      "Optimizer returned max value of %r, but expected 1.0" % optimizedScore)
+  def testComputeScoreChangeFalsePositiveWithCloseWindow(self):
+    windowInfo = optimizer._WindowInfo(start=3, end=5, detectedAnomalies=[])
+    dataInfo = optimizer._DataInfo(idx=6, anomalyScore=0.1,
+                                   lastWindow=windowInfo)
+    scoreChange = optimizer._computeScoreChange(dataInfo, COST_MATRIX)
+    self.assertAlmostEqual(-0.8482836399575129 * COST_MATRIX["fpWeight"],
+                           scoreChange[0])
+    self.assertSetEqual(set(("tn", "fp")), set(scoreChange[1].keys()))
+    self.assertEqual(1, scoreChange[1]["fp"])
+    self.assertEqual(-1, scoreChange[1]["tn"])
 
 
-  def testMaxOfGLFunction(self):
-    """Tests limits of the optimizer; not robust enough to find global max 
-    amongst many local minima
-    Optimizer should return 5.0625 +/- tolerance at x=2.5"""
-
-    # Start right of a local min
-    optimizedThreshold, optimizedScore = twiddle(objFunction=GLFunction,
-      args = (),
-      initialGuess = 1,
-      domain = (0.5, 2.5))
-
-    self.assertTrue(abs(optimizedThreshold - 2.5) <= 0.00001,
-      "Optimizer returned x = %r, which is not within the tolerance of the \
-      maximum location x = 2.5" % optimizedThreshold)
-    self.assertTrue(abs(optimizedScore - 5.0625) <= 0.00001,
-      "Optimizer returned a max value of %r, but expected 5.0625"
-      % optimizedScore)
-
-    # Start at a local max
-    optimizedThreshold, optimizedScore = twiddle(objFunction=GLFunction,
-      args = (),
-      initialGuess = 1.25,
-      domain = (0.5, 2.5))
-
-    self.assertFalse(abs(optimizedThreshold - 2.5) <= 0.00001,
-      "Optimizer found the max at the correct x = 2.5 but should not have")
-    self.assertFalse(abs(optimizedScore - 5.0625) <= 0.00001,
-      "Optimizer found the global max value of 5.0625 but should not have")
+  def testComputeThresholdScoresComplex(self):
+    results = optimizer._computeThresholdScores(_getData1(), 2, COST_MATRIX)
+    self.assertAlmostEqual(0.3, results[0].threshold)
 
 
-if __name__ == '__main__':
+  def testComputeThresholdScoresNoWindows(self):
+    results = optimizer._computeThresholdScores(_getData2(), 0, COST_MATRIX)
+    self.assertGreater(results[0].threshold, 1.0)
+
+
+  def testComputeThresholdScoresCombined(self):
+    results = optimizer._computeThresholdScores(_getData1() + _getData2(), 2,
+                                                COST_MATRIX)
+    self.assertAlmostEqual(0.4, results[0].threshold)
+
+
+  def testComputeThresholdScoresPerfectDetection(self):
+    data = _getData3()
+    results = optimizer._computeThresholdScores(data, 1, COST_MATRIX)
+    self.assertAlmostEqual(0.6, results[0].threshold)
+
+    for score, threshold, counts in results:
+      now = datetime.datetime.now() - datetime.timedelta(hours=1)
+      inc = datetime.timedelta(minutes=5)
+      # Datetime for each row
+      timestamps = [now + (inc * i) for i, _ in enumerate(data)]
+
+      # True iff detector anomaly score is above the threshold
+      predictions = pandas.Series(
+          [int(d.anomalyScore >= threshold) for d in data])
+      # Ground truth: whether each row is in a window
+      labels = pandas.DataFrame(
+          [0, 1, 1, 0])
+      # List of (startDatetime, endDatetime) for each window
+      windowLimits = [timestamps[1:3]]
+
+      # Skip scoring the first row
+      probationaryPeriod = 1
+
+      actualScore = scorer.Scorer(
+          timestamps, predictions, labels, windowLimits, COST_MATRIX,
+          probationaryPeriod).getScore()[1]
+
+      self.assertAlmostEqual(actualScore, score)
+
+
+
+if __name__ == "__main__":
   unittest.main()

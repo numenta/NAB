@@ -106,8 +106,8 @@ class Scorer(object):
                                                   False Negative (fn)
 
     @param probationaryPeriod
-                         (int)             Row index after which predictions
-                                           are scored.
+                         (int)             The row index of the last row of the
+                                           probationary period.
     """
     self.data = pandas.DataFrame()
     self.data["timestamp"] = timestamps

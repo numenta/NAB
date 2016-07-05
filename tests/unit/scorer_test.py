@@ -191,6 +191,40 @@ class ScorerTest(unittest.TestCase):
     self.assertAlmostEqual(firstWindowScore + secondWindowScore, score[1])
 
 
+  def testFalsePositiveAfterWindow1(self):
+    timestamps = self.generateTimestamps(5)
+    predictions = [0, 0, 0, 0, 1]
+    labels = [0, 1, 1, 0, 0]
+    windowLimits = [(timestamps[1], timestamps[2])]
+    probationaryPeriod = 0
+    score = scorer.Scorer(timestamps, predictions, labels, windowLimits,
+                          COST_MATRIX, probationaryPeriod).getScore()
+    firstWindowScore = -1.0 * COST_MATRIX["fnWeight"]
+    # These are calculated by multiplying the sigmoid of the relative
+    # position in the window with the true positive weight. The sigmoid
+    # values are hard coded here but were calculated by running
+    # nab.scorer.scaledSigmoid.
+    fpScore = -0.9999092042625951 * COST_MATRIX["fpWeight"]
+    self.assertAlmostEqual(firstWindowScore + fpScore, score[1])
+
+
+  def testFalsePositiveAfterWindow2(self):
+    timestamps = self.generateTimestamps(5)
+    predictions = [0, 0, 0, 1, 0]
+    labels = [0, 1, 1, 0, 0]
+    windowLimits = [(timestamps[1], timestamps[2])]
+    probationaryPeriod = 0
+    score = scorer.Scorer(timestamps, predictions, labels, windowLimits,
+                          COST_MATRIX, probationaryPeriod).getScore()
+    firstWindowScore = -1.0 * COST_MATRIX["fnWeight"]
+    # These are calculated by multiplying the sigmoid of the relative
+    # position in the window with the true positive weight. The sigmoid
+    # values are hard coded here but were calculated by running
+    # nab.scorer.scaledSigmoid.
+    fpScore = -0.9866142981514303 * COST_MATRIX["fpWeight"]
+    self.assertAlmostEqual(firstWindowScore + fpScore, score[1])
+
+
 
 if __name__ == "__main__":
   unittest.main()

@@ -1,5 +1,6 @@
-The Numenta Anomaly Benchmark [![Build Status](https://travis-ci.org/numenta/NAB.svg?branch=master)](https://travis-ci.org/numenta/NAB)
------------------------------
+## The Numenta Anomaly Benchmark
+
+[![Build Status](https://travis-ci.org/numenta/NAB.svg?branch=master)](https://travis-ci.org/numenta/NAB)
 
 Welcome. This repository contains the data and scripts comprising the Numenta
 Anomaly Benchmark (NAB). NAB is a novel benchmark for evaluating
@@ -20,7 +21,9 @@ refer to the [NAB publication](http://arxiv.org/abs/1510.03336) or the [NAB
 Whitepaper](https://github.com/numenta/NAB/wiki#nab-whitepaper) in the wiki for
 more details about NAB scoring, data, motivation, etc.
 
-We encourage you to publish your results on running NAB, and share them with us at [nab@numenta.org](nab@numenta.org). Please cite the following publication when referring to NAB:
+We encourage you to publish your results on running NAB, and share them with us at
+[nab@numenta.org](nab@numenta.org). Please cite the following publication when
+referring to NAB:
 
 Lavin, Alexander and Ahmad, Subutai. *"Evaluating Real-time Anomaly Detection
 Algorithms – the Numenta Anomaly Benchmark"*, Fourteenth International
@@ -90,8 +93,7 @@ to `False`.
 respectively, but the latest version of NuPIC should still work (the results may
 not be identical).
 
-Installing NAB 1.0
-------------------
+## Installing NAB 1.0
 
 ### Supported Platforms
 
@@ -200,5 +202,3 @@ The run.py command has a number of useful options. To view a description of the
 command line options please enter
 
 	python run.py --help 
-
-
