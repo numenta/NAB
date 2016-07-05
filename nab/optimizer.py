@@ -169,6 +169,16 @@ def computeScaledScoreOutsideWindow(dataInfo):
 
 
 def _computeScoreChange(dataInfo, costMatrix):
+  """Compute the change in score caused by detecting this row as an anomaly.
+
+  Since the optimizer adjusts the threshold one row at a time, we can determine
+  the change in overall score by determining the impact of this single row
+  changing from not being detected to being detected as an anomaly.
+
+  :param dataInfo: the _DataInfo instance for the newly-detected row
+  :param costMatrix: the dict with weights fo true/false ppositives/negatives.
+  :returns: a tuple of (scoreChange, countsChange)
+  """
   scoreChange = 0.0
   countsChange = collections.defaultdict(int)
   if dataInfo.lastWindow is None:
@@ -234,6 +244,27 @@ def _computeScoreChange(dataInfo, costMatrix):
 
 
 def _computeThresholdScores(data, numWindows, costMatrix):
+  """Compute the scores for each threshold.
+
+  This is the core of the optimization. It takes the preprocessed data, sorts
+  it by anomaly score (descending), and iteratively lowers the threshold to
+  detect one more row as an anomaly. The threshold is originally set greater
+  than 1.0 and the score is set to the null detector score for the data. Then
+  the threshold is lowered to the anomaly score of each sorted row in turn.
+  Since some thresholds result in multiple rows being detected at once, we only
+  keep the score that corresponds to all of the newly-detected rows being
+  detected.
+
+  We additionally keep track of the counts of true/false positivies/negatives
+  for debugging.
+
+  :param data: a list of _DataInfo instances for all data to be optimized over
+  :param numWindows: the number of anomaly windows in the data which is used to
+      determine the null detector score to start with
+  :param costMatrix: the weights to use in scoring
+  :returns: a list of ThresholdResult instances sorted by score, highest to
+      lowest
+  """
   # Set up stats
   counts = {
     "tn": len(data),
@@ -274,6 +305,13 @@ def optimizeThreshold(costMatrix, data, probationaryFraction):
 
   :param costMatrix: a dict containing the weights for true/false
       positive/negative
+  :param data: a list of DataRow instances for all data to be optimized over
+  :param probationaryFraction: the fraction of each data file that belongs to
+      the probationary period
+
+  :returns: A list of ThresholdResult instances sorted by score, highest to
+      lowest. The first ThresholdResult in the list will have the optimal
+      threshold and highest score.
   """
   anomalyWindows = _processWindows(data)
 
@@ -281,6 +319,4 @@ def optimizeThreshold(costMatrix, data, probationaryFraction):
 
   data = _processData(data, anomalyWindows, probationaryFraction)
 
-  results = _computeThresholdScores(data, numWindows, costMatrix)
-  print "Done, best result: ", results[0:5]
-  return results
+  return _computeThresholdScores(data, numWindows, costMatrix)

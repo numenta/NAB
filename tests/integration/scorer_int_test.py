@@ -25,7 +25,6 @@ import pandas
 import random
 import unittest
 
-from nab import optimizer
 from nab.scorer import Scorer
 from nab.test_helpers import generateTimestamps, generateWindows, generateLabels
 
@@ -36,10 +35,10 @@ class ScorerIntTest(unittest.TestCase):
 
   def _checkCounts(self, counts, tn, tp, fp, fn):
     """Ensure the metric counts are correct."""
-    self.assertEqual(counts['tn'], tn)
-    self.assertEqual(counts['tp'], tp)
-    self.assertEqual(counts['fp'], fp)
-    self.assertEqual(counts['fn'], fn)
+    self.assertEqual(counts["tn"], tn)
+    self.assertEqual(counts["tp"], tp)
+    self.assertEqual(counts["fp"], fp)
+    self.assertEqual(counts["fn"], fn)
 
 
   def setUp(self):
@@ -67,18 +66,6 @@ class ScorerIntTest(unittest.TestCase):
 
     self.assertEqual(score, 0.0)
     self._checkCounts(scorer.counts, 10, 0, 0, 0)
-
-
-  def testNullCase2(self):
-    """No windows and no predictions should yield a score of 0.0."""
-    length = 10
-    data = {"test/file1": [optimizer.DataRow(anomalyScore=0.0, label=0)
-                           for i in xrange(length)]}
-
-    results = optimizer.optimizeThreshold(self.costMatrix, data, 0)
-
-    self.assertEqual(results[0].score, 0.0)
-    self._checkCounts(results[0].counts, 10, 0, 0, 0)
 
 
   def testFalsePositiveScaling(self):
@@ -221,38 +208,6 @@ class ScorerIntTest(unittest.TestCase):
     self._checkCounts(scorer.counts, length-windowSize*numWindows-1, 2, 1, 8)
 
 
-  def testScoringAllMetrics2(self):
-    """
-    This tests an example set of detections, where all metrics have counts > 0.
-    """
-    start = datetime.datetime.now()
-    increment = datetime.timedelta(minutes=5)
-    length = 100
-    numWindows = 2
-    windowSize = 5
 
-    timestamps = generateTimestamps(start, increment, length)
-    windows = generateWindows(timestamps, numWindows, windowSize)
-    labels = generateLabels(timestamps, windows)
-    predictions = pandas.Series([0]*length)
-
-    index = timestamps[timestamps == windows[0][0]].index[0]
-    # TP, add'l TP, and FP
-    predictions[index] = 1
-    predictions[index+1] = 1
-    predictions[index+7] = 1
-
-    data = {"test/file1": [
-        optimizer.DataRow(anomalyScore=predictions.irow(i),
-                          label=labels.irow(i))
-        for i in xrange(length)]}
-
-    results = optimizer.optimizeThreshold(self.costMatrix, data, 0)
-
-    self.assertAlmostEquals(results[0].score, -0.9769384192573443)
-    self._checkCounts(results[0].counts,
-                      length-windowSize*numWindows-1, 2, 1, 8)
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
   unittest.main()
