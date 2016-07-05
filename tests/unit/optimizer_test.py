@@ -43,32 +43,52 @@ def _getData1():
   window2 = optimizer._WindowInfo(start=9, end=11, detectedAnomalies=[])
 
   return [
-    optimizer._DataInfo(anomalyScore=0.0, idx=None, lastWindow=None),
-    optimizer._DataInfo(anomalyScore=0.2, idx=1, lastWindow=None),
-    optimizer._DataInfo(anomalyScore=0.1, idx=2, lastWindow=None),
-    optimizer._DataInfo(anomalyScore=0.1, idx=3, lastWindow=window1),
-    optimizer._DataInfo(anomalyScore=0.3, idx=4, lastWindow=window1),
-    optimizer._DataInfo(anomalyScore=0.4, idx=5, lastWindow=window1),
-    optimizer._DataInfo(anomalyScore=0.1, idx=6, lastWindow=window1),
-    optimizer._DataInfo(anomalyScore=0.1, idx=7, lastWindow=window1),
-    optimizer._DataInfo(anomalyScore=0.1, idx=8, lastWindow=window1),
-    optimizer._DataInfo(anomalyScore=0.9, idx=9, lastWindow=window2),
-    optimizer._DataInfo(anomalyScore=0.7, idx=10, lastWindow=window2),
-    optimizer._DataInfo(anomalyScore=0.1, idx=11, lastWindow=window2),
-    optimizer._DataInfo(anomalyScore=0.3, idx=12, lastWindow=window2),
-    optimizer._DataInfo(anomalyScore=0.2, idx=13, lastWindow=window2),
-    optimizer._DataInfo(anomalyScore=0.01, idx=14, lastWindow=window2),
-    optimizer._DataInfo(anomalyScore=0.11, idx=15, lastWindow=window2),
+    optimizer._DataInfo(anomalyScore=0.0, idx=0, lastWindow=None,
+                        probation=True),
+    optimizer._DataInfo(anomalyScore=0.2, idx=1, lastWindow=None,
+                        probation=False),
+    optimizer._DataInfo(anomalyScore=0.1, idx=2, lastWindow=None,
+                        probation=False),
+    optimizer._DataInfo(anomalyScore=0.1, idx=3, lastWindow=window1,
+                        probation=False),
+    optimizer._DataInfo(anomalyScore=0.3, idx=4, lastWindow=window1,
+                        probation=False),
+    optimizer._DataInfo(anomalyScore=0.4, idx=5, lastWindow=window1,
+                        probation=False),
+    optimizer._DataInfo(anomalyScore=0.1, idx=6, lastWindow=window1,
+                        probation=False),
+    optimizer._DataInfo(anomalyScore=0.1, idx=7, lastWindow=window1,
+                        probation=False),
+    optimizer._DataInfo(anomalyScore=0.1, idx=8, lastWindow=window1,
+                        probation=False),
+    optimizer._DataInfo(anomalyScore=0.9, idx=9, lastWindow=window2,
+                        probation=False),
+    optimizer._DataInfo(anomalyScore=0.7, idx=10, lastWindow=window2,
+                        probation=False),
+    optimizer._DataInfo(anomalyScore=0.1, idx=11, lastWindow=window2,
+                        probation=False),
+    optimizer._DataInfo(anomalyScore=0.3, idx=12, lastWindow=window2,
+                        probation=False),
+    optimizer._DataInfo(anomalyScore=0.2, idx=13, lastWindow=window2,
+                        probation=False),
+    optimizer._DataInfo(anomalyScore=0.01, idx=14, lastWindow=window2,
+                        probation=False),
+    optimizer._DataInfo(anomalyScore=0.11, idx=15, lastWindow=window2,
+                        probation=False),
   ]
 
 
 
 def _getData2():
   return [
-    optimizer._DataInfo(anomalyScore=0.12, idx=None, lastWindow=None),
-    optimizer._DataInfo(anomalyScore=0.31, idx=1, lastWindow=None),
-    optimizer._DataInfo(anomalyScore=0.41, idx=2, lastWindow=None),
-    optimizer._DataInfo(anomalyScore=0.21, idx=3, lastWindow=None),
+    optimizer._DataInfo(anomalyScore=0.12, idx=0, lastWindow=None,
+                        probation=True),
+    optimizer._DataInfo(anomalyScore=0.31, idx=1, lastWindow=None,
+                        probation=False),
+    optimizer._DataInfo(anomalyScore=0.41, idx=2, lastWindow=None,
+                        probation=False),
+    optimizer._DataInfo(anomalyScore=0.21, idx=3, lastWindow=None,
+                        probation=False),
   ]
 
 
@@ -77,10 +97,14 @@ def _getData3():
   window1 = optimizer._WindowInfo(start=1, end=2, detectedAnomalies=[])
 
   return [
-    optimizer._DataInfo(anomalyScore=0.0, idx=None, lastWindow=None),
-    optimizer._DataInfo(anomalyScore=0.6, idx=1, lastWindow=window1),
-    optimizer._DataInfo(anomalyScore=0.9, idx=2, lastWindow=window1),
-    optimizer._DataInfo(anomalyScore=0.4, idx=3, lastWindow=window1),
+    optimizer._DataInfo(anomalyScore=0.0, idx=0, lastWindow=None,
+                        probation=True),
+    optimizer._DataInfo(anomalyScore=0.6, idx=1, lastWindow=window1,
+                        probation=False),
+    optimizer._DataInfo(anomalyScore=0.9, idx=2, lastWindow=window1,
+                        probation=False),
+    optimizer._DataInfo(anomalyScore=0.4, idx=3, lastWindow=window1,
+                        probation=False),
   ]
 
 
@@ -89,7 +113,8 @@ class OptimizerTest(unittest.TestCase):
 
 
   def testComputeScoreChangeFalsePositiveNoWindow(self):
-    dataInfo = optimizer._DataInfo(idx=1, anomalyScore=0.1, lastWindow=None)
+    dataInfo = optimizer._DataInfo(idx=1, anomalyScore=0.1, lastWindow=None,
+                                   probation=False)
     scoreChange = optimizer._computeScoreChange(dataInfo, COST_MATRIX)
     self.assertAlmostEqual(-COST_MATRIX["fpWeight"], scoreChange[0])
     self.assertSetEqual(set(("tn", "fp")), set(scoreChange[1].keys()))
@@ -100,7 +125,7 @@ class OptimizerTest(unittest.TestCase):
   def testComputeScoreChangeFalsePositiveWithFarWindow(self):
     windowInfo = optimizer._WindowInfo(start=3, end=5, detectedAnomalies=[])
     dataInfo = optimizer._DataInfo(idx=150, anomalyScore=0.1,
-                                   lastWindow=windowInfo)
+                                   lastWindow=windowInfo, probation=False)
     scoreChange = optimizer._computeScoreChange(dataInfo, COST_MATRIX)
     self.assertAlmostEqual(-COST_MATRIX["fpWeight"], scoreChange[0])
     self.assertSetEqual(set(("tn", "fp")), set(scoreChange[1].keys()))
@@ -111,7 +136,7 @@ class OptimizerTest(unittest.TestCase):
   def testComputeScoreChangeFalsePositiveWithCloseWindow(self):
     windowInfo = optimizer._WindowInfo(start=3, end=5, detectedAnomalies=[])
     dataInfo = optimizer._DataInfo(idx=6, anomalyScore=0.1,
-                                   lastWindow=windowInfo)
+                                   lastWindow=windowInfo, probation=False)
     scoreChange = optimizer._computeScoreChange(dataInfo, COST_MATRIX)
     self.assertAlmostEqual(-0.8482836399575129 * COST_MATRIX["fpWeight"],
                            scoreChange[0])

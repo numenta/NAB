@@ -59,7 +59,8 @@ _WindowInfo = collections.namedtuple("_WindowInfo",
 """
 
 _DataInfo = collections.namedtuple("_DataInfo",
-                                   ("anomalyScore", "idx", "lastWindow"))
+                                   ("anomalyScore", "idx", "lastWindow",
+                                    "probation"))
 """Private class with preprocessed info about a data row.
 
 :param anomalyScore: the score returned by the detector
@@ -67,6 +68,7 @@ _DataInfo = collections.namedtuple("_DataInfo",
 :param lastWindow: The _WindowInfo instance that this row is in, or the
     last window precedign this row if this row is outside any window. None
     if no window has been seen yet in this file.
+:param probation: bool indicating whether this row is in the probation period
 """
 
 
@@ -133,15 +135,15 @@ def _processData(data, anomalyWindows, probationaryFraction):
         lastWindow = anomalyWindows[path][nextWindowIdx]
         nextWindowIdx += 1
 
-      if i < probationaryPeriod:
-        dataIdx = None
-      else:
-        dataIdx = i
+      probation = i < probationaryPeriod
+      if probation:
+        # Make sure there isn't an anomaly window inside the probation period
+        assert lastWindow is None
+
       output.append(_DataInfo(anomalyScore=row.anomalyScore,
-                            idx=dataIdx,
-                            lastWindow=lastWindow))
-      if output[-1].idx is None:
-        assert output[-1].lastWindow is None, (output[-1], probationaryPeriod, path, len(rows))
+                              idx=i,
+                              lastWindow=lastWindow,
+                              probation=probation))
 
   return output
 
@@ -171,7 +173,7 @@ def _computeScoreChange(dataInfo, costMatrix):
   countsChange = collections.defaultdict(int)
   if dataInfo.lastWindow is None:
     # False positive before any windows
-    if dataInfo.idx is not None:
+    if not dataInfo.probation:
       # Probationary period has passed
       scoreChange -= costMatrix["fpWeight"]
 
@@ -179,7 +181,7 @@ def _computeScoreChange(dataInfo, costMatrix):
       countsChange["tn"] -= 1
       countsChange["fp"] += 1
     else:
-      # Do nothing, don't count the FP
+      # Do nothing, don't count the FP since it is inside probation period
       pass
   elif dataInfo.idx > dataInfo.lastWindow.end:
     # Outside window, contribute false positive

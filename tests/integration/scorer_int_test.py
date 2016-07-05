@@ -31,7 +31,7 @@ from nab.test_helpers import generateTimestamps, generateWindows, generateLabels
 
 
 
-class ScorerTest(unittest.TestCase):
+class ScorerIntTest(unittest.TestCase):
 
 
   def _checkCounts(self, counts, tn, tp, fp, fn):
@@ -249,7 +249,7 @@ class ScorerTest(unittest.TestCase):
 
     results = optimizer.optimizeThreshold(self.costMatrix, data, 0)
 
-    self.assertAlmostEquals(results[0].score, -0.9540, 4)
+    self.assertAlmostEquals(results[0].score, -0.9769384192573443)
     self._checkCounts(results[0].counts,
                       length-windowSize*numWindows-1, 2, 1, 8)
 
