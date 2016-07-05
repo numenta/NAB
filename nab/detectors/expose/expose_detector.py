@@ -1,33 +1,28 @@
-import math
 import numpy
-from sklearn.kernel_approximation import RBFSampler
-from sklearn.preprocessing import normalize
 
+from sklearn.kernel_approximation import RBFSampler
 from nab.detectors.base import AnomalyDetector
 
 
 
 class ExposeDetector(AnomalyDetector):
 
-  """ This detector is an implemetation of The EXPoSE (EXPected Similarity
+  """ This detector is an implementation of The EXPoSE (EXPected Similarity
   Estimation) algorithm as described in Markus Schneider, Wolfgang Ertel,
   Fabio Ramos, "Expected Similarity Estimation for Lage-Scale Batch and
   Streaming Anomaly Detection", arXiv 1601.06602 (2016).
 
-  EXPose is an anomaly detection classifier that calculates the likelihood of a
-  query point belonging to the class of normal data using the inner product
-  between a feature map and the kernel embedding of probability measures in
-  reproducing kernel Hilbert space (RKHS). This measures the similarity of a
-  data point to previous points without assuming an underlying data
-  distribution.
+  EXPoSE calculates the likelihood of a data point being normal by using
+  the inner product of its feature map with kernel embedding of previous data
+  points. This measures the similarity of a data point to previous points
+  without assuming an underlying data distribution.
 
-  There are three EXPoSE variants : incremental, windowing and decay. This
+  There are three EXPoSE variants: incremental, windowing and decay. This
   implementation is based on EXPoSE with decay. All three variants have been
   tried on NAB but decay gives the best results.
 
-  Parameters for for this detector have been tuned to give the best
-  performance on NAB. Anomaly scores are in the range of -0.02 to 1.02
-  because of approximation.
+  Parameters for this detector have been tuned to give the best performance.
+  Anomaly score outputs are in the range of -0.02 to 1.02.
   """
 
   def __init__(self, *args, **kwargs):
@@ -36,34 +31,34 @@ class ExposeDetector(AnomalyDetector):
     self.kernel = None
     self.previousExposeModel = []
     self.decay = 0.01
-    self.timestep = 1.0
-
-    # Parameters for RBF kernel initialization
-    self.n_components = 20000 #dimensionality of feature transform
-    self.gamma = 0.5
-    self.randomSeed = 290
+    self.timestep = 1
 
 
   def initialize(self):
-    self.kernel = RBFSampler(gamma=self.gamma,
-                             n_components=self.n_components,
-                             random_state=self.randomSeed)
+    """Initializes RBFSampler for the detector"""
+    self.kernel = RBFSampler(gamma=0.5,
+                             n_components=20000,
+                             random_state=290)
 
 
   def handleRecord(self, inputData):
+    """ Returns a list [anomalyScore] calculated using a kernel based
+    similarity method described in the comments below"""
+
     # Transform the input by approximating feature map of a Radial Basis
     # Function kernel using Random Kitchen Sinks approximation
-    inputFeature = self.kernel.fit_transform(numpy.array([[inputData[
-                                                             "value"]]]))
+    inputFeature = self.kernel.fit_transform(
+      numpy.array([[inputData["value"]]]))
 
     # Compute expose model as a weighted sum of new data point's feature
     # map and previous data points' kernel embedding. Influence of older data
     # points declines with the decay factor.
-    if self.timestep == 1.0:
+    if self.timestep == 1:
       exposeModel = inputFeature
     else:
-      exposeModel = (self.decay * inputFeature) + (1 - self.decay) * \
-                                                  self.previousExposeModel
+      exposeModel = ((self.decay * inputFeature) + (1 - self.decay) *
+                     self.previousExposeModel)
+
     # Update previous expose model
     self.previousExposeModel = exposeModel
 
