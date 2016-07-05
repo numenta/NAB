@@ -19,8 +19,6 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-"""TODO"""
-
 import datetime
 import unittest
 

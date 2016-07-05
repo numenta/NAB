@@ -215,8 +215,6 @@ def _computeScoreChange(dataInfo, costMatrix):
     countsChange["tp"] += 1
   elif dataInfo.idx < dataInfo.lastWindow.detectedAnomalies[0]:
     # Not first instance of a detected anomaly but earliest in window
-    windowRange = _windowRange(dataInfo.lastWindow)
-
     prevDataInfo = dataInfo.lastWindow.detectedAnomalies[0]
     scoreChange -= (computeScaledScoreInsideWindow(prevDataInfo) *
                     costMatrix["tpWeight"])
@@ -283,7 +281,7 @@ def _computeThresholdScores(data, numWindows, costMatrix):
   score = -(numWindows * costMatrix["fnWeight"])
   threshold = 2.0
   resultMap = {threshold: ThresholdResult(
-      score=score, threshold=threshold, counts=copy.deepcopy(counts))}
+    score=score, threshold=threshold, counts=copy.deepcopy(counts))}
   for dataInfo in data:
     threshold = dataInfo.anomalyScore
     scoreChange, countsChange = _computeScoreChange(dataInfo, costMatrix)
