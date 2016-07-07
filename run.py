@@ -133,7 +133,8 @@ if __name__ == "__main__":
                     nargs="*",
                     type=str,
                     default=["null", "numenta", "random", "skyline",
-                             "bayesChangePt", "windowedGaussian"],
+                             "bayesChangePt", "windowedGaussian",
+                             "kalmanFilter"],
                     help="Comma separated list of detector(s) to use, e.g. "
                          "null,numenta")
 
@@ -186,6 +187,12 @@ if __name__ == "__main__":
   if "windowedGaussian" in args.detectors:
     from nab.detectors.gaussian.windowedGaussian_detector import (
       WindowedGaussianDetector)
+  if "kalmanFilter" in args.detectors:
+    from nab.detectors.kalman_filter.kalman_filter_detector import (
+      KalmanFilterDetector)
+  if "goodnessOfFit" in args.detectors:
+    from nab.detectors.good_of_fit.good_of_fit_detetctor import (
+      goodnessOfFitDetector)
 
   if args.skipConfirmation or checkInputs(args):
     main(args)
