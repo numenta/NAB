@@ -1,6 +1,7 @@
 import numpy
 
 from sklearn.kernel_approximation import RBFSampler
+
 from nab.detectors.base import AnomalyDetector
 
 
@@ -19,10 +20,8 @@ class ExposeDetector(AnomalyDetector):
 
   There are three EXPoSE variants: incremental, windowing and decay. This
   implementation is based on EXPoSE with decay. All three variants have been
-  tried on NAB but decay gives the best results.
-
-  Parameters for this detector have been tuned to give the best performance.
-  Anomaly score outputs are in the range of -0.02 to 1.02.
+  tried on NAB but decay gives the best results.Parameters for this detector
+  have been tuned to give the best performance.
   """
 
   def __init__(self, *args, **kwargs):
@@ -64,7 +63,8 @@ class ExposeDetector(AnomalyDetector):
 
     # Compute anomaly score by calculating similarity of the new data point
     # with expose model. The similarity measure, calculated via inner
-    # product, is the likelihood of the data point being normal.
+    # product, is the likelihood of data point being normal. Resulting
+    # anomaly scores are in the range of -0.02 to 1.02.
     anomalyScore = numpy.asscalar(1 - numpy.inner(inputFeature, exposeModel))
     self.timestep += 1
 
