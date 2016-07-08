@@ -133,7 +133,7 @@ if __name__ == "__main__":
                     nargs="*",
                     type=str,
                     default=["null", "numenta", "random", "skyline",
-                             "bayesChangePt", "windowedGaussian"],
+                             "bayesChangePt", "windowedGaussian", "expose"],
                     help="Comma separated list of detector(s) to use, e.g. "
                          "null,numenta")
 
@@ -186,6 +186,12 @@ if __name__ == "__main__":
   if "windowedGaussian" in args.detectors:
     from nab.detectors.gaussian.windowedGaussian_detector import (
       WindowedGaussianDetector)
+
+  # To run expose detector, you must have sklearn version 0.16.1 installed.
+  # Higher versions of sklearn may not be compatible with numpy version 1.9.2
+  # required to run nupic.
+  if "expose" in args.detectors:
+    from nab.detectors.expose.expose_detector import ExposeDetector
 
   if args.skipConfirmation or checkInputs(args):
     main(args)
