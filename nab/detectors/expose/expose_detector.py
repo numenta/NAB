@@ -30,7 +30,7 @@ class ExposeDetector(AnomalyDetector):
     self.kernel = None
     self.previousExposeModel = []
     self.decay = 0.01
-    self.timestep = 1
+    self.timestep = 0
 
 
   def initialize(self):
@@ -52,7 +52,7 @@ class ExposeDetector(AnomalyDetector):
     # Compute expose model as a weighted sum of new data point's feature
     # map and previous data points' kernel embedding. Influence of older data
     # points declines with the decay factor.
-    if self.timestep == 1:
+    if self.timestep == 0:
       exposeModel = inputFeature
     else:
       exposeModel = ((self.decay * inputFeature) + (1 - self.decay) *
