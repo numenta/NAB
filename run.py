@@ -187,7 +187,9 @@ if __name__ == "__main__":
     from nab.detectors.gaussian.windowedGaussian_detector import (
       WindowedGaussianDetector)
 
-  # To run expose detector, you must have sklearn package installed.
+  # To run expose detector, you must have sklearn version 0.16.1 installed.
+  # Higher versions of sklearn may not run with numpy version 1.9.2 required
+  # to run nupic.
   if "expose" in args.detectors:
     from nab.detectors.expose.expose_detector import ExposeDetector
 
