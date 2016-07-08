@@ -133,12 +133,8 @@ if __name__ == "__main__":
                     nargs="*",
                     type=str,
                     default=["null", "numenta", "random", "skyline",
-<<<<<<< HEAD
-                             "bayesChangePt", "windowedGaussian",
-                             "kalmanFilter"],
-=======
-                             "bayesChangePt", "windowedGaussian", "expose"],
->>>>>>> 90f83d72957b7de1b8c800c78944f0902bc78ac9
+                             "bayesChangePt", "windowedGaussian", "expose",
+                             "goodnessOfFit"],
                     help="Comma separated list of detector(s) to use, e.g. "
                          "null,numenta")
 
