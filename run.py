@@ -191,8 +191,8 @@ if __name__ == "__main__":
     from nab.detectors.kalman_filter.kalman_filter_detector import (
       KalmanFilterDetector)
   if "goodnessOfFit" in args.detectors:
-    from nab.detectors.good_of_fit.good_of_fit_detetctor import (
-      goodnessOfFitDetector)
+    from nab.detectors.goodness_of_fit.goodness_of_fit_detector import (
+      GoodnessOfFitDetector)
 
   if args.skipConfirmation or checkInputs(args):
     main(args)
