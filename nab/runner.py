@@ -29,7 +29,7 @@ except ImportError:
 from nab.corpus import Corpus
 from nab.detectors.base import detectDataSet
 from nab.labeler import CorpusLabel
-from nab.optimizer import optimizeThreshold
+from nab import optimizer
 from nab.scorer import scoreCorpus
 from nab.util import updateThresholds, updateFinalResults
 
@@ -144,26 +144,36 @@ class Runner(object):
     """
     print "\nRunning optimize step"
 
-    scoreFlag = False
     thresholds = {}
 
     for detectorName in detectorNames:
       resultsDetectorDir = os.path.join(self.resultsDir, detectorName)
       resultsCorpus = Corpus(resultsDetectorDir)
+      data = {}
+      for path, results in resultsCorpus.dataFiles.iteritems():
+        if len(os.path.split(path)[0]) == 0:
+          # Summary file, skip
+          continue
+        dataRows = []
+        for _, row in results.data.iterrows():
+          dataRows.append(
+            optimizer.DataRow(
+              anomalyScore=row["anomaly_score"],
+              label=row["label"]))
+        data[path] = dataRows
 
       thresholds[detectorName] = {}
 
       for profileName, profile in self.profiles.iteritems():
-        thresholds[detectorName][profileName] = optimizeThreshold(
-          (self.pool,
-           detectorName,
-           profileName,
-           profile["CostMatrix"],
-           resultsDetectorDir,
-           resultsCorpus,
-           self.corpusLabel,
-           self.probationaryPercent,
-           scoreFlag))
+        results = optimizer.optimizeThreshold(
+          profile["CostMatrix"],
+          data,
+          self.probationaryPercent,
+        )
+        thresholds[detectorName][profileName] = {
+            "threshold": results[0].threshold,
+            "score": results[0].score,
+        }
 
     updateThresholds(thresholds, self.thresholdPath)
 
@@ -188,7 +198,6 @@ class Runner(object):
     print "\nRunning scoring step"
 
     scoreFlag = True
-    baselines = {}
 
     self.resultsFiles = []
     for detectorName in detectorNames:
@@ -235,19 +244,7 @@ class Runner(object):
     """
     print "\nRunning score normalization step"
 
-    # Get baseline scores for each application profile.
-    nullDir = os.path.join(self.resultsDir, "null")
-    if not os.path.isdir(nullDir):
-      raise IOError("No results directory for null detector. You must "
-                    "run the null detector before normalizing scores.")
-
-    baselines = {}
-    for profileName, _ in self.profiles.iteritems():
-      fileName = os.path.join(nullDir,
-                              "null_" + profileName + "_scores.csv")
-      with open(fileName) as f:
-        results = pandas.read_csv(f)
-        baselines[profileName] = results["Score"].iloc[-1]
+    baselines = self._getNullBaselines()
 
     # Get total number of TPs
     with open(self.labelPath, "rb") as f:
@@ -284,3 +281,20 @@ class Runner(object):
     updateFinalResults(finalResults, resultsPath)
     print "Final scores have been written to %s." % resultsPath
 
+
+  def _getNullBaselines(self):
+    # Get baseline scores for each application profile.
+    nullDir = os.path.join(self.resultsDir, "null")
+    if not os.path.isdir(nullDir):
+      raise IOError("No results directory for null detector. You must "
+                    "run the null detector before normalizing scores.")
+
+    baselines = {}
+    for profileName, _ in self.profiles.iteritems():
+      fileName = os.path.join(nullDir,
+                              "null_" + profileName + "_scores.csv")
+      with open(fileName) as f:
+        results = pandas.read_csv(f)
+        baselines[profileName] = results["Score"].iloc[-1]
+
+    return baselines

@@ -30,15 +30,15 @@ from nab.test_helpers import generateTimestamps, generateWindows, generateLabels
 
 
 
-class ScorerTest(unittest.TestCase):
+class ScorerIntTest(unittest.TestCase):
 
 
   def _checkCounts(self, counts, tn, tp, fp, fn):
     """Ensure the metric counts are correct."""
-    self.assertEqual(counts['tn'], tn, "Incorrect tn count")
-    self.assertEqual(counts['tp'], tp, "Incorrect tp count")
-    self.assertEqual(counts['fp'], fp, "Incorrect fp count")
-    self.assertEqual(counts['fn'], fn, "Incorrect fn count")
+    self.assertEqual(counts["tn"], tn)
+    self.assertEqual(counts["tp"], tp)
+    self.assertEqual(counts["fp"], fp)
+    self.assertEqual(counts["fn"], fn)
 
 
   def setUp(self):
@@ -72,7 +72,7 @@ class ScorerTest(unittest.TestCase):
     """
     Test scaling the weight of false positives results in an approximate
     balance with the true positives.
-    
+
     The contributions of TP and FP scores should approximately cancel; i.e.
     total score =0. With x windows, this total score should on average decrease
     x/2 because of x FNs. Thus, the acceptable range for score should be
@@ -83,14 +83,14 @@ class ScorerTest(unittest.TestCase):
     length = 100
     numWindows = 1
     windowSize = 10
-    
+
     timestamps = generateTimestamps(start, increment, length)
     windows = generateWindows(timestamps, numWindows, windowSize)
     labels = generateLabels(timestamps, windows)
-    
+
     # Scale for 10% = windowSize/length
     self.costMatrix["fpWeight"] = 0.11
-    
+
     # Make arbitrary detections, score, repeat
     scores = []
     for _ in xrange(20):
@@ -101,13 +101,13 @@ class ScorerTest(unittest.TestCase):
         probationaryPeriod=0)
       (_, score) = scorer.getScore()
       scores.append(score)
-  
+
     avgScore = sum(scores)/float(len(scores))
 
     self.assertTrue(-1.5 <= avgScore <= 0.5, "The average score across 20 sets "
       "of random detections is %f, which is not within the acceptable range "
       "-1.5 to 0.5." % avgScore)
-  
+
 
   def testRewardLowFalseNegatives(self):
     """
@@ -120,16 +120,16 @@ class ScorerTest(unittest.TestCase):
     length = 100
     numWindows = 1
     windowSize = 10
-    
+
     timestamps = generateTimestamps(start, increment, length)
     windows = generateWindows(timestamps, numWindows, windowSize)
     labels = generateLabels(timestamps, windows)
     predictions = pandas.Series([0]*length)
-    
+
     costMatrixFN = copy.deepcopy(self.costMatrix)
     costMatrixFN["fnWeight"] = 2.0
     costMatrixFN["fpWeight"] = 0.055
-    
+
     scorer1 = Scorer(timestamps, predictions, labels, windows, self.costMatrix,
       probationaryPeriod=0)
     (_, score1) = scorer1.getScore()
@@ -155,12 +155,12 @@ class ScorerTest(unittest.TestCase):
     length = 100
     numWindows = 0
     windowSize = 10
-    
+
     timestamps = generateTimestamps(start, increment, length)
     windows = []
     labels = generateLabels(timestamps, windows)
     predictions = pandas.Series([0]*length)
-    
+
     costMatrixFP = copy.deepcopy(self.costMatrix)
     costMatrixFP["fpWeight"] = 2.0
     costMatrixFP["fnWeight"] = 0.5
@@ -173,7 +173,7 @@ class ScorerTest(unittest.TestCase):
     scorer2 = Scorer(timestamps, predictions, labels, windows, costMatrixFP,
       probationaryPeriod=0)
     (_, score2) = scorer2.getScore()
-    
+
     self.assertEqual(score1, 0.5*score2)
     self._checkCounts(scorer1.counts, length-windowSize*numWindows-1, 0, 1, 0)
     self._checkCounts(scorer2.counts, length-windowSize*numWindows-1, 0, 1, 0)
@@ -188,25 +188,26 @@ class ScorerTest(unittest.TestCase):
     length = 100
     numWindows = 2
     windowSize = 5
-    
+
     timestamps = generateTimestamps(start, increment, length)
     windows = generateWindows(timestamps, numWindows, windowSize)
     labels = generateLabels(timestamps, windows)
     predictions = pandas.Series([0]*length)
-    
+
     index = timestamps[timestamps == windows[0][0]].index[0]
     # TP, add'l TP, and FP
     predictions[index] = 1
     predictions[index+1] = 1
     predictions[index+7] = 1
-    
+
     scorer = Scorer(timestamps, predictions, labels, windows, self.costMatrix,
       probationaryPeriod=0)
     (_, score) = scorer.getScore()
-    
+
     self.assertAlmostEquals(score, -0.9540, 4)
     self._checkCounts(scorer.counts, length-windowSize*numWindows-1, 2, 1, 8)
 
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
   unittest.main()

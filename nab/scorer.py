@@ -106,8 +106,8 @@ class Scorer(object):
                                                   False Negative (fn)
 
     @param probationaryPeriod
-                         (int)             Row index after which predictions
-                                           are scored.
+                         (int)             The row index of the last row of the
+                                           probationary period.
     """
     self.data = pandas.DataFrame()
     self.data["timestamp"] = timestamps
@@ -436,11 +436,11 @@ def scoreDataSet(args):
 
   if scoreFlag:
     # Append scoring function values to the respective results file
-    df_csv = pandas.read_csv(outputPath, header=0, parse_dates=[0])
-    df_csv["S(t)_%s" % profileName] = scores
-    df_csv.to_csv(outputPath, index=False)
+    dfCsv = pandas.read_csv(outputPath, header=0, parse_dates=[0])
+    dfCsv["S(t)_%s" % profileName] = scores
+    dfCsv.to_csv(outputPath, index=False)
 
   counts = scorer.counts
 
   return (detectorName, profileName, relativePath, threshold, scorer.score,
-    counts["tp"], counts["tn"], counts["fp"], counts["fn"], scorer.length)
+          counts["tp"], counts["tn"], counts["fp"], counts["fn"], scorer.length)
