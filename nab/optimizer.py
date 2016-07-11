@@ -28,7 +28,7 @@ from nab import util
 DataRow = collections.namedtuple("DataRow", ("anomalyScore", "label"))
 """Input format for optimizer.
 
-:param anomalyScore: the score returned by the detetor
+:param anomalyScore: the score returned by the detector
 :param label: the ground truth - True if the point is inside a window,
     False otherwise
 """
@@ -54,8 +54,8 @@ _WindowInfo = collections.namedtuple("_WindowInfo",
 :param start: the file-specific index of the first point in the window
 :param end: the file-specific index of the last point in the window
 :detectedAnomalies: a list of indices of points where the detector's
-    anomaly score is higher than the current threshold. This is updated
-    each time the threshold is lowered.
+    anomaly score is higher than or equal to the current threshold. This is
+    updated each time the threshold is lowered.
 """
 
 _DataInfo = collections.namedtuple("_DataInfo",
@@ -66,14 +66,14 @@ _DataInfo = collections.namedtuple("_DataInfo",
 :param anomalyScore: the score returned by the detector
 :param idx: the file-specific index of this row
 :param lastWindow: The _WindowInfo instance that this row is in, or the
-    last window precedign this row if this row is outside any window. None
+    last window preceding this row if this row is outside any window. None
     if no window has been seen yet in this file.
 :param probation: bool indicating whether this row is in the probation period
 """
 
 
 
-def _processWindows(data):
+def _extractWindowsFromData(data):
   """Process the windows into a format for easy processing.
 
   :param data: a dict mapping each data file path to a list of DataRow
@@ -104,8 +104,8 @@ def _processData(data, anomalyWindows, probationaryFraction):
   """Process the data rows into a format for easy processing.
 
   The resulting _DataInfo instances that fall into the same window will
-  have references to the same _WindowInfo instance and thus can see which
-  other data rows have been detected so far in the
+  have references to the same _WindowInfo instance, allowing us to see
+  other data rows that have been detected so far in the
   _WindowInfo.detectedAnomalies list.
 
   :param data: a dict mapping each data file path to a list of ordered
@@ -249,9 +249,10 @@ def _computeThresholdScores(data, numWindows, costMatrix):
   detect one more row as an anomaly. The threshold is originally set greater
   than 1.0 and the score is set to the null detector score for the data. Then
   the threshold is lowered to the anomaly score of each sorted row in turn.
-  Since some thresholds result in multiple rows being detected at once, we only
-  keep the score that corresponds to all of the newly-detected rows being
-  detected.
+  Since some rows have the same anomaly score, the iterative approach will
+  calculate multiple NAB scores for the same anomaly score. We want to only
+  keep the last NAB score, which corresponds to all rows with that same
+  anomaly score being detected.
 
   We additionally keep track of the counts of true/false positivies/negatives
   for debugging.
@@ -276,7 +277,9 @@ def _computeThresholdScores(data, numWindows, costMatrix):
       counts["tn"] -= 1
       counts["fn"] += 1
 
-  # Now we iteratively compute the score for every possible threshold
+  # Now we iteratively compute the score for every possible threshold. We
+  # start with a threshold > 1.0 such that no detections are made. The initial
+  # score then matches the null detector.
   data = sorted(data, key=lambda di: di.anomalyScore, reverse=True)
   score = -(numWindows * costMatrix["fnWeight"])
   threshold = 2.0
@@ -311,7 +314,7 @@ def optimizeThreshold(costMatrix, data, probationaryFraction):
       lowest. The first ThresholdResult in the list will have the optimal
       threshold and highest score.
   """
-  anomalyWindows = _processWindows(data)
+  anomalyWindows = _extractWindowsFromData(data)
 
   numWindows = sum([len(windows) for _, windows in anomalyWindows.iteritems()])
 
