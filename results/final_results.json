@@ -9,6 +9,11 @@
         "reward_low_FP_rate": 3.1909311068965485,
         "standard": 16.436669224267241
     },
+    "goodnessOfFit": {
+        "reward_low_FN_rate": 58.842292393247128,
+        "reward_low_FP_rate": 47.598351759844824,
+        "standard": 54.642748934698282
+    },
     "null": {
         "reward_low_FN_rate": 0.0,
         "reward_low_FP_rate": 0.0,
