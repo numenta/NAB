@@ -1,114 +1,114 @@
 {
     "bayesChangePt": {
         "reward_low_FN_rate": {
-            "score": -119.7471580442638,
-            "threshold": 0.9813537597656257
+            "score": -128.49158640615104,
+            "threshold": 0.981366459627
         },
         "reward_low_FP_rate": {
-            "score": -108.56073591812678,
-            "threshold": 0.9945251464843755
+            "score": -104.12068400168738,
+            "threshold": 0.997983870968
         },
         "standard": {
-            "score": -74.9034705754507,
-            "threshold": 0.9845962524414067
+            "score": -78.54771098147094,
+            "threshold": 0.990909090909
         }
     },
     "null": {
         "reward_low_FN_rate": {
             "score": -232.0,
-            "threshold": 0.6250000000000001
+            "threshold": 2.0
         },
         "reward_low_FP_rate": {
             "score": -116.0,
-            "threshold": 0.6250000000000001
+            "threshold": 2.0
         },
         "standard": {
             "score": -116.0,
-            "threshold": 0.6250000000000001
+            "threshold": 2.0
         }
     },
     "numenta": {
         "reward_low_FN_rate": {
-            "score": 9.432068022614288,
-            "threshold": 0.5126953125
+            "score": -3.7791855428217764,
+            "threshold": 0.5246505553199999
         },
         "reward_low_FP_rate": {
-            "score": 19.920558339682692,
-            "threshold": 0.5125976562500002
+            "score": 9.1214060956322,
+            "threshold": 0.544952187004
         },
         "standard": {
-            "score": 35.432068022614295,
-            "threshold": 0.5126953125
+            "score": 23.02877988362196,
+            "threshold": 0.544952187004
         }
     },
     "numentaTM": {
         "reward_low_FN_rate": {
-            "score": -2.001699542878321,
-            "threshold": 0.5
+            "score": -15.302014998860468,
+            "threshold": 0.504760604698
         },
         "reward_low_FP_rate": {
-            "score": 5.5435154724804185,
-            "threshold": 0.549999237060547
+            "score": -3.36609434271987,
+            "threshold": 0.565666370505
         },
         "standard": {
-            "score": 25.99830045712168,
-            "threshold": 0.5
+            "score": 12.69798500113981,
+            "threshold": 0.504760604698
         }
     },
     "random": {
         "reward_low_FN_rate": {
-            "score": -45.889252239141754,
-            "threshold": 0.9984497070312507
+            "score": -140.03488001793028,
+            "threshold": 0.998405097835
         },
         "reward_low_FP_rate": {
-            "score": -40.59422055318891,
-            "threshold": 0.9995117187500009
+            "score": -99.78442912134875,
+            "threshold": 0.999595043934
         },
         "standard": {
-            "score": -25.889252239141747,
-            "threshold": 0.9984497070312507
+            "score": -77.16819524795812,
+            "threshold": 0.9994451352600001
         }
     },
     "skyline": {
         "reward_low_FN_rate": {
-            "score": -77.20605964639174,
-            "threshold": 0.8031250000000002
+            "score": -119.5808108447919,
+            "threshold": 1.0
         },
         "reward_low_FP_rate": {
-            "score": -53.17159266153103,
-            "threshold": 0.8996093750000005
+            "score": -63.1761468671044,
+            "threshold": 1.0
         },
         "standard": {
-            "score": -33.206059646391715,
-            "threshold": 0.8031250000000002
+            "score": -50.58081084479084,
+            "threshold": 1.0
         }
     },
     "twitterADVec": {
         "reward_low_FN_rate": {
-            "score": -30.63914483,
-            "threshold": 0.5
+            "score": -73.5759313729816,
+            "threshold": 1
         },
         "reward_low_FP_rate": {
-            "score": -12.15798656,
-            "threshold": 0.5
+            "score": -65.78435239488697,
+            "threshold": 1
         },
         "standard": {
-            "score": -8.639144834,
-            "threshold": 0.5
+            "score": -34.5759313729797,
+            "threshold": 1
         }
     },
     "windowedGaussian": {
         "reward_low_FN_rate": {
-            "score": -127.16881016907034,
-            "threshold": 0.9999998092651373
+            "score": -139.45227714617963,
+            "threshold": 1.0
         },
         "reward_low_FP_rate": {
-            "score": -176.80116502414384,
-            "threshold": 0.9999998092651373
+            "score": -116.0,
+            "threshold": 2.0
         },
         "standard": {
-            "score": -81.16881016907035,
-            "threshold": 0.9999998092651373
+            "score": -85.45227714617614,
+            "threshold": 1.0
         }
     }
 }

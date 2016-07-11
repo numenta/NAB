@@ -1,8 +1,8 @@
 {
     "bayesChangePt": {
-        "reward_low_FN_rate": 32.256563780459771,
-        "reward_low_FP_rate": 3.2065793456896587,
-        "standard": 17.714021303663792
+        "reward_low_FN_rate": 32.256563780383964,
+        "reward_low_FP_rate": 5.1330121171431848,
+        "standard": 17.049665734631766
     },
     "null": {
         "reward_low_FN_rate": 0.0,
@@ -10,33 +10,33 @@
         "standard": 0.0
     },
     "numenta": {
-        "reward_low_FN_rate": 69.37703104097989,
-        "reward_low_FP_rate": 58.58644756021552,
-        "standard": 65.27244311318965
+        "reward_low_FN_rate": 69.377031040981123,
+        "reward_low_FP_rate": 58.252283168065382,
+        "standard": 64.246840835302351
     },
     "numentaTM": {
-        "reward_low_FN_rate": 66.09146564859769,
-        "reward_low_FP_rate": 52.389446324344824,
-        "standard": 61.20616399012932
+        "reward_low_FN_rate": 66.091465648598174,
+        "reward_low_FP_rate": 52.389446324345016,
+        "standard": 61.206163990138656
     },
     "random": {
-        "reward_low_FN_rate": 25.876351314080456,
-        "reward_low_FP_rate": 5.763682319827586,
-        "standard": 16.831768350517237
+        "reward_low_FN_rate": 27.574890833294475,
+        "reward_low_FP_rate": 7.4800349383380587,
+        "standard": 17.397760044032854
     },
     "skyline": {
-        "reward_low_FN_rate": 44.4810173429885,
-        "reward_low_FP_rate": 27.08121005969828,
-        "standard": 35.687043255862065
+        "reward_low_FN_rate": 35.179236597926028,
+        "reward_low_FP_rate": 27.081210059684899,
+        "standard": 32.510234207233864
     },
     "twitterADVec": {
-        "reward_low_FN_rate": 53.50107495100574,
-        "reward_low_FP_rate": 33.610051641206894,
-        "standard": 47.06195725408189
+        "reward_low_FN_rate": 53.501074950997172,
+        "reward_low_FP_rate": 33.610051641190871,
+        "standard": 47.061957254081968
     },
     "windowedGaussian": {
-        "reward_low_FN_rate": 30.123905123850577,
-        "reward_low_FP_rate": -26.207398717241393,
-        "standard": 15.013443892629311
+        "reward_low_FN_rate": 38.289120383490186,
+        "reward_low_FP_rate": 0.0,
+        "standard": 30.709542644200788
     }
 }
