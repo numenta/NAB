@@ -266,7 +266,7 @@ def _computeThresholdScores(data, numWindows, costMatrix):
   """
   # Set up stats
   counts = {
-    "tn": len(data),
+    "tn": 0,
     "tp": 0,
     "fp": 0,
     "fn": 0,
@@ -274,8 +274,9 @@ def _computeThresholdScores(data, numWindows, costMatrix):
   for dataInfo in data:
     if (dataInfo.lastWindow is not None and
         dataInfo.idx <= dataInfo.lastWindow.end):
-      counts["tn"] -= 1
       counts["fn"] += 1
+    else:
+      counts["tn"] += 1
 
   # Now we iteratively compute the score for every possible threshold. We
   # start with a threshold > 1.0 such that no detections are made. The initial
