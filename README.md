@@ -34,6 +34,7 @@ The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the 
 | Detector      | Standard Profile | Reward Low FP | Reward Low FN |
 |---------------|------------------|---------------|---------------|
 | Perfect       | 100.0            | 100.0         | 100.0         |
+| [CAD OSE](https://github.com/smirmik/CAD) | 69.9          | 66.0          | 73.3          |
 | [Numenta HTM](https://github.com/numenta/nupic)* | 65.3          | 58.6          | 69.4          |
 | [Twitter ADVec v1.0.0](https://github.com/twitter/AnomalyDetection)| 47.1             | 33.6          | 53.5          |
 | [Etsy Skyline](https://github.com/etsy/skyline) | 35.7             | 27.1          | 44.5          |
