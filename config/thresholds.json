@@ -13,6 +13,20 @@
             "threshold": 0.9845962524414067
         }
     },
+    "cad_ose": {
+        "reward_low_FN_rate": {
+            "score": 23.171468254465292,
+            "threshold": 0.7047851562500003
+        },
+        "reward_low_FP_rate": {
+            "score": 37.140909268595294,
+            "threshold": 0.7640625000000002
+        },
+        "standard": {
+            "score": 46.1714682544653,
+            "threshold": 0.7047851562500003
+        }
+    },
     "expose": {
         "reward_low_FN_rate": {
             "score": -138.31510519385375,
