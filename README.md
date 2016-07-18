@@ -1,4 +1,3 @@
-
 The Numenta Anomaly Benchmark [![Build Status](https://travis-ci.org/numenta/NAB.svg?branch=master)](https://travis-ci.org/numenta/NAB)
 -----------------------------
 
@@ -32,18 +31,25 @@ Conference on Machine Learning and Applications, December 2015.
 
 The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the perfect detector), and a baseline of 0.0 is determined by the "null" detector (which makes no detections).
 
-| Detector      | Version | Standard Profile | Reward Low FP | Reward Low FN |
-|---------------|---------|------------------|---------------|---------------|
-| Perfect       | N/A     | 100.0            | 100.0         | 100.0         |
-| [Numenta HTM](https://github.com/numenta/nupic)   | current* | 64.7             | 56.5          | 69.3          |
-| [Twitter ADVec](https://github.com/twitter/AnomalyDetection) | v1.0.0    | 47.1             | 33.6          | 53.5          |
-| [Etsy Skyline](https://github.com/etsy/skyline)  | ???     | 35.7             | 27.1          | 44.5          |
-| Random        | N/A     | 16.8             | 5.8          | 25.9          |
-| Null          | N/A     | 0.0              | 0.0           | 0.0           |
+| Detector      | Standard Profile | Reward Low FP | Reward Low FN |
+|---------------|------------------|---------------|---------------|
+| Perfect       | 100.0            | 100.0         | 100.0         |
+| [Numenta HTM](https://github.com/numenta/nupic)* | 65.3          | 58.6          | 69.4          |
+| [Twitter ADVec v1.0.0](https://github.com/twitter/AnomalyDetection)| 47.1             | 33.6          | 53.5          |
+| [Etsy Skyline](https://github.com/etsy/skyline) | 35.7             | 27.1          | 44.5          |
+| Bayesian Changepoint**          | 17.7              | 3.2           | 32.2           |
+|  [EXPoSE](https://arxiv.org/abs/1601.06602v3)   | 16.4     | 3.2  | 26.9     |
+| [Sliding Threshold](https://github.com/numenta/NAB/blob/master/nab/detectors/gaussian/windowedGaussian_detector.py) | 15.0             | -26.2          | 30.1          |
+| Random***       | 11.0             | 1.2          | 19.5          |
+| Null          | 0.0              | 0.0           | 0.0           |
 
 *As of NAB v1.0*
 
-\* The results correspond to NuPIC and nupic.core SHAs 1777c2d and 9b65900 respectively, but the latest version of NuPIC should still work (the results may not be identical).
+\* The results correspond to NuPIC and nupic.core SHAs 42f701d and c030b84 respectively, but the latest version of NuPIC should still work (the results may not be identical).
+
+** The original algorithm was not designed for anomaly detection. Details of the implementation and parameter tuning are in the [detector's code](https://github.com/numenta/NAB/blob/master/nab/detectors/bayes_changept/bayes_changept_detector.py).
+
+*** Scores reflect the mean across a range of random seeds. The spread of scores for each profile are 7.95 to 16.83 for Standard, -1.56 to 2.14 for Reward Low FP, and 11.34 to 23.68 for Reward Low FN.
 
 Please see [the wiki section on contributing algorithms](https://github.com/numenta/NAB/wiki/NAB-Contributions-Criteria#anomaly-detection-algorithms) for discussion on posting algorithms to the scoreboard.
 
@@ -64,6 +70,26 @@ known anomalies) that you would like to see incorporated into NAB.
 The NAB version will be updated whenever new data (and corresponding labels) is
 added to the corpus; NAB is currently in v1.0.
 
+#### Additional Scores
+
+For comparison, here are the NAB V1.0 scores for some additional flavors of HTM.
+NumentaTM HTM detector uses the implementation of temporal memory found
+[here](https://github.com/numenta/nupic.core/blob/master/src/nupic/algorithms/TemporalMemory.hpp).
+Numenta HTM detector with no likelihood uses the raw anomaly scores directly. To
+run without likelihood, set the variable `self.useLikelihood` in
+[numenta_detector.py](https://github.com/numenta/NAB/blob/master/nab/detectors/numenta/numenta_detector.py)
+to `False`.
+
+
+| Detector      |Standard Profile | Reward Low FP | Reward Low FN |
+|---------------|---------|------------------|---------------|---------------|
+| Numenta HTM*   | 65.3             | 58.6       | 69.4          |
+| [NumentaTM HTM](https://github.com/numenta/NAB/blob/master/nab/detectors/numenta/numentaTM_detector.py)* | 61.2             | 52.4       | 66.1          |
+| Numenta HTM*, no likelihood | 52.52 | 41.09    | 58.25         |
+
+\* The results correspond to NuPIC and nupic.core SHAs 42f701d and c030b84
+respectively, but the latest version of NuPIC should still work (the results may
+not be identical).
 
 Installing NAB 1.0
 ------------------

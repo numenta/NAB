@@ -4,15 +4,30 @@
         "reward_low_FP_rate": 3.7401232426724107,
         "standard": 9.28676251491379
     },
+    "bayesChangePt": {
+        "reward_low_FN_rate": 32.256563780459771,
+        "reward_low_FP_rate": 3.2065793456896587,
+        "standard": 17.71402130366379
+    },
+    "expose": {
+        "reward_low_FN_rate": 26.920946783333335,
+        "reward_low_FP_rate": 3.1909311068965485,
+        "standard": 16.436669224267241
+    },
     "null": {
         "reward_low_FN_rate": 0.0,
         "reward_low_FP_rate": 0.0,
         "standard": 0.0
     },
     "numenta": {
-        "reward_low_FN_rate": 69.377031040979887,
-        "reward_low_FP_rate": 58.586447560215518,
-        "standard": 65.272443113189652
+        "reward_low_FN_rate": 69.37703104097989,
+        "reward_low_FP_rate": 58.58644756021552,
+        "standard": 65.27244311318965
+    },
+    "numentaTM": {
+        "reward_low_FN_rate": 66.09146564859769,
+        "reward_low_FP_rate": 52.389446324344824,
+        "standard": 61.20616399012932
     },
     "random": {
         "reward_low_FN_rate": 25.876351314080456,
@@ -28,5 +43,10 @@
         "reward_low_FN_rate": 53.50107495100574,
         "reward_low_FP_rate": 33.610051641206894,
         "standard": 47.06195725408189
+    },
+    "windowedGaussian": {
+        "reward_low_FN_rate": 30.123905123850577,
+        "reward_low_FP_rate": -26.207398717241393,
+        "standard": 15.013443892629311
     }
 }
