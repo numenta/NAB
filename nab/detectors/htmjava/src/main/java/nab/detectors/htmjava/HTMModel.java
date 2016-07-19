@@ -13,6 +13,7 @@ import org.numenta.nupic.algorithms.SpatialPooler;
 import org.numenta.nupic.algorithms.TemporalMemory;
 import org.numenta.nupic.network.Layer;
 import org.numenta.nupic.network.Network;
+import org.numenta.nupic.network.PublisherSupplier;
 import org.numenta.nupic.network.Region;
 import org.numenta.nupic.network.sensor.ObservableSensor;
 import org.numenta.nupic.network.sensor.Publisher;
@@ -32,7 +33,7 @@ public class HTMModel {
 
     private Network network;
 
-    private Publisher publisher;
+    private PublisherSupplier supplier;
 
     /**
      * Create HTM Model to be used by NAB
@@ -42,7 +43,7 @@ public class HTMModel {
         LOGGER.trace("HTMModel({})", modelParams);
 
         // Create Sensor publisher to push NAB input data to network
-        publisher = Publisher.builder()
+        supplier = PublisherSupplier.builder()
                 .addHeader("timestamp,value")
                 .addHeader("datetime,float")
                 .addHeader("T,B")
@@ -59,7 +60,7 @@ public class HTMModel {
                         .add(new TemporalMemory())
                         .add(new SpatialPooler())
                         .add(Sensor.create(ObservableSensor::create,
-                                SensorParams.create(SensorParams.Keys::obs, "Manual Input", publisher)))));
+                                SensorParams.create(SensorParams.Keys::obs, "Manual Input", supplier)))));
     }
 
     /**
@@ -235,7 +236,7 @@ public class HTMModel {
     }
 
     public Publisher getPublisher() {
-        return publisher;
+        return supplier.get();
     }
 
     public Network getNetwork() {
