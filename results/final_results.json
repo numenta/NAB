@@ -1,13 +1,13 @@
 {
     "bayesChangePt": {
-        "reward_low_FN_rate": 32.256563780459771,
+        "reward_low_FN_rate": 32.25656378045977,
         "reward_low_FP_rate": 3.2065793456896587,
         "standard": 17.71402130366379
     },
     "expose": {
         "reward_low_FN_rate": 26.920946783333335,
         "reward_low_FP_rate": 3.1909311068965485,
-        "standard": 16.436669224267241
+        "standard": 16.43666922426724
     },
     "null": {
         "reward_low_FN_rate": 0.0,
@@ -15,14 +15,14 @@
         "standard": 0.0
     },
     "numenta": {
-        "reward_low_FN_rate": 69.37703104097989,
-        "reward_low_FP_rate": 58.58644756021552,
-        "standard": 65.27244311318965
+        "reward_low_FN_rate": 69.44024943178448,
+        "reward_low_FP_rate": 58.94950152900862,
+        "standard": 65.36727069939656
     },
     "numentaTM": {
-        "reward_low_FN_rate": 66.09146564859769,
-        "reward_low_FP_rate": 52.389446324344824,
-        "standard": 61.20616399012932
+        "reward_low_FN_rate": 65.904839452382177,
+        "reward_low_FP_rate": 52.366094841866385,
+        "standard": 60.926224695818966
     },
     "random": {
         "reward_low_FN_rate": 25.876351314080456,
