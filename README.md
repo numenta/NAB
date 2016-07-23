@@ -174,7 +174,7 @@ This will run the Numenta detector only and produce normalized scores. Note that
 by default it tries to use all the cores on your machine. The above command
 should take about 20-30 minutes on a current powerful laptop with 4-8 cores.
 For debugging you can run subsets of the data files by modifying and specifying
-specific label files. Please type:
+specific label files (see section below). Please type:
 
     python run.py --help
 
@@ -200,14 +200,8 @@ methods. Several algorithms are included in the repo, such as the Numenta
 HTM anomaly detection method, as well as methods from the [Etsy
 Skyline](https://github.com/etsy/skyline) anomaly detection library, a sliding
 window detector, Bayes Changepoint, and so on. This will also pass those results
-files to the scoring script to generate final NAB scores. *Note**: this option
+files to the scoring script to generate final NAB scores. **Note**: this option
 will take many many hours to run.
-
-The run.py command has a number of useful options. To view a description of the
-command line options please enter
-
-	python run.py --help 
-
 
 ##### Run subset of NAB data files
 
@@ -226,7 +220,7 @@ NAB on a subset of labels:
     python run.py -d numenta --detect --windowsFile labels/combined_windows_tiny.json
 
 This will run the `detect` phase of NAB on the data files specified in the above
-JSON file. Scoring and normalization are not supported with this option. Note
-that you may see warning messages regarding the lack of labels for other files.
-You can ignore these warnings.
+JSON file. Note that scoring and normalization are not supported with this
+option. Note also that you may see warning messages regarding the lack of labels
+for other files. You can ignore these warnings.
 
