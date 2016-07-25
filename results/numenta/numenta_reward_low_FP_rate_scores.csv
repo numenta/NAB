@@ -1,13 +1,13 @@
 Detector,Profile,File,Threshold,Score,TP,TN,FP,FN,Total_Count
 numenta,reward_low_FP_rate,artificialNoAnomaly/art_daily_small_noise.csv,0.531249809265,0.0,0,3428,0,0,4032
-numenta,reward_low_FP_rate,realAWSCloudwatch/ec2_disk_write_bytes_c0d644.csv,0.531249809265,0.422209837387,3,3021,2,402,4032
+numenta,reward_low_FP_rate,realAWSCloudwatch/ec2_disk_write_bytes_c0d644.csv,0.531249809265,0.422209837387,4,3021,2,401,4032
 numenta,reward_low_FP_rate,realTweets/Twitter_volume_FB.csv,0.531249809265,1.05958392964,2,13498,3,1580,15833
 numenta,reward_low_FP_rate,realTweets/Twitter_volume_IBM.csv,0.531249809265,-1.76957443038,2,13538,15,1588,15893
 numenta,reward_low_FP_rate,realTweets/Twitter_volume_AAPL.csv,0.531249809265,0.604725985551,5,13557,7,1583,15902
 numenta,reward_low_FP_rate,realTraffic/occupancy_6005.csv,0.531249809265,0.641272490375,1,1783,1,238,2380
 numenta,reward_low_FP_rate,artificialWithAnomaly/art_load_balancer_spikes.csv,0.531249809265,0.514788146524,3,3023,2,400,4032
 numenta,reward_low_FP_rate,realAWSCloudwatch/ec2_cpu_utilization_ac20cd.csv,0.531249809265,0.875727409493,1,3025,0,402,4032
-numenta,reward_low_FP_rate,realKnownCause/cpu_utilization_asg_misconfiguration.csv,0.531249809265,-1.67304887591,24,15789,12,1475,18050
+numenta,reward_low_FP_rate,realKnownCause/cpu_utilization_asg_misconfiguration.csv,0.531249809265,-2.11304887591,27,15787,14,1472,18050
 numenta,reward_low_FP_rate,realAdExchange/exchange-2_cpc_results.csv,0.531249809265,-1.44,0,1216,2,163,1624
 numenta,reward_low_FP_rate,realTraffic/occupancy_t4013.csv,0.531249809265,1.0650312654,2,1872,3,248,2500
 numenta,reward_low_FP_rate,realTraffic/speed_6005.csv,0.531249809265,0.619318715936,2,1885,1,237,2500
@@ -57,4 +57,4 @@ numenta,reward_low_FP_rate,artificialWithAnomaly/art_daily_jumpsup.csv,0.5312498
 numenta,reward_low_FP_rate,artificialWithAnomaly/art_increase_spike_density.csv,0.531249809265,0.42067182427,1,3023,2,402,4032
 numenta,reward_low_FP_rate,realKnownCause/nyc_taxi.csv,0.531249809265,2.12189230683,7,8533,2,1028,10320
 numenta,reward_low_FP_rate,realAWSCloudwatch/iio_us-east-1_i-a2eb1cd9_NetworkIn.csv,0.531249809265,-2.22,0,930,1,126,1243
-Totals,,,,20.7628435473,159,299212,135,33336,365558
+Totals,,,,20.3228435473,163,299210,137,33332,365558
