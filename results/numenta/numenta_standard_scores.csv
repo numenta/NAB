@@ -1,13 +1,21 @@
 Detector,Profile,File,Threshold,Score,TP,TN,FP,FN,Total_Count
 numenta,standard,artificialNoAnomaly/art_daily_small_noise.csv,0.521862792969,0.0,0,3428,0,0,4032
+<<<<<<< HEAD
 numenta,standard,realAWSCloudwatch/ec2_disk_write_bytes_c0d644.csv,0.521862792969,0.59666471175,4,3021,2,401,4032
+=======
+numenta,standard,realAWSCloudwatch/ec2_disk_write_bytes_c0d644.csv,0.521862792969,0.500694258181,4,3020,3,401,4032
+>>>>>>> 7b15b44a086d126efd100b74141cc0eee776a5fb
 numenta,standard,realTweets/Twitter_volume_FB.csv,0.521862792969,1.38958392964,2,13498,3,1580,15833
 numenta,standard,realTweets/Twitter_volume_IBM.csv,0.521862792969,-0.072800481082,3,13536,17,1587,15893
 numenta,standard,realTweets/Twitter_volume_AAPL.csv,0.521862792969,1.20961375717,5,13557,7,1583,15902
 numenta,standard,realTraffic/occupancy_6005.csv,0.521862792969,0.64133725997,1,1782,2,238,2380
 numenta,standard,artificialWithAnomaly/art_load_balancer_spikes.csv,0.521862792969,0.734788146524,3,3023,2,400,4032
 numenta,standard,realAWSCloudwatch/ec2_cpu_utilization_ac20cd.csv,0.521862792969,0.875727409493,1,3025,0,402,4032
+<<<<<<< HEAD
 numenta,standard,realKnownCause/cpu_utilization_asg_misconfiguration.csv,0.521862792969,-0.683048875912,27,15786,15,1472,18050
+=======
+numenta,standard,realKnownCause/cpu_utilization_asg_misconfiguration.csv,0.521862792969,-0.573048875912,28,15787,14,1471,18050
+>>>>>>> 7b15b44a086d126efd100b74141cc0eee776a5fb
 numenta,standard,realAdExchange/exchange-2_cpc_results.csv,0.521862792969,-1.22,0,1216,2,163,1624
 numenta,standard,realTraffic/occupancy_t4013.csv,0.521862792969,1.3950312654,2,1872,3,248,2500
 numenta,standard,realTraffic/speed_6005.csv,0.521862792969,0.729318715936,2,1885,1,237,2500
@@ -22,7 +30,11 @@ numenta,standard,realAWSCloudwatch/ec2_cpu_utilization_825cc2.csv,0.521862792969
 numenta,standard,realAWSCloudwatch/ec2_network_in_257a54.csv,0.521862792969,0.855326299622,1,3025,0,402,4032
 numenta,standard,realAWSCloudwatch/grok_asg_anomaly.csv,0.521862792969,2.08958039129,6,3456,7,459,4621
 numenta,standard,realKnownCause/ambient_temperature_system_failure.csv,0.521862792969,1.32263476448,3,5787,4,723,7267
+<<<<<<< HEAD
 numenta,standard,realTweets/Twitter_volume_CVS.csv,0.521862792969,2.19919888007,6,13572,5,1520,15853
+=======
+numenta,standard,realTweets/Twitter_volume_CVS.csv,0.521862792969,2.30919888007,6,13573,4,1520,15853
+>>>>>>> 7b15b44a086d126efd100b74141cc0eee776a5fb
 numenta,standard,artificialWithAnomaly/art_daily_jumpsdown.csv,0.521862792969,0.748908670438,4,3024,1,399,4032
 numenta,standard,realAdExchange/exchange-2_cpm_results.csv,0.521862792969,1.5532103731,2,1218,1,160,1624
 numenta,standard,realAWSCloudwatch/ec2_cpu_utilization_c6585a.csv,0.521862792969,-0.44,0,3424,4,0,4032
@@ -30,7 +42,11 @@ numenta,standard,realAWSCloudwatch/ec2_disk_write_bytes_1ef3de.csv,0.52186279296
 numenta,standard,realAWSCloudwatch/ec2_cpu_utilization_5f5533.csv,0.521862792969,1.71603136566,3,3026,0,399,4032
 numenta,standard,realAWSCloudwatch/ec2_cpu_utilization_77c1ca.csv,0.521862792969,0.807346411729,2,3022,3,401,4032
 numenta,standard,realTraffic/TravelTime_387.csv,0.521862792969,-1.58772099927,1,1873,3,248,2500
+<<<<<<< HEAD
 numenta,standard,realTweets/Twitter_volume_PFE.csv,0.521862792969,2.79833062015,8,13513,7,1580,15858
+=======
+numenta,standard,realTweets/Twitter_volume_PFE.csv,0.521862792969,2.68833062015,8,13512,8,1580,15858
+>>>>>>> 7b15b44a086d126efd100b74141cc0eee776a5fb
 numenta,standard,artificialNoAnomaly/art_daily_no_noise.csv,0.521862792969,0.0,0,3428,0,0,4032
 numenta,standard,realAdExchange/exchange-4_cpm_results.csv,0.521862792969,1.44270035668,3,1232,1,161,1643
 numenta,standard,realAWSCloudwatch/elb_request_count_8c0756.csv,0.521862792969,1.70512381098,2,3026,0,400,4032
@@ -57,4 +73,8 @@ numenta,standard,artificialWithAnomaly/art_daily_jumpsup.csv,0.521862792969,0.74
 numenta,standard,artificialWithAnomaly/art_increase_spike_density.csv,0.521862792969,0.64067182427,1,3023,2,402,4032
 numenta,standard,realKnownCause/nyc_taxi.csv,0.521862792969,2.34189230683,7,8533,2,1028,10320
 numenta,standard,realAWSCloudwatch/iio_us-east-1_i-a2eb1cd9_NetworkIn.csv,0.521862792969,-2.11,0,930,1,126,1243
+<<<<<<< HEAD
 Totals,,,,35.6380384762,167,299200,147,33328,365558
+=======
+Totals,,,,35.6520680226,168,299200,147,33327,365558
+>>>>>>> 7b15b44a086d126efd100b74141cc0eee776a5fb
