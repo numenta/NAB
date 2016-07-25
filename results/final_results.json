@@ -15,9 +15,9 @@
         "standard": 0.0
     },
     "numenta": {
-        "reward_low_FN_rate": 69.37703104097989,
-        "reward_low_FP_rate": 58.58644756021552,
-        "standard": 65.27244311318965
+        "reward_low_FN_rate": 69.436217952925276,
+        "reward_low_FP_rate": 58.759846356594835,
+        "standard": 65.361223481120689
     },
     "numentaTM": {
         "reward_low_FN_rate": 66.09146564859769,
