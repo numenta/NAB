@@ -27,7 +27,7 @@
             "threshold": 0.9947875976562506
         }
     },
-    "goodnessOfFit": {
+    "relativeEntropy": {
         "reward_low_FN_rate": {
             "score": -27.2288224715,
             "threshold": 0.5

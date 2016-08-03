@@ -134,7 +134,7 @@ if __name__ == "__main__":
                     type=str,
                     default=["null", "numenta", "random", "skyline",
                              "bayesChangePt", "windowedGaussian", "expose",
-                             "goodnessOfFit"],
+                             "relativeEntropy"],
                     help="Comma separated list of detector(s) to use, e.g. "
                          "null,numenta")
 
@@ -187,9 +187,9 @@ if __name__ == "__main__":
   if "windowedGaussian" in args.detectors:
     from nab.detectors.gaussian.windowedGaussian_detector import (
       WindowedGaussianDetector)
-  if "goodnessOfFit" in args.detectors:
-    from nab.detectors.goodness_of_fit.goodness_of_fit_detector import (
-      GoodnessOfFitDetector)
+  if "relativeEntropy" in args.detectors:
+    from nab.detectors.relative_entropy.relative_entropy_detector import (
+      RelativeEntropyDetector)
 
   # To run expose detector, you must have sklearn version 0.16.1 installed.
   # Higher versions of sklearn may not be compatible with numpy version 1.9.2

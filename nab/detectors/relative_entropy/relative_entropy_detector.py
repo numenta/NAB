@@ -27,7 +27,7 @@ from nab.detectors.base import AnomalyDetector
 
 
 
-class GoodnessOfFitDetector(AnomalyDetector):
+class RelativeEntropyDetector(AnomalyDetector):
 
   """ This detector is an implementation of online anomaly detection using
   Relative Entropy statistic with multiple hypotheses as described in
@@ -51,7 +51,7 @@ class GoodnessOfFitDetector(AnomalyDetector):
     """ Variable names are kept consistent with algorithm's pseudo code in
     the paper."""
 
-    super(GoodnessOfFitDetector, self).__init__(*args, **kwargs)
+    super(RelativeEntropyDetector, self).__init__(*args, **kwargs)
 
     # Timeseries of the metric on which anomaly needs to be detected
     self.util = []

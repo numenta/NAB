@@ -1,18 +1,13 @@
 {
     "bayesChangePt": {
-        "reward_low_FN_rate": 32.256563780459771,
+        "reward_low_FN_rate": 32.25656378045977,
         "reward_low_FP_rate": 3.2065793456896587,
         "standard": 17.71402130366379
     },
     "expose": {
         "reward_low_FN_rate": 26.920946783333335,
         "reward_low_FP_rate": 3.1909311068965485,
-        "standard": 16.436669224267241
-    },
-    "goodnessOfFit": {
-        "reward_low_FN_rate": 58.842292393247128,
-        "reward_low_FP_rate": 47.598351759844824,
-        "standard": 54.642748934698282
+        "standard": 16.43666922426724
     },
     "null": {
         "reward_low_FN_rate": 0.0,
@@ -33,6 +28,11 @@
         "reward_low_FN_rate": 25.876351314080456,
         "reward_low_FP_rate": 5.763682319827586,
         "standard": 16.831768350517237
+    },
+    "relativeEntropy": {
+        "reward_low_FN_rate": 58.84229239324713,
+        "reward_low_FP_rate": 47.598351759844824,
+        "standard": 54.64274893469828
     },
     "skyline": {
         "reward_low_FN_rate": 44.4810173429885,
