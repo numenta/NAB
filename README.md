@@ -38,9 +38,9 @@ The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the 
 | [Relative Entropy] (http://www.hpl.hp.com/techreports/2011/HPL-2011-8.pdf) | 54.6 | 47.6 | 58.8 |
 | [Twitter ADVec v1.0.0](https://github.com/twitter/AnomalyDetection)| 47.1             | 33.6          | 53.5          |
 | [Etsy Skyline](https://github.com/etsy/skyline) | 35.7             | 27.1          | 44.5          |
+| [Sliding Threshold](https://github.com/numenta/NAB/blob/master/nab/detectors/gaussian/windowedGaussian_detector.py) | 30.7             | 12.1         | 38.3          |
 | Bayesian Changepoint**          | 17.7              | 3.2           | 32.2           |
 |  [EXPoSE](https://arxiv.org/abs/1601.06602v3)   | 16.4     | 3.2  | 26.9     |
-| [Sliding Threshold](https://github.com/numenta/NAB/blob/master/nab/detectors/gaussian/windowedGaussian_detector.py) | 15.0             | -26.2          | 30.1          |
 | Random***       | 11.0             | 1.2          | 19.5          |
 | Null          | 0.0              | 0.0           | 0.0           |
 
@@ -138,11 +138,13 @@ PYTHONPATH setup:
 
 There are several different use cases for NAB:
 
-1. If you just want to look at all
-the results we reported in the paper, there is no need to run anything.
-All the data files are in the data subdirectory and all individual detections
-for reported algorithms are checked in to the results subdirectory. Please see
-the README files in those locations.
+1. If you just want to look at all the results we reported in the paper, there
+is no need to run anything. All the data files are in the data subdirectory and
+all individual detections for reported algorithms are checked in to the results
+subdirectory. Please see the README files in those locations.
+
+1. If you want to plot some of the results, please see the README in the
+`scripts` directory for `scripts/plot.py`
 
 1. If you have your own algorithm and want to run the NAB benchmark, please see
 the [NAB Entry Points](https://github.com/numenta/NAB/wiki#nab-entry-diagram)
@@ -158,6 +160,9 @@ the directions below to "Run HTM with NAB".
 the directions below to "Run full NAB". Note that this will take hours as the
 Skyline code is quite slow.
 
+1. If you just want to run NAB on one or more data files (e.g. for debugging)
+follow the directions below to "Run a subset of NAB".
+
 
 ##### Run HTM with NAB
 
@@ -170,7 +175,7 @@ This will run the Numenta detector only and produce normalized scores. Note that
 by default it tries to use all the cores on your machine. The above command
 should take about 20-30 minutes on a current powerful laptop with 4-8 cores.
 For debugging you can run subsets of the data files by modifying and specifying
-specific label files. Please type:
+specific label files (see section below). Please type:
 
     python run.py --help
 
@@ -191,16 +196,32 @@ the specific version of NuPIC (and associated nupic.core) that is noted in the
     cd /path/to/nab
     python run.py
 
-This will run everything and produce results files for the anomaly detection
-methods. Included in the repo are the Numenta anomaly detection method, as well
-as methods from the [Etsy Skyline](https://github.com/etsy/skyline) anomaly
-detection library, a random detector, and a null detector. This will also pass
-those results files to the scoring script to generate final NAB scores.
-**Note**: this option will take many many hours to run.
+This will run everything and produce results files for all anomaly detection
+methods. Several algorithms are included in the repo, such as the Numenta
+HTM anomaly detection method, as well as methods from the [Etsy
+Skyline](https://github.com/etsy/skyline) anomaly detection library, a sliding
+window detector, Bayes Changepoint, and so on. This will also pass those results
+files to the scoring script to generate final NAB scores. **Note**: this option
+will take many many hours to run.
 
-The run.py command has a number of useful options. To view a description of the
-command line options please enter
+##### Run subset of NAB data files
 
-	python run.py --help 
+For debugging it is sometimes useful to be able to run your algorithm on a
+subset of the NAB data files or on your own set of data files. You can do that
+by creating a custom `combined_windows.json` file that only contains labels for
+the files you want to run. This new file should be in exactly the same format as
+`combined_windows.json` except it would only contain windows for the files you
+are interested in. 
 
+**Example**: an example file containing two files is in
+`labels/combined_windows_tiny.json`.  The following command shows you how to run
+NAB on a subset of labels:
+
+    cd /path/to/nab
+    python run.py -d numenta --detect --windowsFile labels/combined_windows_tiny.json
+
+This will run the `detect` phase of NAB on the data files specified in the above
+JSON file. Note that scoring and normalization are not supported with this
+option. Note also that you may see warning messages regarding the lack of labels
+for other files. You can ignore these warnings.
 
