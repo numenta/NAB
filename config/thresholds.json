@@ -27,6 +27,20 @@
             "threshold": 0.9947875976562506
         }
     },
+    "relativeEntropy": {
+        "reward_low_FN_rate": {
+            "score": -27.2288224715,
+            "threshold": 0.5
+        },
+        "reward_low_FP_rate": {
+            "score": -5.57182391716,
+            "threshold": 0.5
+        },
+        "standard": {
+            "score": 10.7711775285,
+            "threshold": 0.5
+        }
+    },
     "null": {
         "reward_low_FN_rate": {
             "score": -232.0,

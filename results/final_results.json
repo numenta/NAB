@@ -29,6 +29,11 @@
         "reward_low_FP_rate": 5.763682319827586,
         "standard": 16.831768350517237
     },
+    "relativeEntropy": {
+        "reward_low_FN_rate": 58.84229239324713,
+        "reward_low_FP_rate": 47.598351759844824,
+        "standard": 54.64274893469828
+    },
     "skyline": {
         "reward_low_FN_rate": 44.4810173429885,
         "reward_low_FP_rate": 27.08121005969828,
