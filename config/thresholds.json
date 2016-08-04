@@ -13,17 +13,17 @@
             "threshold": 0.9845962524414067
         }
     },
-    "cad_ose": {
+    "contextOSE": {
         "reward_low_FN_rate": {
-            "score": 23.171468254465292,
+            "score": 23.171468254465296,
             "threshold": 0.7047851562500003
         },
         "reward_low_FP_rate": {
-            "score": 37.140909268595294,
+            "score": 37.1409092685953,
             "threshold": 0.7640625000000002
         },
         "standard": {
-            "score": 46.1714682544653,
+            "score": 46.17146825446529,
             "threshold": 0.7047851562500003
         }
     },

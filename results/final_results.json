@@ -4,10 +4,10 @@
         "reward_low_FP_rate": 3.2065793456896587,
         "standard": 17.71402130366379
     },
-    "cad": {
-        "ose_reward_low_FN_rate": 73.3251345558908,
-        "ose_reward_low_FP_rate": 66.00901261577586,
-        "ose_standard": 69.90149493728447
+    "contextOSE": {
+        "reward_low_FN_rate": 73.3251345558908,
+        "reward_low_FP_rate": 66.00901261577586,
+        "standard": 69.90149493728447
     },
     "expose": {
         "reward_low_FN_rate": 26.920946783333335,
