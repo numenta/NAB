@@ -116,7 +116,6 @@ class ContextOperator(object):
 
       if contextID == nextFreeContextIDNumber :
         numAddedContexts += 1
-#         contextValues = [0, 0, 0, rightFacts, zerolevel, leftHash, rightHash]
         contextValues = [0, zerolevel, leftHash, rightHash]
 
         self.contextsValuesList.append(contextValues)
