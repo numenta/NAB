@@ -116,7 +116,8 @@ class ContextOperator(object):
 
       if contextID == nextFreeContextIDNumber :
         numAddedContexts += 1
-        contextValues = [0, 0, 0, rightFacts, zerolevel, leftHash, rightHash]
+#         contextValues = [0, 0, 0, rightFacts, zerolevel, leftHash, rightHash]
+        contextValues = [0, zerolevel, leftHash, rightHash]
 
         self.contextsValuesList.append(contextValues)
         if zerolevel :
@@ -126,7 +127,7 @@ class ContextOperator(object):
         contextValues = self.contextsValuesList[contextID]
 
         if zerolevel :
-          contextValues[4] = 1
+          contextValues[1] = 1
           return False
 
 
@@ -144,8 +145,6 @@ class ContextOperator(object):
         numNewContexts = self.getContextByFacts (potentialNewContexts)
       else :
         numNewContexts = 0
-      maxPredWeight = 0.0
-      predicContexts = []
 
     for semiContextValues in self.crossedSemiContextsLists[leftOrRight] :
       semiContextValues[0] = []
@@ -162,21 +161,6 @@ class ContextOperator(object):
       semiContextValues[2] = lenSemiContextValues0
       if lenSemiContextValues0 > 0 :
         newCrossedValues.append(semiContextValues)
-        if leftOrRight == 0 and semiContextValues[1] == lenSemiContextValues0 :
-          for contextID in semiContextValues[3].itervalues():
-            contValues = self.contextsValuesList[contextID]
-
-            if contValues[0] > 0 :
-              currPredWeight = contValues[1] / float(contValues[0])
-            else :
-              currPredWeight = 0.0
-
-            if currPredWeight >  maxPredWeight :
-              maxPredWeight = currPredWeight
-              predicContexts = [contValues]
-
-            elif currPredWeight ==  maxPredWeight :
-              predicContexts.append(contValues)
 
     self.crossedSemiContextsLists[leftOrRight] = newCrossedValues
 
@@ -184,21 +168,15 @@ class ContextOperator(object):
       return self.updateContextsAndGetActive(newContextFlag)
 
     else :
-      predictions = set()
-      for contValues in predicContexts :
-        predictions.update(contValues[3])
-
-      return numNewContexts, predictions
+      return numNewContexts
 
 
   def updateContextsAndGetActive(self, newContextFlag):
     """
     This function reviews the list of previously selected left semi-contexts,
-    updates the prediction results value of all contexts, including left
-    semi-contexts, creates the list of potentially new contexts resulted from
-    intersection between zero-level contexts, determines the contexts that
-    coincide with the input data and require activation, prepares the values
-    for calculating anomaly value.
+    creates the list of potentially new contexts resulted from intersection
+    between zero-level contexts, determines the contexts that coincide with
+    the input data and require activation.
 
     @param newContextFlag:     flag indicating that a new zero-level
                     context is not recorded at the current
@@ -219,12 +197,10 @@ class ContextOperator(object):
 
 
     Эта функция производит обход по списку отобранных ранее левых
-    полуконтекстов, обновляет значения результативности предсказывания у всех
-    контекстов, частью которых являются данные левые полуконтексты, создаёт
-    список контекстов, которые являются результатом пересечения контекстов
-    нулевого уровня и могут быть новыми, определяет какие контексты полностью
-    совпали входными данными и их надо активировать, подготавливает показатели
-    для расчета величины аномалии.
+    полуконтекстов, создаёт список контекстов, которые являются результатом
+    пересечения контекстов нулевого уровня и могут быть новыми, определяет
+    какие контексты полностью совпали c входными данными и их надо
+    активировать.
 
 
     @param newContextsFlag: флаг, указывающий на то, что на текущем шаге не был
@@ -261,26 +237,24 @@ class ContextOperator(object):
           if leftSemiContVal[1] == leftSemiContVal[2] :
 
             numSelectedContext += 1
-            contextValues[0] += rightSemConVal1
 
             if rightSemConVal2 > 0 :
-              contextValues[1] += rightSemConVal2
 
               if rightSemConVal1 == rightSemConVal2 :
-                contextValues[2] += 1
+                contextValues[0] += 1
                 activeContexts.append([ contextID,
+                                        contextValues[0],
                                         contextValues[2],
-                                        contextValues[5],
-                                        contextValues[6]
+                                        contextValues[3]
                                       ])
 
-              elif contextValues[4] and newContextFlag :
+              elif contextValues[1] and newContextFlag :
                 if leftSemiContVal[2] <= self.maxLeftSemiContextsLenght :
                   leftFacts = tuple(leftSemiContVal[0])
                   rightFacts = tuple(rightSemConVal0)
                   potentialNewContexts.append(tuple([leftFacts, rightFacts]))
 
-          elif contextValues[4] and newContextFlag and rightSemConVal2 > 0 :
+          elif contextValues[1] and newContextFlag and rightSemConVal2 > 0 :
             if leftSemiContVal[2] <= self.maxLeftSemiContextsLenght :
               leftFacts = tuple(leftSemiContVal[0])
               rightFacts = tuple(rightSemConVal0)

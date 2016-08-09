@@ -53,7 +53,6 @@ class ContextualAnomalyDetectorOSE(object):
 
     self.potentialNewContexts = []
 
-    self.lastPredictionedFacts = []
     self.aScoresHistory = [ 1.0 ]
 
 
@@ -97,7 +96,7 @@ class ContextualAnomalyDetectorOSE(object):
     leftFactsGroup.update(currSensFacts, currNeurFacts)
     self.leftFactsGroup = tuple(sorted(leftFactsGroup))
 
-    numNewCont, newPredictions  =  self.contextOperator.contextCrosser  (
+    numNewCont  =  self.contextOperator.contextCrosser  (
       leftOrRight = 0,
       factsList = self.leftFactsGroup,
       potentialNewContexts = potNewContexts
@@ -110,10 +109,7 @@ class ContextualAnomalyDetectorOSE(object):
     else :
       percentAddedContextToUniqPotNew = 0.0
 
-    return  ( newPredictions,
-              percentSelectedContextActive,
-              percentAddedContextToUniqPotNew
-            )
+    return  percentSelectedContextActive, percentAddedContextToUniqPotNew
 
 
   def getAnomalyScore(self,inputData):
@@ -123,22 +119,11 @@ class ContextualAnomalyDetectorOSE(object):
 
     outSens = []
     for sNum, currSymb in enumerate(reversed(binInpValue)) :
-      outSens.append( 65536 + sNum * 2 + ( 1 if currSymb == "1" else 0 ) )
+      outSens.append( sNum * 2 + ( 1 if currSymb == "1" else 0 ) )
     setOutSens = set(outSens)
 
-    sumDeltas = 0.0
-    for fact in setOutSens :
-      if fact not in self.lastPredictionedFacts :
-        sumDeltas += 2 ** ((fact-65536) / 2)
-
-    predictionError = sumDeltas / self.maxBinValue
-
-    self.lastPredictionedFacts, anomalyVal1, anomalyVal2 = self.step(setOutSens)
-
-    if predictionError > 0 :
-      currentAnomalyScore = (1.0 - anomalyVal1 + anomalyVal2) / 2.0
-    else :
-      currentAnomalyScore = 0.0
+    anomalyVal1, anomalyVal2 = self.step(setOutSens)
+    currentAnomalyScore = (1.0 - anomalyVal1 + anomalyVal2) / 2.0
 
     if max(self.aScoresHistory[-int(self.restPeriod):]) < self.baseThreshold :
       returnedAnomalyScore = currentAnomalyScore
