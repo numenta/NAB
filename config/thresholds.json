@@ -15,16 +15,16 @@
     },
     "contextOSE": {
         "reward_low_FN_rate": {
-            "score": 23.171468254465296,
+            "score": 22.67222031445549,
             "threshold": 0.7047851562500003
         },
         "reward_low_FP_rate": {
-            "score": 37.1409092685953,
-            "threshold": 0.7640625000000002
+            "score": 39.38696292192149,
+            "threshold": 0.7656372070312502
         },
         "standard": {
-            "score": 46.17146825446529,
-            "threshold": 0.7047851562500003
+            "score": 46.167000006791156,
+            "threshold": 0.7655273437500002
         }
     },
     "expose": {
