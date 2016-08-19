@@ -1,3 +1,5 @@
+if you want to use KNN-CAD algorithm, please make reference to our [article](https://arxiv.org/abs/1608.04585).
+
 The Numenta Anomaly Benchmark [![Build Status](https://travis-ci.org/numenta/NAB.svg?branch=master)](https://travis-ci.org/numenta/NAB)
 -----------------------------
 

@@ -1,3 +1,9 @@
+#################################################
+# if you want to use KNN-CAD algorithm,
+# please make reference to our article
+# https://arxiv.org/abs/1608.04585
+#################################################
+
 from nab.detectors.base import AnomalyDetector
 
 import numpy as np

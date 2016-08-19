@@ -1,4 +1,7 @@
 # KNN-CAD 
+
+if you want to use KNN-CAD algorithm, please make reference to our [article](https://arxiv.org/abs/1608.04585).
+
 This algorithm shows the application of the multi-dimentional conformal anomaly detection on time-series. 
 
 First of all we need to transform time-series into multi-dimensional vectors. We use an approach that is used in the [Singular Spectrum Analysis](https://en.wikipedia.org/wiki/Singular_spectrum_analysis). 
