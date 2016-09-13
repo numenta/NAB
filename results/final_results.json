@@ -4,6 +4,11 @@
         "reward_low_FP_rate": 3.2065793456896587,
         "standard": 17.71402130366379
     },
+    "contextOSE": {
+        "reward_low_FN_rate": 73.18167250416667,
+        "reward_low_FP_rate": 66.97713919047413,
+        "standard": 69.89956896844828
+    },
     "expose": {
         "reward_low_FN_rate": 26.920946783333335,
         "reward_low_FP_rate": 3.1909311068965485,

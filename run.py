@@ -197,5 +197,10 @@ if __name__ == "__main__":
   if "expose" in args.detectors:
     from nab.detectors.expose.expose_detector import ExposeDetector
 
+  if "contextOSE" in args.detectors:
+    from nab.detectors.context_ose.context_ose_detector import (
+    ContextOSEDetector )
+
+
   if args.skipConfirmation or checkInputs(args):
     main(args)
