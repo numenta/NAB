@@ -1,24 +1,30 @@
-# -*- coding: utf-8 -*-
-# -----------------------------------------------------------------------------
-# Contextual Anomaly Detector - Open Source Edition
-# Copyright (C) 2016, Mikhail Smirnov   smirmik@gmail.com
-# https://github.com/smirmik/CAD
+# ----------------------------------------------------------------------
+# Copyright (C) 2016, Numenta, Inc.  Unless you have an agreement
+# with Numenta, Inc., for a separate license for this software code, the
+# following terms and conditions apply:
 #
-# This program is free software: you can redistribute it and/or modify it under
-# the terms  of  the  GNU Affero Public License version 3  as  published by the
-# Free Software Foundation.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero Public License version 3 as
+# published by the Free Software Foundation.
 #
-# This program is distributed  in  the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-# FOR A PARTICULAR PURPOSE. See the GNU Affero Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU Affero Public License for more details.
 #
-# You should have received a copy of the  GNU Affero Public License  along with
-# this program.  If not, see http://www.gnu.org/licenses.
+# You should have received a copy of the GNU Affero Public License
+# along with this program.  If not, see http://www.gnu.org/licenses.
 #
-# ------------------------------------------------------------------------------
+# http://numenta.org/licenses/
+# ----------------------------------------------------------------------
 
 class ContextOperator(object):
-
+  
+  """
+  Contextual Anomaly Detector - Open Source Edition
+  2016, Mikhail Smirnov   smirmik@gmail.com
+  https://github.com/smirmik/CAD
+  """
 
   def __init__(self, maxLeftSemiContextsLenght):
 
@@ -53,27 +59,6 @@ class ContextOperator(object):
           or:
           b) number of the really new contexts that have been saved to the
           context memory.
-
-
-    Функция, которая по полному списку фактов определяет существует ли уже в
-    памяти данный контекст и в случае, если такого контекста нет - сразу
-    создаёт его. Для оптимизации быстродействия и объема занимаемой оперативной
-    памяти контексты разделены на полуконтексты, в связи с тем, что сразу
-    несколько контекстов могут содержать одинаковый набор фактов в левой или
-    правой части.
-
-    @param newContextsList:     список потенциально новых контекстов
-
-    @param zerolevel:         флаг, указывающий на то, какой тип контекстов
-                    в передаваемом списке
-
-    @return : в зависимости от того, какой тип потенциально новых контекстов
-          был передан в качестве входных параметров, функция возвращает либо:
-          а) флаг, указывающий на то, что переданный контекст нулевого
-          уровня является новым/существующим,
-          либо:
-          б) количество контекстов, которые действительно оказались новыми
-          и были сохранены в памяти контекстов.
     """
 
 
@@ -193,29 +178,6 @@ class ContextOperator(object):
                     semi-contexts, which are potentially new
                     contexts requiring saving to the context
                     memory
-
-
-    Эта функция производит обход по списку отобранных ранее левых
-    полуконтекстов, создаёт список контекстов, которые являются результатом
-    пересечения контекстов нулевого уровня и могут быть новыми, определяет
-    какие контексты полностью совпали c входными данными и их надо
-    активировать.
-
-
-    @param newContextsFlag: флаг, указывающий на то, что на текущем шаге не был
-                    записан новый контекст нулевого уровня, а значит не
-                    нужно создавать путем пересечения новые контексты,
-                    т.к. они все уже созданы ранее
-
-    @return activeContexts:     список индентификаторов контекстов, полностью
-                    совпавших с входным потоком, которые нужно считать
-                    активными и записать во входной поток "нейроны"
-
-    @return potentialNewContextsLists:  список контекстов, созданных на основе
-                    пересечения левых и правых полуконтекстов нулевого
-                    уровня, и потенциально являющихся новыми
-                    контекстами, которые нужно запомнить в памяти
-                    контекстов
     """
 
     activeContexts = []

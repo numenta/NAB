@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------
-# Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
+# Copyright (C) 2016, Numenta, Inc.  Unless you have an agreement
 # with Numenta, Inc., for a separate license for this software code, the
 # following terms and conditions apply:
 #
@@ -22,10 +22,13 @@ from nab.detectors.base import AnomalyDetector
 from nab.detectors.context_ose.cad_ose import ContextualAnomalyDetectorOSE
 
 class ContextOSEDetector(AnomalyDetector):
+  
   """
   This detector uses Contextual Anomaly Detector - Open Source Edition
+  2016, Mikhail Smirnov   smirmik@gmail.com
   https://github.com/smirmik/CAD
   """
+
   def __init__(self, *args, **kwargs):
 
     super(ContextOSEDetector, self).__init__(*args, **kwargs)
