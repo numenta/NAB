@@ -75,17 +75,20 @@ added to the corpus; NAB is currently in v1.0.
 #### Additional Scores
 
 For comparison, here are the NAB V1.0 scores for some additional flavors of HTM.
-NumentaTM HTM detector uses the implementation of temporal memory found
+
+* NumentaTM HTM detector uses the implementation of temporal memory found
 [here](https://github.com/numenta/nupic.core/blob/master/src/nupic/algorithms/TemporalMemory.hpp).
-Numenta HTM detector with no likelihood uses the raw anomaly scores directly. To
+* Numenta HTM detector with no likelihood uses the raw anomaly scores directly. To
 run without likelihood, set the variable `self.useLikelihood` in
 [numenta_detector.py](https://github.com/numenta/NAB/blob/master/nab/detectors/numenta/numenta_detector.py)
 to `False`.
+* [nab-comportex](https://github.com/floybix/nab-comportex) is a twist on HTM  anomaly detection using [Comportex](https://github.com/htm-community/comportex), a community-driven HTM implementation in Clojure. Please see [Felix Andrew's blog post](http://floybix.github.io/2016/07/01/attempting-nab) on experiments with this algorithm.
 
 
 | Detector      |Standard Profile | Reward Low FP | Reward Low FN |
 |---------------|---------|------------------|---------------|---------------|
 | Numenta HTM*   | 65.3             | 58.6       | 69.4          |
+| [nab-comportex](https://github.com/floybix/nab-comportex) | 64.6             | 58.8       | 69.6          |
 | [NumentaTM HTM](https://github.com/numenta/NAB/blob/master/nab/detectors/numenta/numentaTM_detector.py)* | 61.2             | 52.4       | 66.1          |
 | Numenta HTM*, no likelihood | 52.52 | 41.09    | 58.25         |
 
