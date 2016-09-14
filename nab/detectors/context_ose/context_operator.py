@@ -54,7 +54,7 @@ class ContextOperator(object):
 
     @return : depending on the type of  potentially new context transmitted as
           an input parameters the function returns either:
-          а) flag indicating that the transmitted zero-level context is
+          a) flag indicating that the transmitted zero-level context is
           a new/existing one;
           or:
           b) number of the really new contexts that have been saved to the
@@ -171,7 +171,7 @@ class ContextOperator(object):
     @return activeContexts:     list of identifiers of the contexts which
                     completely coincide with the input stream,
                     should be considered active and be
-                    recorded to the input stream of “neurons”
+                    recorded to the input stream of "neurons"
 
     @return potentialNewContextsLists:  list of contexts based on intersection
                     between the left and the right zero-level
