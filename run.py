@@ -176,6 +176,8 @@ if __name__ == "__main__":
       BayesChangePtDetector)
   if "numenta" in args.detectors:
     from nab.detectors.numenta.numenta_detector import NumentaDetector
+  if "htmjava" in args.detectors:
+    from nab.detectors.htmjava.htmjava_detector import HtmjavaDetector
   if "numentaTM" in args.detectors:
     from nab.detectors.numenta.numentaTM_detector import NumentaTMDetector
   if "null" in args.detectors:

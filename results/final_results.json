@@ -1,4 +1,9 @@
 {
+    "htmjava": {
+        "reward_low_FN_rate": 12.80037041235632,
+        "reward_low_FP_rate": 3.7401232426724107,
+        "standard": 9.28676251491379
+    },
     "bayesChangePt": {
         "reward_low_FN_rate": 32.25656378045977,
         "reward_low_FP_rate": 3.2065793456896587,
