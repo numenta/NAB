@@ -127,12 +127,12 @@ This will install the additional required modules pandas and simplejson.
 
 Recommended:
 
-	python setup.py install --user
+    python setup.py install --user
 
 Or if you are actively working on the code and are familiar with manual
 PYTHONPATH setup:
 
-	python setup.py develop --prefix=/some/other/path/
+    python setup.py develop --prefix=/some/other/path/
 
 ### Usage
 
@@ -201,4 +201,4 @@ those results files to the scoring script to generate final NAB scores.
 The run.py command has a number of useful options. To view a description of the
 command line options please enter
 
-	python run.py --help 
+    python run.py --help

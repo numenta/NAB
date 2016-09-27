@@ -170,6 +170,8 @@ class Runner(object):
           data,
           self.probationaryPercent,
         )
+        print "Best threshold from optimize: ", results[0].threshold
+        print "Corresponding score: ", results[0].score
         thresholds[detectorName][profileName] = {
             "threshold": results[0].threshold,
             "score": results[0].score,
@@ -263,8 +265,10 @@ class Runner(object):
         results = pandas.read_csv(f)
 
         # Calculate score:
+        print "Score (non-normalized): ", results["Score"].iloc[-1]
         perfect = tpCount * self.profiles[profileName]["CostMatrix"]["tpWeight"]
         score = 100 * (results["Score"].iloc[-1] - base) / (perfect - base)
+        print "Score (normalized): ", score
 
         # Add to results dict:
         resultsInfo = resultsFile.split(os.path.sep)[-1].split('.')[0]
