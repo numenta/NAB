@@ -22,6 +22,7 @@ import org.numenta.nupic.network.Layer;
 import org.numenta.nupic.network.Network;
 import org.numenta.nupic.network.PublisherSupplier;
 import org.numenta.nupic.network.Region;
+import org.numenta.nupic.network.sensor.HTMSensor;
 import org.numenta.nupic.network.sensor.ObservableSensor;
 import org.numenta.nupic.network.sensor.Publisher;
 import org.numenta.nupic.network.sensor.Sensor;
@@ -60,15 +61,23 @@ public class HTMModel {
         // Get updated model parameters
         Parameters parameters = getModelParameters(modelParams);
 
+        HTMSensor<Object> sensor = (HTMSensor<Object>)Sensor.create(ObservableSensor::create,
+                SensorParams.create(SensorParams.Keys::obs, "ManualInput", supplier));
+
+        sensor.initEncoder(parameters);
+
+        int inputWidth = sensor.getEncoder().getN();
+        parameters.set(KEY.INPUT_DIMENSIONS, new int[]{inputWidth});
+        parameters.set(KEY.POTENTIAL_RADIUS, inputWidth);
+
         // Create NAB Network
         network = Network.create("NAB Network", parameters)
                 .add(Network.createRegion("NAB Region")
-                    .add(Network.createLayer("NAB Layer", parameters)
-                        .add(Anomaly.create())
-                        .add(new TemporalMemory())
-                        .add(new SpatialPooler())
-                        .add(Sensor.create(ObservableSensor::create,
-                                SensorParams.create(SensorParams.Keys::obs, "Manual Input", supplier)))));
+                        .add(Network.createLayer("NAB Layer", parameters)
+                                .add(Anomaly.create())
+                                .add(new TemporalMemory())
+                                .add(new SpatialPooler())
+                                .add(sensor)));
     }
 
     /**
@@ -123,9 +132,6 @@ public class HTMModel {
         if (spParams.has("columnCount")) {
             p.set(KEY.COLUMN_DIMENSIONS, new int[]{spParams.get("columnCount").asInt()});
         }
-        if (tpParams.has("inputWidth")) {
-            p.set(KEY.INPUT_DIMENSIONS, new int[]{tpParams.get("inputWidth").asInt()});
-        }
         if (spParams.has("maxBoost")) {
             p.set(KEY.MAX_BOOST, spParams.get("maxBoost").asDouble());
         }
@@ -138,9 +144,13 @@ public class HTMModel {
         if (spParams.has("synPermActiveInc")) {
             p.set(KEY.SYN_PERM_ACTIVE_INC, spParams.get("synPermActiveInc").asDouble());
         }
-        if (spParams.has("seed")) {
-            p.set(KEY.SEED, spParams.get("seed").asInt());
-        }
+        // if (spParams.has("seed")) {
+        //     p.set(KEY.SEED, spParams.get("seed").asInt());
+        // }
+        // For some seeds, htm.java throws
+        // java.lang.ArrayIndexOutOfBoundsException: 1017
+        //    at org.numenta.nupic.Connections.computeActivity(Connections.java:1199)
+        p.set(KEY.SEED, 42);
         if (spParams.has("numActiveColumnsPerInhArea")) {
             p.set(KEY.NUM_ACTIVE_COLUMNS_PER_INH_AREA, spParams.get("numActiveColumnsPerInhArea").asDouble());
         }
@@ -194,9 +204,12 @@ public class HTMModel {
         if (tpParams.has("predictedSegmentDecrement")) {
             p.set(KEY.PREDICTED_SEGMENT_DECREMENT, tpParams.get("predictedSegmentDecrement").asDouble());
         }
-        if (tpParams.has("seed")) {
-            p.set(KEY.SEED, tpParams.get("seed").asInt());
-        }
+        // if (tpParams.has("seed")) {
+        //     p.set(KEY.SEED, tpParams.get("seed").asInt());
+        // }
+        // For some seeds, htm.java throws
+        // java.lang.ArrayIndexOutOfBoundsException: 1017
+        //    at org.numenta.nupic.Connections.computeActivity(Connections.java:1199)
         if (tpParams.has("newSynapseCount")) {
             p.set(KEY.MAX_NEW_SYNAPSE_COUNT, tpParams.get("newSynapseCount").intValue());
         }

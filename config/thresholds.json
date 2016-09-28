@@ -1,18 +1,4 @@
 {
-    "htmjava": {
-        "reward_low_FN_rate": {
-            "score": -2.001699542878321,
-             "threshold": 0.5
-         },
-         "reward_low_FP_rate": {
-             "score": 5.5435154724804185,
-             "threshold": 0.549999237060547
-         },
-         "standard": {
-             "score": 25.99830045712168,
-             "threshold": 0.5
-         }
-    },
     "bayesChangePt": {
         "reward_low_FN_rate": {
             "score": -119.7471580442638,
@@ -41,18 +27,18 @@
             "threshold": 0.9947875976562506
         }
     },
-    "relativeEntropy": {
+    "htmjava": {
         "reward_low_FN_rate": {
-            "score": -27.2288224715,
-            "threshold": 0.5
+            "score": -15.092683287919897,
+            "threshold": 0.501556396484375
         },
         "reward_low_FP_rate": {
-            "score": -5.57182391716,
-            "threshold": 0.5
+            "score": -0.668792875255821,
+            "threshold": 0.5416503906250002
         },
         "standard": {
-            "score": 10.7711775285,
-            "threshold": 0.5
+            "score": 17.499891977504333,
+            "threshold": 0.514062309265137
         }
     },
     "null": {
@@ -109,6 +95,20 @@
         "standard": {
             "score": -25.889252239141747,
             "threshold": 0.9984497070312507
+        }
+    },
+    "relativeEntropy": {
+        "reward_low_FN_rate": {
+            "score": -27.2288224715,
+            "threshold": 0.5
+        },
+        "reward_low_FP_rate": {
+            "score": -5.57182391716,
+            "threshold": 0.5
+        },
+        "standard": {
+            "score": 10.7711775285,
+            "threshold": 0.5
         }
     },
     "skyline": {

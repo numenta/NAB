@@ -1,9 +1,4 @@
 {
-    "htmjava": {
-        "reward_low_FN_rate": 12.80037041235632,
-        "reward_low_FP_rate": 3.7401232426724107,
-        "standard": 9.28676251491379
-    },
     "bayesChangePt": {
         "reward_low_FN_rate": 32.25656378045977,
         "reward_low_FP_rate": 3.2065793456896587,
@@ -13,6 +8,11 @@
         "reward_low_FN_rate": 26.920946783333335,
         "reward_low_FP_rate": 3.1909311068965485,
         "standard": 16.43666922426724
+    },
+    "htmjava": {
+        "reward_low_FN_rate": 62.32968871037356,
+        "reward_low_FP_rate": 49.711727208941376,
+        "standard": 57.54305688685344
     },
     "null": {
         "reward_low_FN_rate": 0.0,
