@@ -1,9 +1,16 @@
 package nab.detectors.htmjava;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.joda.time.DateTimeZone;
 import org.numenta.nupic.Connections;
 import org.numenta.nupic.Parameters;
@@ -23,10 +30,11 @@ import org.numenta.nupic.util.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
 
 public class HTMModel {
     protected static final Logger LOGGER = LoggerFactory.getLogger(HTMModel.class);
@@ -44,10 +52,10 @@ public class HTMModel {
 
         // Create Sensor publisher to push NAB input data to network
         supplier = PublisherSupplier.builder()
-                .addHeader("timestamp,value")
-                .addHeader("datetime,float")
-                .addHeader("T,B")
-                .build();
+            .addHeader("timestamp,value")
+            .addHeader("datetime,float")
+            .addHeader("T,B")
+            .build();
 
         // Get updated model parameters
         Parameters parameters = getModelParameters(modelParams);
@@ -112,35 +120,35 @@ public class HTMModel {
         Parameters p = Parameters.getSpatialDefaultParameters();
         JsonNode spParams = modelParams.path("spParams");
         LOGGER.trace("getSpatialPoolerParams({})", spParams);
-        if (spParams.has("spVerbosity")) {
-            p.setParameterByKey(KEY.SP_VERBOSITY, spParams.get("spVerbosity").asInt());
-        }
         if (spParams.has("columnCount")) {
-            p.setParameterByKey(KEY.COLUMN_DIMENSIONS, new int[]{spParams.get("columnCount").asInt()});
+            p.set(KEY.COLUMN_DIMENSIONS, new int[]{spParams.get("columnCount").asInt()});
+        }
+        if (tpParams.has("inputWidth")) {
+            p.set(KEY.INPUT_DIMENSIONS, new int[]{tpParams.get("inputWidth").asInt()});
         }
         if (spParams.has("maxBoost")) {
-            p.setParameterByKey(KEY.MAX_BOOST, spParams.get("maxBoost").asDouble());
+            p.set(KEY.MAX_BOOST, spParams.get("maxBoost").asDouble());
         }
         if (spParams.has("synPermInactiveDec")) {
-            p.setParameterByKey(KEY.SYN_PERM_INACTIVE_DEC, spParams.get("synPermInactiveDec").asDouble());
+            p.set(KEY.SYN_PERM_INACTIVE_DEC, spParams.get("synPermInactiveDec").asDouble());
         }
         if (spParams.has("synPermConnected")) {
-            p.setParameterByKey(KEY.SYN_PERM_CONNECTED, spParams.get("synPermConnected").asDouble());
+            p.set(KEY.SYN_PERM_CONNECTED, spParams.get("synPermConnected").asDouble());
         }
         if (spParams.has("synPermActiveInc")) {
-            p.setParameterByKey(KEY.SYN_PERM_ACTIVE_INC, spParams.get("synPermActiveInc").asDouble());
+            p.set(KEY.SYN_PERM_ACTIVE_INC, spParams.get("synPermActiveInc").asDouble());
         }
         if (spParams.has("seed")) {
-            p.setParameterByKey(KEY.SEED, spParams.get("seed").asInt());
+            p.set(KEY.SEED, spParams.get("seed").asInt());
         }
         if (spParams.has("numActiveColumnsPerInhArea")) {
-            p.setParameterByKey(KEY.NUM_ACTIVE_COLUMNS_PER_INH_AREA, spParams.get("numActiveColumnsPerInhArea").asDouble());
+            p.set(KEY.NUM_ACTIVE_COLUMNS_PER_INH_AREA, spParams.get("numActiveColumnsPerInhArea").asDouble());
         }
         if (spParams.has("globalInhibition")) {
-            p.setParameterByKey(KEY.GLOBAL_INHIBITION, spParams.get("globalInhibition").asBoolean());
+            p.set(KEY.GLOBAL_INHIBITION, spParams.get("globalInhibition").asBoolean());
         }
         if (spParams.has("potentialPct")) {
-            p.setParameterByKey(KEY.POTENTIAL_PCT, spParams.get("potentialPct").asDouble());
+            p.set(KEY.POTENTIAL_PCT, spParams.get("potentialPct").asDouble());
         }
 
         LOGGER.trace("getSpatialPoolerParams => {}", p);
@@ -157,44 +165,40 @@ public class HTMModel {
         JsonNode tpParams = modelParams.path("tpParams");
         LOGGER.trace("getTemporalMemoryParams({})", tpParams);
         if (tpParams.has("columnCount")) {
-            p.setParameterByKey(KEY.COLUMN_DIMENSIONS, new int[]{tpParams.get("columnCount").asInt()});
-        }
-        if (tpParams.has("inputWidth")) {
-            p.setParameterByKey(KEY.INPUT_DIMENSIONS, new int[]{tpParams.get("inputWidth").asInt()});
+            p.set(KEY.COLUMN_DIMENSIONS, new int[]{tpParams.get("columnCount").asInt()});
         }
         if (tpParams.has("activationThreshold")) {
-            p.setParameterByKey(KEY.ACTIVATION_THRESHOLD, tpParams.get("activationThreshold").asInt());
+            p.set(KEY.ACTIVATION_THRESHOLD, tpParams.get("activationThreshold").asInt());
         }
         if (tpParams.has("cellsPerColumn")) {
-            p.setParameterByKey(KEY.CELLS_PER_COLUMN, tpParams.get("cellsPerColumn").asInt());
+            p.set(KEY.CELLS_PER_COLUMN, tpParams.get("cellsPerColumn").asInt());
         }
         if (tpParams.has("permanenceInc")) {
-            p.setParameterByKey(KEY.PERMANENCE_INCREMENT, tpParams.get("permanenceInc").asDouble());
+            p.set(KEY.PERMANENCE_INCREMENT, tpParams.get("permanenceInc").asDouble());
         }
         if (tpParams.has("minThreshold")) {
-            p.setParameterByKey(KEY.MIN_THRESHOLD, tpParams.get("minThreshold").asInt());
-        }
-        if (tpParams.has("verbosity")) {
-            p.setParameterByKey(KEY.TM_VERBOSITY, tpParams.get("verbosity").asInt());
-        // +        "globalDecay": 0.0,
+            p.set(KEY.MIN_THRESHOLD, tpParams.get("minThreshold").asInt());
         }
         if (tpParams.has("initialPerm")) {
-            p.setParameterByKey(KEY.INITIAL_PERMANENCE, tpParams.get("initialPerm").asDouble());
-        // +        "maxAge": 0,
-        // +        "maxSegmentsPerCell": 128,
-        // +        "maxSynapsesPerSegment": 128,
+            p.set(KEY.INITIAL_PERMANENCE, tpParams.get("initialPerm").asDouble());
+        }
+        if(tpParams.has("maxSegmentsPerCell")) {
+            p.set(KEY.MAX_SEGMENTS_PER_CELL, tpParams.get("maxSegmentsPerCell").asInt());
+        }
+        if(tpParams.has("maxSynapsesPerSegment")) {
+            p.set(KEY.MAX_SYNAPSES_PER_SEGMENT, tpParams.get("maxSynapsesPerSegment").asInt());
         }
         if (tpParams.has("permanenceDec")) {
-            p.setParameterByKey(KEY.PERMANENCE_DECREMENT, tpParams.get("permanenceDec").asDouble());
+            p.set(KEY.PERMANENCE_DECREMENT, tpParams.get("permanenceDec").asDouble());
         }
         if (tpParams.has("predictedSegmentDecrement")) {
-            p.setParameterByKey(KEY.PREDICTED_SEGMENT_DECREMENT, tpParams.get("predictedSegmentDecrement").asDouble());
+            p.set(KEY.PREDICTED_SEGMENT_DECREMENT, tpParams.get("predictedSegmentDecrement").asDouble());
         }
         if (tpParams.has("seed")) {
-            p.setParameterByKey(KEY.SEED, tpParams.get("seed").asInt());
+            p.set(KEY.SEED, tpParams.get("seed").asInt());
         }
         if (tpParams.has("newSynapseCount")) {
-            p.setParameterByKey(KEY.MAX_NEW_SYNAPSE_COUNT, tpParams.get("newSynapseCount").intValue());
+            p.set(KEY.MAX_NEW_SYNAPSE_COUNT, tpParams.get("newSynapseCount").intValue());
         }
 
         LOGGER.trace("getTemporalMemoryParams => {}", p);
@@ -211,8 +215,8 @@ public class HTMModel {
         LOGGER.trace("getSensorParams({})", sensorParams);
         Map<String, Map<String, Object>> fieldEncodings = getFieldEncodingMap(sensorParams);
         Parameters p = Parameters.empty();
-        p.setParameterByKey(KEY.CLIP_INPUT, true);
-        p.setParameterByKey(KEY.FIELD_ENCODING_MAP, fieldEncodings);
+        p.set(KEY.CLIP_INPUT, true);
+        p.set(KEY.FIELD_ENCODING_MAP, fieldEncodings);
 
         LOGGER.trace("getSensorParams => {}", p);
         return p;
@@ -227,9 +231,9 @@ public class HTMModel {
         JsonNode modelParams = params.path("modelParams");
         LOGGER.trace("getModelParameters({})", modelParams);
         Parameters p = Parameters.getAllDefaultParameters()
-                .union(getSpatialPoolerParams(modelParams))
-                .union(getTemporalMemoryParams(modelParams))
-                .union(getSensorParams(modelParams));
+            .union(getSpatialPoolerParams(modelParams))
+            .union(getTemporalMemoryParams(modelParams))
+            .union(getSensorParams(modelParams));
 
         LOGGER.trace("getModelParameters => {}", p);
         return p;
@@ -242,7 +246,6 @@ public class HTMModel {
     public Network getNetwork() {
         return network;
     }
-
 
     public void showDebugInfo() {
         Region region = network.getHead();
@@ -285,6 +288,7 @@ public class HTMModel {
      *          java -DLOGLEVEL=TRACE -DLOGGER=FILE -jar htm.java-nab.jar "{\"modelParams\":{....}}" < nab_data.csv > anomalies.out
      *
      */
+    @SuppressWarnings("resource")
     public static void main(String[] args) {
         try {
             LOGGER.trace("main({})",  Arrays.asList(args));
@@ -331,6 +335,10 @@ public class HTMModel {
             if (options.has("p")) {
                 params = mapper.readTree((File)options.valueOf("p"));
             } else if (options.nonOptionArguments().isEmpty()) {
+                try { input.close(); }catch(Exception ignore) {}
+                if(options.has("o")) {
+                    try { output.flush(); output.close(); }catch(Exception ignore) {}
+                }
                 throw new IllegalArgumentException("Expecting OPF parameters. See 'help' for more information");
             } else {
                 params = mapper.readTree((String)options.nonOptionArguments().get(0));
@@ -345,7 +353,6 @@ public class HTMModel {
             // Create NAB Network Model
             HTMModel model = new HTMModel(params);
             Network network = model.getNetwork();
-
             network.observe().subscribe((inference) -> {
                 double score = inference.getAnomalyScore();
                 int record = inference.getRecordNum();

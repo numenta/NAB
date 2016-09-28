@@ -10,10 +10,13 @@ repositories {
   maven {
     url 'https://oss.sonatype.org/content/repositories/snapshots'
   }
+  maven {
+    url 'http://metaware.us/maven3'
+  }
 }
 
 dependencies {
-    compile group: 'org.numenta', name: 'htm.java', version: '0.6.8'
+    compile group: 'org.numenta', name: 'htm.java', version: '0.6.9-SNAPSHOT'
     compile group: 'com.google.guava', name: 'guava', version: '19.0'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.10'
     compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.10'
@@ -29,9 +32,12 @@ jar {
     }
 }
 
+clean {
+  delete fileTree(dir: '../../../' , include: 'htmjava.log')
+}
+
 task copyToLib(type: Copy) {
     into "$buildDir/libs"
     from configurations.runtime
 }
 assemble.dependsOn(copyToLib)
-
