@@ -144,12 +144,10 @@ public class HTMModel {
         if (spParams.has("synPermActiveInc")) {
             p.set(KEY.SYN_PERM_ACTIVE_INC, spParams.get("synPermActiveInc").asDouble());
         }
+        // TODO https://github.com/numenta/htm.java/issues/482
         // if (spParams.has("seed")) {
         //     p.set(KEY.SEED, spParams.get("seed").asInt());
         // }
-        // For some seeds, htm.java throws
-        // java.lang.ArrayIndexOutOfBoundsException: 1017
-        //    at org.numenta.nupic.Connections.computeActivity(Connections.java:1199)
         p.set(KEY.SEED, 42);
         if (spParams.has("numActiveColumnsPerInhArea")) {
             p.set(KEY.NUM_ACTIVE_COLUMNS_PER_INH_AREA, spParams.get("numActiveColumnsPerInhArea").asDouble());
@@ -204,12 +202,10 @@ public class HTMModel {
         if (tpParams.has("predictedSegmentDecrement")) {
             p.set(KEY.PREDICTED_SEGMENT_DECREMENT, tpParams.get("predictedSegmentDecrement").asDouble());
         }
+        // TODO https://github.com/numenta/htm.java/issues/482
         // if (tpParams.has("seed")) {
         //     p.set(KEY.SEED, tpParams.get("seed").asInt());
         // }
-        // For some seeds, htm.java throws
-        // java.lang.ArrayIndexOutOfBoundsException: 1017
-        //    at org.numenta.nupic.Connections.computeActivity(Connections.java:1199)
         if (tpParams.has("newSynapseCount")) {
             p.set(KEY.MAX_NEW_SYNAPSE_COUNT, tpParams.get("newSynapseCount").intValue());
         }
