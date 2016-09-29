@@ -85,6 +85,7 @@ run without likelihood, set the variable `self.useLikelihood` in
 [numenta_detector.py](https://github.com/numenta/NAB/blob/master/nab/detectors/numenta/numenta_detector.py)
 to `False`.
 * [nab-comportex](https://github.com/floybix/nab-comportex) is a twist on HTM  anomaly detection using [Comportex](https://github.com/htm-community/comportex), a community-driven HTM implementation in Clojure. Please see [Felix Andrew's blog post](http://floybix.github.io/2016/07/01/attempting-nab) on experiments with this algorithm.
+* [HTM Java](https://github.com/numenta/htm.java) is a Community-Driven Java port of HTM.
 
 
 | Detector      |Standard Profile | Reward Low FP | Reward Low FN |
@@ -92,6 +93,7 @@ to `False`.
 | Numenta HTM*   | 65.3             | 58.6       | 69.4          |
 | [nab-comportex](https://github.com/floybix/nab-comportex)&dagger; | 64.6             | 58.8       | 69.6          |
 | [NumentaTM HTM](https://github.com/numenta/NAB/blob/master/nab/detectors/numenta/numentaTM_detector.py)* | 61.2             | 52.4       | 66.1          |
+| [HTM Java](https://github.com/numenta/NAB/blob/master/nab/detectors/htmjava) | 57.54 | 49.71 | 62.33 |
 | Numenta HTM*, no likelihood | 52.52 | 41.09    | 58.25         |
 
 \* The results correspond to NuPIC and nupic.core SHAs 42f701d and c030b84
@@ -198,22 +200,6 @@ the specific version of NuPIC (and associated nupic.core) that is noted in the
     cd /path/to/nupic.core/
     git checkout -b nab {TAG NAME}
 
-##### Run htm.java with NAB
-
-First make sure you have __java 8__ installed.
- 
-    java -version
-        
-Build __htm.java__ NAB detector:
-  
-    cd nab/detectors/htmjava
-    ./gradlew clean build
-    
-Run __htm.java__ NAB detector:
-
-    cd /path/to/nab
-    python run.py -d htmjava --detect --score --normalize
-
 ##### Run full NAB
 
     cd /path/to/nab
@@ -234,7 +220,7 @@ subset of the NAB data files or on your own set of data files. You can do that
 by creating a custom `combined_windows.json` file that only contains labels for
 the files you want to run. This new file should be in exactly the same format as
 `combined_windows.json` except it would only contain windows for the files you
-are interested in. 
+are interested in.
 
 **Example**: an example file containing two files is in
 `labels/combined_windows_tiny.json`.  The following command shows you how to run
