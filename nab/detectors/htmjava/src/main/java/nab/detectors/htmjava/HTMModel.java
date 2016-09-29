@@ -1,3 +1,24 @@
+/* ---------------------------------------------------------------------
+ * Numenta Platform for Intelligent Computing (NuPIC)
+ * Copyright (C) 2014, Numenta, Inc.  Unless you have an agreement
+ * with Numenta, Inc., for a separate license for this software code, the
+ * following terms and conditions apply:
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero Public License
+ * along with this program.  If not, see http://www.gnu.org/licenses.
+ *
+ * http://numenta.org/licenses/
+ * ---------------------------------------------------------------------
+ */
 package nab.detectors.htmjava;
 
 import java.io.BufferedReader;
@@ -28,6 +49,7 @@ import org.numenta.nupic.network.sensor.Publisher;
 import org.numenta.nupic.network.sensor.Sensor;
 import org.numenta.nupic.network.sensor.SensorParams;
 import org.numenta.nupic.util.Tuple;
+import org.numenta.nupic.util.UniversalRandom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +84,7 @@ public class HTMModel {
         Parameters parameters = getModelParameters(modelParams);
 
         HTMSensor<Object> sensor = (HTMSensor<Object>)Sensor.create(ObservableSensor::create,
-                SensorParams.create(SensorParams.Keys::obs, "ManualInput", supplier));
+            SensorParams.create(SensorParams.Keys::obs, "ManualInput", supplier));
 
         sensor.initEncoder(parameters);
 
@@ -72,12 +94,12 @@ public class HTMModel {
 
         // Create NAB Network
         network = Network.create("NAB Network", parameters)
-                .add(Network.createRegion("NAB Region")
-                        .add(Network.createLayer("NAB Layer", parameters)
-                                .add(Anomaly.create())
-                                .add(new TemporalMemory())
-                                .add(new SpatialPooler())
-                                .add(sensor)));
+            .add(Network.createRegion("NAB Region")
+                .add(Network.createLayer("NAB Layer", parameters)
+                    .add(Anomaly.create())
+                    .add(new TemporalMemory())
+                    .add(new SpatialPooler())
+                    .add(sensor)));
     }
 
     /**
@@ -144,11 +166,6 @@ public class HTMModel {
         if (spParams.has("synPermActiveInc")) {
             p.set(KEY.SYN_PERM_ACTIVE_INC, spParams.get("synPermActiveInc").asDouble());
         }
-        // TODO https://github.com/numenta/htm.java/issues/482
-        // if (spParams.has("seed")) {
-        //     p.set(KEY.SEED, spParams.get("seed").asInt());
-        // }
-        p.set(KEY.SEED, 42);
         if (spParams.has("numActiveColumnsPerInhArea")) {
             p.set(KEY.NUM_ACTIVE_COLUMNS_PER_INH_AREA, spParams.get("numActiveColumnsPerInhArea").asDouble());
         }
@@ -202,10 +219,6 @@ public class HTMModel {
         if (tpParams.has("predictedSegmentDecrement")) {
             p.set(KEY.PREDICTED_SEGMENT_DECREMENT, tpParams.get("predictedSegmentDecrement").asDouble());
         }
-        // TODO https://github.com/numenta/htm.java/issues/482
-        // if (tpParams.has("seed")) {
-        //     p.set(KEY.SEED, tpParams.get("seed").asInt());
-        // }
         if (tpParams.has("newSynapseCount")) {
             p.set(KEY.MAX_NEW_SYNAPSE_COUNT, tpParams.get("newSynapseCount").intValue());
         }
@@ -243,7 +256,15 @@ public class HTMModel {
             .union(getSpatialPoolerParams(modelParams))
             .union(getTemporalMemoryParams(modelParams))
             .union(getSensorParams(modelParams));
-
+        
+        // TODO https://github.com/numenta/htm.java/issues/482
+        // if (spParams.has("seed")) {
+        //     p.set(KEY.SEED, spParams.get("seed").asInt());
+        // }
+        p.set(KEY.RANDOM, new UniversalRandom(42));
+        // Setting the random above is done as a work-around to this.
+        //p.set(KEY.SEED, 42);
+        
         LOGGER.trace("getModelParameters => {}", p);
         return p;
     }
@@ -305,18 +326,18 @@ public class HTMModel {
             OptionParser parser = new OptionParser();
             parser.nonOptions("OPF parameters object (JSON)");
             parser.acceptsAll(Arrays.asList("p", "params"), "OPF parameters file (JSON).\n(default: first non-option argument)")
-                    .withOptionalArg()
-                    .ofType(File.class);
+                .withOptionalArg()
+                .ofType(File.class);
             parser.acceptsAll(Arrays.asList("i", "input"), "Input data file (csv).\n(default: stdin)")
-                    .withOptionalArg()
-                    .ofType(File.class);
+                .withOptionalArg()
+                .ofType(File.class);
             parser.acceptsAll(Arrays.asList("o", "output"), "Output results file (csv).\n(default: stdout)")
-                    .withOptionalArg()
-                    .ofType(File.class);
+                .withOptionalArg()
+                .ofType(File.class);
             parser.acceptsAll(Arrays.asList("s", "skip"), "Header lines to skip")
-                    .withOptionalArg()
-                    .ofType(Integer.class)
-                    .defaultsTo(0);
+                .withOptionalArg()
+                .ofType(Integer.class)
+                .defaultsTo(0);
             parser.acceptsAll(Arrays.asList("h", "?", "help"), "Help");
             OptionSet options = parser.parse(args);
             if (args.length == 0 || options.has("h")) {
