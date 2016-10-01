@@ -75,22 +75,15 @@ public class HTMModel {
 
         // Create Sensor publisher to push NAB input data to network
         supplier = PublisherSupplier.builder()
-            .addHeader("timestamp,value")
-            .addHeader("datetime,float")
-            .addHeader("T,B")
-            .build();
+                .addHeader("timestamp,value")
+                .addHeader("datetime,float")
+                .addHeader("T,B")
+                .build();
 
         // Get updated model parameters
         Parameters parameters = getModelParameters(modelParams);
-
-        HTMSensor<Object> sensor = (HTMSensor<Object>)Sensor.create(ObservableSensor::create,
-            SensorParams.create(SensorParams.Keys::obs, "ManualInput", supplier));
-
-        sensor.initEncoder(parameters);
-
-        int inputWidth = sensor.getEncoder().getN();
-        parameters.set(KEY.INPUT_DIMENSIONS, new int[]{inputWidth});
-        parameters.set(KEY.POTENTIAL_RADIUS, inputWidth);
+        
+        LOGGER.info("RUNNING WITH NO EXPLICIT P_RADIUS SET");
 
         // Create NAB Network
         network = Network.create("NAB Network", parameters)
@@ -99,7 +92,8 @@ public class HTMModel {
                     .add(Anomaly.create())
                     .add(new TemporalMemory())
                     .add(new SpatialPooler())
-                    .add(sensor)));
+                    .add(Sensor.create(ObservableSensor::create,
+                            SensorParams.create(SensorParams.Keys::obs, "Manual Input", supplier)))));
     }
 
     /**
