@@ -1,0 +1,43 @@
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+archivesBaseName = 'htm.java-nab'
+
+
+repositories {
+  mavenCentral()
+  maven {
+    url 'https://oss.sonatype.org/content/repositories/snapshots'
+  }
+  maven {
+    url 'http://metaware.us/maven3'
+  }
+}
+
+dependencies {
+    compile group: 'org.numenta', name: 'htm.java', version: '0.6.9'
+    compile group: 'com.google.guava', name: 'guava', version: '19.0'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.10'
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.10'
+    compile group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '4.6'
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'NAB detector for htm.java',
+                   'Implementation-Version': '0.0.1',
+                   'Main-Class': 'nab.detectors.htmjava.HTMModel',
+                   'Class-Path': configurations.runtime.files.collect {"$it.name"}.join(' ')
+    }
+}
+
+clean {
+  delete fileTree(dir: '../../../' , include: 'htmjava.log')
+}
+
+task copyToLib(type: Copy) {
+    into "$buildDir/libs"
+    from configurations.runtime
+}
+assemble.dependsOn(copyToLib)
