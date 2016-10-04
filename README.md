@@ -91,7 +91,7 @@ to `False`.
 |---------------|---------|------------------|---------------|---------------|
 | Numenta HTM*   | 65.3             | 58.6       | 69.4          |
 | [nab-comportex](https://github.com/floybix/nab-comportex)&dagger; | 64.6             | 58.8       | 69.6          |
-| [NumentaTM HTM](https://github.com/numenta/NAB/blob/master/nab/detectors/numenta/numentaTM_detector.py)* | 61.2             | 52.4       | 66.1          |
+| [NumentaTM HTM](https://github.com/numenta/NAB/blob/master/nab/detectors/numenta/numentaTM_detector.py)* | 56.46             | 48.54       | 61.64          |
 | Numenta HTM*, no likelihood | 52.52 | 41.09    | 58.25         |
 
 \* The results correspond to NuPIC and nupic.core SHAs 42f701d and c030b84
