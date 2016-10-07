@@ -366,7 +366,7 @@ def scoreCorpus(threshold, args):
       probationaryPeriod,
       scoreFlag))
 
-  results = pool.map(scoreDataSet, args)
+  results = pool.map_async(scoreDataSet, args).get(99999999)
 
   # Total the 6 scoring metrics for all data files
   totals = [None]*3 + [0]*6

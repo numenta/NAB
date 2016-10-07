@@ -129,7 +129,7 @@ class Runner(object):
 
           count += 1
 
-    self.pool.map(detectDataSet, args)
+    self.pool.map_async(detectDataSet, args).get(99999999)
 
 
   def optimize(self, detectorNames):
