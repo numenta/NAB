@@ -129,7 +129,9 @@ class Runner(object):
 
           count += 1
 
-    self.pool.map(detectDataSet, args)
+    # Using `map_async` instead of `map` so interrupts are properly handled.
+    # See: http://stackoverflow.com/a/1408476
+    self.pool.map_async(detectDataSet, args).get(99999999)
 
 
   def optimize(self, detectorNames):
