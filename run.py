@@ -133,7 +133,8 @@ if __name__ == "__main__":
                     nargs="*",
                     type=str,
                     default=["null", "numenta", "random", "skyline",
-                             "bayesChangePt", "windowedGaussian"],
+                             "bayesChangePt", "windowedGaussian", "expose",
+                             "relativeEntropy"],
                     help="Comma separated list of detector(s) to use, e.g. "
                          "null,numenta")
 
@@ -188,6 +189,20 @@ if __name__ == "__main__":
       WindowedGaussianDetector)
   if "knncad" in args.detectors:
     from nab.detectors.knncad.knncad_detector import KnncadDetector
+  if "relativeEntropy" in args.detectors:
+    from nab.detectors.relative_entropy.relative_entropy_detector import (
+      RelativeEntropyDetector)
+
+  # To run expose detector, you must have sklearn version 0.16.1 installed.
+  # Higher versions of sklearn may not be compatible with numpy version 1.9.2
+  # required to run nupic.
+  if "expose" in args.detectors:
+    from nab.detectors.expose.expose_detector import ExposeDetector
+
+  if "contextOSE" in args.detectors:
+    from nab.detectors.context_ose.context_ose_detector import (
+    ContextOSEDetector )
+
 
   if args.skipConfirmation or checkInputs(args):
     main(args)

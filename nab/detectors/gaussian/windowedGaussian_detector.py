@@ -34,7 +34,7 @@ def normalProbability(x, mean, std):
   if x < mean:
     # Gaussian is symmetrical around mean, so flip to get the tail probability
     xp = 2*mean - x
-    return 1.0 - normalProbability(xp, mean, std)
+    return normalProbability(xp, mean, std)
 
   # Calculate the Q function with the complementary error function, explained
   # here: http://www.gaussianwaves.com/2012/07/q-function-and-error-functions
