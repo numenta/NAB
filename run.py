@@ -186,6 +186,8 @@ if __name__ == "__main__":
   if "windowedGaussian" in args.detectors:
     from nab.detectors.gaussian.windowedGaussian_detector import (
       WindowedGaussianDetector)
+  if "knncad" in args.detectors:
+    from nab.detectors.knncad.knncad_detector import KnncadDetector
 
   if args.skipConfirmation or checkInputs(args):
     main(args)
