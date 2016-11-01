@@ -20,14 +20,14 @@
         "standard": 0.0
     },
     "numenta": {
-        "reward_low_FN_rate": 75.521021840747125,
-        "reward_low_FP_rate": 64.106082639137924,
-        "standard": 71.040153450775861
+        "reward_low_FN_rate": 74.320244309511494,
+        "reward_low_FP_rate": 63.116841602198278,
+        "standard": 70.101056119439647
     },
     "numentaTM": {
-        "reward_low_FN_rate": 65.274358381459763,
-        "reward_low_FP_rate": 52.190880769133621,
-        "standard": 59.980503089439658
+        "reward_low_FN_rate": 65.27435838145976,
+        "reward_low_FP_rate": 52.19088076913362,
+        "standard": 59.98050308943966
     },
     "random": {
         "reward_low_FN_rate": 25.876351314080456,

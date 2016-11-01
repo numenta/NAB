@@ -34,7 +34,7 @@ The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the 
 | Detector      | Standard Profile | Reward Low FP | Reward Low FN |
 |---------------|------------------|---------------|---------------|
 | Perfect       | 100.0            | 100.0         | 100.0         |
-| [Numenta HTM](https://github.com/numenta/nupic)* | 71.0          | 64.1          | 75.5          |
+| [Numenta HTM](https://github.com/numenta/nupic)* | 70.1          | 63.1          | 74.3          |
 | [CAD OSE](https://github.com/smirmik/CAD)&dagger; | 69.9          | 67.0          | 73.2          |
 | [Relative Entropy](http://www.hpl.hp.com/techreports/2011/HPL-2011-8.pdf) | 54.6 | 47.6 | 58.8 |
 | [Twitter ADVec v1.0.0](https://github.com/twitter/AnomalyDetection)| 47.1             | 33.6          | 53.5          |
@@ -47,7 +47,8 @@ The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the 
 
 *As of NAB v1.0*
 
-\* The results correspond to NuPIC and nupic.core SHAs 42f701d and c030b84 respectively, but the latest version of NuPIC should still work (the results may not be identical).
+\* The results correspond to NuPIC version 0.5.6 and the corresponding
+nupic.core version 0.4.10.
 
 ** The original algorithm was not designed for anomaly detection. Details of the implementation and parameter tuning are in the [detector's code](https://github.com/numenta/NAB/blob/master/nab/detectors/bayes_changept/bayes_changept_detector.py).
 
@@ -89,14 +90,13 @@ to `False`.
 
 | Detector      |Standard Profile | Reward Low FP | Reward Low FN |
 |---------------|---------|------------------|---------------|---------------|
-| Numenta HTM*   | 65.3             | 58.6       | 69.4          |
+| Numenta HTM*   | 70.1             | 63.1       | 74.3          |
 | [nab-comportex](https://github.com/floybix/nab-comportex)&dagger; | 64.6             | 58.8       | 69.6          |
 | [NumentaTM HTM](https://github.com/numenta/NAB/blob/master/nab/detectors/numenta/numentaTM_detector.py)* | 61.2             | 52.4       | 66.1          |
 | Numenta HTM*, no likelihood | 52.52 | 41.09    | 58.25         |
 
-\* The results correspond to NuPIC and nupic.core SHAs 42f701d and c030b84
-respectively, but the latest version of NuPIC should still work (the results may
-not be identical).
+\* The results correspond to NuPIC version 0.5.6 and the corresponding
+nupic.core version 0.4.10.
 
 &dagger; Algorithm was an entry to the [2016 NAB Competition](http://numenta.com/blog/2016/08/10/numenta-anomaly-benchmark-nab-competition-2016-winners/).
 
