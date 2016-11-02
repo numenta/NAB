@@ -47,8 +47,7 @@ The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the 
 
 *As of NAB v1.0*
 
-\* The results correspond to NuPIC version 0.5.6 and the corresponding
-nupic.core version 0.4.10.
+\* From NuPIC version 0.5.6 ([available on PyPI](https://pypi.python.org/pypi/nupic/0.5.6)).
 
 ** The original algorithm was not designed for anomaly detection. Details of the implementation and parameter tuning are in the [detector's code](https://github.com/numenta/NAB/blob/master/nab/detectors/bayes_changept/bayes_changept_detector.py).
 
@@ -95,8 +94,7 @@ to `False`.
 | [NumentaTM HTM](https://github.com/numenta/NAB/blob/master/nab/detectors/numenta/numentaTM_detector.py)* | 61.2             | 52.4       | 66.1          |
 | Numenta HTM*, no likelihood | 52.52 | 41.09    | 58.25         |
 
-\* The results correspond to NuPIC version 0.5.6 and the corresponding
-nupic.core version 0.4.10.
+\* From NuPIC version 0.5.6 ([available on PyPI](https://pypi.python.org/pypi/nupic/0.5.6)).
 
 &dagger; Algorithm was an entry to the [2016 NAB Competition](http://numenta.com/blog/2016/08/10/numenta-anomaly-benchmark-nab-competition-2016-winners/).
 
