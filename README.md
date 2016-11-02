@@ -92,7 +92,7 @@ to `False`.
 |---------------|---------|------------------|---------------|---------------|
 | Numenta HTM*   | 70.1             | 63.1       | 74.3          |
 | [nab-comportex](https://github.com/floybix/nab-comportex)&dagger; | 64.6             | 58.8       | 69.6          |
-| [NumentaTM HTM](https://github.com/numenta/NAB/blob/master/nab/detectors/numenta/numentaTM_detector.py)* | 61.2             | 52.4       | 66.1          |
+| [NumentaTM HTM](https://github.com/numenta/NAB/blob/master/nab/detectors/numenta/numentaTM_detector.py)* | 56.46             | 48.54       | 61.64          |
 | Numenta HTM*, no likelihood | 52.52 | 41.09    | 58.25         |
 
 \* From NuPIC version 0.5.6 ([available on PyPI](https://pypi.python.org/pypi/nupic/0.5.6)).
