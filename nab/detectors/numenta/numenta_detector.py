@@ -96,11 +96,13 @@ class NumentaDetector(AnomalyDetector):
       anomalyScore = self.anomalyLikelihood.anomalyProbability(
         inputData["value"], rawScore, inputData["timestamp"])
       logScore = self.anomalyLikelihood.computeLogLikelihood(anomalyScore)
-      if spatialAnomaly:
-        logScore = 1.0
-      return (logScore, rawScore)
+    else:
+      finalScore = rawScore
 
-    return (rawScore, rawScore)
+    if spatialAnomaly:
+      finalScore = 1.0
+
+    return (finalScore, rawScore)
 
 
   def initialize(self):
