@@ -96,6 +96,7 @@ class NumentaDetector(AnomalyDetector):
       anomalyScore = self.anomalyLikelihood.anomalyProbability(
         inputData["value"], rawScore, inputData["timestamp"])
       logScore = self.anomalyLikelihood.computeLogLikelihood(anomalyScore)
+      finalScore = logScore
     else:
       finalScore = rawScore
 
