@@ -41,21 +41,35 @@
             "threshold": 0.9947875976562506
         }
     },
+    "knncad": {
+        "reward_low_FN_rate": {
+            "score": 0.0,
+            "threshold": 1.0
+        },
+        "reward_low_FP_rate": {
+            "score": 0.0,
+            "threshold": 1.0
+        },
+        "standard": {
+            "score": 0.0,
+            "threshold": 1.0
+        }
+    },
 	"htmjava": {
-	    "reward_low_FN_rate": {
+        "reward_low_FN_rate": {
 	        "score": -15.092683287919897,
 	        "threshold": 0.501556396484375
-	    },
-	    "reward_low_FP_rate": {
+        },
+        "reward_low_FP_rate": {
 	        "score": -0.668792875255821,
 	        "threshold": 0.5416503906250002
-	    },
-	    "standard": {
+        },
+        "standard": {
 	        "score": 17.499891977504333,
 	        "threshold": 0.514062309265137
-	    }
+        }
 	},
-	"null": {
+    "null": {
         "reward_low_FN_rate": {
             "score": -232.0,
             "threshold": 0.6250000000000001
@@ -71,30 +85,30 @@
     },
     "numenta": {
         "reward_low_FN_rate": {
-            "score": 9.638038476183745,
-            "threshold": 0.5218505859374999
+            "score": 26.634450197137568,
+            "threshold": 0.5421876907348634
         },
         "reward_low_FP_rate": {
-            "score": 20.322843547289906,
-            "threshold": 0.5312498092651368
+            "score": 30.431072517124093,
+            "threshold": 0.5751955032348636
         },
         "standard": {
-            "score": 35.638038476183745,
-            "threshold": 0.52186279296875
+            "score": 46.634450197137596,
+            "threshold": 0.5421876907348634
         }
     },
     "numentaTM": {
         "reward_low_FN_rate": {
-            "score": -4.682023383551243,
-            "threshold": 0.48872070312500016
+            "score": 8.764037437134272,
+            "threshold": 0.5126953125
         },
         "reward_low_FP_rate": {
-            "score": 4.501624059009296,
-            "threshold": 0.54091796875
+            "score": 15.463515082084744,
+            "threshold": 0.65076904296875
         },
         "standard": {
-            "score": 23.317976616448757,
-            "threshold": 0.48872070312500016
+            "score": 33.76403743713426,
+            "threshold": 0.5126953125
         }
     },
     "random": {
