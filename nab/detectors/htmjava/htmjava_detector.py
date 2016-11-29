@@ -28,6 +28,12 @@ from nupic.frameworks.opf.common_models.cluster_params import (
 
 from nab.detectors.base import AnomalyDetector
 
+# Fraction outside of the range of values seen so far that will be considered
+# a spatial anomaly regardless of the anomaly likelihood calculation. This
+# accounts for the human labelling bias for spatial values larger than what
+# has been seen so far.
+SPATIAL_TOLERANCE = 0.05
+
 
 class HtmjavaDetector(AnomalyDetector):
   """
@@ -42,6 +48,9 @@ class HtmjavaDetector(AnomalyDetector):
     self.sensorParams = None
     self.modelParams = None
     self.anomalyLikelihood = None
+    # Keep track of value range for spatial anomaly detection
+    self.minVal = None
+    self.maxVal = None
 
 
   def getAdditionalHeaders(self):
@@ -59,14 +68,32 @@ class HtmjavaDetector(AnomalyDetector):
     line = "{0},{1}\n".format(inputData['timestamp'], inputData['value'])
     self.model.stdin.writelines(line)
 
+    # Get the value
+    value = inputData["value"]
+
     # Retrieve the anomaly score
     result = self.model.stdout.readline()
     rawScore = float(result)
+
+    # Update min/max values and check if there is a spatial anomaly
+    spatialAnomaly = False
+    if self.minVal != self.maxVal:
+      tolerance = (self.maxVal - self.minVal) * SPATIAL_TOLERANCE
+      maxExpected = self.maxVal + tolerance
+      minExpected = self.minVal - tolerance
+      if value > maxExpected or value < minExpected:
+        spatialAnomaly = True
+    if self.maxVal is None or value > self.maxVal:
+      self.maxVal = value
+    if self.minVal is None or value < self.minVal:
+      self.minVal = value
 
     # Compute log(anomaly likelihood)
     anomalyScore = self.anomalyLikelihood.anomalyProbability(
       inputData["value"], rawScore, inputData["timestamp"])
     logScore = self.anomalyLikelihood.computeLogLikelihood(anomalyScore)
+    if spatialAnomaly:
+      logScore = 1.0
 
     return (logScore, rawScore)
 
