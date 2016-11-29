@@ -10,8 +10,7 @@ novel scoring mechanism designed for real-time applications.
 Included are the tools to allow you to easily run NAB on your
 own anomaly detection algorithms; see the [NAB entry points
 info](https://github.com/numenta/NAB/wiki#nab-entry-points). Competitive results
-tied to open source code will be posted in the wiki on the
-[Scoreboard](https://github.com/numenta/NAB/wiki/NAB%20Scoreboard). Let us know
+tied to open source code will be posted in the scoreboard below.  Let us know
 about your work by emailing us at [nab@numenta.org](mailto:nab@numenta.org) or
 submitting a pull request.
 
@@ -190,7 +189,7 @@ to see all the options.
 
 Note that to replicate results exactly as in the paper you may need to checkout
 the specific version of NuPIC (and associated nupic.core) that is noted in the
-[Scoreboard](https://github.com/numenta/NAB/wiki/NAB%20Scoreboard):
+scoreboard:
 
     cd /path/to/nupic/
     git checkout -b nab {TAG NAME}
