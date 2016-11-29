@@ -34,7 +34,7 @@ The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the 
 | Detector      | Standard Profile | Reward Low FP | Reward Low FN |
 |---------------|------------------|---------------|---------------|
 | Perfect       | 100.0            | 100.0         | 100.0         |
-| [Numenta HTM](https://github.com/numenta/nupic)* | 70.1          | 63.1          | 74.3          |
+| [Numenta HTM](https://github.com/numenta/nupic)* | 64.7          | 56.5          | 69.3          |
 | [CAD OSE](https://github.com/smirmik/CAD)&dagger; | 69.9          | 67.0          | 73.2          |
 | [KNN CAD](https://github.com/numenta/NAB/tree/master/nab/detectors/knncad)&dagger; | 58.0     | 43.4  | 64.8     |
 | [Relative Entropy](http://www.hpl.hp.com/techreports/2011/HPL-2011-8.pdf) | 54.6 | 47.6 | 58.8 |
@@ -46,9 +46,7 @@ The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the 
 | Random***       | 11.0             | 1.2          | 19.5          |
 | Null          | 0.0              | 0.0           | 0.0           |
 
-*As of NAB v1.0*
-
-\* From NuPIC version 0.5.6 ([available on PyPI](https://pypi.python.org/pypi/nupic/0.5.6)).
+\* As of NAB v1.0, NuPIC version 0.3.5
 
 ** The original algorithm was not designed for anomaly detection. Details of the implementation and parameter tuning are in the [detector's code](https://github.com/numenta/NAB/blob/master/nab/detectors/bayes_changept/bayes_changept_detector.py).
 
