@@ -45,7 +45,7 @@ The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the 
 | Random***       | 11.0             | 1.2          | 19.5          |
 | Null          | 0.0              | 0.0           | 0.0           |
 
-\* As of NAB v1.0, NuPIC version 0.3.5
+\* As of NAB 1.0, NuPIC 0.3.5
 
 ** The original algorithm was not designed for anomaly detection. Details of the implementation and parameter tuning are in the [detector's code](https://github.com/numenta/NAB/blob/master/nab/detectors/bayes_changept/bayes_changept_detector.py).
 
