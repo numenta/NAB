@@ -5,6 +5,11 @@
 data_test/
 deprecated/
 nab.egg-info/
+.idea/
+.project
+.pydevproject
+htmjava.log
+nab/detectors/htmjava/.pydevproject
 
 # Generated files
 

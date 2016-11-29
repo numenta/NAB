@@ -86,11 +86,13 @@ run without likelihood, set the variable `self.useLikelihood` in
 [numenta_detector.py](https://github.com/numenta/NAB/blob/master/nab/detectors/numenta/numenta_detector.py)
 to `False`.
 * [nab-comportex](https://github.com/floybix/nab-comportex) is a twist on HTM  anomaly detection using [Comportex](https://github.com/htm-community/comportex), a community-driven HTM implementation in Clojure. Please see [Felix Andrew's blog post](http://floybix.github.io/2016/07/01/attempting-nab) on experiments with this algorithm.
+* [HTM Java](https://github.com/numenta/htm.java) is a Community-Driven Java port of HTM.
 
 
 | Detector      |Standard Profile | Reward Low FP | Reward Low FN |
 |---------------|---------|------------------|---------------|---------------|
 | Numenta HTM*   | 70.1             | 63.1       | 74.3          |
+| [HTM Java](https://github.com/numenta/NAB/blob/master/nab/detectors/htmjava) | 65.5 | 53.2 | 70.4 |
 | [nab-comportex](https://github.com/floybix/nab-comportex)&dagger; | 64.6             | 58.8       | 69.6          |
 | [NumentaTM HTM](https://github.com/numenta/NAB/blob/master/nab/detectors/numenta/numentaTM_detector.py)* | 64.6             | 56.7       | 69.2          |
 | Numenta HTM*, no likelihood | 53.62 | 34.15    | 61.89         |
@@ -196,7 +198,6 @@ the specific version of NuPIC (and associated nupic.core) that is noted in the
     git checkout -b nab {TAG NAME}
     cd /path/to/nupic.core/
     git checkout -b nab {TAG NAME}
-
 
 ##### Run full NAB
 
