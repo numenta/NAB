@@ -44,4 +44,9 @@ setup(
   packages=find_packages(),
   long_description=read("README.md"),
   install_requires=requirements,
+  entry_points={
+    "console_scripts": [
+      "nab-plot = nab.plot:main",
+    ],
+  },
 )
