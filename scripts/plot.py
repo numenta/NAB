@@ -43,10 +43,13 @@ if __name__ == "__main__":
   assert len(dataFiles) == len(dataNames)
 
   for i in xrange(len(dataFiles)):
+    print i, dataFiles[i]
     dataPlotter = PlotNAB(
         dataFile=dataFiles[i],
-        dataName="Labels inspection for " + dataFiles[i])
-    dataPlotter.plotRawData(
+        dataName=dataNames[i],
+        offline=True,
+    )
+    dataPlotter.plot(
         withLabels=True,
         withWindows=False,
         withProbation=False)
