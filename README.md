@@ -178,7 +178,7 @@ follow the directions below to "Run a subset of NAB".
 First make sure NuPIC is installed and working properly. Then:
 
     cd /path/to/nab
-    python run.py -d numenta --detect --score --normalize
+    python run.py -d numenta --detect --optimize --score --normalize
 
 This will run the Numenta detector only and produce normalized scores. Note that
 by default it tries to use all the cores on your machine. The above command
