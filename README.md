@@ -89,7 +89,7 @@ to `False`.
 * [HTM Java](https://github.com/numenta/htm.java) is a Community-Driven Java port of HTM.
 
 
-| Detector     |Standard Profile | Reward Low FP | Reward Low FN |
+| Detector      |Standard Profile | Reward Low FP | Reward Low FN |
 |---------------|---------|------------------|---------------|
 | Numenta HTM*   | 70.1             | 63.1       | 74.3          |
 | [HTM Java](https://github.com/numenta/NAB/blob/master/nab/detectors/htmjava) | 65.5 | 53.2 | 70.4 |
