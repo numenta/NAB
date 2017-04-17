@@ -146,6 +146,9 @@ class CorpusLabel(object):
       if len(self.windows[relativePath]) == 0:
         continue
 
+      if not relativePath in self.corpus.dataFiles:
+        continue
+
       data = self.corpus.dataFiles[relativePath].data
       if "raw" in self.path:
         timestamps = windows[relativePath]
