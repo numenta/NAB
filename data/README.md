@@ -66,8 +66,8 @@ Data are ordered, timestamped, single-valued metrics. All data files contain ano
 
 - artificialNoAnomaly/
 
-	Artifically-generated data without any anomalies.
+	Artificially-generated data without any anomalies.
 
 - artificialWithAnomaly/
 
-	Artifically-generated data with varying types of anomalies.
+	Artificially-generated data with varying types of anomalies.
