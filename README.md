@@ -10,8 +10,7 @@ novel scoring mechanism designed for real-time applications.
 Included are the tools to allow you to easily run NAB on your
 own anomaly detection algorithms; see the [NAB entry points
 info](https://github.com/numenta/NAB/wiki#nab-entry-points). Competitive results
-tied to open source code will be posted in the wiki on the
-[Scoreboard](https://github.com/numenta/NAB/wiki/NAB%20Scoreboard). Let us know
+tied to open source code will be posted in the scoreboard below.  Let us know
 about your work by emailing us at [nab@numenta.org](mailto:nab@numenta.org) or
 submitting a pull request.
 
@@ -34,7 +33,7 @@ The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the 
 | Detector      | Standard Profile | Reward Low FP | Reward Low FN |
 |---------------|------------------|---------------|---------------|
 | Perfect       | 100.0            | 100.0         | 100.0         |
-| [Numenta HTM](https://github.com/numenta/nupic)* | 70.1          | 63.1          | 74.3          |
+| [Numenta HTM](https://github.com/numenta/nupic)* | 64.7          | 56.5          | 69.3          |
 | [CAD OSE](https://github.com/smirmik/CAD)&dagger; | 69.9          | 67.0          | 73.2          |
 | [KNN CAD](https://github.com/numenta/NAB/tree/master/nab/detectors/knncad)&dagger; | 58.0     | 43.4  | 64.8     |
 | [Relative Entropy](http://www.hpl.hp.com/techreports/2011/HPL-2011-8.pdf) | 54.6 | 47.6 | 58.8 |
@@ -46,9 +45,7 @@ The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the 
 | Random***       | 11.0             | 1.2          | 19.5          |
 | Null          | 0.0              | 0.0           | 0.0           |
 
-*As of NAB v1.0*
-
-\* From NuPIC version 0.5.6 ([available on PyPI](https://pypi.python.org/pypi/nupic/0.5.6)).
+\* As of NAB 1.0, NuPIC 0.3.5
 
 ** The original algorithm was not designed for anomaly detection. Details of the implementation and parameter tuning are in the [detector's code](https://github.com/numenta/NAB/blob/master/nab/detectors/bayes_changept/bayes_changept_detector.py).
 
@@ -192,7 +189,7 @@ to see all the options.
 
 Note that to replicate results exactly as in the paper you may need to checkout
 the specific version of NuPIC (and associated nupic.core) that is noted in the
-[Scoreboard](https://github.com/numenta/NAB/wiki/NAB%20Scoreboard):
+scoreboard:
 
     cd /path/to/nupic/
     git checkout -b nab {TAG NAME}
