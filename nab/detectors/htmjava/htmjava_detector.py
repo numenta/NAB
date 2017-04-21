@@ -89,11 +89,12 @@ class HtmjavaDetector(AnomalyDetector):
       self.minVal = value
 
     # Compute log(anomaly likelihood)
-    anomalyScore = self.anomalyLikelihood.anomalyProbability(
-      inputData["value"], rawScore, inputData["timestamp"])
-    logScore = self.anomalyLikelihood.computeLogLikelihood(anomalyScore)
     if spatialAnomaly:
       logScore = 1.0
+    else:
+      anomalyScore = self.anomalyLikelihood.anomalyProbability(
+          inputData["value"], rawScore, inputData["timestamp"])
+      logScore = self.anomalyLikelihood.computeLogLikelihood(anomalyScore)
 
     return (logScore, rawScore)
 
