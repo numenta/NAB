@@ -130,7 +130,7 @@ Use the Github links provided in the right sidebar.
     cd NAB
     (sudo) pip install -r requirements.txt
 
-This will install the additional required modules pandas and simplejson.
+This will install the required modules.
 
 ##### Install NAB
 
