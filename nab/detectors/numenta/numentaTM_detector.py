@@ -25,7 +25,10 @@ import simplejson as json
 from nupic.algorithms import anomaly_likelihood
 from nupic.frameworks.opf.common_models.cluster_params import (
   getScalarMetricWithTimeOfDayAnomalyParams)
-from nupic.frameworks.opf.modelfactory import ModelFactory
+try:
+  from nupic.frameworks.opf.modelfactory import ModelFactory
+except:  # Try importing it the old way (version < 0.7.0.dev0)
+  from nupic.frameworks.opf.model_factory import ModelFactory
 
 from nab.detectors.numenta.numenta_detector import NumentaDetector
 
