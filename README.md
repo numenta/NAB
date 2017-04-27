@@ -136,12 +136,25 @@ This will install the required modules.
 
 Recommended:
 
-	python setup.py install --user
+	pip install . --user
 
-Or if you are actively working on the code and are familiar with manual
+
+> Note: If NuPIC is not already installed, the version specified in 
+`NAB/requirements.txt` will be installed. If NuPIC is already installed, it
+ will not be re-installed. 
+ 
+ 
+If you want to manage dependency versions yourself, you can skip dependencies 
+with:
+    
+    pip install . --user --no-deps 
+
+
+If you are actively working on the code and are familiar with manual
 PYTHONPATH setup:
 
-	python setup.py develop --prefix=/some/other/path/
+	pip install -e . --install-option="--prefix=/some/other/path/"
+
 
 ### Usage
 
