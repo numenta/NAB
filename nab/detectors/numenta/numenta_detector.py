@@ -130,7 +130,7 @@ class NumentaDetector(AnomalyDetector):
 
     if self.useLikelihood:
       # Initialize the anomaly likelihood object
-      numentaLearningPeriod = math.floor(self.probationaryPeriod / 2.0)
+      numentaLearningPeriod = int(math.floor(self.probationaryPeriod / 2.0))
       self.anomalyLikelihood = anomaly_likelihood.AnomalyLikelihood(
         claLearningPeriod=numentaLearningPeriod,
         estimationSamples=self.probationaryPeriod-numentaLearningPeriod,
