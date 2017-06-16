@@ -42,11 +42,6 @@ Data are ordered, timestamped, single-valued metrics. All data files contain ano
 	- rogue_agent_key_updown.csv: Timing the key strokes for several users of a
 	computer, where the anomalies represent a change in the user.
 
-- realRogueAgent/
-
-	This data represents computer usage patterns for different users, where an
-	anomaly may occur with a rogue user of the computer.
-
 - realTraffic/
 
 	Real time traffic data from the Twin Cities Metro area in Minnesota, collected
