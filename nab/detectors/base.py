@@ -127,24 +127,33 @@ def detectDataSet(args):
 
   @param args   (tuple)   Arguments to run a detector on a file and then
   """
-  (i, detectorInstance, detectorName, labels, outputDir, relativePath) = args
 
-  relativeDir, fileName = os.path.split(relativePath)
-  fileName =  detectorName + "_" + fileName
-  outputPath = os.path.join(outputDir, detectorName, relativeDir, fileName)
-  createPath(outputPath)
+  import traceback
+  try:
+	  (i, detectorInstance, detectorName, labels, outputDir, relativePath) = args
 
-  print "%s: Beginning detection with %s for %s" % \
-                                                (i, detectorName, relativePath)
-  detectorInstance.initialize()
+	  relativeDir, fileName = os.path.split(relativePath)
+	  fileName =  detectorName + "_" + fileName
+	  outputPath = os.path.join(outputDir, detectorName, relativeDir, fileName)
+	  createPath(outputPath)
 
-  results = detectorInstance.run()
+	  print "%s: Beginning detection with %s for %s" % \
+							(i, detectorName, relativePath)
+	  detectorInstance.initialize()
 
-  # label=1 for relaxed windows, 0 otherwise
-  results["label"] = labels
+	  results = detectorInstance.run()
 
-  results.to_csv(outputPath, index=False)
+	  # label=1 for relaxed windows, 0 otherwise
+	  results["label"] = labels
 
-  print "%s: Completed processing %s records at %s" % \
-                                        (i, len(results.index), datetime.now())
-  print "%s: Results have been written to %s" % (i, outputPath)
+	  results.to_csv(outputPath, index=False)
+
+	  print "%s: Completed processing %s records at %s" % \
+						(i, len(results.index), datetime.now())
+	  print "%s: Results have been written to %s" % (i, outputPath)
+  except Exception as e:
+	  print "Exception:", e.message
+	  print traceback.print_exc()
+	
+
+

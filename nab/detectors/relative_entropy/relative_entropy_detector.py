@@ -119,8 +119,8 @@ class RelativeEntropyDetector(AnomalyDetector):
         # Create a histogram of empirical frequencies for the current window
         # using B_current
         P_hat = numpy.histogram(B_current,
-                                bins=self.N_bins,
-                                range=(0,self.N_bins),
+                                bins=int(self.N_bins),
+                                range=(0,int(self.N_bins)),
                                 density=True)[0]
 
         # This is for the first null hypothesis
