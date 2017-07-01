@@ -40,7 +40,7 @@ def median_absolute_deviation(timeseries):
   if median_deviation == 0:
     return False
 
-  test_statistic = demedianed.iget(-1) / median_deviation
+  test_statistic = demedianed.iloc[-1] / median_deviation
 
   # Completely arbitary...triggers if the median deviation is
   # 6 times bigger than the median
@@ -114,10 +114,12 @@ def stddev_from_moving_average(timeseries):
   respect to the short term trends.
   """
   series = pandas.Series([x[1] for x in timeseries])
-  expAverage = pandas.stats.moments.ewma(series, com=50)
-  stdDev = pandas.stats.moments.ewmstd(series, com=50)
+  #expAverage = pandas.stats.moments.ewma(series, com=50)
+  expAverage = series.ewm(ignore_na=False,min_periods=0,adjust=True,com=50).mean()
+  #stdDev = pandas.stats.moments.ewmstd(series, com=50)
+  stdDev = series.ewm(ignore_na=False,min_periods=0,adjust=True,com=50).std(bias=False)
 
-  return abs(series.iget(-1) - expAverage.iget(-1)) > 3 * stdDev.iget(-1)
+  return abs(series.iloc[-1] - expAverage.iloc[-1]) > 3 * stdDev.iloc[-1]
 
 
 def mean_subtraction_cumulation(timeseries):
@@ -130,9 +132,10 @@ def mean_subtraction_cumulation(timeseries):
   series = pandas.Series([x[1] if x[1] else 0 for x in timeseries])
   series = series - series[0:len(series) - 1].mean()
   stdDev = series[0:len(series) - 1].std()
-  expAverage = pandas.stats.moments.ewma(series, com=15)
+  #expAverage = pandas.stats.moments.ewma(series, com=15)
+  expAverage = series.ewm(ignore_na=False,min_periods=0,adjust=True,com=15).mean()
 
-  return abs(series.iget(-1)) > 3 * stdDev
+  return abs(series.iloc[-1]) > 3 * stdDev
 
 
 def least_squares(timeseries):
