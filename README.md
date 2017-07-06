@@ -16,9 +16,11 @@ about your work by emailing us at [nab@numenta.org](mailto:nab@numenta.org) or
 submitting a pull request.
 
 This readme is a brief overview and contains details for setting up NAB. Please
-refer to the [NAB publication](http://arxiv.org/abs/1510.03336) or the [NAB
-Whitepaper](https://github.com/numenta/NAB/wiki#nab-whitepaper) in the wiki for
-more details about NAB scoring, data, motivation, etc.
+refer to the following for more details about NAB scoring, data, and motivation:
+
+- [Evaluating Real-time Anomaly Detection Algorithms](http://arxiv.org/abs/1510.03336) - Original publication of NAB
+- [Unsupervised real-time anomaly detection for streaming data](http://www.sciencedirect.com/science/article/pii/S0925231217309864) - covers NAB and Numenta's HTM-based anomaly detection algorithm
+- [NAB Whitepaper](https://github.com/numenta/NAB/wiki#nab-whitepaper)
 
 We encourage you to publish your results on running NAB, and share them with us at [nab@numenta.org](nab@numenta.org). Please cite the following publication when referring to NAB:
 
