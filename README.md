@@ -35,7 +35,7 @@ The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the 
 | Detector      | Standard Profile | Reward Low FP | Reward Low FN |
 |---------------|------------------|---------------|---------------|
 | Perfect       | 100.0            | 100.0         | 100.0         |
-| [Numenta HTM](https://github.com/numenta/nupic)* | 70.1          | 63.1          | 74.3          |
+| [Numenta HTM](https://github.com/numenta/nupic)* | 70.5-69.7     | 62.6-61.7     | 75.2-74.2     |
 | [CAD OSE](https://github.com/smirmik/CAD)&dagger; | 69.9          | 67.0          | 73.2          |
 | [KNN CAD](https://github.com/numenta/NAB/tree/master/nab/detectors/knncad)&dagger; | 58.0     | 43.4  | 64.8     |
 | [Relative Entropy](http://www.hpl.hp.com/techreports/2011/HPL-2011-8.pdf) | 54.6 | 47.6 | 58.8 |
@@ -49,9 +49,9 @@ The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the 
 
 *As of NAB v1.0*
 
-\* From NuPIC version 0.5.6 ([available on PyPI](https://pypi.python.org/pypi/nupic/0.5.6)).
+\* From NuPIC version 0.5.6 ([available on PyPI](https://pypi.python.org/pypi/nupic));the range in scores represents runs using different random seeds.
 
-** The original algorithm was not designed for anomaly detection. Details of the implementation and parameter tuning are in the [detector's code](https://github.com/numenta/NAB/blob/master/nab/detectors/bayes_changept/bayes_changept_detector.py).
+** The original algorithm was modified for anomaly detection. Implementation details are in the [detector's code](https://github.com/numenta/NAB/blob/master/nab/detectors/bayes_changept/bayes_changept_detector.py).
 
 *** Scores reflect the mean across a range of random seeds. The spread of scores for each profile are 7.95 to 16.83 for Standard, -1.56 to 2.14 for Reward Low FP, and 11.34 to 23.68 for Reward Low FN.
 
@@ -80,19 +80,22 @@ added to the corpus; NAB is currently in v1.0.
 
 For comparison, here are the NAB V1.0 scores for some additional flavors of HTM.
 
+* Numenta HTM using NuPIC v.0.5.6: This version of NuPIC was used to generate the data for the paper mentioned above (Unsupervised real-time anomaly detection for streaming data. Neurocomputing, ISSN 0925-2312, https://doi.org/10.1016/j.neucom.2017.04.070).  If you are interested in replicating the results shown in the paper, use this version.
+* [HTM Java](https://github.com/numenta/htm.java) is a Community-Driven Java port of HTM.
+* [nab-comportex](https://github.com/floybix/nab-comportex) is a twist on HTM  anomaly detection using [Comportex](https://github.com/htm-community/comportex), a community-driven HTM implementation in Clojure. Please see [Felix Andrew's blog post](http://floybix.github.io/2016/07/01/attempting-nab) on experiments with this algorithm.
 * NumentaTM HTM detector uses the implementation of temporal memory found
 [here](https://github.com/numenta/nupic.core/blob/master/src/nupic/algorithms/TemporalMemory.hpp).
 * Numenta HTM detector with no likelihood uses the raw anomaly scores directly. To
 run without likelihood, set the variable `self.useLikelihood` in
 [numenta_detector.py](https://github.com/numenta/NAB/blob/master/nab/detectors/numenta/numenta_detector.py)
 to `False`.
-* [nab-comportex](https://github.com/floybix/nab-comportex) is a twist on HTM  anomaly detection using [Comportex](https://github.com/htm-community/comportex), a community-driven HTM implementation in Clojure. Please see [Felix Andrew's blog post](http://floybix.github.io/2016/07/01/attempting-nab) on experiments with this algorithm.
-* [HTM Java](https://github.com/numenta/htm.java) is a Community-Driven Java port of HTM.
+
+
 
 
 | Detector      |Standard Profile | Reward Low FP | Reward Low FN |
 |---------------|---------|------------------|---------------|
-| Numenta HTM*   | 70.1             | 63.1       | 74.3          |
+| Numenta HTMusing NuPIC v0.5.6*   | 70.1             | 63.1       | 74.3          |
 | [HTM Java](https://github.com/numenta/NAB/blob/master/nab/detectors/htmjava) | 65.5 | 53.2 | 70.4 |
 | [nab-comportex](https://github.com/floybix/nab-comportex)&dagger; | 64.6             | 58.8       | 69.6          |
 | [NumentaTM HTM](https://github.com/numenta/NAB/blob/master/nab/detectors/numenta/numentaTM_detector.py)* | 64.6             | 56.7       | 69.2          |
