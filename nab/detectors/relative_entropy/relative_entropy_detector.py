@@ -57,7 +57,7 @@ class RelativeEntropyDetector(AnomalyDetector):
     self.util = []
 
     # Number of bins into which util is to be quantized
-    self.N_bins = 5.0
+    self.N_bins = 5
 
     # Window size
     self.W = 52
