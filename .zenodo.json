@@ -1,0 +1,85 @@
+    "description": "The Numenta Anomaly Benchmark",
+    "access_right": "open",
+    "license": {
+        "id": "AGPL-3.0"
+    },
+    "upload_type": "software",
+    "creators": [
+        {
+            "affiliation": "Numenta",
+            "orcid": "0000-0002-2141-0629",
+            "name": "Subutai Ahmad"
+        },
+        {
+            "name": "Alexander Lavin"
+        },
+        {
+            "affiliation": "Numenta",
+            "name": "Scott Purdy"
+        },
+        {
+            "name": "Zuha Agha"
+        },
+        {
+            "name": "Ian Danforth"
+        },
+        {
+            "affiliation": "Numenta",
+            "name": "Marcus Lewis"
+        },
+        {
+            "affiliation": "Numenta",
+            "name": "Luiz Scheinkman"
+        },
+        {
+            "affiliation": "Numenta",
+            "name": "Matthew Taylor"
+        },
+        {
+            "name": "Jay Gokhale"
+        },
+        {
+            "name": "Tom Silver"
+        },
+        {
+            "name": "Mikhail Smirnov"
+        },
+        {
+            "name": "Austin Marshall"
+        },
+        {
+            "name": "Marion Le Borgne"
+        },
+        {
+            "name": "Yuya Takashina"
+        },
+        {
+            "name": "Sergey Kibish"
+        },
+        {
+            "name": "ish-vlad"
+        },
+        {
+            "affiliation": "Numenta",
+            "name": "Celeste Baranski"
+        },
+        {
+            "name": "Richard Crowder"
+        },
+        {
+            "name": "m.fab"
+        },
+        {
+            "name": "Will Welch"
+        },
+        {
+            "name": "Sagan Bolliger"
+        },
+        {
+            "name": "Chetan Surpur"
+        },
+        {
+            "name": "breznak"
+        }
+    ],
+}
