@@ -39,6 +39,11 @@
         "reward_low_FP_rate": 5.763682319827586,
         "standard": 16.831768350517237
     },
+    "randomCutForest": {
+        "reward_low_FN_rate": 59.74876476310345,
+        "reward_low_FP_rate": 38.360772142413786,
+        "standard": 51.717054557073276
+    },
     "relativeEntropy": {
         "reward_low_FN_rate": 58.84229239324713,
         "reward_low_FP_rate": 47.598351759844824,

@@ -41,6 +41,20 @@
             "threshold": 0.9947875976562506
         }
     },
+    "htmjava": {
+        "reward_low_FN_rate": {
+            "score": 8.764037437134272,
+            "threshold": 0.5126953125
+        },
+        "reward_low_FP_rate": {
+            "score": 15.463515082084744,
+            "threshold": 0.65076904296875
+        },
+        "standard": {
+            "score": 33.76403743713426,
+            "threshold": 0.5126953125
+        }
+    },
     "knncad": {
         "reward_low_FN_rate": {
             "score": 0.0,
@@ -55,20 +69,6 @@
             "threshold": 1.0
         }
     },
-	"htmjava": {
-        "reward_low_FN_rate": {
-            "score": 8.764037437134272,
-            "threshold": 0.5126953125
-        },
-        "reward_low_FP_rate": {
-            "score": 15.463515082084744,
-            "threshold": 0.65076904296875
-        },
-        "standard": {
-            "score": 33.76403743713426,
-            "threshold": 0.5126953125
-        }
-	},
     "null": {
         "reward_low_FN_rate": {
             "score": -232.0,
@@ -123,6 +123,20 @@
         "standard": {
             "score": -25.889252239141747,
             "threshold": 0.9984497070312507
+        }
+    },
+    "randomCutForest": {
+        "reward_low_FN_rate": {
+            "score": -24.07429862443211,
+            "threshold": 0.44804840087890635
+        },
+        "reward_low_FP_rate": {
+            "score": -27.003008629582606,
+            "threshold": 0.5751955032348636
+        },
+        "standard": {
+            "score": 3.98356657241316,
+            "threshold": 0.4539184570312501
         }
     },
     "relativeEntropy": {
