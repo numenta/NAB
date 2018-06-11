@@ -113,7 +113,7 @@ class HtmjavaDetector(AnomalyDetector):
       self.modelParams["modelParams"]["sensorParams"]["encoders"])
 
     # Initialize the anomaly likelihood object
-    numentaLearningPeriod = math.floor(self.probationaryPeriod / 2.0)
+    numentaLearningPeriod = int(math.floor(self.probationaryPeriod / 2.0))
     self.anomalyLikelihood = anomaly_likelihood.AnomalyLikelihood(
       learningPeriod=numentaLearningPeriod,
       estimationSamples=self.probationaryPeriod-numentaLearningPeriod,
