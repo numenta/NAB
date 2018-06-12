@@ -14,4 +14,4 @@ Build __htm.java__ NAB detector:
 Run __htm.java__ NAB detector:
 
     cd /path/to/nab
-    python run.py -d htmjava --detect --score --normalize
+    python run.py -d htmjava --detect --score --normalize --optimize
