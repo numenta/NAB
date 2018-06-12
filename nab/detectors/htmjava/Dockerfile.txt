@@ -1,0 +1,22 @@
+FROM ubuntu:16.04
+RUN apt update && apt install -y \
+        software-properties-common \
+        python-software-properties \
+        python-pip \
+        python-dev \
+        openjfx
+RUN pip install -U pip setuptools
+RUN \
+    echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
+    add-apt-repository -y ppa:webupd8team/java && \
+    apt-get update && \
+    apt-get install -y oracle-java8-installer && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/oracle-jdk8-installer
+ADD . /work
+WORKDIR /work/nab/detectors/htmjava
+RUN ./gradlew clean build
+WORKDIR /work
+RUN pip install -r requirements.txt && \
+    pip install .
+CMD ["python", "run.py", "-d", "htmjava", "--skipConfirmation", "--detect", "--score", "--normalize"]
