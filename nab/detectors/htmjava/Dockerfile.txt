@@ -19,4 +19,4 @@ RUN ./gradlew clean build
 WORKDIR /work
 RUN pip install -r requirements.txt && \
     pip install .
-CMD ["python", "run.py", "-d", "htmjava", "--skipConfirmation", "--detect", "--score", "--normalize"]
+CMD ["python", "run.py", "-d", "htmjava", "--skipConfirmation", "--detect", "--score", "--normalize", "--optimize"]
