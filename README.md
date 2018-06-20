@@ -56,7 +56,8 @@ The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the 
 
 *** Scores reflect the mean across a range of random seeds. The spread of scores for each profile are 7.95 to 16.83 for Standard, -1.56 to 2.14 for Reward Low FP, and 11.34 to 23.68 for Reward Low FN.
 
-\**** We have included the results for RCF using an [AWS proprietary implementation](https://docs.aws.amazon.com/kinesisanalytics/latest/sqlref/sqlrf-random-cut-forest.html); even though the algorithm code is not open source, the [algorithm description](http://proceedings.mlr.press/v48/guha16.pdf) is public and the code we used to run [NAB on RCF](nab/detectors/random_cut_forest) is open source. See [here](nab/detectors/random_cut_forest/random_cut_forest.sql) for more information on the parameters that were used
+\**** We have included the results for RCF using an [AWS proprietary implementation](https://docs.aws.amazon.com/kinesisanalytics/latest/sqlref/sqlrf-random-cut-forest.html); even though the algorithm code is not open source, the [algorithm description](http://proceedings.mlr.press/v48/guha16.pdf) is public and the code we used to run [NAB on RCF](nab/detectors/random_cut_forest) is open source.
+
 
 &dagger; Algorithm was an entry to the [2016 NAB Competition](http://numenta.com/blog/2016/08/10/numenta-anomaly-benchmark-nab-competition-2016-winners/).
 

@@ -1,10 +1,11 @@
 # Robust Random Cut Forest Based Anomaly Detection On Streams
 
-Use this script to evaluate [Robust Random Cut Forest Based Anomaly Detection On Streams][4] algorithm on NAB.
+Use this script to evaluate [Robust Random Cut Forest Based Anomaly Detection On Streams<sup>1</sup>][1] algorithm on NAB.
 
-This script will create an [AWS Kinesis Analytics][2] application that will use the [RANDOM_CUT_FOREST][3] function to detect anomalies on NAB data files as they are streamed via AWS API ("boto3"). The application's output stream with the anomaly scores will be stored in the "results" folder for further processing using NAB standard tools ("run.py") to optimize, normalize and score the results.
+This script will create an [AWS Kinesis Analytics][2] application that will use the [RANDOM_CUT_FOREST][3] function to detect anomalies on NAB data files as they are streamed via AWS API ("boto3"). The application's output stream with the anomaly scores will be stored in the "results" folder for further processing using NAB standard tools ("run.py") to optimize, normalize and score the results.  See [NAB Entry Points][4] "Option 2" for more information.
 
-See [NAB Entry Points][1] "Option 2" for more information.
+See [random_cut_forest.sql](random_cut_forest.sql) file for more information on the parameters that were used.
+
 
 ### AWS Credentials
 
@@ -49,8 +50,12 @@ For example, use the following command from NAB's root directory to optimize the
 python run.py -d randomCutForest --optimize --score --normalize
 ```
 
-[1]: https://github.com/numenta/NAB/wiki/NAB-Entry-Points
+---
+[1: Guha, Sudipto, Nina Mishra, Gourav Roy, and Okke Schrijvers. "Robust random cut forest based anomaly detection on streams." In *International Conference on Machine Learning*, pp. 2712-2721. 2016.][1]
+
+
+[1]: http://proceedings.mlr.press/v48/guha16.pdf  'Guha, Sudipto, Nina Mishra, Gourav Roy, and Okke Schrijvers. "Robust random cut forest based anomaly detection on streams." In International Conference on Machine Learning, pp. 2712-2721. 2016'
 [2]: https://aws.amazon.com/kinesis/data-analytics/
 [3]: https://docs.aws.amazon.com/kinesisanalytics/latest/sqlref/sqlrf-random-cut-forest.html
-[4]: http://proceedings.mlr.press/v48/guha16.pdf
+[4]: https://github.com/numenta/NAB/wiki/NAB-Entry-Points
 [5]: https://aws.amazon.com/cli/
