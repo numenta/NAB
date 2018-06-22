@@ -39,6 +39,7 @@ The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the 
 | [CAD OSE](https://github.com/smirmik/CAD)&dagger; | 69.9          | 67.0          | 73.2          |
 | [KNN CAD](https://github.com/numenta/NAB/tree/master/nab/detectors/knncad)&dagger; | 58.0     | 43.4  | 64.8     |
 | [Relative Entropy](http://www.hpl.hp.com/techreports/2011/HPL-2011-8.pdf) | 54.6 | 47.6 | 58.8 |
+| [Random Cut Forest](http://proceedings.mlr.press/v48/guha16.pdf) **** | 51.7 | 38.4 | 59.7 |
 | [Twitter ADVec v1.0.0](https://github.com/twitter/AnomalyDetection)| 47.1             | 33.6          | 53.5          |
 | [Windowed Gaussian](https://github.com/numenta/NAB/blob/master/nab/detectors/gaussian/windowedGaussian_detector.py) | 39.6             | 20.9         | 47.4          |
 | [Etsy Skyline](https://github.com/etsy/skyline) | 35.7             | 27.1          | 44.5          |
@@ -54,6 +55,9 @@ The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the 
 ** The original algorithm was modified for anomaly detection. Implementation details are in the [detector's code](https://github.com/numenta/NAB/blob/master/nab/detectors/bayes_changept/bayes_changept_detector.py).
 
 *** Scores reflect the mean across a range of random seeds. The spread of scores for each profile are 7.95 to 16.83 for Standard, -1.56 to 2.14 for Reward Low FP, and 11.34 to 23.68 for Reward Low FN.
+
+\**** We have included the results for RCF using an [AWS proprietary implementation](https://docs.aws.amazon.com/kinesisanalytics/latest/sqlref/sqlrf-random-cut-forest.html); even though the algorithm code is not open source, the [algorithm description](http://proceedings.mlr.press/v48/guha16.pdf) is public and the code we used to run [NAB on RCF](nab/detectors/random_cut_forest) is open source.
+
 
 &dagger; Algorithm was an entry to the [2016 NAB Competition](http://numenta.com/blog/2016/08/10/numenta-anomaly-benchmark-nab-competition-2016-winners/).
 
@@ -249,4 +253,3 @@ This will run the `detect` phase of NAB on the data files specified in the above
 JSON file. Note that scoring and normalization are not supported with this
 option. Note also that you may see warning messages regarding the lack of labels
 for other files. You can ignore these warnings.
-
