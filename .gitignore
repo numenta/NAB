@@ -10,6 +10,7 @@ nab.egg-info/
 .pydevproject
 htmjava.log
 nab/detectors/htmjava/.pydevproject
+scripts/.ipynb_checkpoints/
 
 # Generated files
 
