@@ -10,8 +10,6 @@ nab.egg-info/
 .pydevproject
 htmjava.log
 nab/detectors/htmjava/.pydevproject
-venv/
-results_orig/
 
 # Generated files
 
