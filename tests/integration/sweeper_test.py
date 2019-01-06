@@ -18,22 +18,20 @@
 #
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
-import unittest
-
 import pytest
 
-from nab.sweep_optimizer import AnomalyPoint, Optimizer, ThresholdScore
+from nab.sweeper import AnomalyPoint, Sweeper, ThresholdScore
 
 
 class TestSweeper(object):
   def testOptimizerInit(self):
-    o = Optimizer()
+    o = Sweeper()
     assert o.probationPercent is not None
 
-    o = Optimizer(probationPercent=0.30)
+    o = Sweeper(probationPercent=0.30)
     assert o.probationPercent == 0.30
 
-    o = Optimizer(costMatrix={"tpWeight": 0, "fpWeight": 1, "fnWeight": 2})
+    o = Sweeper(costMatrix={"tpWeight": 0, "fpWeight": 1, "fnWeight": 2})
     assert o.tpWeight == 0
     assert o.fpWeight == 1
     assert o.fnWeight == 2
@@ -47,12 +45,12 @@ class TestSweeper(object):
     (6000, 0.1, 500),  # Cap at 5000 works as expected
   ])
   def testGetProbationaryLength(self, numRows, probationaryPercent, expectedLength):
-    o = Optimizer(probationPercent=probationaryPercent)
+    o = Sweeper(probationPercent=probationaryPercent)
     actualLength = o._getProbationaryLength(numRows)
     assert actualLength == expectedLength
 
   def testSetCostMatrix(self):
-    o = Optimizer()
+    o = Sweeper()
     assert o.tpWeight is None
     assert o.fpWeight is None
     assert o.fnWeight is None
@@ -93,8 +91,8 @@ class TestSweeper(object):
       "fpWeight": 0.11,
     }
     probationPercent = 0.1
-    o = Optimizer(probationPercent=probationPercent, costMatrix=costMatrix)
-    scoredAnomalies = o._calcSweepScore(fakeTimestamps, fakeAnomalyScores, windowLimits, fakeName)
+    o = Sweeper(probationPercent=probationPercent, costMatrix=costMatrix)
+    scoredAnomalies = o.calcSweepScore(fakeTimestamps, fakeAnomalyScores, windowLimits, fakeName)
 
     # Check that correct number of AnomalyPoints returned
     assert len(scoredAnomalies) == numRows
@@ -137,7 +135,7 @@ class TestSweeper(object):
       AnomalyPoint(7, 0.0, 0, None),
     ]
 
-    o = Optimizer()
+    o = Sweeper()
     sortedList = o._prepAnomalyListForScoring(fakeInput)
     assert sortedList == expectedList
 
@@ -153,7 +151,7 @@ class TestSweeper(object):
     ]
 
     fakeFNWeight = 33.0
-    o = Optimizer()
+    o = Sweeper()
     o.fnWeight = fakeFNWeight
 
     # Expect one entry for all false positives and one entry per unique window name,
@@ -169,7 +167,7 @@ class TestSweeper(object):
 
   def testCalcScoreByThresholdReturnsExpectedScores(self):
     fnWeight = 5.0
-    o = Optimizer()
+    o = Sweeper()
     o.fnWeight = fnWeight
 
     fakeInput = [
@@ -190,6 +188,6 @@ class TestSweeper(object):
       ThresholdScore(0.0, 5 - 3 + 20 - 3, 3, 0, 2, 0, 5),
     ]
 
-    actual = o._calcScoreByThreshold(fakeInput)
+    actual = o.calcScoreByThreshold(fakeInput)
 
     assert actual == expectedScoresByThreshold

@@ -22,15 +22,51 @@ import logging
 import math
 
 from nab.corpus import Corpus
-from nab.scorer import scaledSigmoid
 
 logger = logging.getLogger(__name__)
 AnomalyPoint = namedtuple("AnomalyPoint", ["timestamp", "anomalyScore", "sweepScore", "windowName"])
 ThresholdScore = namedtuple("ThresholdScore", ["threshold", "score", "tp", "tn", "fp", "fn", "total"])
 
 
+def sigmoid(x):
+  """Standard sigmoid function."""
+  return 1 / (1 + math.exp(-x))
 
-class Optimizer(object):
+
+def scaledSigmoid(relativePositionInWindow):
+  """Return a scaled sigmoid function given a relative position within a
+  labeled window.  The function is computed as follows:
+
+  A relative position of -1.0 is the far left edge of the anomaly window and
+  corresponds to S = 2*sigmoid(5) - 1.0 = 0.98661.  This is the earliest to be
+  counted as a true positive.
+
+  A relative position of -0.5 is halfway into the anomaly window and
+  corresponds to S = 2*sigmoid(0.5*5) - 1.0 = 0.84828.
+
+  A relative position of 0.0 consists of the right edge of the window and
+  corresponds to S = 2*sigmoid(0) - 1 = 0.0.
+
+  Relative positions > 0 correspond to false positives increasingly far away
+  from the right edge of the window. A relative position of 1.0 is past the
+  right  edge of the  window and corresponds to a score of 2*sigmoid(-5) - 1.0 =
+  -0.98661.
+
+  @param  relativePositionInWindow (float)  A relative position
+                                            within a window calculated per the
+                                            rules above.
+
+  @return (float)
+  """
+  if relativePositionInWindow > 3.0:
+    # FP well behind window
+    return -1.0
+  else:
+    return 2*sigmoid(-5*relativePositionInWindow) - 1.0
+
+
+
+class Sweeper(object):
   def __init__(self, probationPercent=0.15, costMatrix=None):
     self.probationPercent = probationPercent
 
@@ -45,18 +81,6 @@ class Optimizer(object):
     self.tpWeight = costMatrix["tpWeight"]
     self.fpWeight = costMatrix["fpWeight"]
     self.fnWeight = costMatrix["fnWeight"]
-
-  def optimizeCorpus(self):
-    pass
-
-  def optimizeFile(self):
-    pass  # Probably not needed.
-
-  def scoreCorpus(self):
-    pass
-
-  def scoreFile(self):
-    pass
 
   def _getProbationaryLength(self, numRows):
     return min(math.floor(self.probationPercent * numRows), self.probationPercent * 5000)
@@ -75,7 +99,7 @@ class Optimizer(object):
         scoreParts[row.windowName] = -self.fnWeight
     return scoreParts
 
-  def _calcSweepScore(self, timestamps, anomalyScores, windowLimits, dataSetName):
+  def calcSweepScore(self, timestamps, anomalyScores, windowLimits, dataSetName):
     assert len(timestamps) == len(anomalyScores), "timestamps and anomalyScores should not be different lengths!"
     # The final list of anomaly points returned from this function.
     # Used for threshold optimization and scoring in other functions.
@@ -141,7 +165,7 @@ class Optimizer(object):
 
     return anomalyList
 
-  def _calcScoreByThreshold(self, anomalyList):
+  def calcScoreByThreshold(self, anomalyList):
     scorableList = self._prepAnomalyListForScoring(anomalyList)
     scoreParts = self._prepareScoreByThresholdParts(scorableList)
     scoresByThreshold = []  # The final list we return
@@ -188,17 +212,26 @@ class Optimizer(object):
 
     return scoresByThreshold
 
-  def _optimizeAnomalyDicts(self):
-    """Return (threshold, score) with highest score based on sweep score algorithm."""
-    pass
+  def scoreDataSet(self, timestamps, anomalyScores, windowLimits, dataSetName, threshold):
+    anomalyList = self.calcSweepScore(timestamps, anomalyScores, windowLimits, dataSetName)
+    scoresByThreshold = self.calcScoreByThreshold(anomalyList)
 
-  def _scoreAnomalyDicts(self):
-    pass
+    bestRow = None
+    for thresholdScore in scoresByThreshold:
+      if thresholdScore.threshold <= threshold:
+        bestRow = thresholdScore
+        break
+
+    return (
+      [x.sweepScore for x in anomalyList],  # Return sweepScore for each row, to be added to score file
+      bestRow
+    )
+
 
 if __name__ == '__main__':
   logging.basicConfig()
   logger.setLevel(logging.DEBUG)
-  o = Optimizer()
+  o = Sweeper()
   print(o)
   c = Corpus('results/numenta')
   print(c)
