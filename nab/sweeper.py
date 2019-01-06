@@ -58,7 +58,7 @@ def scaledSigmoid(relativePositionInWindow):
 
   @return (float)
   """
-  if relativePositionInWindow >= 3.0:
+  if relativePositionInWindow > 3.0:
     # FP well behind window
     return -1.0
   else:
@@ -149,7 +149,7 @@ class Sweeper(object):
       # If outside a window, score as if false positive
       else:
         if prevWindowRightIndex is None:
-          positionPastWindow = 3.0
+          positionPastWindow = 100.0  # No preceding window
         else:
           positionPastWindow = abs(prevWindowRightIndex - i) / float(prevWindowWidth - 1)
 
