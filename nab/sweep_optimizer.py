@@ -24,9 +24,9 @@ import math
 from nab.corpus import Corpus
 from nab.scorer import scaledSigmoid
 
-
-AnomalyPoint = namedtuple("AnomalyPoint", ["timestamp", "anomalyScore", "SweepScore", "windowName"])
 logger = logging.getLogger(__name__)
+AnomalyPoint = namedtuple("AnomalyPoint", ["timestamp", "anomalyScore", "sweepScore", "windowName"])
+ThresholdScore = namedtuple("ThresholdScore", ["threshold", "score", "tp", "tn", "fp", "fn", "total"])
 
 
 
@@ -61,7 +61,21 @@ class Optimizer(object):
   def _getProbationaryLength(self, numRows):
     return min(math.floor(self.probationPercent * numRows), self.probationPercent * 5000)
 
-  def calcSweepScore(self, timestamps, anomalyScores, windowLimits, dataSetName):
+  def _prepAnomalyListForScoring(self, inputAnomalyList):
+    """Sort by anomaly score and filter all rows with 'probationary' window name"""
+    return sorted(
+      [x for x in inputAnomalyList if x.windowName != 'probationary'],
+      key=lambda x: x.anomalyScore,
+      reverse=True)
+
+  def _prepareScoreByThresholdParts(self, inputAnomalyList):
+    scoreParts = {"fp": 0}
+    for row in inputAnomalyList:
+      if row.windowName not in ('probationary', None):
+        scoreParts[row.windowName] = -self.fnWeight
+    return scoreParts
+
+  def _calcSweepScore(self, timestamps, anomalyScores, windowLimits, dataSetName):
     assert len(timestamps) == len(anomalyScores), "timestamps and anomalyScores should not be different lengths!"
     # The final list of anomaly points returned from this function.
     # Used for threshold optimization and scoring in other functions.
@@ -71,7 +85,7 @@ class Optimizer(object):
     maxTP = scaledSigmoid(-1.0)
     probationaryLength = self._getProbationaryLength(len(timestamps))
 
-    # Iteration variables - these update as we  iterate through the data
+    # Iteration variables - these update as we iterate through the data
     curWindowLimits = None
     curWindowName = None
     curWindowWidth = None
@@ -127,7 +141,52 @@ class Optimizer(object):
 
     return anomalyList
 
+  def _calcScoreByThreshold(self, anomalyList):
+    scorableList = self._prepAnomalyListForScoring(anomalyList)
+    scoreParts = self._prepareScoreByThresholdParts(scorableList)
+    scoresByThreshold = []  # The final list we return
+    curThreshold = 1.1  # Start threshold eliminates all rows --> full false negative score
 
+    # Initialize counts:
+    # * every point in a window is a false negative
+    # * every point outside a window is a false positive
+    tn = sum(1 if x.windowName is None else 0 for x in scorableList)
+    fn = sum(1 if x.windowName is not None else 0 for x in scorableList)
+    tp = 0
+    fp = 0
+
+    # Iterate through every data point, starting with highest anomaly scores and working down.
+    # Whenever we reach a new anomaly score, we save the current score and begin calculating
+    # the score for the new, lower threshold. Every data point we iterate over is 'active'
+    # for the current threshold level, so the point is either a true positive (has a `windowName`)
+    # or a false positive (`windowName is None`).
+    for dataPoint in scorableList:
+      # Check if we've reached a new threshold
+      if dataPoint.anomalyScore != curThreshold:
+        curScore = sum(scoreParts.values())
+        s = ThresholdScore(curThreshold, curScore, tp, tn, fp, fn, tp + tn + fp + fn)
+        scoresByThreshold.append(s)
+        curThreshold = dataPoint.anomalyScore
+
+      # Adjust counts
+      if dataPoint.windowName is not None:
+        tp += 1
+        fn -= 1
+      else:
+        fp += 1
+        tn -= 1
+
+      if dataPoint.windowName is None:
+        scoreParts["fp"] += dataPoint.sweepScore
+      else:
+        scoreParts[dataPoint.windowName] = max(scoreParts[dataPoint.windowName], dataPoint.sweepScore)
+    else:
+      # Make sure to save the score for the last threshold
+      curScore = sum(scoreParts.values())
+      s = ThresholdScore(curThreshold, curScore, tp, tn, fp, fn, tp + tn + fp + fn)
+      scoresByThreshold.append(s)
+
+    return scoresByThreshold
 
   def _optimizeAnomalyDicts(self):
     """Return (threshold, score) with highest score based on sweep score algorithm."""

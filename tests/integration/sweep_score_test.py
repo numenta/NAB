@@ -22,7 +22,7 @@ import unittest
 
 import pytest
 
-from nab.sweep_optimizer import AnomalyPoint, Optimizer
+from nab.sweep_optimizer import AnomalyPoint, Optimizer, ThresholdScore
 
 
 class TestSweeper(object):
@@ -94,7 +94,7 @@ class TestSweeper(object):
     }
     probationPercent = 0.1
     o = Optimizer(probationPercent=probationPercent, costMatrix=costMatrix)
-    scoredAnomalies = o.calcSweepScore(fakeTimestamps, fakeAnomalyScores, windowLimits, fakeName)
+    scoredAnomalies = o._calcSweepScore(fakeTimestamps, fakeAnomalyScores, windowLimits, fakeName)
 
     # Check that correct number of AnomalyPoints returned
     assert len(scoredAnomalies) == numRows
@@ -111,6 +111,85 @@ class TestSweeper(object):
     # Points in window have positive score; others have negative score
     for point in scoredAnomalies:
       if point.windowName not in ("probationary", None):
-        assert point.SweepScore > 0
+        assert point.sweepScore > 0
       else:
-        assert point.SweepScore < 0
+        assert point.sweepScore < 0
+
+  def testPrepAnomalyListForScoring(self):
+    fakeInput = [
+      AnomalyPoint(0, 0.5, 0, 'probationary'),  # filter because 'probationary'
+      AnomalyPoint(1, 0.5, 0, 'probationary'),  # filter because 'probationary'
+      AnomalyPoint(2, 0.0, 0, None),
+      AnomalyPoint(3, 0.1, 0, None),
+      AnomalyPoint(4, 0.2, 0, 'windowA'),
+      AnomalyPoint(5, 0.5, 0, 'windowB'),
+      AnomalyPoint(6, 0.5, 0, None),
+      AnomalyPoint(7, 0.0, 0, None),
+    ]
+
+    # Expected: sorted by anomaly score descending, with probationary rows filtered out.
+    expectedList = [
+      AnomalyPoint(5, 0.5, 0, 'windowB'),
+      AnomalyPoint(6, 0.5, 0, None),
+      AnomalyPoint(4, 0.2, 0, 'windowA'),
+      AnomalyPoint(3, 0.1, 0, None),
+      AnomalyPoint(2, 0.0, 0, None),
+      AnomalyPoint(7, 0.0, 0, None),
+    ]
+
+    o = Optimizer()
+    sortedList = o._prepAnomalyListForScoring(fakeInput)
+    assert sortedList == expectedList
+
+  def testPrepareScoreParts(self):
+    fakeInput = [
+      AnomalyPoint(0, 0.5, 0, 'probationary'),
+      AnomalyPoint(1, 0.5, 0, 'probationary'),
+      AnomalyPoint(2, 0.0, 0, None),
+      AnomalyPoint(4, 0.2, 0, 'windowA'),
+      AnomalyPoint(5, 0.2, 0, 'windowA'),
+      AnomalyPoint(6, 0.5, 0, 'windowB'),
+      AnomalyPoint(7, 0.5, 0, None),
+    ]
+
+    fakeFNWeight = 33.0
+    o = Optimizer()
+    o.fnWeight = fakeFNWeight
+
+    # Expect one entry for all false positives and one entry per unique window name,
+    # initialized to a starting score of `-self.fnWeight`
+    expectedOutput = {
+      "fp": 0,
+      "windowA": -fakeFNWeight,
+      "windowB": -fakeFNWeight
+    }
+
+    actualScoreParts = o._prepareScoreByThresholdParts(fakeInput)
+    assert actualScoreParts == expectedOutput
+
+  def testCalcScoreByThresholdReturnsExpectedScores(self):
+    fnWeight = 5.0
+    o = Optimizer()
+    o.fnWeight = fnWeight
+
+    fakeInput = [
+      AnomalyPoint(0, 0.5, -1000, 'probationary'),  # Should never contribute to score (probationary)
+      AnomalyPoint(1, 0.5, -1000, 'probationary'),  # Should never contribute to score (probationary)
+      AnomalyPoint(2, 0.0, -3, None),  # Should never contribute to score (anomaly == 0.0)
+      AnomalyPoint(4, 0.2, 20, 'windowA'),  # Should be used instead of next row when threshold <= 0.2
+      AnomalyPoint(5, 0.3, 10, 'windowA'),  # Should be used for winowA _until_ threshold <= 0.2
+      AnomalyPoint(6, 0.5, 5, 'windowB'),  # Only score for windowB, but won't be used until threshold <= 0.5
+      AnomalyPoint(7, 0.5, -3, None),
+    ]
+
+    expectedScoresByThreshold = [
+      ThresholdScore(1.1, -2 * fnWeight, 0, 2, 0, 3, 5),  # two windows, both false negatives at this threshold
+      ThresholdScore(0.5, 5 - 3 - fnWeight, 1, 1, 1, 2, 5),  # Both 'anomalyScore == 0.5' score, windowA is still FN
+      ThresholdScore(0.3, 5 - 3 + 10, 2, 1, 1, 1, 5),  # Both windows now have a TP
+      ThresholdScore(0.2, 5 - 3 + 20, 3, 1, 1, 0, 5),  # windowA gets a new max value due to row 4 becoming active
+      ThresholdScore(0.0, 5 - 3 + 20 - 3, 3, 0, 2, 0, 5),
+    ]
+
+    actual = o._calcScoreByThreshold(fakeInput)
+
+    assert actual == expectedScoresByThreshold
