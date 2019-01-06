@@ -58,7 +58,7 @@ def scaledSigmoid(relativePositionInWindow):
 
   @return (float)
   """
-  if relativePositionInWindow > 3.0:
+  if relativePositionInWindow >= 3.0:
     # FP well behind window
     return -1.0
   else:
@@ -67,6 +67,8 @@ def scaledSigmoid(relativePositionInWindow):
 
 
 class Sweeper(object):
+
+
   def __init__(self, probationPercent=0.15, costMatrix=None):
     self.probationPercent = probationPercent
 
@@ -77,13 +79,16 @@ class Sweeper(object):
     if costMatrix is not None:
       self.setCostMatrix(costMatrix)
 
+
   def setCostMatrix(self, costMatrix):
     self.tpWeight = costMatrix["tpWeight"]
     self.fpWeight = costMatrix["fpWeight"]
     self.fnWeight = costMatrix["fnWeight"]
 
+
   def _getProbationaryLength(self, numRows):
     return min(math.floor(self.probationPercent * numRows), self.probationPercent * 5000)
+
 
   def _prepAnomalyListForScoring(self, inputAnomalyList):
     """Sort by anomaly score and filter all rows with 'probationary' window name"""
@@ -92,6 +97,7 @@ class Sweeper(object):
       key=lambda x: x.anomalyScore,
       reverse=True)
 
+
   def _prepareScoreByThresholdParts(self, inputAnomalyList):
     scoreParts = {"fp": 0}
     for row in inputAnomalyList:
@@ -99,8 +105,11 @@ class Sweeper(object):
         scoreParts[row.windowName] = -self.fnWeight
     return scoreParts
 
+
   def calcSweepScore(self, timestamps, anomalyScores, windowLimits, dataSetName):
     assert len(timestamps) == len(anomalyScores), "timestamps and anomalyScores should not be different lengths!"
+    timestamps = list(timestamps)
+    windowLimits = list(windowLimits)  # Copy because we mutate this list
     # The final list of anomaly points returned from this function.
     # Used for threshold optimization and scoring in other functions.
     anomalyList = []
@@ -126,7 +135,7 @@ class Sweeper(object):
         curWindowLimits = windowLimits.pop(0)
         curWindowName = "%s|%s" % (dataSetName, curWindowLimits[0])
         curWindowRightIndex = timestamps.index(curWindowLimits[1])
-        curWindowWidth = float(curWindowRightIndex - timestamps.index(curWindowLimits[0] + 1))
+        curWindowWidth = float(curWindowRightIndex - timestamps.index(curWindowLimits[0]) + 1)
 
         logger.debug("Entering window: %s (%s)" % (curWindowName, str(curWindowLimits)))
 
@@ -164,6 +173,7 @@ class Sweeper(object):
         curWindowRightIndex = None
 
     return anomalyList
+
 
   def calcScoreByThreshold(self, anomalyList):
     scorableList = self._prepAnomalyListForScoring(anomalyList)
@@ -212,31 +222,24 @@ class Sweeper(object):
 
     return scoresByThreshold
 
+
   def scoreDataSet(self, timestamps, anomalyScores, windowLimits, dataSetName, threshold):
     anomalyList = self.calcSweepScore(timestamps, anomalyScores, windowLimits, dataSetName)
     scoresByThreshold = self.calcScoreByThreshold(anomalyList)
 
-    bestRow = None
+    matchingRow = None
+    prevRow = None
     for thresholdScore in scoresByThreshold:
-      if thresholdScore.threshold <= threshold:
-        bestRow = thresholdScore
+      if thresholdScore.threshold == threshold:
+        matchingRow = thresholdScore
         break
+      elif thresholdScore.threshold < threshold:
+        matchingRow = prevRow
+        break
+
+      prevRow = thresholdScore
 
     return (
       [x.sweepScore for x in anomalyList],  # Return sweepScore for each row, to be added to score file
-      bestRow
+      matchingRow
     )
-
-
-if __name__ == '__main__':
-  logging.basicConfig()
-  logger.setLevel(logging.DEBUG)
-  o = Sweeper()
-  print(o)
-  c = Corpus('results/numenta')
-  print(c)
-  print(c.numDataFiles)
-  print(c.dataFiles.keys())
-
-  a = AnomalyPoint("jan 1, 2018", 0.4, 1.0, None)
-  print(a)
