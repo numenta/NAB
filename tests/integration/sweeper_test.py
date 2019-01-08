@@ -37,7 +37,7 @@ class TestSweeper(object):
     assert o.fnWeight == 2
 
   @pytest.mark.parametrize("numRows,probationaryPercent,expectedLength", [
-    (100, 0.0, 0),  # 0% probationary --> legnth 0
+    (100, 0.0, 0),  # 0% probationary --> length 0
     (100, 1.0, 100),  # 100% --> length 100
     (100, 0.1, 10),
     (100, 0.15, 15),

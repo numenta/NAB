@@ -183,7 +183,7 @@ class Sweeper(object):
 
     # Initialize counts:
     # * every point in a window is a false negative
-    # * every point outside a window is a false positive
+    # * every point outside a window is a true negative
     tn = sum(1 if x.windowName is None else 0 for x in scorableList)
     fn = sum(1 if x.windowName is not None else 0 for x in scorableList)
     tp = 0
