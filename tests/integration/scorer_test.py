@@ -26,7 +26,7 @@ import random
 import unittest
 
 from nab.sweeper import Sweeper
-from nab.test_helpers import generateTimestamps, generateWindows, generateLabels
+from nab.test_helpers import generateTimestamps, generateWindows
 
 
 
@@ -92,7 +92,6 @@ class ScorerTest(unittest.TestCase):
     
     timestamps = generateTimestamps(start, increment, length)
     windows = generateWindows(timestamps, numWindows, windowSize)
-    labels = generateLabels(timestamps, windows)
     
     # Scale for 10% = windowSize/length
     self.costMatrix["fpWeight"] = 0.11
@@ -183,7 +182,6 @@ class ScorerTest(unittest.TestCase):
     
     timestamps = generateTimestamps(start, increment, length)
     windows = []
-    labels = generateLabels(timestamps, windows)
     anomalyScores = pandas.Series([0]*length)
     
     costMatrixFP = copy.deepcopy(self.costMatrix)

@@ -24,7 +24,7 @@ import pandas
 import unittest
 
 from nab.sweeper import Sweeper
-from nab.test_helpers import generateTimestamps, generateWindows, generateLabels
+from nab.test_helpers import generateTimestamps, generateWindows
 
 
 

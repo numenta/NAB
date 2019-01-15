@@ -96,19 +96,3 @@ def generateWindows(timestamps, numWindows, windowSize):
     windows.append([t1, t2])
 
   return windows
-
-
-def generateLabels(timestamps, windows):
-  """
-  Returns a pandas Series of integers containing a 1 for every window and 0
-  everywhere else.
-  @param timestamps (Series)   Pandas Series containing list of timestamps.
-  @param windows    (list)     List of datetime pairs corresponding to each
-                               time window.
-  """
-  labels = pandas.Series([0]*len(timestamps))
-  for t1, t2 in windows:
-    subset = timestamps[timestamps >= t1][timestamps <= t2]
-    indices = subset.loc[:].index
-    labels.values[indices.values] = 1
-  return labels
