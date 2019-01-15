@@ -27,6 +27,20 @@
             "threshold": 0.7655273437500002
         }
     },
+    "earthgeckoSkyline": {
+        "reward_low_FN_rate": {
+            "score": -9.975483739777937,
+            "threshold": 0.5
+        },
+        "reward_low_FP_rate": {
+            "score": -8.826901388460517,
+            "threshold": 0.5
+        },
+        "standard": {
+            "score": 19.024516260222065,
+            "threshold": 0.5
+        }
+    },
     "expose": {
         "reward_low_FN_rate": {
             "score": -138.31510519385375,
