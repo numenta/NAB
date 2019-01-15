@@ -61,6 +61,29 @@ function createDiv(container, id){
   return div
 }
 
+// This addition was added to fix changes that appear to have been made between
+// nab v1.0 and the current master in terms of the addition of a raw_score field
+// to the numenta results files.  Further to this addition, all the dimensions
+// have been added to the legend, apart from raw_score.  Although these cannot
+// be plotted against additional and relevant y axis, as dygraph does not allow
+// for more that 2 y axis and does not handle displaying dynamic y axis based on
+// the data point selected.  However their addition does at least add them as
+// series on the plot that can be moused over and their value are reported in
+// the legend for allowing visualations of the std, reward_low_FP_rate and
+// reward_low_FN_rate values.
+function test_for_numenta(path) {
+  var searchTerm = 'numenta'
+  var indexOfFirst = path.indexOf(searchTerm);
+  if (indexOfFirst !== -1)
+    // nab version > v1.0 - new numenta_ and numentaTM csv format
+    // timestamp,value,anomaly_score,raw_score,label,S(t)_reward_low_FP_rate,S(t)_reward_low_FN_rate,S(t)_standard
+    use_visibility = [true, true, true, true, false, true, true, true];
+  else
+    // nab version > v1.0 - csv format
+    // timestamp,value,anomaly_score,label,S(t)_reward_low_FP_rate,S(t)_reward_low_FN_rate,S(t)_standard
+    use_visibility = [true, true, true, true, true, true, true];
+  return use_visibility
+}
 
 function render(path) {
   filePaths = getFilePaths(path)
@@ -80,12 +103,13 @@ function render(path) {
   for (var i = 0; i < filePaths.length; i++) {
     path = filePaths[i][0]
     if (path.indexOf(query) > -1) {
+      use_visibility = test_for_numenta(path)
       graphs.push(
         new Dygraph(
           createDiv(graphDiv, count++),
           path,
           {
-            visibility: [true, true, true, false, true],
+            visibility: use_visibility,
             series: {
               timestamp: {
                 axis: "x1"
@@ -93,18 +117,9 @@ function render(path) {
               value: {
                 axis: "y1"
               },
-              label: {
-                axis: "y2"
-              },
               anomaly_score: {
                 axis: "y2"
               },
-              _raw_score: {
-                axis: "y2"
-              },
-              _alerts: {
-                axis: "y2"
-              }
             },
             legend: "always",
             title: path,
