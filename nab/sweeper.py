@@ -21,11 +21,15 @@ from collections import namedtuple
 import logging
 import math
 
-from nab.corpus import Corpus
-
 logger = logging.getLogger(__name__)
-AnomalyPoint = namedtuple("AnomalyPoint", ["timestamp", "anomalyScore", "sweepScore", "windowName"])
-ThresholdScore = namedtuple("ThresholdScore", ["threshold", "score", "tp", "tn", "fp", "fn", "total"])
+AnomalyPoint = namedtuple(
+  "AnomalyPoint",
+  ["timestamp", "anomalyScore", "sweepScore", "windowName"]
+)
+ThresholdScore = namedtuple(
+  "ThresholdScore",
+  ["threshold", "score", "tp", "tn", "fp", "fn", "total"]
+)
 
 
 def sigmoid(x):
@@ -60,11 +64,21 @@ def scaledSigmoid(relativePositionInWindow):
   """
   if relativePositionInWindow > 3.0:
     # FP well behind window
-    return -1.0
+    val = -1.0
   else:
-    return 2*sigmoid(-5*relativePositionInWindow) - 1.0
+    val = 2*sigmoid(-5*relativePositionInWindow) - 1.0
+
+  return val
 
 
+def prepAnomalyListForScoring(inputAnomalyList):
+  """
+  Sort by anomaly score and filter all rows with 'probationary' window name
+  """
+  return sorted(
+    [x for x in inputAnomalyList if x.windowName != 'probationary'],
+    key=lambda x: x.anomalyScore,
+    reverse=True)
 
 class Sweeper(object):
 
@@ -72,9 +86,9 @@ class Sweeper(object):
   def __init__(self, probationPercent=0.15, costMatrix=None):
     self.probationPercent = probationPercent
 
-    self.tpWeight = None
-    self.fpWeight = None
-    self.fnWeight = None
+    self.tpWeight = 0
+    self.fpWeight = 0
+    self.fnWeight = 0
 
     if costMatrix is not None:
       self.setCostMatrix(costMatrix)
@@ -87,15 +101,10 @@ class Sweeper(object):
 
 
   def _getProbationaryLength(self, numRows):
-    return min(math.floor(self.probationPercent * numRows), self.probationPercent * 5000)
-
-
-  def _prepAnomalyListForScoring(self, inputAnomalyList):
-    """Sort by anomaly score and filter all rows with 'probationary' window name"""
-    return sorted(
-      [x for x in inputAnomalyList if x.windowName != 'probationary'],
-      key=lambda x: x.anomalyScore,
-      reverse=True)
+    return min(
+      math.floor(self.probationPercent * numRows),
+      self.probationPercent * 5000
+    )
 
 
   def _prepareScoreByThresholdParts(self, inputAnomalyList):
@@ -106,8 +115,10 @@ class Sweeper(object):
     return scoreParts
 
 
-  def calcSweepScore(self, timestamps, anomalyScores, windowLimits, dataSetName):
-    assert len(timestamps) == len(anomalyScores), "timestamps and anomalyScores should not be different lengths!"
+  def calcSweepScore(
+      self, timestamps, anomalyScores, windowLimits, dataSetName):
+    assert len(timestamps) == len(anomalyScores), \
+      "timestamps and anomalyScores should not be different lengths!"
     timestamps = list(timestamps)
     windowLimits = list(windowLimits)  # Copy because we mutate this list
     # The final list of anomaly points returned from this function.
@@ -126,45 +137,55 @@ class Sweeper(object):
     prevWindowWidth = None
     prevWindowRightIndex = None
 
-    for i, (curTimestamp, curAnomaly) in enumerate(zip(timestamps, anomalyScores)):
+    for i, (curTime, curAnomaly) in enumerate(zip(timestamps, anomalyScores)):
       unweightedScore = None
       weightedScore = None
 
       # If not in a window, check if we've just entered one
-      if len(windowLimits) > 0 and curTimestamp == windowLimits[0][0]:
+      if windowLimits and curTime == windowLimits[0][0]:
         curWindowLimits = windowLimits.pop(0)
         curWindowName = "%s|%s" % (dataSetName, curWindowLimits[0])
         curWindowRightIndex = timestamps.index(curWindowLimits[1])
-        curWindowWidth = float(curWindowRightIndex - timestamps.index(curWindowLimits[0]) + 1)
+        curWindowWidth = float(curWindowRightIndex -
+                               timestamps.index(curWindowLimits[0]) + 1)
 
-        logger.debug("Entering window: %s (%s)" % (curWindowName, str(curWindowLimits)))
+        logger.debug(
+          "Entering window: %s (%s)", curWindowName, str(curWindowLimits))
 
       # If in a window, score as if true positive
       if curWindowLimits is not None:
-        # Doesn't the `+ 1` in this equation mean we can _never_ have a positionInWindow == 0?
         positionInWindow = -(curWindowRightIndex - i + 1) / curWindowWidth
         unweightedScore = scaledSigmoid(positionInWindow)
-        weightedScore = unweightedScore * self.tpWeight / maxTP  # Why is `maxTP` here?
+        weightedScore = unweightedScore * self.tpWeight / maxTP
 
       # If outside a window, score as if false positive
       else:
         if prevWindowRightIndex is None:
-          unweightedScore = -1.0  # No preceding window
+          # No preceding window, so return score as is we were just really
+          # far away from the nearest window.
+          unweightedScore = -1.0
         else:
-          positionPastWindow = abs(prevWindowRightIndex - i) / float(prevWindowWidth - 1)
+          numerator = abs(prevWindowRightIndex - i)
+          denominator = float(prevWindowWidth - 1)
+          positionPastWindow = numerator / denominator
           unweightedScore = scaledSigmoid(positionPastWindow)
 
         weightedScore = unweightedScore * self.fpWeight
 
-      pointWindowName = curWindowName if i >= probationaryLength else "probationary"
-      point = AnomalyPoint(curTimestamp, curAnomaly, weightedScore, pointWindowName)
+      if i >= probationaryLength:
+        pointWindowName = curWindowName
+      else:
+        pointWindowName = "probationary"
+
+      point = AnomalyPoint(curTime, curAnomaly, weightedScore, pointWindowName)
 
       anomalyList.append(point)
 
       # If at right-edge of window, exit window.
-      # This happens after processing the current point and appending it to the list.
-      if curWindowLimits is not None and curTimestamp == curWindowLimits[1]:
-        logger.debug("Exiting window: %s" % curWindowName)
+      # This happens after processing the current point and appending it
+      # to the list.
+      if curWindowLimits is not None and curTime == curWindowLimits[1]:
+        logger.debug("Exiting window: %s", curWindowName)
         prevWindowRightIndex = i
         prevWindowWidth = curWindowWidth
         curWindowLimits = None
@@ -176,10 +197,14 @@ class Sweeper(object):
 
 
   def calcScoreByThreshold(self, anomalyList):
-    scorableList = self._prepAnomalyListForScoring(anomalyList)
+    scorableList = prepAnomalyListForScoring(anomalyList)
     scoreParts = self._prepareScoreByThresholdParts(scorableList)
     scoresByThreshold = []  # The final list we return
-    curThreshold = 1.1  # Start threshold eliminates all rows --> full false negative score
+
+    # The current threshold above which an anomaly score is considered
+    # an anomaly prediction. This starts above 1.0 so that all points
+    # are skipped, which gives us a full false-negative score.
+    curThreshold = 1.1
 
     # Initialize counts:
     # * every point in a window is a false negative
@@ -189,16 +214,20 @@ class Sweeper(object):
     tp = 0
     fp = 0
 
-    # Iterate through every data point, starting with highest anomaly scores and working down.
-    # Whenever we reach a new anomaly score, we save the current score and begin calculating
-    # the score for the new, lower threshold. Every data point we iterate over is 'active'
-    # for the current threshold level, so the point is either a true positive (has a `windowName`)
-    # or a false positive (`windowName is None`).
+    # Iterate through every data point, starting with highest anomaly scores
+    # and working down. Whenever we reach a new anomaly score, we save the
+    # current score and begin calculating the score for the new, lower
+    # threshold. Every data point we iterate over is 'active' for the current
+    # threshold level, so the point is either:
+    #   * a true positive (has a `windowName`)
+    #   * a false positive (`windowName is None`).
     for dataPoint in scorableList:
-      # Check if we've reached a new threshold
+      # If we've reached a new anomaly threshold, store the current
+      # threshold+score pair.
       if dataPoint.anomalyScore != curThreshold:
         curScore = sum(scoreParts.values())
-        s = ThresholdScore(curThreshold, curScore, tp, tn, fp, fn, tp + tn + fp + fn)
+        totalCount = tp + tn + fp + fn
+        s = ThresholdScore(curThreshold, curScore, tp, tn, fp, fn, totalCount)
         scoresByThreshold.append(s)
         curThreshold = dataPoint.anomalyScore
 
@@ -213,18 +242,33 @@ class Sweeper(object):
       if dataPoint.windowName is None:
         scoreParts["fp"] += dataPoint.sweepScore
       else:
-        scoreParts[dataPoint.windowName] = max(scoreParts[dataPoint.windowName], dataPoint.sweepScore)
-    else:
-      # Make sure to save the score for the last threshold
-      curScore = sum(scoreParts.values())
-      s = ThresholdScore(curThreshold, curScore, tp, tn, fp, fn, tp + tn + fp + fn)
-      scoresByThreshold.append(s)
+        scoreParts[dataPoint.windowName] = max(
+          scoreParts[dataPoint.windowName],
+          dataPoint.sweepScore
+        )
+
+    # Make sure to save the score for the last threshold
+    curScore = sum(scoreParts.values())
+    totalCount = tp + tn + fp + fn
+    s = ThresholdScore(curThreshold, curScore, tp, tn, fp, fn, totalCount)
+    scoresByThreshold.append(s)
 
     return scoresByThreshold
 
 
-  def scoreDataSet(self, timestamps, anomalyScores, windowLimits, dataSetName, threshold):
-    anomalyList = self.calcSweepScore(timestamps, anomalyScores, windowLimits, dataSetName)
+  def scoreDataSet(
+      self, timestamps, anomalyScores, windowLimits, dataSetName, threshold):
+    """
+    TODO: fill this in
+    :param timestamps:
+    :param anomalyScores:
+    :param windowLimits:
+    :param dataSetName:
+    :param threshold:
+    :return:
+    """
+    anomalyList = self.calcSweepScore(
+      timestamps, anomalyScores, windowLimits, dataSetName)
     scoresByThreshold = self.calcScoreByThreshold(anomalyList)
 
     matchingRow = None
@@ -239,7 +283,8 @@ class Sweeper(object):
 
       prevRow = thresholdScore
 
+    # Return sweepScore for each row, to be added to score file
     return (
-      [x.sweepScore for x in anomalyList],  # Return sweepScore for each row, to be added to score file
+      [x.sweepScore for x in anomalyList],
       matchingRow
     )

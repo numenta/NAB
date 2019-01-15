@@ -20,7 +20,12 @@
 # ----------------------------------------------------------------------
 import pytest
 
-from nab.sweeper import AnomalyPoint, Sweeper, ThresholdScore
+from nab.sweeper import (
+  AnomalyPoint,
+  Sweeper,
+  ThresholdScore,
+  prepAnomalyListForScoring
+)
 
 
 class TestSweeper(object):
@@ -51,9 +56,9 @@ class TestSweeper(object):
 
   def testSetCostMatrix(self):
     o = Sweeper()
-    assert o.tpWeight is None
-    assert o.fpWeight is None
-    assert o.fnWeight is None
+    assert o.tpWeight == 0
+    assert o.fpWeight == 0
+    assert o.fnWeight == 0
 
     # These are all arbitrary.
     expectedTP = 2.0
@@ -136,7 +141,7 @@ class TestSweeper(object):
     ]
 
     o = Sweeper()
-    sortedList = o._prepAnomalyListForScoring(fakeInput)
+    sortedList = prepAnomalyListForScoring(fakeInput)
     assert sortedList == expectedList
 
   def testPrepareScoreParts(self):
