@@ -23,20 +23,20 @@ import datetime
 import pandas
 import unittest
 
-from nab.scorer import Scorer
-from nab.test_helpers import generateTimestamps, generateWindows, generateLabels
+from nab.sweeper import Sweeper
+from nab.test_helpers import generateTimestamps, generateWindows
 
 
 
 class TruePositiveTest(unittest.TestCase):
 
 
-  def _checkCounts(self, counts, tn, tp, fp, fn):
+  def _checkCounts(self, scoreRow, tn, tp, fp, fn):
     """Ensure the metric counts are correct."""
-    self.assertEqual(counts['tn'], tn, "Incorrect tn count")
-    self.assertEqual(counts['tp'], tp, "Incorrect tp count")
-    self.assertEqual(counts['fp'], fp, "Incorrect fp count")
-    self.assertEqual(counts['fn'], fn, "Incorrect fn count")
+    self.assertEqual(scoreRow.tn, tn, "Incorrect tn count")
+    self.assertEqual(scoreRow.tp, tp, "Incorrect tp count")
+    self.assertEqual(scoreRow.fp, fp, "Incorrect fp count")
+    self.assertEqual(scoreRow.fn, fn, "Incorrect fn count")
 
 
   def setUp(self):
@@ -60,18 +60,25 @@ class TruePositiveTest(unittest.TestCase):
 
     timestamps = generateTimestamps(start, increment, length)
     windows = generateWindows(timestamps, numWindows, windowSize)
-    labels = generateLabels(timestamps, windows)
-    predictions = pandas.Series([0]*length)
+    anomalyScores = pandas.Series([0] * length)
+    threshold = 0.5
 
+    # Set a single true positive
     index = timestamps[timestamps == windows[0][0]].index[0]
-    predictions[index] = 1
-    scorer = Scorer(timestamps, predictions, labels, windows, self.costMatrix,
-      probationaryPeriod=0)
-    (_, score) = scorer.getScore()
+    anomalyScores[index] = 1.0
 
-    self.assertAlmostEquals(score, self.costMatrix["tpWeight"], 4)
-    self._checkCounts(scorer.counts, length-windowSize*numWindows, 1, 0,
-      windowSize*numWindows-1)
+    sweeper = Sweeper(probationPercent=0, costMatrix=self.costMatrix)
+    (scores, matchingRow) = sweeper.scoreDataSet(
+      timestamps,
+      anomalyScores,
+      windows,
+      "testData",
+      threshold
+    )
+
+    self.assertEqual(matchingRow.score, self.costMatrix["tpWeight"])
+    self._checkCounts(matchingRow, length - windowSize * numWindows, 1, 0,
+                      windowSize * numWindows - 1)
 
 
   def testEarlierTruePositiveIsBetter(self):
@@ -87,28 +94,39 @@ class TruePositiveTest(unittest.TestCase):
 
     timestamps = generateTimestamps(start, increment, length)
     windows = generateWindows(timestamps, numWindows, windowSize)
-    labels = generateLabels(timestamps, windows)
-    predictions1 = pandas.Series([0]*length)
-    predictions2 = pandas.Series([0]*length)
+    anomalyScores1 = pandas.Series([0] * length)
+    anomalyScores2 = pandas.Series([0] * length)
+    threshold = 0.5
     t1, t2 = windows[0]
 
     index1 = timestamps[timestamps == t1].index[0]
-    predictions1[index1] = 1
-    scorer1 = Scorer(timestamps, predictions1, labels, windows, self.costMatrix,
-      probationaryPeriod=0)
-    (_, score1) = scorer1.getScore()
+    anomalyScores1[index1] = 1
+    sweeper = Sweeper(probationPercent=0, costMatrix=self.costMatrix)
+    (_, matchingRow1) = sweeper.scoreDataSet(
+      timestamps,
+      anomalyScores1,
+      windows,
+      "testData",
+      threshold
+    )
 
     index2 = timestamps[timestamps == t2].index[0]
-    predictions2[index2] = 1
-    scorer2 = Scorer(timestamps, predictions2, labels, windows, self.costMatrix,
-      probationaryPeriod=0)
-    (_, score2) = scorer2.getScore()
+    anomalyScores2[index2] = 1
+    (_, matchingRow2) = sweeper.scoreDataSet(
+      timestamps,
+      anomalyScores2,
+      windows,
+      "testData",
+      threshold
+    )
+    score1 = matchingRow1.score
+    score2 = matchingRow2.score
 
     self.assertTrue(score1 > score2, "The earlier TP score is not greater than "
       "the later TP. They are %f and %f, respectively." % (score1, score2))
-    self._checkCounts(scorer1.counts, length-windowSize*numWindows, 1, 0,
+    self._checkCounts(matchingRow1, length-windowSize*numWindows, 1, 0,
       windowSize*numWindows-1)
-    self._checkCounts(scorer2.counts, length-windowSize*numWindows, 1, 0,
+    self._checkCounts(matchingRow2, length-windowSize*numWindows, 1, 0,
       windowSize*numWindows-1)
 
 
@@ -125,27 +143,38 @@ class TruePositiveTest(unittest.TestCase):
 
     timestamps = generateTimestamps(start, increment, length)
     windows = generateWindows(timestamps, numWindows, windowSize)
-    labels = generateLabels(timestamps, windows)
-    predictions = pandas.Series([0]*length)
+    anomalyScores = pandas.Series([0] * length)
+    threshold = 0.5
     window = windows[0]
     t1, t2 = window
 
+    # Score with a single true positive at start of window
     index1 = timestamps[timestamps == t1].index[0]
-    predictions[index1] = 1
-    scorer1 = Scorer(timestamps, predictions, labels, windows, self.costMatrix,
-      probationaryPeriod=0)
-    (_, score1) = scorer1.getScore()
+    anomalyScores[index1] = 1
+    sweeper = Sweeper(probationPercent=0, costMatrix=self.costMatrix)
+    (_, matchingRow1) = sweeper.scoreDataSet(
+      timestamps,
+      anomalyScores,
+      windows,
+      "testData",
+      threshold
+    )
 
+    # Add a second true positive to end of window
     index2 = timestamps[timestamps == t2].index[0]
-    predictions[index2] = 1
-    scorer2 = Scorer(timestamps, predictions, labels, windows, self.costMatrix,
-      probationaryPeriod=0)
-    (_, score2) = scorer2.getScore()
+    anomalyScores[index2] = 1
+    (_, matchingRow2) = sweeper.scoreDataSet(
+      timestamps,
+      anomalyScores,
+      windows,
+      "testData",
+      threshold
+    )
 
-    self.assertEqual(score1, score2)
-    self._checkCounts(scorer1.counts, length-windowSize*numWindows, 1, 0,
+    self.assertEqual(matchingRow1.score, matchingRow2.score)
+    self._checkCounts(matchingRow1, length-windowSize*numWindows, 1, 0,
       windowSize*numWindows-1)
-    self._checkCounts(scorer2.counts, length-windowSize*numWindows, 2, 0,
+    self._checkCounts(matchingRow2, length-windowSize*numWindows, 2, 0,
       windowSize*numWindows-2)
 
 
@@ -159,32 +188,41 @@ class TruePositiveTest(unittest.TestCase):
     length = 10
     numWindows = 1
     timestamps = generateTimestamps(start, increment, length)
-    
+    threshold = 0.5
+
     windowSize1 = 2
     windows1 = generateWindows(timestamps, numWindows, windowSize1)
-    labels1 = generateLabels(timestamps, windows1)
     index = timestamps[timestamps == windows1[0][0]].index[0]
-    predictions1 = pandas.Series([0]*length)
-    predictions1[index] = 1
+    anomalyScores1 = pandas.Series([0]*length)
+    anomalyScores1[index] = 1
     
     windowSize2 = 3
     windows2 = generateWindows(timestamps, numWindows, windowSize2)
-    labels2 = generateLabels(timestamps, windows2)
     index = timestamps[timestamps == windows2[0][0]].index[0]
-    predictions2 = pandas.Series([0]*length)
-    predictions2[index] = 1
+    anomalyScores2 = pandas.Series([0]*length)
+    anomalyScores2[index] = 1
 
-    scorer1 = Scorer(timestamps, predictions1, labels1, windows1,
-      self.costMatrix, probationaryPeriod=0)
-    (_, score1) = scorer1.getScore()
-    scorer2 = Scorer(timestamps, predictions2, labels2, windows2,
-      self.costMatrix, probationaryPeriod=0)
-    (_, score2) = scorer2.getScore()
+    sweeper = Sweeper(probationPercent=0, costMatrix=self.costMatrix)
+    (_, matchingRow1) = sweeper.scoreDataSet(
+      timestamps,
+      anomalyScores1,
+      windows1,
+      "testData",
+      threshold
+    )
+
+    (_, matchingRow2) = sweeper.scoreDataSet(
+      timestamps,
+      anomalyScores2,
+      windows2,
+      "testData",
+      threshold
+    )
     
-    self.assertEqual(score1, score2)
-    self._checkCounts(scorer1.counts, length-windowSize1*numWindows, 1, 0,
+    self.assertEqual(matchingRow1.score, matchingRow2.score)
+    self._checkCounts(matchingRow1, length-windowSize1*numWindows, 1, 0,
       windowSize1*numWindows-1)
-    self._checkCounts(scorer2.counts, length-windowSize2*numWindows, 1, 0,
+    self._checkCounts(matchingRow2, length-windowSize2*numWindows, 1, 0,
       windowSize2*numWindows-1)
 
 
@@ -200,32 +238,41 @@ class TruePositiveTest(unittest.TestCase):
     length = 1000
     numWindows = 1
     windowSize = 100
+    threshold = 0.5
 
     timestamps = generateTimestamps(start, increment, length)
     windows = generateWindows(timestamps, numWindows, windowSize)
-    labels = generateLabels(timestamps, windows)
-    predictions = pandas.Series([0]*length)
+    anomalyScores = pandas.Series([0]*length)
 
     # Make prediction at end of the window; TP
     index = timestamps[timestamps == windows[0][1]].index[0]
-    predictions[index] = 1
-    scorer1 = Scorer(timestamps, predictions, labels, windows, self.costMatrix,
-      probationaryPeriod=0)
-    (_, score1) = scorer1.getScore()
+    anomalyScores[index] = 1
+    sweeper = Sweeper(probationPercent=0, costMatrix=self.costMatrix)
+    (_, matchingRow1) = sweeper.scoreDataSet(
+      timestamps,
+      anomalyScores,
+      windows,
+      "testData",
+      threshold
+    )
     # Make prediction just after the window; FP
-    predictions[index] = 0
+    anomalyScores[index] = 0
     index += 1
-    predictions[index] = 1
-    scorer2 = Scorer(timestamps, predictions, labels, windows, self.costMatrix,
-      probationaryPeriod=0)
-    (_, score2) = scorer2.getScore()
+    anomalyScores[index] = 1
+    (_, matchingRow2) = sweeper.scoreDataSet(
+      timestamps,
+      anomalyScores,
+      windows,
+      "testData",
+      threshold
+    )
 
     # TP score + FP score + 1 should be very close to 0; the 1 is added to
     # account for the subsequent FN contribution.
-    self.assertAlmostEquals(score1 + score2 + 1, 0.0, 3)
-    self._checkCounts(scorer1.counts, length-windowSize*numWindows, 1, 0,
+    self.assertAlmostEquals(matchingRow1.score + matchingRow2.score + 1, 0.0, 3)
+    self._checkCounts(matchingRow1, length-windowSize*numWindows, 1, 0,
       windowSize*numWindows-1)
-    self._checkCounts(scorer2.counts, length-windowSize*numWindows-1, 0, 1,
+    self._checkCounts(matchingRow2, length-windowSize*numWindows-1, 0, 1,
       windowSize*numWindows)
 
 

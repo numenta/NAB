@@ -23,22 +23,21 @@ import datetime
 import pandas
 import unittest
 
-from nab.scorer import Scorer
-from nab.test_helpers import generateTimestamps, generateWindows, generateLabels
+from nab.sweeper import Sweeper
+from nab.test_helpers import generateTimestamps, generateWindows
 
 
 
 class FalseNegativeTests(unittest.TestCase):
 
-
-  def _checkCounts(self, counts, tn, tp, fp, fn):
+  def _checkCounts(self, scoreRow, tn, tp, fp, fn):
     """Ensure the metric counts are correct."""
-    self.assertEqual(counts['tn'], tn, "Incorrect tn count")
-    self.assertEqual(counts['tp'], tp, "Incorrect tp count")
-    self.assertEqual(counts['fp'], fp, "Incorrect fp count")
-    self.assertEqual(counts['fn'], fn, "Incorrect fn count")
-  
-  
+    self.assertEqual(scoreRow.tn, tn, "Incorrect tn count")
+    self.assertEqual(scoreRow.tp, tp, "Incorrect tp count")
+    self.assertEqual(scoreRow.fp, fp, "Incorrect fp count")
+    self.assertEqual(scoreRow.fn, fn, "Incorrect fn count")
+
+
   def setUp(self):
     self.costMatrix = {"tpWeight": 1.0,
                        "fnWeight": 1.0,
@@ -59,15 +58,20 @@ class FalseNegativeTests(unittest.TestCase):
 
     timestamps = generateTimestamps(start, increment, length)
     windows = generateWindows(timestamps, numWindows, windowSize)
-    labels = generateLabels(timestamps, windows)
-    predictions = pandas.Series([0]*length)
+    anomalyScores = pandas.Series([0]*length)
+    threshold = 1.0
 
-    scorer = Scorer(timestamps, predictions, labels, windows, self.costMatrix,
-      probationaryPeriod=0)
-    (_, score) = scorer.getScore()
+    sweeper = Sweeper(probationPercent=0, costMatrix=self.costMatrix)
+    (scores, matchingRow) = sweeper.scoreDataSet(
+      timestamps,
+      anomalyScores,
+      windows,
+      "testData",
+      threshold
+    )
 
-    self.assertTrue(abs(score + self.costMatrix['fnWeight']) < 0.1)
-    self._checkCounts(scorer.counts, length-windowSize*numWindows, 0, 0,
+    self.assertEqual(matchingRow.score, -self.costMatrix["fnWeight"])
+    self._checkCounts(matchingRow, length-windowSize*numWindows, 0, 0,
       windowSize*numWindows)
 
 
@@ -84,16 +88,21 @@ class FalseNegativeTests(unittest.TestCase):
 
     timestamps = generateTimestamps(start, increment, length)
     windows = generateWindows(timestamps, numWindows, windowSize)
-    labels = generateLabels(timestamps, windows)
-    predictions = pandas.Series([0]*length)
+    anomalyScores = pandas.Series([0] * length)
+    threshold = 1
 
-    scorer = Scorer(timestamps, predictions, labels, windows, self.costMatrix,
-      probationaryPeriod=0)
-    (_, score) = scorer.getScore()
+    sweeper = Sweeper(probationPercent=0, costMatrix=self.costMatrix)
+    (scores, matchingRow) = sweeper.scoreDataSet(
+      timestamps,
+      anomalyScores,
+      windows,
+      "testData",
+      threshold
+    )
 
-    self.assertTrue(abs(score + 4*self.costMatrix['fnWeight']) < 0.01)
-    self._checkCounts(scorer.counts, length-windowSize*numWindows, 0, 0,
-      windowSize*numWindows)
+    self.assertEqual(matchingRow.score, 4 * -self.costMatrix["fnWeight"])
+    self._checkCounts(matchingRow, length - windowSize * numWindows, 0, 0,
+                      windowSize * numWindows)
 
 
 if __name__ == '__main__':

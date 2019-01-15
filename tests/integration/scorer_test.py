@@ -25,20 +25,20 @@ import pandas
 import random
 import unittest
 
-from nab.scorer import Scorer
-from nab.test_helpers import generateTimestamps, generateWindows, generateLabels
+from nab.sweeper import Sweeper
+from nab.test_helpers import generateTimestamps, generateWindows
 
 
 
 class ScorerTest(unittest.TestCase):
 
 
-  def _checkCounts(self, counts, tn, tp, fp, fn):
+  def _checkCounts(self, scoreRow, tn, tp, fp, fn):
     """Ensure the metric counts are correct."""
-    self.assertEqual(counts['tn'], tn, "Incorrect tn count")
-    self.assertEqual(counts['tp'], tp, "Incorrect tp count")
-    self.assertEqual(counts['fp'], fp, "Incorrect fp count")
-    self.assertEqual(counts['fn'], fn, "Incorrect fn count")
+    self.assertEqual(scoreRow.tn, tn, "Incorrect tn count")
+    self.assertEqual(scoreRow.tp, tp, "Incorrect tp count")
+    self.assertEqual(scoreRow.fp, fp, "Incorrect fp count")
+    self.assertEqual(scoreRow.fn, fn, "Incorrect fn count")
 
 
   def setUp(self):
@@ -54,18 +54,23 @@ class ScorerTest(unittest.TestCase):
     start = datetime.datetime.now()
     increment = datetime.timedelta(minutes=5)
     length = 10
+    threshold = 0.5
 
     timestamps = generateTimestamps(start, increment, length)
-    predictions = pandas.Series([0]*length)
-    labels = pandas.Series([0]*length)
+    anomalyScores = pandas.Series([0]*length)
     windows = []
 
-    scorer = Scorer(timestamps, predictions, labels, windows, self.costMatrix,
-      probationaryPeriod=0)
-    (_, score) = scorer.getScore()
+    sweeper = Sweeper(probationPercent=0, costMatrix=self.costMatrix)
+    (scores, matchingRow) = sweeper.scoreDataSet(
+      timestamps,
+      anomalyScores,
+      windows,
+      "testData",
+      threshold
+    )
 
-    self.assertEqual(score, 0.0)
-    self._checkCounts(scorer.counts, 10, 0, 0, 0)
+    self.assertEqual(matchingRow.score, 0.0)
+    self._checkCounts(matchingRow, 10, 0, 0, 0)
 
 
   def testFalsePositiveScaling(self):
@@ -83,24 +88,29 @@ class ScorerTest(unittest.TestCase):
     length = 100
     numWindows = 1
     windowSize = 10
+    threshold = 0.5
     
     timestamps = generateTimestamps(start, increment, length)
     windows = generateWindows(timestamps, numWindows, windowSize)
-    labels = generateLabels(timestamps, windows)
     
     # Scale for 10% = windowSize/length
     self.costMatrix["fpWeight"] = 0.11
-    
+    sweeper = Sweeper(probationPercent=0, costMatrix=self.costMatrix)
+
     # Make arbitrary detections, score, repeat
     scores = []
     for _ in xrange(20):
-      predictions = pandas.Series([0]*length)
+      anomalyScores = pandas.Series([0]*length)
       indices = random.sample(range(length), 10)
-      predictions[indices] = 1
-      scorer = Scorer(timestamps, predictions, labels, windows, self.costMatrix,
-        probationaryPeriod=0)
-      (_, score) = scorer.getScore()
-      scores.append(score)
+      anomalyScores[indices] = 1
+      (scores, matchingRow) = sweeper.scoreDataSet(
+        timestamps,
+        anomalyScores,
+        windows,
+        "testData",
+        threshold
+      )
+      scores.append(matchingRow.score)
   
     avgScore = sum(scores)/float(len(scores))
 
@@ -120,27 +130,40 @@ class ScorerTest(unittest.TestCase):
     length = 100
     numWindows = 1
     windowSize = 10
-    
+    threshold = 0.5
+
     timestamps = generateTimestamps(start, increment, length)
     windows = generateWindows(timestamps, numWindows, windowSize)
-    labels = generateLabels(timestamps, windows)
-    predictions = pandas.Series([0]*length)
+    anomalyScores = pandas.Series([0]*length)
     
     costMatrixFN = copy.deepcopy(self.costMatrix)
     costMatrixFN["fnWeight"] = 2.0
     costMatrixFN["fpWeight"] = 0.055
-    
-    scorer1 = Scorer(timestamps, predictions, labels, windows, self.costMatrix,
-      probationaryPeriod=0)
-    (_, score1) = scorer1.getScore()
-    scorer2 = Scorer(timestamps, predictions, labels, windows, costMatrixFN,
-      probationaryPeriod=0)
-    (_, score2) = scorer2.getScore()
 
-    self.assertEqual(score1, 0.5*score2)
-    self._checkCounts(scorer1.counts, length-windowSize*numWindows, 0, 0,
+    sweeper1 = Sweeper(probationPercent=0, costMatrix=self.costMatrix)
+    sweeper2 = Sweeper(probationPercent=0, costMatrix=costMatrixFN)
+
+    (scores, matchingRow1) = sweeper1.scoreDataSet(
+      timestamps,
+      anomalyScores,
+      windows,
+      "testData",
+      threshold
+    )
+
+    (scores, matchingRow2) = sweeper2.scoreDataSet(
+      timestamps,
+      anomalyScores,
+      windows,
+      "testData",
+      threshold
+    )
+
+
+    self.assertEqual(matchingRow1.score, 0.5*matchingRow2.score)
+    self._checkCounts(matchingRow1, length-windowSize*numWindows, 0, 0,
       windowSize*numWindows)
-    self._checkCounts(scorer2.counts, length-windowSize*numWindows, 0, 0,
+    self._checkCounts(matchingRow2, length-windowSize*numWindows, 0, 0,
       windowSize*numWindows)
 
 
@@ -155,28 +178,40 @@ class ScorerTest(unittest.TestCase):
     length = 100
     numWindows = 0
     windowSize = 10
+    threshold = 0.5
     
     timestamps = generateTimestamps(start, increment, length)
     windows = []
-    labels = generateLabels(timestamps, windows)
-    predictions = pandas.Series([0]*length)
+    anomalyScores = pandas.Series([0]*length)
     
     costMatrixFP = copy.deepcopy(self.costMatrix)
     costMatrixFP["fpWeight"] = 2.0
     costMatrixFP["fnWeight"] = 0.5
     # FP
-    predictions[0] = 1
+    anomalyScores[0] = 1
 
-    scorer1 = Scorer(timestamps, predictions, labels, windows, self.costMatrix,
-      probationaryPeriod=0)
-    (_, score1) = scorer1.getScore()
-    scorer2 = Scorer(timestamps, predictions, labels, windows, costMatrixFP,
-      probationaryPeriod=0)
-    (_, score2) = scorer2.getScore()
+    sweeper1 = Sweeper(probationPercent=0, costMatrix=self.costMatrix)
+    sweeper2 = Sweeper(probationPercent=0, costMatrix=costMatrixFP)
+
+    (scores, matchingRow1) = sweeper1.scoreDataSet(
+      timestamps,
+      anomalyScores,
+      windows,
+      "testData",
+      threshold
+    )
+
+    (scores, matchingRow2) = sweeper2.scoreDataSet(
+      timestamps,
+      anomalyScores,
+      windows,
+      "testData",
+      threshold
+    )
     
-    self.assertEqual(score1, 0.5*score2)
-    self._checkCounts(scorer1.counts, length-windowSize*numWindows-1, 0, 1, 0)
-    self._checkCounts(scorer2.counts, length-windowSize*numWindows-1, 0, 1, 0)
+    self.assertEqual(matchingRow1.score, 0.5*matchingRow2.score)
+    self._checkCounts(matchingRow1, length-windowSize*numWindows-1, 0, 1, 0)
+    self._checkCounts(matchingRow2, length-windowSize*numWindows-1, 0, 1, 0)
 
 
   def testScoringAllMetrics(self):
@@ -188,24 +223,30 @@ class ScorerTest(unittest.TestCase):
     length = 100
     numWindows = 2
     windowSize = 5
+    threshold = 0.5
     
     timestamps = generateTimestamps(start, increment, length)
     windows = generateWindows(timestamps, numWindows, windowSize)
-    labels = generateLabels(timestamps, windows)
-    predictions = pandas.Series([0]*length)
+    anomalyScores = pandas.Series([0]*length)
     
     index = timestamps[timestamps == windows[0][0]].index[0]
     # TP, add'l TP, and FP
-    predictions[index] = 1
-    predictions[index+1] = 1
-    predictions[index+7] = 1
+    anomalyScores[index] = 1
+    anomalyScores[index+1] = 1
+    anomalyScores[index+7] = 1
+
+    sweeper = Sweeper(probationPercent=0, costMatrix=self.costMatrix)
+
+    (scores, matchingRow) = sweeper.scoreDataSet(
+      timestamps,
+      anomalyScores,
+      windows,
+      "testData",
+      threshold
+    )
     
-    scorer = Scorer(timestamps, predictions, labels, windows, self.costMatrix,
-      probationaryPeriod=0)
-    (_, score) = scorer.getScore()
-    
-    self.assertAlmostEquals(score, -0.9540, 4)
-    self._checkCounts(scorer.counts, length-windowSize*numWindows-1, 2, 1, 8)
+    self.assertAlmostEquals(matchingRow.score, -0.9540, 4)
+    self._checkCounts(matchingRow, length-windowSize*numWindows-1, 2, 1, 8)
 
 
 if __name__ == '__main__':

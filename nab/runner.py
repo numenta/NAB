@@ -157,15 +157,11 @@ class Runner(object):
 
       for profileName, profile in self.profiles.iteritems():
         thresholds[detectorName][profileName] = optimizeThreshold(
-          (self.pool,
-           detectorName,
-           profileName,
+          (detectorName,
            profile["CostMatrix"],
-           resultsDetectorDir,
            resultsCorpus,
            self.corpusLabel,
-           self.probationaryPercent,
-           scoreFlag))
+           self.probationaryPercent))
 
     updateThresholds(thresholds, self.thresholdPath)
 

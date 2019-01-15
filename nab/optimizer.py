@@ -17,18 +17,31 @@
 #
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
+import os
 
-from nab.scorer import scoreCorpus
+from nab.sweeper import Sweeper
+from nab.util import convertResultsPathToDataPath
 
 
 
 def optimizeThreshold(args):
   """Optimize the threshold for a given combination of detector and profile.
 
-  @param args       (tuple)   Arguments necessary for the objective function.
+  @param args       (tuple)   Contains:
 
-  @param tolerance  (float)   Number used to determine when optimization has
-                              converged to a sufficiently good score.
+    detectorName        (string)                Name of detector.
+
+    costMatrix          (dict)                  Cost matrix to weight the
+                                                true positives, false negatives,
+                                                and false positives during
+                                                scoring.
+    resultsCorpus       (nab.Corpus)            Corpus object that holds the per
+                                                record anomaly scores for a
+                                                given detector.
+    corpusLabel         (nab.CorpusLabel)       Ground truth anomaly labels for
+                                                the NAB corpus.
+    probationaryPercent (float)                 Percent of each data file not
+                                                to be considered during scoring.
 
   @return (dict) Contains:
         "threshold" (float)   Threshold that returns the largest score from the
@@ -37,115 +50,52 @@ def optimizeThreshold(args):
         "score"     (float)   The score from the objective function given the
                               threshold.
   """
-  optimizedThreshold, optimizedScore = twiddle(
-    objFunction=objectiveFunction,
-    args=args,
-    initialGuess=0.5,
-    tolerance=.0000001)
+  (detectorName,
+   costMatrix,
+   resultsCorpus,
+   corpusLabel,
+   probationaryPercent) = args
 
-  print "Optimizer found a max score of {} with anomaly threshold {}.".format(
-    optimizedScore, optimizedThreshold)
+  sweeper = Sweeper(
+    probationPercent=probationaryPercent,
+    costMatrix=costMatrix
+  )
+
+  # First, get the sweep-scores for each row in each data set
+  allAnomalyRows = []
+  for relativePath, dataSet in resultsCorpus.dataFiles.iteritems():
+    if "_scores.csv" in relativePath:
+      continue
+
+    # relativePath: raw dataset file,
+    # e.g. 'artificialNoAnomaly/art_noisy.csv'
+    relativePath = convertResultsPathToDataPath(
+      os.path.join(detectorName, relativePath))
+
+    windows = corpusLabel.windows[relativePath]
+    labels = corpusLabel.labels[relativePath]
+    timestamps = labels['timestamp']
+    anomalyScores = dataSet.data["anomaly_score"]
+
+    curAnomalyRows = sweeper.calcSweepScore(
+      timestamps,
+      anomalyScores,
+      windows,
+      relativePath
+    )
+    allAnomalyRows.extend(curAnomalyRows)
+
+  # Get scores by threshold for the entire corpus
+  scoresByThreshold = sweeper.calcScoreByThreshold(allAnomalyRows)
+  scoresByThreshold = sorted(
+    scoresByThreshold,key=lambda x: x.score, reverse=True)
+  bestParams = scoresByThreshold[0]
+
+  print("Optimizer found a max score of {} with anomaly threshold {}.".format(
+    bestParams.score, bestParams.threshold
+  ))
 
   return {
-    "threshold": optimizedThreshold,
-    "score": optimizedScore
+    "threshold": bestParams.threshold,
+    "score": bestParams.score
   }
-
-
-def twiddle(objFunction, args, initialGuess=0.5, tolerance=0.00001,
-            domain=(float("-inf"), float("inf"))):
-  """Optimize a single parameter given an objective function.
-
-  This is a local hill-climbing algorithm. Here is a simple description of it:
-  https://www.youtube.com/watch?v=2uQ2BSzDvXs
-
-  @param args       (tuple)   Arguments necessary for the objective function.
-
-  @param tolerance  (float)   Number used to determine when optimization has
-                              converged to a sufficiently good score. Should be
-                              very low to yield precise likelihood values.
-
-  @param objFunction(function)Objective Function used to quantify how good a
-                              particular parameter choice is.
-
-  @param init       (float)   Initial value of the parameter.
-
-  @param domain     (tuple)   Domain of parameter values, as (min, max).
-
-  @return           (tuple)   Two-tuple, with first item the parameter value
-                              yielding the best score, and second item the
-                              optimum score from the objective function.
-  """
-  pastCalls = {}
-  x = initialGuess
-  delta = 0.1
-  bestScore = objFunction(x, args)
-
-  pastCalls[x] = bestScore
-
-  while delta > tolerance:
-
-    # Keep x within bounds
-    if x+delta > domain[1]:
-      delta = abs(domain[1] - x) / 2
-    x += delta
-
-    if x not in pastCalls:
-      score = objFunction(x, args)
-      pastCalls[x] = score
-
-    score = pastCalls[x]
-
-    if score > bestScore:
-      bestScore = score
-      delta *= 2
-
-    else:
-      # Keep x within bounds
-      if x-delta < domain[0]:
-        delta = abs(domain[0] - x) / 2
-      x -= 2*delta
-
-      if x not in pastCalls:
-        score = objFunction(x, args)
-        pastCalls[x] = score
-
-      score = pastCalls[x]
-
-      if score > bestScore:
-        bestScore = score
-        delta *= 2
-      else:
-        x += delta
-        delta *= 0.5
-
-    print "Parameter:", x
-    print "Best score:", bestScore
-    print "Step size:", delta
-    print
-
-  # Return the threshold from pastCalls dict. Due to numerical precision, the
-  # the while loop may not always yield the threshold that reflects the max
-  # score (bestScore).
-  bestParam = max(pastCalls.iterkeys(), key=lambda key: pastCalls[key])
-
-  return (bestParam, pastCalls[bestParam])
-
-
-def objectiveFunction(threshold, args):
-  """Objective function that scores the corpus given a specific threshold.
-
-  @param threshold  (float)   Threshold value to convert an anomaly score value
-                              to a detection.
-
-  @param args       (tuple)   Arguments necessary to call scoreHelper.
-
-  @return score     (float)   Score of corpus.
-  """
-  if not 0 <= threshold <= 1:
-    return float("-inf")
-
-  resultsDF = scoreCorpus(threshold, args)
-  score = float(resultsDF["Score"].iloc[-1])
-
-  return score
