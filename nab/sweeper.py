@@ -149,11 +149,11 @@ class Sweeper(object):
       # If outside a window, score as if false positive
       else:
         if prevWindowRightIndex is None:
-          positionPastWindow = 100.0  # No preceding window
+          unweightedScore = -1.0  # No preceding window
         else:
           positionPastWindow = abs(prevWindowRightIndex - i) / float(prevWindowWidth - 1)
+          unweightedScore = scaledSigmoid(positionPastWindow)
 
-        unweightedScore = scaledSigmoid(positionPastWindow)
         weightedScore = unweightedScore * self.fpWeight
 
       pointWindowName = curWindowName if i >= probationaryLength else "probationary"
