@@ -119,6 +119,23 @@ class Sweeper(object):
 
   def calcSweepScore(
       self, timestamps, anomalyScores, windowLimits, dataSetName):
+    """
+    Given a single file's rows, return a list of AnomalyPoints.
+
+    Each AnomalyPoint contains the row's timestamp, anomaly score,
+    calculated NAB score, and window name. These lists may be passed
+    to `calcScoreByThreshold()` directly in order to score or optimize
+    a single file, or combined together prior to being passed to
+    `calcScoreByThreshold()` in order to score / calculate multiple
+    files / an entire corpus.
+
+    @param timestamps:    (list)  `datetime` objects
+    @param anomalyScores: (list)  `float` objects in the range [0.0, 1.0]
+    @param windowLimits:  (list)  `tuple` objects of window limits
+    @param dataSetName:   (list)  `string` name of dataset, often filename
+
+    @return   (list) List of AnomalyPoint objects
+    """
     assert len(timestamps) == len(anomalyScores), \
       "timestamps and anomalyScores should not be different lengths!"
     timestamps = list(timestamps)
@@ -199,6 +216,13 @@ class Sweeper(object):
 
 
   def calcScoreByThreshold(self, anomalyList):
+    """
+    Find NAB scores for each threshold in `anomalyList`.
+
+    @param anomalyList  (list) `AnomalyPoint` objects from `calcSweepScore()`
+
+    @return (list)  List of `ThresholdScore` objects
+    """
     scorableList = prepAnomalyListForScoring(anomalyList)
     scoreParts = self._prepareScoreByThresholdParts(scorableList)
     scoresByThreshold = []  # The final list we return
