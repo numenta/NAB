@@ -35,8 +35,6 @@ def optimizeThreshold(args):
                                                 true positives, false negatives,
                                                 and false positives during
                                                 scoring.
-    resultsDetectorDir  (string)                Directory for the results CSVs.
-
     resultsCorpus       (nab.Corpus)            Corpus object that holds the per
                                                 record anomaly scores for a
                                                 given detector.
@@ -52,11 +50,11 @@ def optimizeThreshold(args):
         "score"     (float)   The score from the objective function given the
                               threshold.
   """
-  (detectorName,  # (string)  Name of detector
-   costMatrix,  # (dict)  Weights for FP, FN, and TP.
-   resultsCorpus,  # (nab.corpus.Corpus)
-   corpusLabel,  # (nap.labeler.CorpusLabel)
-   probationaryPercent) = args  # (float) Percentage of records to be 'probationary'
+  (detectorName,
+   costMatrix,
+   resultsCorpus,
+   corpusLabel,
+   probationaryPercent) = args
 
   sweeper = Sweeper(
     probationPercent=probationaryPercent,
@@ -89,7 +87,8 @@ def optimizeThreshold(args):
 
   # Get scores by threshold for the entire corpus
   scoresByThreshold = sweeper.calcScoreByThreshold(allAnomalyRows)
-  scoresByThreshold = sorted(scoresByThreshold, key=lambda x: x.score, reverse=True)
+  scoresByThreshold = sorted(
+    scoresByThreshold,key=lambda x: x.score, reverse=True)
   bestParams = scoresByThreshold[0]
 
   print("Optimizer found a max score of {} with anomaly threshold {}.".format(

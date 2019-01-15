@@ -197,7 +197,8 @@ class Runner(object):
 
         threshold = thresholds[detectorName][profileName]["threshold"]
         resultsDF = scoreCorpus(threshold,
-                                (detectorName,
+                                (self.pool,
+                                 detectorName,
                                  profileName,
                                  profile["CostMatrix"],
                                  resultsDetectorDir,

@@ -35,6 +35,8 @@ def scoreCorpus(threshold, args):
 
   @param args       (tuple)   Contains:
 
+    pool                (multiprocessing.Pool)  Pool of processes to perform
+                                                tasks in parallel.
     detectorName        (string)                Name of detector.
 
     profileName         (string)                Name of scoring profile.
@@ -53,7 +55,8 @@ def scoreCorpus(threshold, args):
     probationaryPercent (float)                 Percent of each data file not
                                                 to be considered during scoring.
   """
-  (detectorName,
+  (pool,
+   detectorName,
    profileName,
    costMatrix,
    resultsDetectorDir,
@@ -172,9 +175,9 @@ def scoreDataSet(args):
 
   if scoreFlag:
     # Append scoring function values to the respective results file
-    df_csv = pandas.read_csv(outputPath, header=0, parse_dates=[0])
-    df_csv["S(t)_%s" % profileName] = scores
-    df_csv.to_csv(outputPath, index=False)
+    dfCSV = pandas.read_csv(outputPath, header=0, parse_dates=[0])
+    dfCSV["S(t)_%s" % profileName] = scores
+    dfCSV.to_csv(outputPath, index=False)
 
   return (detectorName, profileName, relativePath, threshold, bestRow.score,
           bestRow.tp, bestRow.tn, bestRow.fp, bestRow.fn, bestRow.total)
