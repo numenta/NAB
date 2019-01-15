@@ -81,7 +81,9 @@ def prepAnomalyListForScoring(inputAnomalyList):
     reverse=True)
 
 class Sweeper(object):
-
+  """Class used to iterate over all anomaly scores in a data set, generating
+  threshold-score pairs for use in threshold optimization or dataset scoring.
+  """
 
   def __init__(self, probationPercent=0.15, costMatrix=None):
     self.probationPercent = probationPercent
@@ -258,14 +260,22 @@ class Sweeper(object):
 
   def scoreDataSet(
       self, timestamps, anomalyScores, windowLimits, dataSetName, threshold):
-    """
-    TODO: fill this in
-    :param timestamps:
-    :param anomalyScores:
-    :param windowLimits:
-    :param dataSetName:
-    :param threshold:
-    :return:
+    """Function called to score each dataset in the corpus.
+
+    @param timestamps     (tuple) tuple of timestamps
+    @param anomalyScores  (tuple) tuple of anomaly scores (floats [0, 1.0])
+    @param windowLimits   (tuple) tuple of window limit tuples
+    @param dataSetName    (string) name of this dataset, usually a file path.
+      Used to name the windows in this dataset, which is important when scoring
+      more than one data set, as each window in all data sets needs to be
+      uniquely named.
+    @param threshold      (float) the threshold at which an anomaly score is
+      considered to be an anomaly prediction.
+
+    @return
+    :return:  (tuple) Contains:
+      scores      (list) List of per-row scores, to be saved in score file
+      matchingRow (ThresholdScore)
     """
     anomalyList = self.calcSweepScore(
       timestamps, anomalyScores, windowLimits, dataSetName)

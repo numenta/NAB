@@ -35,8 +35,6 @@ def scoreCorpus(threshold, args):
 
   @param args       (tuple)   Contains:
 
-    pool                (multiprocessing.Pool)  Pool of processes to perform
-                                                tasks in parallel.
     detectorName        (string)                Name of detector.
 
     profileName         (string)                Name of scoring profile.
@@ -55,8 +53,7 @@ def scoreCorpus(threshold, args):
     probationaryPercent (float)                 Percent of each data file not
                                                 to be considered during scoring.
   """
-  (pool,
-   detectorName,
+  (detectorName,
    profileName,
    costMatrix,
    resultsDetectorDir,
@@ -72,7 +69,7 @@ def scoreCorpus(threshold, args):
 
     # relativePath: raw dataset file,
     # e.g. 'artificialNoAnomaly/art_noisy.csv'
-    relativePath = convertResultsPathToDataPath( \
+    relativePath = convertResultsPathToDataPath(
       os.path.join(detectorName, relativePath))
 
     # outputPath: dataset results file,

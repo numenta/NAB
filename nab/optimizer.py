@@ -27,10 +27,23 @@ from nab.util import convertResultsPathToDataPath
 def optimizeThreshold(args):
   """Optimize the threshold for a given combination of detector and profile.
 
-  @param args       (tuple)   Arguments necessary for the objective function.
+  @param args       (tuple)   Contains:
 
-  @param tolerance  (float)   Number used to determine when optimization has
-                              converged to a sufficiently good score.
+    detectorName        (string)                Name of detector.
+
+    costMatrix          (dict)                  Cost matrix to weight the
+                                                true positives, false negatives,
+                                                and false positives during
+                                                scoring.
+    resultsDetectorDir  (string)                Directory for the results CSVs.
+
+    resultsCorpus       (nab.Corpus)            Corpus object that holds the per
+                                                record anomaly scores for a
+                                                given detector.
+    corpusLabel         (nab.CorpusLabel)       Ground truth anomaly labels for
+                                                the NAB corpus.
+    probationaryPercent (float)                 Percent of each data file not
+                                                to be considered during scoring.
 
   @return (dict) Contains:
         "threshold" (float)   Threshold that returns the largest score from the
@@ -39,15 +52,11 @@ def optimizeThreshold(args):
         "score"     (float)   The score from the objective function given the
                               threshold.
   """
-  (pool,
-   detectorName,
-   profileName,
-   costMatrix,
-   resultsDetectorDir,
-   resultsCorpus,
-   corpusLabel,
-   probationaryPercent,
-   scoreFlag) = args
+  (detectorName,  # (string)  Name of detector
+   costMatrix,  # (dict)  Weights for FP, FN, and TP.
+   resultsCorpus,  # (nab.corpus.Corpus)
+   corpusLabel,  # (nap.labeler.CorpusLabel)
+   probationaryPercent) = args  # (float) Percentage of records to be 'probationary'
 
   sweeper = Sweeper(
     probationPercent=probationaryPercent,
@@ -62,7 +71,7 @@ def optimizeThreshold(args):
 
     # relativePath: raw dataset file,
     # e.g. 'artificialNoAnomaly/art_noisy.csv'
-    relativePath = convertResultsPathToDataPath( \
+    relativePath = convertResultsPathToDataPath(
       os.path.join(detectorName, relativePath))
 
     windows = corpusLabel.windows[relativePath]
