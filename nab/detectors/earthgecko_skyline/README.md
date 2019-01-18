@@ -78,7 +78,7 @@ CONSENSUS = 5
 SHORTEN_TIMESERIES = False
 # Based on 5 minute resolution data shorten to 7 days (513 data points) + 4 hrs
 # (60 data points) either side
-SHORTEN_TO_DATAPOINS = 633
+SHORTEN_TO_DATAPOINTS = 633
 
 # Enable debug logging
 LOCAL_DEBUG = False
