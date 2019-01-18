@@ -134,7 +134,7 @@ if __name__ == "__main__":
                     type=str,
                     default=["null", "numenta", "random", "skyline",
                              "bayesChangePt", "windowedGaussian", "expose",
-                             "relativeEntropy"],
+                             "relativeEntropy", "earthgeckoSkyline"],
                     help="Comma separated list of detector(s) to use, e.g. "
                          "null,numenta")
 
@@ -205,6 +205,8 @@ if __name__ == "__main__":
     from nab.detectors.context_ose.context_ose_detector import (
     ContextOSEDetector )
 
+  if "earthgeckoSkyline" in args.detectors:
+    from nab.detectors.earthgecko_skyline.earthgecko_skyline_detector import EarthgeckoSkylineDetector
 
   if args.skipConfirmation or checkInputs(args):
     main(args)
