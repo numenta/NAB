@@ -132,11 +132,16 @@ if __name__ == "__main__":
   parser.add_argument("-d", "--detectors",
                     nargs="*",
                     type=str,
-                    default=["null", "numenta", "random", "skyline",
-                             "bayesChangePt", "windowedGaussian", "expose",
-                             "relativeEntropy", "earthgeckoSkyline"],
+                    default=["null", "numenta", "random", "bayesChangePt",
+                             "windowedGaussian", "expose", "relativeEntropy",
+                             "earthgeckoSkyline"],
                     help="Comma separated list of detector(s) to use, e.g. "
                          "null,numenta")
+
+  parser.add_argument("--enableSkylineDetector",
+                    default=False,
+                    help="Enable the skyline detector, by default it is "
+                        "disabled.")
 
   parser.add_argument("-p", "--profilesFile",
                     default=os.path.join("config", "profiles.json"),
@@ -163,6 +168,11 @@ if __name__ == "__main__":
     args.optimize = True
     args.score = True
     args.normalize = True
+
+  if args.enableSkylineDetector:
+    enabled_detectors = args.detectors
+    enabled_detectors.append('skyline')
+    args.detectors = enabled_detectors
 
   if len(args.detectors) == 1:
     # Handle comma-seperated list argument.
