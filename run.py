@@ -170,9 +170,9 @@ if __name__ == "__main__":
     args.normalize = True
 
   if args.enableSkylineDetector:
-    enabled_detectors = args.detectors
-    enabled_detectors.append('skyline')
-    args.detectors = enabled_detectors
+    defaultEnabledDetectors = args.detectors
+    defaultEnabledDetectors.append('skyline')
+    args.detectors = defaultEnabledDetectors
 
   if len(args.detectors) == 1:
     # Handle comma-seperated list argument.
