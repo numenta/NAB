@@ -138,11 +138,6 @@ if __name__ == "__main__":
                     help="Comma separated list of detector(s) to use, e.g. "
                          "null,numenta")
 
-  parser.add_argument("--enableSkylineDetector",
-                    default=False,
-                    help="Enable the skyline detector, by default it is "
-                        "disabled.")
-
   parser.add_argument("-p", "--profilesFile",
                     default=os.path.join("config", "profiles.json"),
                     help="The configuration file to use while running the "
@@ -169,11 +164,6 @@ if __name__ == "__main__":
     args.score = True
     args.normalize = True
 
-  if args.enableSkylineDetector:
-    enabledDetectors = args.detectors
-    enabledDetectors.append('skyline')
-    args.detectors = enabledDetectors
-
   if len(args.detectors) == 1:
     # Handle comma-seperated list argument.
     args.detectors = args.detectors[0].split(",")
@@ -194,6 +184,8 @@ if __name__ == "__main__":
     from nab.detectors.null.null_detector import NullDetector
   if "random" in args.detectors:
     from nab.detectors.random.random_detector import RandomDetector
+  # By default the skyline detector is disabled, it can still be added to the
+  # detectors argument to enable it, for more info see #335 and #333
   if "skyline" in args.detectors:
     from nab.detectors.skyline.skyline_detector import SkylineDetector
   if "windowedGaussian" in args.detectors:
