@@ -132,9 +132,9 @@ if __name__ == "__main__":
   parser.add_argument("-d", "--detectors",
                     nargs="*",
                     type=str,
-                    default=["null", "numenta", "random", "skyline",
-                             "bayesChangePt", "windowedGaussian", "expose",
-                             "relativeEntropy", "earthgeckoSkyline"],
+                    default=["null", "numenta", "random", "bayesChangePt",
+                             "windowedGaussian", "expose", "relativeEntropy",
+                             "earthgeckoSkyline"],
                     help="Comma separated list of detector(s) to use, e.g. "
                          "null,numenta")
 
@@ -184,6 +184,8 @@ if __name__ == "__main__":
     from nab.detectors.null.null_detector import NullDetector
   if "random" in args.detectors:
     from nab.detectors.random.random_detector import RandomDetector
+  # By default the skyline detector is disabled, it can still be added to the
+  # detectors argument to enable it, for more info see #335 and #333
   if "skyline" in args.detectors:
     from nab.detectors.skyline.skyline_detector import SkylineDetector
   if "windowedGaussian" in args.detectors:
