@@ -129,7 +129,7 @@ class CorpusLabel(object):
     a relative path and its corresponding list of windows.
     """
     def found(t, data):
-      f = data["timestamp"][data["timestamp"] == pandas.tslib.Timestamp(t)]
+      f = data["timestamp"][data["timestamp"] == pandas.Timestamp(t)]
       exists = (len(f) == 1)
 
       return exists
