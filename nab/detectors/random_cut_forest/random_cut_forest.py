@@ -360,7 +360,13 @@ def streamFile(corpus, corpusLabel, resultsdir, name):
     response = kinesis.get_records(ShardIterator=shardIterator)
     records = response["Records"]
     if len(records) > 0:
-      rows.extend([rec["Data"].strip('\n').split(",") for rec in records])
+      parsed_records = []
+      for rec in records:
+        parsed_record = str(rec["Data"], "utf-8")
+        parsed_record = parsed_record.strip('\n')
+        parsed_record = parsed_record.split(",")
+        parsed_records.append(parsed_record)
+      rows.extend(parsed_records)
       shardIterator = response["NextShardIterator"]
       sys.stdout.write("\rProcessed {}/{} ".format(len(rows), total))
       sys.stdout.flush()
