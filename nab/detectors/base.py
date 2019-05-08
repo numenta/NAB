@@ -28,12 +28,11 @@ from nab.util import createPath, getProbationPeriod
 
 
 
-class AnomalyDetector(object):
+class AnomalyDetector(object, metaclass=abc.ABCMeta):
   """
   Base class for all anomaly detectors. When inheriting from this class please
   take note of which methods MUST be overridden, as documented below.
   """
-  __metaclass__ = abc.ABCMeta
 
   def __init__( self,
                 dataSet,
@@ -113,7 +112,7 @@ class AnomalyDetector(object):
 
       # Progress report
       if (i % 1000) == 0:
-        print ".",
+        print(".", end=' ')
         sys.stdout.flush()
 
     ans = pandas.DataFrame(rows, columns=headers)
@@ -134,8 +133,8 @@ def detectDataSet(args):
   outputPath = os.path.join(outputDir, detectorName, relativeDir, fileName)
   createPath(outputPath)
 
-  print "%s: Beginning detection with %s for %s" % \
-                                                (i, detectorName, relativePath)
+  print("%s: Beginning detection with %s for %s" % \
+                                                (i, detectorName, relativePath))
   detectorInstance.initialize()
 
   results = detectorInstance.run()
@@ -145,6 +144,6 @@ def detectDataSet(args):
 
   results.to_csv(outputPath, index=False)
 
-  print "%s: Completed processing %s records at %s" % \
-                                        (i, len(results.index), datetime.now())
-  print "%s: Results have been written to %s" % (i, outputPath)
+  print("%s: Completed processing %s records at %s" % \
+                                        (i, len(results.index), datetime.now()))
+  print("%s: Results have been written to %s" % (i, outputPath))

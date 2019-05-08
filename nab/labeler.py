@@ -85,7 +85,7 @@ def checkForOverlap(labels, buffer, labelsFileName, dataFileName):
   Raise a ValueError if the difference between any consecutive labels is smaller
   than the buffer.
   """
-  for i in xrange(len(labels)-1):
+  for i in range(len(labels)-1):
     if labels[i+1] - labels[i] <= buffer:
       # import pdb; pdb.set_trace()
       raise ValueError("The labels {} and {} in \'{}\' labels for data file "
@@ -139,7 +139,7 @@ class CorpusLabel(object):
 
     self.windows = {}
 
-    for relativePath in windows.keys():
+    for relativePath in list(windows.keys()):
 
       self.windows[relativePath] = deepmap(strp, windows[relativePath])
 
@@ -172,7 +172,7 @@ class CorpusLabel(object):
 
     self.windows = {}
 
-    for relativePath in windows.keys():
+    for relativePath in list(windows.keys()):
 
       self.windows[relativePath] = deepmap(strp, windows[relativePath])
 
@@ -183,7 +183,7 @@ class CorpusLabel(object):
       if num_windows > 1:
         if not all([(self.windows[relativePath][i+1][0]
                     - self.windows[relativePath][i][1]).total_seconds() >= 0
-                    for i in xrange(num_windows-1)]):
+                    for i in range(num_windows-1)]):
           raise ValueError("In the label file %s, windows overlap." % self.path)
 
 
@@ -195,8 +195,8 @@ class CorpusLabel(object):
     """
     self.labels = {}
 
-    for relativePath, dataSet in self.corpus.dataFiles.iteritems():
-      if self.windows.has_key(relativePath):
+    for relativePath, dataSet in self.corpus.dataFiles.items():
+      if relativePath in self.windows:
         windows = self.windows[relativePath]
 
         labels = pandas.DataFrame({"timestamp": dataSet.data["timestamp"]})
@@ -211,7 +211,7 @@ class CorpusLabel(object):
         self.labels[relativePath] = labels
 
       else:
-        print "Warning: no label for datafile",relativePath
+        print("Warning: no label for datafile",relativePath)
 
 
 class LabelCombiner(object):
@@ -326,7 +326,7 @@ class LabelCombiner(object):
 
     self.labelTimestamps = {}
     self.labelIndices = {}
-    for relativePath, dataSet in self.corpus.dataFiles.iteritems():
+    for relativePath, dataSet in self.corpus.dataFiles.items():
       if ("Known" in relativePath) or ("artificial" in relativePath):
         knownAnomalies = self.knownLabels[0].windows[relativePath]
         self.labelTimestamps[relativePath] = [str(t) for t in knownAnomalies]
@@ -366,11 +366,11 @@ class LabelCombiner(object):
       self.labelIndices[relativePath] = setTruthLabels(dataSet, trueAnomalies)
 
       if self.verbosity>0:
-        print "----"
-        print "For %s the passed raw labels and qualified true labels are,"\
-              " respectively:" % relativePath
-        print passedAnomalies
-        print trueAnomalies
+        print("----")
+        print("For %s the passed raw labels and qualified true labels are,"\
+              " respectively:" % relativePath)
+        print(passedAnomalies)
+        print(trueAnomalies)
 
     return self.labelTimestamps, self.labelIndices
 
@@ -382,7 +382,7 @@ class LabelCombiner(object):
     labels should be revised, or not included in the ground truth labels.
     """
     count = 0
-    for relativePath, indices in self.labelIndices.iteritems():
+    for relativePath, indices in self.labelIndices.items():
 
       if "iio_us-east-1_i-a2eb1cd9_NetworkIn" in relativePath:
         self.labelIndices[relativePath] = [249, 339]
@@ -390,8 +390,8 @@ class LabelCombiner(object):
       count += len(indices)
 
     if self.verbosity > 0:
-      print "============================================================="
-      print "Total ground truth anomalies in benchmark dataset =", count
+      print("=============================================================")
+      print("Total ground truth anomalies in benchmark dataset =", count)
 
 
   def applyWindows(self):
@@ -403,7 +403,7 @@ class LabelCombiner(object):
     If verbosity = 2, the window metrics are printed to the console.
     """
     allWindows = {}
-    for relativePath, anomalies in self.labelIndices.iteritems():
+    for relativePath, anomalies in self.labelIndices.items():
       data = self.corpus.dataFiles[relativePath].data
       length = len(data)
       num = len(anomalies)
@@ -413,11 +413,11 @@ class LabelCombiner(object):
         windowLength = int(self.windowSize * length)
 
       if self.verbosity==2:
-        print "----"
-        print "Window metrics for file", relativePath
-        print "file length =", length, ";" \
+        print("----")
+        print("Window metrics for file", relativePath)
+        print("file length =", length, ";" \
               "number of windows =", num, ";" \
-              "window length =", windowLength
+              "window length =", windowLength)
 
       windows = []
       for a in anomalies:
@@ -440,7 +440,7 @@ class LabelCombiner(object):
     and with the probationary period. Overlapping windows are merged into a
     single window. Windows overlapping with the probationary period are deleted.
     """
-    for relativePath, windows in self.combinedWindows.iteritems():
+    for relativePath, windows in self.combinedWindows.items():
       numWindows = len(windows)
       if numWindows > 0:
 
@@ -454,8 +454,8 @@ class LabelCombiner(object):
         if (pandas.to_datetime(windows[0][0])
             -probationTimestamp).total_seconds() < 0:
           del windows[0]
-          print ("The first window in {} overlaps with the probationary period "
-                 ", so we're deleting it.".format(relativePath))
+          print(("The first window in {} overlaps with the probationary period "
+                 ", so we're deleting it.".format(relativePath)))
 
         i = 0
         while len(windows)-1 > i:

@@ -206,15 +206,15 @@ def createApplication():
   Create a new AWS Kinesis Analytics Application used to provide anomaly
   scores from NAB data files. See "random_cut_forest.sql"
   """
-  print "Creating kinesis streams"
+  print("Creating kinesis streams")
   streams = createStreams()
   inputStream = streams[INPUT_STREAM_NAME]
   outputStream = streams[OUTPUT_STREAM_NAME]
 
-  print "Creating IAM Role"
+  print("Creating IAM Role")
   role = createRole(inputStream, outputStream)
 
-  print "Creating kinesis analytics application"
+  print("Creating kinesis analytics application")
   sourceCode = open(APPLICATION_SOURCE_FILE, "r").read()
   kinesisAnalytics = boto3.client("kinesisanalytics")
   kinesisAnalytics.create_application(
@@ -301,13 +301,13 @@ def deleteApplication():
   """
   Deletes the application created via "createApplication"
   """
-  print "Deleting IAM Role"
+  print("Deleting IAM Role")
   deleteRole()
 
-  print "Deleting kinesis streams"
+  print("Deleting kinesis streams")
   deleteStreams()
 
-  print "Deleting kinesis analytics application"
+  print("Deleting kinesis analytics application")
   kinesisAnalytics = boto3.client("kinesisanalytics")
   try:
     response = kinesisAnalytics.describe_application(
@@ -332,7 +332,7 @@ def streamFile(corpus, corpusLabel, resultsdir, name):
   :param name: NAB data file name (i.e. "realKnownCause/nyc_taxi.csv")
   :return: The result file absolute path
   """
-  print "Streaming", name
+  print("Streaming", name)
 
   startApplication()
 
@@ -403,7 +403,7 @@ def streamAll(corpus, corpusLabel, resultsdir):
                     'scripts/create_new_detector.py --detector randomCutForest'
                     first
   """
-  for name in corpus.dataFiles.keys():
+  for name in list(corpus.dataFiles.keys()):
     streamFile(corpus, corpusLabel, resultsdir, name)
 
 

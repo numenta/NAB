@@ -352,7 +352,7 @@ class PlotNAB(object):
     # Query plotly
     fig = Figure(data=data, layout=layout)
     plot_url = self.py.plot(fig)
-    print "Detections plot URL: ", plot_url
+    print("Detections plot URL: ", plot_url)
 
     return plot_url
 
@@ -423,7 +423,7 @@ class PlotNAB(object):
       try:
         os.chdir(tempDir)
         plotPath = self.py.plot(fig)
-        print "Data plot URL: ", plotPath
+        print("Data plot URL: ", plotPath)
       finally:
         os.chdir(cwd)
     else:
@@ -536,7 +536,7 @@ def main():
   parser.add_argument("file")
   args = parser.parse_args()
   if args.offline and args.output is not None:
-    print "Plots cannot be saved to file in offline mode."
+    print("Plots cannot be saved to file in offline mode.")
     sys.exit(-1)
   path = args.file
   title = args.title

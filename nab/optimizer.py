@@ -63,7 +63,7 @@ def optimizeThreshold(args):
 
   # First, get the sweep-scores for each row in each data set
   allAnomalyRows = []
-  for relativePath, dataSet in resultsCorpus.dataFiles.iteritems():
+  for relativePath, dataSet in resultsCorpus.dataFiles.items():
     if "_scores.csv" in relativePath:
       continue
 
@@ -91,9 +91,9 @@ def optimizeThreshold(args):
     scoresByThreshold,key=lambda x: x.score, reverse=True)
   bestParams = scoresByThreshold[0]
 
-  print("Optimizer found a max score of {} with anomaly threshold {}.".format(
+  print(("Optimizer found a max score of {} with anomaly threshold {}.".format(
     bestParams.score, bestParams.threshold
-  ))
+  )))
 
   return {
     "threshold": bestParams.threshold,

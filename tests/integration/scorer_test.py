@@ -99,9 +99,9 @@ class ScorerTest(unittest.TestCase):
 
     # Make arbitrary detections, score, repeat
     scores = []
-    for _ in xrange(20):
+    for _ in range(20):
       anomalyScores = pandas.Series([0]*length)
-      indices = random.sample(range(length), 10)
+      indices = random.sample(list(range(length)), 10)
       anomalyScores[indices] = 1
       (scores, matchingRow) = sweeper.scoreDataSet(
         timestamps,
@@ -245,7 +245,7 @@ class ScorerTest(unittest.TestCase):
       threshold
     )
     
-    self.assertAlmostEquals(matchingRow.score, -0.9540, 4)
+    self.assertAlmostEqual(matchingRow.score, -0.9540, 4)
     self._checkCounts(matchingRow, length-windowSize*numWindows-1, 2, 1, 8)
 
 

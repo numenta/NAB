@@ -66,7 +66,7 @@ def scoreCorpus(threshold, args):
    scoreFlag) = args
 
   args = []
-  for relativePath, dataSet in resultsCorpus.dataFiles.iteritems():
+  for relativePath, dataSet in resultsCorpus.dataFiles.items():
     if "_scores.csv" in relativePath:
       continue
 
@@ -107,7 +107,7 @@ def scoreCorpus(threshold, args):
   # Total the 6 scoring metrics for all data files
   totals = [None]*3 + [0]*6
   for row in results:
-    for i in xrange(6):
+    for i in range(6):
       totals[i+3] += row[i+4]
 
   results.append(["Totals"] + totals)

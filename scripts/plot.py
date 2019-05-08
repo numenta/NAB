@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
   assert len(dataFiles) == len(dataNames)
 
-  for i in xrange(len(dataFiles)):
+  for i in range(len(dataFiles)):
     dataPlotter = PlotNAB(
         dataFile=dataFiles[i],
         dataName=dataNames[i],

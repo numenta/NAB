@@ -52,7 +52,7 @@ def main(args):
     output_filename = os.path.join(args.destDir, datafile)
     sortData(input_filename, output_filename)
 
-  print "Sorted files written to ", args.destDir
+  print("Sorted files written to ", args.destDir)
 
 
 if __name__ == "__main__":
