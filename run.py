@@ -132,11 +132,11 @@ if __name__ == "__main__":
   parser.add_argument("-d", "--detectors",
                     nargs="*",
                     type=str,
-                    default=["null", "numenta", "random", "bayesChangePt",
-                             "windowedGaussian", "expose", "relativeEntropy",
-                             "earthgeckoSkyline"],
+                    default=["null", "random",
+                             "bayesChangePt", "windowedGaussian", "expose",
+                             "relativeEntropy", "earthgeckoSkyline"],
                     help="Comma separated list of detector(s) to use, e.g. "
-                         "null,numenta")
+                         "null, expose")
 
   parser.add_argument("-p", "--profilesFile",
                     default=os.path.join("config", "profiles.json"),
@@ -174,12 +174,6 @@ if __name__ == "__main__":
   if "bayesChangePt" in args.detectors:
     from nab.detectors.bayes_changept.bayes_changept_detector import (
       BayesChangePtDetector)
-  if "numenta" in args.detectors:
-    from nab.detectors.numenta.numenta_detector import NumentaDetector
-  if "htmjava" in args.detectors:
-    from nab.detectors.htmjava.htmjava_detector import HtmjavaDetector
-  if "numentaTM" in args.detectors:
-    from nab.detectors.numenta.numentaTM_detector import NumentaTMDetector
   if "null" in args.detectors:
     from nab.detectors.null.null_detector import NullDetector
   if "random" in args.detectors:
