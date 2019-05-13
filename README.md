@@ -214,7 +214,7 @@ to see all the options.
 
 Note that to replicate results exactly as in the paper you may need to checkout
 the specific version of NuPIC (and associated nupic.core) that is noted in the
-[Scoreboard](https://github.com/numenta/NAB/wiki/NAB%20Scoreboard):
+[Scoreboard](https://github.com/numenta/NAB#additional-scores):
 
     cd /path/to/nupic/
     git checkout -b nab {TAG NAME}
