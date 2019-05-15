@@ -98,7 +98,7 @@ if __name__ == "__main__":
 
   setup(
     name="nab",
-    version="1.0",
+    version="1.1",
     author="Alexander Lavin",
     author_email="nab@numenta.org",
     description=(
