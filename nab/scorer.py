@@ -102,6 +102,7 @@ def scoreCorpus(threshold, args):
 
   # Using `map_async` instead of `map` so interrupts are properly handled.
   # See: http://stackoverflow.com/a/1408476
+  # Magic number is a timeout in seconds.
   results = pool.map_async(scoreDataSet, args).get(999999)
 
   # Total the 6 scoring metrics for all data files
