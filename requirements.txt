@@ -1,3 +1,4 @@
 pandas==0.20.3
 simplejson==3.11.1
 boto3==1.7.11
+scikit-learn==0.21.1
