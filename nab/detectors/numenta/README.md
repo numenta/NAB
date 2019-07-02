@@ -1,53 +1,28 @@
-# [HTM Java](https://github.com/numenta/htm.java) NAB detector
+# Numenta and NumentaTM detectors
 
-This directory holds the code required to run the `htmjava` detector against
-the NAB data. In addition to Java, some of this code requires Python 2 and
-therefore extra setup. In 2019 the main body of the benchmark's code was
-ported to Python 3 but this detector relies on NuPIC which supports Python 2
-only.
+This directory holds the Python 2 code required to run the `numenta` and
+`numentaTM` detectors against the NAB data. In 2019 the main body of the
+benchmark's code was ported to Python 3 however these detectors rely on NuPIC
+which is Python 2 only.
 
 This code can be used to replicate results listed on the scoreboard of
 the main repository for the following detectors:
 
-    htmjava
+    numenta
+    numentaTM
 
 ## Installation
-
-### Java
-
-First make sure you have __java 8__ installed. You should see a version number matchin 1.8.XXXX.
-
-```
-$ java -version
-java version "1.8.0_211"
-Java(TM) SE Runtime Environment (build 1.8.0_211-b12)
-Java HotSpot(TM) 64-Bit Server VM (build 25.211-b12, mixed mode)
-```
-
-Navigate to the *inner* `htmjava` directory and build __htm.java__ NAB detector:
-    
-```
-cd nab/detectors/htmjava
-./gradlew clean build
-```
-
-Once this has built correctly navigate back to the *outer* `htmjava` directory
-and continue with the Python installation and usage described below.
-
-`cd ../../../`
-
-### Python
 
 We assume you have a working version of Python 3 installed as your default Python.
 If your default system Python is still Python 2 you can skip the virtual environment
 creation below.
 
-#### Requirements to install
+### Requirements to install
 
 - [Python 2.7](https://www.python.org/download/)
 - [Virtualenv](https://pypi.org/project/virtualenv/)
 
-#### Install a virtual environment
+### Install a virtual environment
 
 Create a new Python 2 virtual environment in this directory.
 
@@ -70,11 +45,11 @@ Type "help", "copyright", "credits" or "license" for more information.
 >>>
 ```
 
-#### Install NuPIC
+### Install NuPIC
 
 `pip install nupic`
 
-#### Install detectors
+### Install detectors
 
 `python setup.py develop`
 
@@ -84,9 +59,10 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 This directory contains a modified version of the `run.py` script which exists
 in the main NAB directory. It can be used to run *detection* only using the
-`htmjava` detector against NAB data.
+`numenta` and `numentaTM` detectors against NAB data.
 
-By default it will output results to the main NAB/results directory.
+By default it will run both `numenta` and `numentaTM` detectors and output
+results to the main NAB/results directory.
 
 `python run.py`
 
@@ -94,19 +70,23 @@ Note: By default `run.py` tries to use all the cores on your machine. The above
 command should take about 20-30 minutes on a current powerful laptop with 4-8
 cores.
 
+To run only one of the detectors use the `-d` option:
+
+`python run.py -d numenta`
+
 To see all options of this script type:
 
 `python run.py --help`
 
 ### Optimizing, Scoring and Normalizing
 
-Once you have run detection against the NAB data you will need to exit the
-Python 2 virtual environment and move into the main NAB directory.
+Once you have run either of the detectors herein against the NAB data you will need
+to exit the Python 2 virtual environment and move into the main NAB directory.
 
 ```
-(env) /NAB/nab/detectors/htmjava
+(env) /NAB/nab/detectors/numenta
 $ deactivate                                                          
-/NAB/nab/detectors/htmjava      
+/NAB/nab/detectors/numenta      
 $ cd ../../../
 /NAB
 $
@@ -114,7 +94,7 @@ $
 
 Then follow the instructions in the main README to run optimization, scoring, and normalization, e.g.:
 
-`python run.py -d htmjava --optimize --score --normalize`
+`python run.py -d numenta,numentaTM --optimize --score --normalize`
 
 ### Run a subset of NAB data files
 
@@ -129,7 +109,7 @@ are interested in.
 `labels/combined_windows_tiny.json`. (Under of the main NAB directory) The
 following command shows you how to run NAB on a subset of labels:
 
-    python run.py --detect --windowsFile labels/combined_windows_tiny.json
+    python run.py -d numenta --detect --windowsFile labels/combined_windows_tiny.json
 
 This will run the `detect` phase of NAB on the data files specified in the above
 JSON file. Note that scoring and normalization are not supported with this
