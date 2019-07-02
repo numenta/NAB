@@ -23,7 +23,7 @@ class KnncadDetector(AnomalyDetector):
         return np.dot(np.dot(diff,self.sigma),diff.T)
 
     def ncm(self,item, item_in_array=False):
-        arr = map(lambda x:self.metric(x,item), self.training)
+        arr = [self.metric(x,item) for x in self.training]
         return np.sum(np.partition(arr, self.k+item_in_array)[:self.k+item_in_array])
 
     def handleRecord(self, inputData):
@@ -46,9 +46,9 @@ class KnncadDetector(AnomalyDetector):
                     try:
                         self.sigma = np.linalg.inv(np.dot(np.array(self.training).T, self.training))
                     except np.linalg.linalg.LinAlgError:
-                        print 'Singular Matrix at record', self.record_count 
+                        print('Singular Matrix at record', self.record_count) 
                 if len(self.scores) == 0:
-                    self.scores = map(lambda v: self.ncm(v, True), self.training)
+                    self.scores = [self.ncm(v, True) for v in self.training]
                     
                 new_score = self.ncm(new_item)
                 result = 1.*len(np.where(np.array(self.scores) < new_score)[0])/len(self.scores)

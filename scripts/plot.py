@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
   assert len(dataFiles) == len(dataNames)
 
-  for i in xrange(len(dataFiles)):
+  for i in range(len(dataFiles)):
     dataPlotter = PlotNAB(
         dataFile=dataFiles[i],
         dataName=dataNames[i],
@@ -69,9 +69,9 @@ if __name__ == "__main__":
   #     "Ambient Temperature System Failure Data"
   # )
   # detectors=["numenta", "null"]
-  #
+  
   # assert len(dataFiles) == len(dataNames)
-  #
+  
   # # Create the list of result filenames for each detector
   # allResultsFiles = []
   # for f in dataFiles:
@@ -80,12 +80,13 @@ if __name__ == "__main__":
   #     filename = d + "/"+f.replace("/","/"+d+"_")
   #     resultFiles.append(filename)
   #   allResultsFiles.append(resultFiles)
-  #
+  
   # # Now plot everything
   # for i in range(len(dataFiles)):
   #   dataPlotter = PlotNAB(
   #       dataFile=dataFiles[i],
-  #       dataName=dataNames[i])
+  #       dataName=dataNames[i],
+  #       offline=True)
   #   dataPlotter.plotMultipleDetectors(
   #       allResultsFiles[i],
   #       detectors=detectors,
