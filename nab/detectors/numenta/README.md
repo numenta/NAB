@@ -45,13 +45,11 @@ Type "help", "copyright", "credits" or "license" for more information.
 >>>
 ```
 
-### Install NuPIC
-
-`pip install nupic`
-
 ### Install detectors
 
-`python setup.py develop`
+`cd /path/to/NAB/`
+`pip install nupic`
+`python nab/detectors/numenta/setup.py develop`
 
 ## Usage
 
@@ -64,7 +62,7 @@ in the main NAB directory. It can be used to run *detection* only using the
 By default it will run both `numenta` and `numentaTM` detectors and output
 results to the main NAB/results directory.
 
-`python run.py`
+`python2 run.py`
 
 Note: By default `run.py` tries to use all the cores on your machine. The above
 command should take about 20-30 minutes on a current powerful laptop with 4-8
@@ -72,11 +70,11 @@ cores.
 
 To run only one of the detectors use the `-d` option:
 
-`python run.py -d numenta`
+`python2 run.py -d numenta`
 
 To see all options of this script type:
 
-`python run.py --help`
+`python2 run.py --help`
 
 ### Optimizing, Scoring and Normalizing
 
@@ -109,7 +107,7 @@ are interested in.
 `labels/combined_windows_tiny.json`. (Under of the main NAB directory) The
 following command shows you how to run NAB on a subset of labels:
 
-    python run.py -d numenta --detect --windowsFile labels/combined_windows_tiny.json
+    python2 run.py -d numenta --detect --windowsFile labels/combined_windows_tiny.json
 
 This will run the `detect` phase of NAB on the data files specified in the above
 JSON file. Note that scoring and normalization are not supported with this
