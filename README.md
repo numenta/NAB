@@ -175,7 +175,8 @@ all individual detections for reported algorithms are checked in to the results
 subdirectory. Please see the README files in those locations.
 
 1. If you want to plot some of the results, please see the README in the
-`scripts` directory for `scripts/plot.py`
+`scripts` directory for `scripts/plot.py`. For example `python scripts/plot.py` 
+will open default data-plots in the browser. 
 
 1. If you have your own algorithm and want to run the NAB benchmark, please see
 the [NAB Entry Points](https://github.com/numenta/NAB/wiki#nab-entry-diagram)
