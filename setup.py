@@ -107,6 +107,7 @@ if __name__ == "__main__":
     packages=find_packages(),
     long_description=read("README.md"),
     install_requires=requirements,
+    include_package_data=True,
     entry_points={
       "console_scripts": [
         "nab-plot = nab.plot:main",
