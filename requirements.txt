@@ -2,3 +2,4 @@ nupic==1.0.5
 pandas==0.20.3
 simplejson==3.11.1
 boto3==1.7.11
+plotly==3.10.0 #required for scripts/plot
