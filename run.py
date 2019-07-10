@@ -134,7 +134,7 @@ if __name__ == "__main__":
                     type=str,
                     default=["null", "numenta", "random", "bayesChangePt",
                              "windowedGaussian", "expose", "relativeEntropy",
-                             "earthgeckoSkyline"],
+                             "earthgeckoSkyline", "naive"],
                     help="Comma separated list of detector(s) to use, e.g. "
                          "null,numenta")
 
@@ -209,6 +209,8 @@ if __name__ == "__main__":
 
   if "earthgeckoSkyline" in args.detectors:
     from nab.detectors.earthgecko_skyline.earthgecko_skyline_detector import EarthgeckoSkylineDetector
+  if "naive" in args.detectors:
+    from nab.detectors.naive.naive_detector import NaiveDetector
 
   if args.skipConfirmation or checkInputs(args):
     main(args)
