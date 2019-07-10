@@ -174,7 +174,7 @@ class RelativeEntropyDetector(AnomalyDetector):
 
     index = -1
     minEntropy = float("inf")
-    for i in xrange(self.m):
+    for i in range(self.m):
       entropy = 2 * self.W * stats.entropy(P_hat,self.P[i])
       if entropy < self.T and entropy < minEntropy:
         minEntropy = entropy

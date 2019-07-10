@@ -49,26 +49,26 @@ def main(args):
   probationaryPercent = 0.15
 
 
-  print "Getting corpus."
+  print("Getting corpus.")
   corpus = Corpus(dataDir)
 
-  print "Creating LabelCombiner."
+  print("Creating LabelCombiner.")
   labelCombiner = LabelCombiner(labelDir, corpus,
                                 args.threshold, windowSize,
                                 probationaryPercent, args.verbosity)
 
-  print "Combining labels."
+  print("Combining labels.")
   labelCombiner.combine()
 
-  print "Writing combined labels files."
+  print("Writing combined labels files.")
   labelCombiner.write(args.combinedLabelsPath, args.combinedWindowsPath)
 
-  print "Attempting to load objects as a test."
+  print("Attempting to load objects as a test.")
   corpusLabel = CorpusLabel(args.combinedWindowsPath, corpus)
   corpusLabel.validateLabels()
 
-  print "Successfully combined labels!"
-  print "Resulting windows stored in:", args.combinedWindowsPath
+  print("Successfully combined labels!")
+  print("Resulting windows stored in:", args.combinedWindowsPath)
 
 
 if __name__ == "__main__":

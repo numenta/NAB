@@ -53,7 +53,7 @@ class CorpusTest(unittest.TestCase):
     is a dictionary containing DataFile objects containing pandas.DataFrame
     objects to represent the underlying data.
     """
-    for df in self.corpus.dataFiles.values():
+    for df in list(self.corpus.dataFiles.values()):
       self.assertIsInstance(df, nab.corpus.DataFile)
       self.assertIsInstance(df.data, pandas.DataFrame)
       self.assertEqual(set(df.data.columns.values),
@@ -66,13 +66,13 @@ class CorpusTest(unittest.TestCase):
     "test" is added.
     """
     columnData = {}
-    for relativePath, df in self.corpus.dataFiles.iteritems():
+    for relativePath, df in self.corpus.dataFiles.items():
       rows, _ = df.data.shape
       columnData[relativePath] = pandas.Series(np.zeros(rows))
 
     self.corpus.addColumn("test", columnData, write=False)
 
-    for df in self.corpus.dataFiles.values():
+    for df in list(self.corpus.dataFiles.values()):
       self.assertEqual(set(df.data.columns.values),
         set(["timestamp", "value", "test"]))
 
@@ -83,7 +83,7 @@ class CorpusTest(unittest.TestCase):
     named "test" is removed.
     """
     columnData = {}
-    for relativePath, df in self.corpus.dataFiles.iteritems():
+    for relativePath, df in self.corpus.dataFiles.items():
       rows, _ = df.data.shape
       columnData[relativePath] = pandas.Series(np.zeros(rows))
 
@@ -91,7 +91,7 @@ class CorpusTest(unittest.TestCase):
 
     self.corpus.removeColumn("test", write=False)
 
-    for df in self.corpus.dataFiles.values():
+    for df in list(self.corpus.dataFiles.values()):
       self.assertEqual(set(df.data.columns.values),
         set(["timestamp", "value"]))
 
@@ -107,8 +107,8 @@ class CorpusTest(unittest.TestCase):
 
     copyCorpus = nab.corpus.Corpus(copyLocation)
 
-    for relativePath in self.corpus.dataFiles.keys():
-      self.assertIn(relativePath, copyCorpus.dataFiles.keys())
+    for relativePath in list(self.corpus.dataFiles.keys()):
+      self.assertIn(relativePath, list(copyCorpus.dataFiles.keys()))
 
       self.assertTrue(
         all(self.corpus.dataFiles[relativePath].data == \
@@ -126,7 +126,7 @@ class CorpusTest(unittest.TestCase):
     copyLocation = os.path.join(tempfile.mkdtemp(), "test")
     copyCorpus = self.corpus.copy(copyLocation)
 
-    for relativePath, df in self.corpus.dataFiles.iteritems():
+    for relativePath, df in self.corpus.dataFiles.items():
       newPath = relativePath + "_copy"
       copyCorpus.addDataSet(newPath, copy.deepcopy(df))
 
@@ -144,7 +144,7 @@ class CorpusTest(unittest.TestCase):
     subset1 = self.corpus.getDataSubset(query1)
 
     self.assertEqual(len(subset1), 2)
-    for relativePath in subset1.keys():
+    for relativePath in list(subset1.keys()):
       self.assertIn(query1, relativePath)
 
     query2 = "artificialWithAnomaly"
@@ -152,7 +152,7 @@ class CorpusTest(unittest.TestCase):
 
     self.assertEqual(len(subset2), 1)
 
-    for relativePath in subset2.keys():
+    for relativePath in list(subset2.keys()):
       self.assertIn(query2, relativePath)
 
 

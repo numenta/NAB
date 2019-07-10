@@ -58,7 +58,7 @@ if GRUBBS_KS_TEST_ENABLED:
         import scipy
         scipy_version = scipy.version.version
         if scipy_version != '1.1.0':
-            print('To run grubbs and ks_test scipy==1.1.0 is required, scipy %s is installed' % scipy_version)
+            print(('To run grubbs and ks_test scipy==1.1.0 is required, scipy %s is installed' % scipy_version))
             sys.exit(1)
     except:
         print('To run grubbs and ks_test scipy==1.1.0 is required')
@@ -67,7 +67,7 @@ if GRUBBS_KS_TEST_ENABLED:
         import statsmodels
         statsmodels_version = statsmodels.version.version
         if statsmodels_version != '0.8.0':
-            print('To run grubbs and ks_test statsmodels==0.8.0 is required, statsmodels %s is installed' % statsmodels_version)
+            print(('To run grubbs and ks_test statsmodels==0.8.0 is required, statsmodels %s is installed' % statsmodels_version))
             sys.exit(1)
     except:
         print('To run grubbs and ks_test statsmodels==0.8.0 is required')

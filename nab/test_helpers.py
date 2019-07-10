@@ -55,7 +55,7 @@ def writeCorpus(corpusDir, corpusData):
   """
   makeDirsExist(corpusDir)
 
-  for relativePath, data in corpusData.iteritems():
+  for relativePath, data in corpusData.items():
     dataFilePath = os.path.join(corpusDir, relativePath)
     createPath(dataFilePath)
     data.to_csv(dataFilePath, index=False)
@@ -69,7 +69,7 @@ def generateTimestamps(start, increment, length):
   @param length     (int)         Number of datetime objects
   """
   timestamps = pandas.Series([start])
-  for i in xrange(length - 1):
+  for i in range(length - 1):
     timestamps.loc[i + 1] = timestamps.loc[i] + increment
   return timestamps
 
@@ -88,7 +88,7 @@ def generateWindows(timestamps, numWindows, windowSize):
   delta = timestamps[1] - timestamps[0]
   diff = int(round((len(timestamps) - numWindows * windowSize) / float(numWindows + 1)))
   windows = []
-  for i in xrange(numWindows):
+  for i in range(numWindows):
     t1 = start + delta * diff * (i + 1) + (delta * windowSize * i)
     t2 = t1 + delta * (windowSize - 1)
     if not any(timestamps == t1) or not any(timestamps == t2):

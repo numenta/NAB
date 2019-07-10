@@ -187,7 +187,7 @@ class ContextOperator(object):
 
     for leftSemiContVal in self.crossedSemiContextsLists[0]:
 
-      for rightSemiContextID, contextID in leftSemiContVal[3].iteritems():
+      for rightSemiContextID, contextID in leftSemiContVal[3].items():
 
         if self.newContextID != contextID :
 
