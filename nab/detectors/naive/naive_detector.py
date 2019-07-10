@@ -80,12 +80,11 @@ class NaiveDetector(AnomalyDetector):
     score = 1-math.exp(-self.coef * x)
 
     # bound to anomaly range (should not happen, but some are over)
-    if(score > 1):
-        score = 1.0
-    elif(score < 0):
-        score = 0.0
+#    if(score > 1):
+#        score = 1.0
+#    elif(score < 0):
+#        score = 0.0
 
-    print(score)
-    assert(score >= 0 and score <= 1)
+    assert(score >= 0 and score <= 1), print("ERR: score: "+str(score)+ "\t curr: "+str(current)+"\t pred: "+str(predicted))
     return score
 
