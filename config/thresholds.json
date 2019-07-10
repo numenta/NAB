@@ -83,6 +83,20 @@
             "threshold": 1.0
         }
     },
+    "naive": {
+        "reward_low_FN_rate": {
+            "score": -232.0,
+            "threshold": 1.1
+        },
+        "reward_low_FP_rate": {
+            "score": -116.0,
+            "threshold": 1.1
+        },
+        "standard": {
+            "score": -116.0,
+            "threshold": 1.1
+        }
+    },
     "null": {
         "reward_low_FN_rate": {
             "score": -232.0,

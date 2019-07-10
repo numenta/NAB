@@ -18,29 +18,74 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
-"""
-This is implementation of the "naive forecast" is a baseline algorithm for time-series
-forecasting. It repeats the last seen value. So `P(t+1) = P(t)`.
-"""
+import math #exp
 
 from nab.detectors.base import AnomalyDetector
 
+EPSILON = 0.00000001
+
 class NaiveDetector(AnomalyDetector):
+  """
+  This is implementation of the "naive forecast", aka "random walk forecasting",
+  which is a baseline algorithm for time-series forecasting. 
+  It predicts the last seen value. So `Prediction(t+1) = Input(t)`.
+  
+  Hyperparameter to optimize is @param coef in `initialize`.
+  """
 
 
-  def initialize(self):
+  def initialize(self, coef=10.0):
+    """
+    @param `coef` for the activation function that scales anomaly score to [0, 1.0]
+           The function is: `anomalyScore = 1-exp(-coef*x)`, where 
+           `x=abs(current - predicted)/predicted`. 
+    """
     super().initialize()
     self.predicted = 0.0 #previous value, last seen
+    self.coef = coef
+
 
   def handleRecord(self, inputData):
-    """The anomaly score is simply the last seen value"""
+    """The predicted value is simply the last seen value,
+       Anomaly score is computed as a function of current,predicted.
+
+       See @ref `initialize` param `coef`.
+    """
     current = float(inputData["value"])
     inputData['predicted'] = self.predicted
-    anomalyScore = 1 #FIXME how compute anomaly score from predicted, current?
+    try:
+      anomalyScore = self.anomalyFn_(current, self.predicted)
+    except: 
+      #on any math error (overflow,...), we mark this as anomaly. tough love
+      anomalyScore = 1.0
 
     ret = [anomalyScore, self.predicted]
     self.predicted=current
     return (ret)
 
+
   def getAdditionalHeaders(self):
     return ['predicted']
+
+
+  def anomalyFn_(self, current, predicted):
+    """
+    compute anomaly score from 2 scalars
+    """
+    if predicted == 0.0:
+      predicted = EPSILON #avoid division by zero
+
+    # the computation
+    x = abs(current - predicted)/predicted
+    score = 1-math.exp(-self.coef * x)
+
+    # bound to anomaly range (should not happen, but some are over)
+    if(score > 1):
+        score = 1.0
+    elif(score < 0):
+        score = 0.0
+
+    print(score)
+    assert(score >= 0 and score <= 1)
+    return score
+
