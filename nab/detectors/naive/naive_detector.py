@@ -25,12 +25,22 @@ forecasting. It repeats the last seen value. So `P(t+1) = P(t)`.
 
 from nab.detectors.base import AnomalyDetector
 
-
-
 class NaiveDetector(AnomalyDetector):
+
+
+  def initialize(self):
+    super().initialize()
+    self.predicted = 0.0 #previous value, last seen
 
   def handleRecord(self, inputData):
     """The anomaly score is simply the last seen value"""
-    print(inputData)
-    anomalyScore = 0.5
-    return (anomalyScore, )
+    current = float(inputData["value"])
+    inputData['predicted'] = self.predicted
+    anomalyScore = 1 #FIXME how compute anomaly score from predicted, current?
+
+    ret = [anomalyScore, self.predicted]
+    self.predicted=current
+    return (ret)
+
+  def getAdditionalHeaders(self):
+    return ['predicted']
