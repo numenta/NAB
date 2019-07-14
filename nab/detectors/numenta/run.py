@@ -124,6 +124,14 @@ if __name__ == "__main__":
                     help="The number of CPUs to use to run the "
                     "benchmark. If not specified all CPUs will be used.")
 
+  # In this version of run.py this is a no-op
+  # See https://github.com/numenta/NAB/issues/346 for why it was retained
+  parser.add_argument("--detect",
+                  help="No-op. See: https://github.com/numenta/NAB/issues/346",
+                  default=False,
+                  action="store_true")
+
+
   args = parser.parse_args()
 
   if len(args.detectors) == 1:
