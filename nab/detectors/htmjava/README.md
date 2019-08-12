@@ -53,6 +53,10 @@ Create a new Python 2 virtual environment in this directory.
 
 `virtualenv -p path/to/python2 env`
 
+On Windows this might be:
+
+`virtualenv -p C:\Python27\python.exe env`
+
 Activate that virtual environment.
 
 `./env/Scripts/activate`
