@@ -78,8 +78,7 @@ behavior.
 The majority of the data is real-world from a variety of sources such as AWS
 server metrics, Twitter volume, advertisement clicking metrics, traffic data,
 and more. All data is included in the repository, with more details in the
-[data readme](https://github.com/numenta/NAB/tree/master/data). We are in the
-process of adding more data, and actively searching for more data. Please
+[data readme](https://github.com/numenta/NAB/tree/master/data). Please
 contact us at [nab@numenta.org](mailto:nab@numenta.org) if you have similar
 data (ideally with known anomalies) that you would like to see incorporated
 into NAB.
