@@ -230,7 +230,7 @@ the `nab/detectors/twitter` directory.
     python run.py
 
 This will run all detectors available in this repository and produce results
-files. To run NuPIC dependent detectors see "Run HTM with NAB" above.
+files. To run non-Python3 detectors see "Running non-Python3 detectors" above.
 
 **Note**: this option may take many many hours to run.
 
