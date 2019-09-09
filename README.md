@@ -206,23 +206,20 @@ specific label files (see section below). Please type:
 
 to see all the options.
 
-##### Run HTM with NAB
+##### Running non-Python3 detectors
 
-In 2019 much of NAB was ported to Python 3, however NuPIC itself was not.
-
-NuPIC dependent detectors include:
+The NAB framework Python 3, and therefore can integrate Python 3 detectors. The following detectors must be run outside the NAB runtime and integrated for scoring in a later step. These detectors include:
 
     numenta
     numentaTM
     htmjava
+    twitterADVec
 
 Instructions on how to run the `numenta` and `numentaTM` detectors under
 Python 2 can be found in the `nab/detectors/numenta` directory.
 
 Instructions on how to run the `htmjava` detector can be found in the
 `nab/detectors/htmjava` directory.
-
-##### Run TwitterADVec with NAB
 
 Instructions on how to run the R based `twitterADVec` detector can be found in
 the `nab/detectors/twitter` directory.
