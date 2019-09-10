@@ -210,19 +210,13 @@ to see all the options.
 
 The NAB framework Python 3, and therefore can integrate Python 3 detectors. The following detectors must be run outside the NAB runtime and integrated for scoring in a later step. These detectors include:
 
-    numenta
-    numentaTM
-    htmjava
-    twitterADVec
+    numenta (Python 2)
+    numentaTM (Python 2)
+    htmjava (Python 2 / Java)
+    twitterADVec (R)
+    random_cut_forest (AWS Kinesis Analytics)
 
-Instructions on how to run the `numenta` and `numentaTM` detectors under
-Python 2 can be found in the `nab/detectors/numenta` directory.
-
-Instructions on how to run the `htmjava` detector can be found in the
-`nab/detectors/htmjava` directory.
-
-Instructions on how to run the R based `twitterADVec` detector can be found in
-the `nab/detectors/twitter` directory.
+Instructions on how to run the each detector in their native environment can be found in the `nab/detectors/${name}` directory.
 
 ##### Run full NAB
 
