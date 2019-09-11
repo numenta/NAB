@@ -1,8 +1,8 @@
-The Numenta Anomaly Benchmark [![Build Status](https://travis-ci.org/numenta/NAB.svg?branch=master)](https://travis-ci.org/numenta/NAB)
+The Numenta Anomaly Benchmark (NAB) [![Build Status](https://travis-ci.org/numenta/NAB.svg?branch=master)](https://travis-ci.org/numenta/NAB)
 -----------------------------
 
 Welcome. This repository contains the data and scripts which comprise the
-Numenta Anomaly Benchmark (NAB). NAB is a novel benchmark for evaluating
+Numenta Anomaly Benchmark (NAB) v1.1.1. NAB is a novel benchmark for evaluating
 algorithms for anomaly detection in streaming, real-time applications. It is
 composed of over 50 labeled real-world and artificial timeseries data files
 plus a novel scoring mechanism designed for real-time applications.
@@ -206,9 +206,9 @@ specific label files (see section below). Please type:
 
 to see all the options.
 
-##### Running non-Python3 detectors
+##### Running non-Python 3 detectors
 
-The NAB framework Python 3, and therefore can integrate Python 3 detectors. The following detectors must be run outside the NAB runtime and integrated for scoring in a later step. These detectors include:
+NAB is a Python 3 framework, and can only integrate Python 3 detectors. The following detectors must be run outside the NAB runtime and integrated for scoring in a later step. These detectors include:
 
     numenta (Python 2)
     numentaTM (Python 2)
