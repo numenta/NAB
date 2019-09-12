@@ -2,7 +2,7 @@ The Numenta Anomaly Benchmark (NAB) [![Build Status](https://travis-ci.org/numen
 -----------------------------
 
 Welcome. This repository contains the data and scripts which comprise the
-Numenta Anomaly Benchmark (NAB) v1.1.1. NAB is a novel benchmark for evaluating
+Numenta Anomaly Benchmark (NAB) v1.1. NAB is a novel benchmark for evaluating
 algorithms for anomaly detection in streaming, real-time applications. It is
 composed of over 50 labeled real-world and artificial timeseries data files
 plus a novel scoring mechanism designed for real-time applications.
