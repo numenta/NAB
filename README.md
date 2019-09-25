@@ -128,7 +128,7 @@ officially supported.
 
 You need to manually install the following:
 
-- [Python 3](https://www.python.org/download/)
+- [Python 3.7](https://www.python.org/download/)
 - [pip](https://pip.pypa.io/en/latest/installing.html)
 - [NumPy](http://www.numpy.org/)
 
