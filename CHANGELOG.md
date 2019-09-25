@@ -1,9 +1,6 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## v1.2.dev0
-### Pending
-
 ## [v1.1] - 2019-09-12
 ### Updated runtime to Python 3
 - Moved python 2 runtimes into independent detectors.
