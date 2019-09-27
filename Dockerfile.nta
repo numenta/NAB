@@ -1,0 +1,11 @@
+FROM numenta/nupic
+
+ENV NAB /usr/local/src/nab
+
+ADD . $NAB
+
+# Run Numenta detectors
+RUN echo "Running numenta detectors in Python 2.7..."
+WORKDIR $NAB/nab/detectors/numenta
+RUN python -m pip install -r requirements.txt
+RUN python run.py --skipConfirmation
