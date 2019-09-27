@@ -9,7 +9,7 @@ plus a novel scoring mechanism designed for real-time applications.
 
 Included are the tools to allow you to run NAB on your own anomaly detection
 algorithms; see the [NAB entry points
-info](https://github.com/numenta/NAB/wiki#nab-entry-points). Competitive
+info](https://github.com/numenta/NAB/wiki/NAB-Entry-Points). Competitive
 results tied to open source code will be posted on the
 [Scoreboard](https://github.com/numenta/NAB#scoreboard). Let us know about
 your work by emailing us at [nab@numenta.org](mailto:nab@numenta.org) or
@@ -128,7 +128,7 @@ officially supported.
 
 You need to manually install the following:
 
-- [Python 3](https://www.python.org/download/)
+- [Python 3.7](https://www.python.org/download/)
 - [pip](https://pip.pypa.io/en/latest/installing.html)
 - [NumPy](http://www.numpy.org/)
 
@@ -175,7 +175,7 @@ subdirectory. Please see the README files in those locations.
 `scripts` directory for `scripts/plot.py`
 
 1. If you have your own algorithm and want to run the NAB benchmark, please see
-the [NAB Entry Points](https://github.com/numenta/NAB/wiki#nab-entry-diagram)
+the [NAB Entry Points](https://github.com/numenta/NAB/wiki/NAB-Entry-Points)
 section in the wiki. (The easiest option is often to simply run your algorithm
 on the data and output results in the CSV format we specify. Then run the NAB
 scoring algorithm to compute the final scores. This is how we scored the Twitter
