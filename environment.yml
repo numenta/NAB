@@ -16,4 +16,5 @@ dependencies:
   - pip:
     - boto3
     - botocore
-
+    # Install NAB in development mode
+    - -e .
