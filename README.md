@@ -128,39 +128,36 @@ officially supported.
 
 You need to manually install the following:
 
-- [Python 3.7](https://www.python.org/download/)
+- [Python 3.6](https://www.python.org/download/)
 - [pip](https://pip.pypa.io/en/latest/installing.html)
 - [NumPy](http://www.numpy.org/)
 
-##### Download this repository
+#### Download this repository
 
 Use the Github links provided in the right sidebar.
 
-##### Install the Python requirements
+#### Install NAB
 
-    cd NAB
-    (sudo) pip install -r requirements.txt
+##### Pip:
 
-This will install the required modules.
+From inside the checkout directory:
 
-##### Install NAB
-
-Recommended:
-
-	pip install . --user
-
+    pip install -r requirements.txt
+	  pip install . --user
 
 If you want to manage dependency versions yourself, you can skip dependencies
 with:
 
     pip install . --user --no-deps
 
-
 If you are actively working on the code and are familiar with manual
 PYTHONPATH setup:
 
-	pip install -e . --install-option="--prefix=/some/other/path/"
+	  pip install -e . --install-option="--prefix=/some/other/path/"
 
+##### Anaconda:
+
+    conda env create
 
 ### Usage
 
