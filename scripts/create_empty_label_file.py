@@ -46,13 +46,13 @@ def main(args):
 
   corpus = Corpus(args.dataDir)
 
-  empty_labels = {p : [] for p in corpus.dataFiles.keys() if "Known" not in p}
+  empty_labels = {p : [] for p in list(corpus.dataFiles.keys()) if "Known" not in p}
 
   with open(args.labelFile, "w") as outFile:
     outFile.write(json.dumps(empty_labels,
              sort_keys=True, indent=4, separators=(',', ': ')))
 
-  print "Empty label file written to",args.labelFile
+  print("Empty label file written to",args.labelFile)
 
 
 if __name__ == "__main__":

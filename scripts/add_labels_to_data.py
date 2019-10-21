@@ -49,7 +49,7 @@ def main(args):
   corpusLabel.getEverything()
 
   columnData = {}
-  for relativePath in corpusLabel.labels.keys():
+  for relativePath in list(corpusLabel.labels.keys()):
     columnData[relativePath] = pandas.Series(
       corpusLabel.labels[relativePath]["label"])
 
@@ -57,7 +57,7 @@ def main(args):
 
   corpus.copy(newRoot=args.destDir)
 
-  print "Done adding labels!"
+  print("Done adding labels!")
 
 
 if __name__ == "__main__":

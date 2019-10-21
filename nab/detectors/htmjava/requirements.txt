@@ -1,0 +1,3 @@
+nupic==1.0.5
+pandas==0.20.3
+simplejson==3.11.1

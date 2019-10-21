@@ -18,6 +18,7 @@
 # http://numenta.org/licenses/
 # ----------------------------------------------------------------------
 
+from functools import cmp_to_key
 from nab.detectors.context_ose.context_operator import ContextOperator
 
 class ContextualAnomalyDetectorOSE(object):
@@ -90,7 +91,7 @@ class ContextualAnomalyDetectorOSE(object):
     else :
       percentSelectedContextActive = 0.0
 
-    srtAContexts = sorted(activeContexts, cmp=aContextsCMP)
+    srtAContexts = sorted(activeContexts, key=lambda x: (x[1], x[2], x[3]))
     activeNeurons = [ cInf[0] for cInf in srtAContexts[-self.maxActNeurons:] ]
 
     currNeurFacts = set([ 2 ** 31 + fact for fact in activeNeurons ])
@@ -136,12 +137,3 @@ class ContextualAnomalyDetectorOSE(object):
     self.aScoresHistory.append(currentAnomalyScore)
 
     return returnedAnomalyScore
-
-
-def aContextsCMP(x, y):
-  if cmp(x[1], y[1]) !=0 :
-    return cmp(x[1], y[1])
-  elif cmp(x[2], y[2]) !=0 :
-    return cmp(x[2], y[2])
-  else :
-    return cmp(x[3], y[3])

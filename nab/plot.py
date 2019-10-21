@@ -33,7 +33,7 @@ import plotly.offline
 import plotly.plotly
 
 from plotly.graph_objs import (
-    Bar, Data, Figure, Layout, Line, Margin, Marker, Scatter, XAxis, YAxis)
+    Bar, Figure, Layout, Line, Margin, Marker, Scatter)
 
 try:
   import simplejson as json
@@ -137,7 +137,7 @@ class PlotNAB(object):
     return Scatter(x=data["timestamp"][mask],
                    y=data["value"][mask],
                    name="value",
-                   line=Line(
+                   line=dict(
                      width=1.5
                    ),
                    showlegend=False)
@@ -184,7 +184,7 @@ class PlotNAB(object):
                    mode="markers",
                    name="Ground Truth Anomaly",
                    text=["Anomalous Instance"],
-                   marker=Marker(
+                   marker=dict(
                      color="rgb(200, 20, 20)",
                      size=10,
                      symbol=MARKERS[0]
@@ -218,7 +218,7 @@ class PlotNAB(object):
     return Bar(x=x,
                y=y,
                name="Anomaly Window",
-               marker=Marker(
+               marker=dict(
                  color="rgb(220, 100, 100)"
                ),
                opacity=0.3)
@@ -239,7 +239,7 @@ class PlotNAB(object):
     return Bar(x=x,
                y=y,
                name="Probationary Period",
-               marker=Marker(
+               marker=dict(
                  color="rgb(0, 0, 200)"
                ),
                opacity=0.2)
@@ -255,14 +255,12 @@ class PlotNAB(object):
         "showlegend": False,
         "width": width,
         "height": height,
-        "xaxis": XAxis(
+        "xaxis": dict(
             title=xLabel,
         ),
-        "yaxis": YAxis(
+        "yaxis": dict(
             title=yLabel,
             domain=[0, 1],
-            autorange=True,
-            autotick=True,
         ),
         "barmode": "stack",
         "bargap": 0}
@@ -345,14 +343,13 @@ class PlotNAB(object):
     if withProbation:
       traces.append(self._addProbation())
 
-    # Create plotly Data and Layout objects:
-    data = Data(traces)
+    # Create plotly Layout object:
     layout = self._createLayout("Anomaly Detections for " + self.dataName)
 
     # Query plotly
-    fig = Figure(data=data, layout=layout)
+    fig = Figure(data=traces, layout=layout)
     plot_url = self.py.plot(fig)
-    print "Detections plot URL: ", plot_url
+    print("Detections plot URL: ", plot_url)
 
     return plot_url
 
@@ -408,12 +405,11 @@ class PlotNAB(object):
     if withProbation:
       traces.append(self._addProbation(start=start, end=end))
 
-    # Create plotly Data and Layout objects:
-    data = Data(traces)
+    # Create plotly Layout object:
     layout = self._createLayout(self.dataName, xLabel=xLabel, yLabel=yLabel, fontSize=fontSize, width=width, height=height)
 
     # Query plotly
-    fig = Figure(data=data, layout=layout)
+    fig = Figure(data=traces, layout=layout)
     if plotPath is None:
       # We temporarily switch to a temp directory to avoid overwriting the
       # previous plot when in offline mode.
@@ -423,7 +419,7 @@ class PlotNAB(object):
       try:
         os.chdir(tempDir)
         plotPath = self.py.plot(fig)
-        print "Data plot URL: ", plotPath
+        print("Data plot URL: ", plotPath)
       finally:
         os.chdir(cwd)
     else:
@@ -470,11 +466,11 @@ class PlotNAB(object):
                       mode="markers",
                       name=name,
                       text=["anomalous data"],
-                      marker=Marker(
+                      marker=dict(
                         color="rgb(200, 20, 20)",
                         size=15.0,
                         symbol=symbol,
-                        line=Line(
+                        line=dict(
                           color="rgb(200, 20, 20)",
                           width=2
                         )
@@ -485,11 +481,11 @@ class PlotNAB(object):
                       mode="markers",
                       name=name,
                       text=["anomalous data"],
-                      marker=Marker(
+                      marker=dict(
                         color="rgb(20, 200, 20)",
                         size=15.0,
                         symbol=symbol,
-                        line=Line(
+                        line=dict(
                           color="rgb(20, 200, 20)",
                           width=2
                         )
@@ -536,7 +532,7 @@ def main():
   parser.add_argument("file")
   args = parser.parse_args()
   if args.offline and args.output is not None:
-    print "Plots cannot be saved to file in offline mode."
+    print("Plots cannot be saved to file in offline mode.")
     sys.exit(-1)
   path = args.file
   title = args.title

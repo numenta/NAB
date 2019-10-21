@@ -77,7 +77,7 @@ def updateFinalResults(newResults, resultsFilePath):
   """
   results = getOldDict(resultsFilePath)
 
-  for detector, score in newResults.iteritems():
+  for detector, score in newResults.items():
     results[detector] = score
 
   writeJSON(resultsFilePath, results)
@@ -101,13 +101,13 @@ def updateThresholds(newThresholds, thresholdsFilePath):
   """
   oldThresholds = getOldDict(thresholdsFilePath)
 
-  for detector, profileDictionary in newThresholds.iteritems():
+  for detector, profileDictionary in newThresholds.items():
     if detector not in oldThresholds:
       # add an entry for a new detector
       oldThresholds[detector] = newThresholds[detector]
       continue
 
-    for profileName, data in profileDictionary.iteritems():
+    for profileName, data in profileDictionary.items():
       if profileName not in oldThresholds[detector]:
         # add an entry for a new scoring profile under this detector
         oldThresholds[detector][profileName] = data
@@ -122,7 +122,7 @@ def updateThresholds(newThresholds, thresholdsFilePath):
 def checkInputs(args):
   """Function that displays a set of arguments and asks to proceed."""
   pprint.pprint(vars(args))
-  inp = raw_input("Proceed? (y/n): ")
+  inp = input("Proceed? (y/n): ")
 
   if inp == 'y':
     return True
@@ -130,7 +130,7 @@ def checkInputs(args):
   if inp == 'n':
     return False
 
-  print "Incorrect input given\n"
+  print("Incorrect input given\n")
   return checkInputs(args)
 
 
@@ -232,7 +232,7 @@ def osPathSplit(path, debug=False):
   while True:
     newpath, tail = os.path.split(path)
     if debug:
-      print repr(path), (newpath, tail)
+      print(repr(path), (newpath, tail))
     if newpath == path:
       assert not tail
       if path:
@@ -274,7 +274,7 @@ def flattenDict(dictionary, files={}, head=""):
 
   @param head       (string)  Prefix to each key
   """
-  for key in dictionary.keys():
+  for key in list(dictionary.keys()):
     concat = head + "/" + key if head != "" else key
     if type(dictionary[key]) is dict:
       flattenDict(dictionary[key], files, concat)
@@ -312,7 +312,7 @@ def recur(function, value, n):
   @param n        (int)         Number of times to recurse.
   """
   if n < 0 or int(n) != n:
-    print "incorrect input"
+    print("incorrect input")
     sys.exit()
 
   elif n == 0:

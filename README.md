@@ -1,28 +1,31 @@
-The Numenta Anomaly Benchmark [![Build Status](https://travis-ci.org/numenta/NAB.svg?branch=master)](https://travis-ci.org/numenta/NAB)
+The Numenta Anomaly Benchmark (NAB) [![Build Status](https://travis-ci.org/numenta/NAB.svg?branch=master)](https://travis-ci.org/numenta/NAB)
 -----------------------------
 
-Welcome. This repository contains the data and scripts comprising the Numenta
-Anomaly Benchmark (NAB). NAB is a novel benchmark for evaluating
+Welcome. This repository contains the data and scripts which comprise the
+Numenta Anomaly Benchmark (NAB) v1.1. NAB is a novel benchmark for evaluating
 algorithms for anomaly detection in streaming, real-time applications. It is
-comprised of over 50 labeled real-world and artificial timeseries data files plus a
-novel scoring mechanism designed for real-time applications.
+composed of over 50 labeled real-world and artificial timeseries data files
+plus a novel scoring mechanism designed for real-time applications.
 
-Included are the tools to allow you to easily run NAB on your
-own anomaly detection algorithms; see the [NAB entry points
-info](https://github.com/numenta/NAB/wiki#nab-entry-points). Competitive results
-tied to open source code will be posted in the wiki on the
-[Scoreboard](https://github.com/numenta/NAB/wiki/NAB%20Scoreboard). Let us know
-about your work by emailing us at [nab@numenta.org](mailto:nab@numenta.org) or
+Included are the tools to allow you to run NAB on your own anomaly detection
+algorithms; see the [NAB entry points
+info](https://github.com/numenta/NAB/wiki/NAB-Entry-Points). Competitive
+results tied to open source code will be posted on the
+[Scoreboard](https://github.com/numenta/NAB#scoreboard). Let us know about
+your work by emailing us at [nab@numenta.org](mailto:nab@numenta.org) or
 submitting a pull request.
 
-This readme is a brief overview and contains details for setting up NAB. Please
-refer to the following for more details about NAB scoring, data, and motivation:
+This readme is a brief overview and contains details for setting up NAB.
+Please refer to the following for more details about NAB scoring, data, and
+motivation:
 
 - [Unsupervised real-time anomaly detection for streaming data](http://www.sciencedirect.com/science/article/pii/S0925231217309864) - The main paper, covering NAB and Numenta's HTM-based anomaly detection algorithm
 - [NAB Whitepaper](https://github.com/numenta/NAB/wiki#nab-whitepaper)
 - [Evaluating Real-time Anomaly Detection Algorithms](http://arxiv.org/abs/1510.03336) - Original publication of NAB
 
-We encourage you to publish your results on running NAB, and share them with us at [nab@numenta.org](nab@numenta.org). Please cite the following publication when referring to NAB:
+We encourage you to publish your results on running NAB, and share them with
+us at [nab@numenta.org](nab@numenta.org). Please cite the following
+publication when referring to NAB:
 
 Ahmad, S., Lavin, A., Purdy, S., & Agha, Z. (2017). Unsupervised real-time
 anomaly detection for streaming data. Neurocomputing, Available online 2 June
@@ -59,27 +62,29 @@ The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the 
 
 \**** We have included the results for RCF using an [AWS proprietary implementation](https://docs.aws.amazon.com/kinesisanalytics/latest/sqlref/sqlrf-random-cut-forest.html); even though the algorithm code is not open source, the [algorithm description](http://proceedings.mlr.press/v48/guha16.pdf) is public and the code we used to run [NAB on RCF](nab/detectors/random_cut_forest) is open source.
 
-
 &dagger; Algorithm was an entry to the [2016 NAB Competition](http://numenta.com/blog/2016/08/10/numenta-anomaly-benchmark-nab-competition-2016-winners/).
 
-Please see [the wiki section on contributing algorithms](https://github.com/numenta/NAB/wiki/NAB-Contributions-Criteria#anomaly-detection-algorithms) for discussion on posting algorithms to the scoreboard.
+Please see [the wiki section on contributing
+algorithms](https://github.com/numenta/NAB/wiki/NAB-Contributions-Criteria#anomaly-detection-algorithms)
+for discussion on posting algorithms to the scoreboard.
 
 #### Corpus
 
-The NAB corpus of 58 timeseries data files is designed to provide data for research
-in streaming anomaly detection. It is comprised of both
-real-world and artifical timeseries data containing labeled anomalous periods of behavior.
+The NAB corpus of 58 timeseries data files is designed to provide data for
+research in streaming anomaly detection. It is comprised of both real-world
+and artifical timeseries data containing labeled anomalous periods of
+behavior.
 
 The majority of the data is real-world from a variety of sources such as AWS
 server metrics, Twitter volume, advertisement clicking metrics, traffic data,
-and more. All data is included in the repository, with more details in the [data
-readme](https://github.com/numenta/NAB/tree/master/data). We are in the process
-of adding more data, and actively searching for more data. Please contact us at
-[nab@numenta.org](mailto:nab@numenta.org) if you have similar data (ideally with
-known anomalies) that you would like to see incorporated into NAB.
+and more. All data is included in the repository, with more details in the
+[data readme](https://github.com/numenta/NAB/tree/master/data). Please
+contact us at [nab@numenta.org](mailto:nab@numenta.org) if you have similar
+data (ideally with known anomalies) that you would like to see incorporated
+into NAB.
 
-The NAB version will be updated whenever new data (and corresponding labels) is
-added to the corpus; NAB is currently in v1.0.
+The NAB version will be updated whenever new data (and corresponding labels)
+is added to the corpus or other significant changes are made.
 
 #### Additional Scores
 
@@ -96,8 +101,6 @@ run without likelihood, set the variable `self.useLikelihood` in
 to `False`.
 
 
-
-
 | Detector      |Standard Profile | Reward Low FP | Reward Low FN |
 |---------------|---------|------------------|---------------|
 | Numenta HTMusing NuPIC v0.5.6*   | 70.1             | 63.1       | 74.3          |
@@ -110,66 +113,57 @@ to `False`.
 
 &dagger; Algorithm was an entry to the [2016 NAB Competition](http://numenta.com/blog/2016/08/10/numenta-anomaly-benchmark-nab-competition-2016-winners/).
 
-Installing NAB 1.0
-------------------
+Installing NAB
+--------------
 
 ### Supported Platforms
 
 - OSX 10.9 and higher
 - Amazon Linux (via AMI)
 
-Other platforms may work but have not been tested.
-
+Other platforms may work. NAB has been tested on Windows 10 but is not
+officially supported.
 
 ### Initial requirements
 
 You need to manually install the following:
 
-- [Python 2.7](https://www.python.org/download/)
+- [Python 3.6](https://www.python.org/download/)
 - [pip](https://pip.pypa.io/en/latest/installing.html)
 - [NumPy](http://www.numpy.org/)
-- [NuPIC](http://www.github.com/numenta/nupic) (only required if running the Numenta detector)
 
-##### Download this repository
+#### Download this repository
 
 Use the Github links provided in the right sidebar.
 
-##### Install the Python requirements
+#### Install NAB
 
-    cd NAB
-    (sudo) pip install -r requirements.txt
+##### Pip:
 
-This will install the required modules.
+From inside the checkout directory:
 
-##### Install NAB
-
-Recommended:
-
-	pip install . --user
-
-
-> Note: If NuPIC is not already installed, the version specified in
-`NAB/requirements.txt` will be installed. If NuPIC is already installed, it
- will not be re-installed.
-
+    pip install -r requirements.txt
+	  pip install . --user
 
 If you want to manage dependency versions yourself, you can skip dependencies
 with:
 
     pip install . --user --no-deps
 
-
 If you are actively working on the code and are familiar with manual
 PYTHONPATH setup:
 
-	pip install -e . --install-option="--prefix=/some/other/path/"
+	  pip install -e . --install-option="--prefix=/some/other/path/"
 
+##### Anaconda:
+
+    conda env create
 
 ### Usage
 
 There are several different use cases for NAB:
 
-1. If you just want to look at all the results we reported in the paper, there
+1. If you want to look at all the results we reported in the paper, there
 is no need to run anything. All the data files are in the data subdirectory and
 all individual detections for reported algorithms are checked in to the results
 subdirectory. Please see the README files in those locations.
@@ -178,31 +172,28 @@ subdirectory. Please see the README files in those locations.
 `scripts` directory for `scripts/plot.py`
 
 1. If you have your own algorithm and want to run the NAB benchmark, please see
-the [NAB Entry Points](https://github.com/numenta/NAB/wiki#nab-entry-diagram)
+the [NAB Entry Points](https://github.com/numenta/NAB/wiki/NAB-Entry-Points)
 section in the wiki. (The easiest option is often to simply run your algorithm
 on the data and output results in the CSV format we specify. Then run the NAB
 scoring algorithm to compute the final scores. This is how we scored the Twitter
 algorithm, which is written in R.)
 
-1. If you are a NuPIC user and just want to run the Numenta HTM detector follow
+1. If you are a NuPIC user and want to run the Numenta HTM detector follow
 the directions below to "Run HTM with NAB".
 
 1. If you want to run everything including the bundled Skyline detector follow
 the directions below to "Run full NAB". Note that this will take hours as the
 Skyline code is quite slow.
 
-1. If you just want to run NAB on one or more data files (e.g. for debugging)
+1. If you want to run NAB on one or more data files (e.g. for debugging)
 follow the directions below to "Run a subset of NAB".
 
-
-##### Run HTM with NAB
-
-First make sure NuPIC is installed and working properly. Then:
+##### Run a detector on NAB
 
     cd /path/to/nab
-    python run.py -d numenta --detect --optimize --score --normalize
+    python run.py -d expose --detect --optimize --score --normalize
 
-This will run the Numenta detector only and produce normalized scores. Note that
+This will run the EXPoSE detector only and produce normalized scores. Note that
 by default it tries to use all the cores on your machine. The above command
 should take about 20-30 minutes on a current powerful laptop with 4-8 cores.
 For debugging you can run subsets of the data files by modifying and specifying
@@ -212,27 +203,27 @@ specific label files (see section below). Please type:
 
 to see all the options.
 
-Note that to replicate results exactly as in the paper you may need to checkout
-the specific version of NuPIC (and associated nupic.core) that is noted in the
-[Scoreboard](https://github.com/numenta/NAB/wiki/NAB%20Scoreboard):
+##### Running non-Python 3 detectors
 
-    cd /path/to/nupic/
-    git checkout -b nab {TAG NAME}
-    cd /path/to/nupic.core/
-    git checkout -b nab {TAG NAME}
+NAB is a Python 3 framework, and can only integrate Python 3 detectors. The following detectors must be run outside the NAB runtime and integrated for scoring in a later step. These detectors include:
+
+    numenta (Python 2)
+    numentaTM (Python 2)
+    htmjava (Python 2 / Java)
+    twitterADVec (R)
+    random_cut_forest (AWS Kinesis Analytics)
+
+Instructions on how to run the each detector in their native environment can be found in the `nab/detectors/${name}` directory.
 
 ##### Run full NAB
 
     cd /path/to/nab
     python run.py
 
-This will run everything and produce results files for all anomaly detection
-methods. Several algorithms are included in the repo, such as the Numenta
-HTM anomaly detection method, as well as methods from the [Etsy
-Skyline](https://github.com/etsy/skyline) anomaly detection library, a sliding
-window detector, Bayes Changepoint, and so on. This will also pass those results
-files to the scoring script to generate final NAB scores. **Note**: this option
-will take many many hours to run.
+This will run all detectors available in this repository and produce results
+files. To run non-Python3 detectors see "Running non-Python3 detectors" above.
+
+**Note**: this option may take many many hours to run.
 
 ##### Run subset of NAB data files
 
@@ -248,7 +239,7 @@ are interested in.
 NAB on a subset of labels:
 
     cd /path/to/nab
-    python run.py -d numenta --detect --windowsFile labels/combined_windows_tiny.json
+    python run.py -d expose --detect --windowsFile labels/combined_windows_tiny.json
 
 This will run the `detect` phase of NAB on the data files specified in the above
 JSON file. Note that scoring and normalization are not supported with this
