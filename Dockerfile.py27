@@ -1,4 +1,4 @@
-FROM numenta/nupic
+FROM numenta/nupic:1.0.5
 
 # Plus Java so we can run HTM.Java as well
 RUN wget https://d3pxv6yz143wms.cloudfront.net/8.212.04.2/java-1.8.0-amazon-corretto-jdk_8.212.04-2_amd64.deb && \
