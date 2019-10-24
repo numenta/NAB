@@ -1,4 +1,6 @@
 pandas==0.20.3
 simplejson==3.11.1
 boto3==1.9.134
-scikit-learn==0.21.1
+scikit-learn==0.21.1; python_version >= '3.5'
+scikit-learn==0.20.1; python_version < '3.5'
+plotly==2.0.0
