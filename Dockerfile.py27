@@ -11,6 +11,8 @@ ENV PATH $JAVA_HOME/bin:$PATH
 ENV NAB /usr/local/src/nab
 
 ADD . $NAB
+WORKDIR $NAB
+RUN python -m pip install -e .
 
 # Run Numenta detectors
 RUN echo "Running numenta detectors in Python 2.7..."
