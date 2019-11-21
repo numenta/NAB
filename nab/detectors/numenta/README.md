@@ -13,6 +13,12 @@ the main repository for the following detectors:
 
 ## Installation
 
+### Docker
+
+Both these detectors are also provided within a docker image, available with `docker pull numenta/nab:py2.7`.
+
+### Assumptions
+
 We assume you have a working version of Python 3 installed as your default Python.
 If your default system Python is still Python 2 you can skip the virtual environment
 creation below.

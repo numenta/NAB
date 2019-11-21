@@ -13,6 +13,10 @@ the main repository for the following detectors:
 
 ## Installation
 
+### Docker
+
+This detector is also provided within a docker image, available with `docker pull numenta/nab:py2.7`.
+
 ### Java
 
 First make sure you have __java 8__ installed. You should see a version number matchin 1.8.XXXX.

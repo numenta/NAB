@@ -213,7 +213,7 @@ NAB is a Python 3 framework, and can only integrate Python 3 detectors. The foll
     twitterADVec (R)
     random_cut_forest (AWS Kinesis Analytics)
 
-Instructions on how to run the each detector in their native environment can be found in the `nab/detectors/${name}` directory.
+Instructions on how to run the each detector in their native environment can be found in the `nab/detectors/${name}` directory. The Python 2 HTM detectors are also provided within a docker image, available with `docker pull numenta/nab:py2.7`.
 
 ##### Run full NAB
 
