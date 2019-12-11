@@ -1,4 +1,4 @@
-The Numenta Anomaly Benchmark (NAB) [![Build Status](https://travis-ci.org/numenta/NAB.svg?branch=master)](https://travis-ci.org/numenta/NAB)
+The Numenta Anomaly Benchmark (NAB) [![Build Status](https://travis-ci.org/numenta/NAB.svg?branch=master)](https://travis-ci.org/numenta/NAB) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1040335.svg)](https://doi.org/10.5281/zenodo.1040335)
 -----------------------------
 
 Welcome. This repository contains the data and scripts which comprise the
