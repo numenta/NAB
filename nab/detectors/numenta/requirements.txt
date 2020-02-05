@@ -1,0 +1,4 @@
+nupic==1.0.5
+numpy<=1.16 #latest to support py2
+pandas==0.20.3
+simplejson==3.11.1

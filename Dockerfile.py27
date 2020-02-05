@@ -1,0 +1,28 @@
+FROM numenta/nupic:1.0.5
+
+# Plus Java so we can run HTM.Java as well
+RUN wget https://d3pxv6yz143wms.cloudfront.net/8.212.04.2/java-1.8.0-amazon-corretto-jdk_8.212.04-2_amd64.deb && \
+    apt-get update &&  apt-get install java-common && apt-get install -y --no-install-recommends apt-utils && \
+    dpkg --install java-1.8.0-amazon-corretto-jdk_8.212.04-2_amd64.deb
+
+ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-amazon-corretto
+ENV PATH $JAVA_HOME/bin:$PATH
+
+ENV NAB /usr/local/src/nab
+
+ADD . $NAB
+WORKDIR $NAB
+RUN python -m pip install -e .
+
+# Run Numenta detectors
+RUN echo "Running numenta detectors in Python 2.7..."
+WORKDIR $NAB/nab/detectors/numenta
+RUN python -m pip install -r requirements.txt
+RUN python run.py --skipConfirmation
+
+# Run HTM.Java detector
+RUN echo "Running HTM.Java detector in Java 8 / Python 2.7..."
+WORKDIR $NAB/nab/detectors/htmjava/nab/detectors/htmjava
+RUN ./gradlew clean build
+WORKDIR $NAB/nab/detectors/htmjava
+RUN python run.py --skipConfirmation

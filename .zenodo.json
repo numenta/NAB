@@ -1,3 +1,4 @@
+{
     "description": "The Numenta Anomaly Benchmark",
     "access_right": "open",
     "license": {
@@ -81,5 +82,5 @@
         {
             "name": "breznak"
         }
-    ],
+    ]
 }

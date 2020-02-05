@@ -269,7 +269,7 @@ class TruePositiveTest(unittest.TestCase):
 
     # TP score + FP score + 1 should be very close to 0; the 1 is added to
     # account for the subsequent FN contribution.
-    self.assertAlmostEquals(matchingRow1.score + matchingRow2.score + 1, 0.0, 3)
+    self.assertAlmostEqual(matchingRow1.score + matchingRow2.score + 1, 0.0, 3)
     self._checkCounts(matchingRow1, length-windowSize*numWindows, 1, 0,
       windowSize*numWindows-1)
     self._checkCounts(matchingRow2, length-windowSize*numWindows-1, 0, 1,

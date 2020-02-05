@@ -105,7 +105,7 @@ class CorpusLabelTest(unittest.TestCase):
 
     corpusLabel = nab.labeler.CorpusLabel(self.tempCorpusLabelPath, corpus)
 
-    for relativePath, lab in corpusLabel.labels.iteritems():
+    for relativePath, lab in corpusLabel.labels.items():
       windows = corpusLabel.windows[relativePath]
 
       for row in lab[lab["label"] == 1].iterrows():
@@ -151,7 +151,7 @@ class CorpusLabelTest(unittest.TestCase):
 
     corpusLabel = nab.labeler.CorpusLabel(self.tempCorpusLabelPath, corpus)
 
-    for relativePath, l in corpusLabel.labels.iteritems():
+    for relativePath, l in corpusLabel.labels.items():
       windows = corpusLabel.windows[relativePath]
 
       for t, lab in corpusLabel.labels["test_data_file.csv"].values:

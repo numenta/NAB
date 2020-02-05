@@ -157,7 +157,7 @@ class Corpus(object):
                                   modificiations or not.
     """
 
-    for relativePath in self.dataFiles.keys():
+    for relativePath in list(self.dataFiles.keys()):
       self.dataFiles[relativePath].modifyData(
         columnName, data[relativePath], write=write)
 
@@ -172,7 +172,7 @@ class Corpus(object):
     @param write        (boolean) Flag to decide whether to write corpus
                                   modificiations or not.
     """
-    for relativePath in self.dataFiles.keys():
+    for relativePath in list(self.dataFiles.keys()):
       self.dataFiles[relativePath].modifyData(columnName, write=write)
 
   def copy(self, newRoot=None):
@@ -184,13 +184,13 @@ class Corpus(object):
     if newRoot[-1] != os.path.sep:
       newRoot += os.path.sep
     if os.path.isdir(newRoot):
-      print "directory already exists"
+      print("directory already exists")
       return None
     else:
       createPath(newRoot)
 
     newCorpus = Corpus(newRoot)
-    for relativePath in self.dataFiles.keys():
+    for relativePath in list(self.dataFiles.keys()):
       newCorpus.addDataSet(relativePath, self.dataFiles[relativePath])
     return newCorpus
 
@@ -224,7 +224,7 @@ class Corpus(object):
                                       datafile.
     """
     ans = {}
-    for relativePath in self.dataFiles.keys():
+    for relativePath in list(self.dataFiles.keys()):
       if query in relativePath:
         ans[relativePath] = self.dataFiles[relativePath]
     return ans

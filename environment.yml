@@ -1,0 +1,20 @@
+name: NAB
+channels:
+  - defaults
+  - conda-forge
+
+dependencies:
+  - python=3.6
+  - pip
+
+  # See requirements.txt
+  - pandas==0.20.3
+  - simplejson==3.11.1
+  - boto3==1.9.134
+  - scikit-learn==0.21.1
+
+  - pip:
+    - boto3
+    - botocore
+    # Install NAB in development mode
+    - -e .

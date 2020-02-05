@@ -106,14 +106,14 @@ class Runner(object):
                                         detector name and its corresponding
                                         class constructor.
     """
-    print "\nRunning detection step"
+    print("\nRunning detection step")
 
     count = 0
     args = []
-    for detectorName, detectorConstructor in detectors.iteritems():
-      for relativePath, dataSet in self.corpus.dataFiles.iteritems():
+    for detectorName, detectorConstructor in detectors.items():
+      for relativePath, dataSet in self.corpus.dataFiles.items():
 
-        if self.corpusLabel.labels.has_key(relativePath):
+        if relativePath in self.corpusLabel.labels:
           args.append(
             (
               count,
@@ -131,7 +131,7 @@ class Runner(object):
 
     # Using `map_async` instead of `map` so interrupts are properly handled.
     # See: http://stackoverflow.com/a/1408476
-    self.pool.map_async(detectDataSet, args).get(99999999)
+    self.pool.map_async(detectDataSet, args).get(999999)
 
 
   def optimize(self, detectorNames):
@@ -144,7 +144,7 @@ class Runner(object):
                                   dictionary containing the score and the
                                   threshold used to obtained that score.
     """
-    print "\nRunning optimize step"
+    print("\nRunning optimize step")
 
     scoreFlag = False
     thresholds = {}
@@ -155,7 +155,7 @@ class Runner(object):
 
       thresholds[detectorName] = {}
 
-      for profileName, profile in self.profiles.iteritems():
+      for profileName, profile in self.profiles.items():
         thresholds[detectorName][profileName] = optimizeThreshold(
           (detectorName,
            profile["CostMatrix"],
@@ -183,7 +183,7 @@ class Runner(object):
                                     another dictionary containing the score and
                                     the threshold used to obtained that score.
     """
-    print "\nRunning scoring step"
+    print("\nRunning scoring step")
 
     scoreFlag = True
     baselines = {}
@@ -193,7 +193,7 @@ class Runner(object):
       resultsDetectorDir = os.path.join(self.resultsDir, detectorName)
       resultsCorpus = Corpus(resultsDetectorDir)
 
-      for profileName, profile in self.profiles.iteritems():
+      for profileName, profile in self.profiles.items():
 
         threshold = thresholds[detectorName][profileName]["threshold"]
         resultsDF = scoreCorpus(threshold,
@@ -211,8 +211,8 @@ class Runner(object):
           (detectorName, profileName))
 
         resultsDF.to_csv(scorePath, index=False)
-        print "%s detector benchmark scores written to %s" %\
-          (detectorName, scorePath)
+        print("%s detector benchmark scores written to %s" %\
+          (detectorName, scorePath))
         self.resultsFiles.append(scorePath)
 
 
@@ -231,7 +231,7 @@ class Runner(object):
 
     Note the results CSVs still contain the original scores, not normalized.
     """
-    print "\nRunning score normalization step"
+    print("\nRunning score normalization step")
 
     # Get baseline scores for each application profile.
     nullDir = os.path.join(self.resultsDir, "null")
@@ -240,7 +240,7 @@ class Runner(object):
                     "run the null detector before normalizing scores.")
 
     baselines = {}
-    for profileName, _ in self.profiles.iteritems():
+    for profileName, _ in self.profiles.items():
       fileName = os.path.join(nullDir,
                               "null_" + profileName + "_scores.csv")
       with open(fileName) as f:
@@ -251,13 +251,13 @@ class Runner(object):
     with open(self.labelPath, "rb") as f:
       labelsDict = json.load(f)
     tpCount = 0
-    for labels in labelsDict.values():
+    for labels in list(labelsDict.values()):
       tpCount += len(labels)
 
     # Normalize the score from each results file.
     finalResults = {}
     for resultsFile in self.resultsFiles:
-      profileName = [k for k in baselines.keys() if k in resultsFile][0]
+      profileName = [k for k in list(baselines.keys()) if k in resultsFile][0]
       base = baselines[profileName]
 
       with open(resultsFile) as f:
@@ -275,10 +275,10 @@ class Runner(object):
           finalResults[detector] = {}
         finalResults[detector][profile] = score
 
-      print ("Final score for \'%s\' detector on \'%s\' profile = %.2f"
-             % (detector, profile, score))
+      print(("Final score for \'%s\' detector on \'%s\' profile = %.2f"
+             % (detector, profile, score)))
 
     resultsPath = os.path.join(self.resultsDir, "final_results.json")
     updateFinalResults(finalResults, resultsPath)
-    print "Final scores have been written to %s." % resultsPath
+    print("Final scores have been written to %s." % resultsPath)
 

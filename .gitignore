@@ -1,9 +1,11 @@
-
+*.bak
 .DS_Store
 *.pyc
 
 data_test/
 deprecated/
+build/
+dist/
 nab.egg-info/
 .idea/
 .project
@@ -13,5 +15,5 @@ nab/detectors/htmjava/.pydevproject
 scripts/.ipynb_checkpoints/
 
 # Generated files
-
+plot_*
 *resultsSummary*
