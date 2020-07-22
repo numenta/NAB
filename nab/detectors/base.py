@@ -106,6 +106,13 @@ class AnomalyDetector(object, metaclass=abc.ABCMeta):
 
       detectorValues = self.handleRecord(inputData)
 
+      # Make sure anomalyScore is between 0 and 1
+      if not 0 <= detectorValues[0] <= 1:
+        raise ValueError(
+          f"anomalyScore must be a number between 0 and 1. "
+          f"Please verify if '{self.handleRecord.__qualname__}' method is "
+          f"returning a value between 0 and 1")
+
       outputRow = list(row) + list(detectorValues)
 
       rows.append(outputRow)
