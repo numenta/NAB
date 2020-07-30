@@ -66,6 +66,7 @@ class ExposeDetector(AnomalyDetector):
     # product, is the likelihood of data point being normal. Resulting
     # anomaly scores are in the range of -0.02 to 1.02.
     anomalyScore = numpy.asscalar(1 - numpy.inner(inputFeature, exposeModel))
+    anomalyScore = (anomalyScore + 0.02) / 1.04
     self.timestep += 1
 
     return [anomalyScore]
