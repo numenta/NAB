@@ -68,5 +68,15 @@
         "reward_low_FN_rate": 47.4100271583046,
         "reward_low_FP_rate": 20.86798582474138,
         "standard": 39.649523496077585
+    },
+    "Fixed10": {
+        "reward_low_FN_rate": 98.88138738072666,
+        "reward_low_FP_rate": 97.08617926056505,
+        "standard": 98.32208107109
+    },
+    "Variable50": {
+        "reward_low_FN_rate": 97.72692991840437,
+        "reward_low_FP_rate": 93.62515435484464,
+        "standard": 96.59039487760656
     }
 }
