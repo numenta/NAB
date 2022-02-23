@@ -8,8 +8,7 @@ composed of over 50 labeled real-world and artificial timeseries data files
 plus a novel scoring mechanism designed for real-time applications.
 
 Included are the tools to allow you to run NAB on your own anomaly detection
-algorithms; see the [NAB entry points
-info](https://github.com/numenta/NAB/wiki/NAB-Entry-Points). Competitive
+algorithms; see the [NAB entry points info](https://github.com/numenta/NAB/wiki/NAB-Entry-Points). Competitive
 results tied to open source code will be posted on the
 [Scoreboard](https://github.com/numenta/NAB#scoreboard). Let us know about
 your work by emailing us at [nab@numenta.org](mailto:nab@numenta.org) or
@@ -38,6 +37,7 @@ The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the 
 | Detector      | Standard Profile | Reward Low FP | Reward Low FN |
 |---------------|------------------|---------------|---------------|
 | Perfect       | 100.0            | 100.0         | 100.0         |
+| [ARTime](https://github.com/markNZed/ARTimeNAB.jl) | 74.9     | 65.2     | 80.4     |
 | [Numenta HTM](https://github.com/numenta/nupic)* | 70.5-69.7     | 62.6-61.7     | 75.2-74.2     |
 | [CAD OSE](https://github.com/smirmik/CAD)&dagger; | 69.9          | 67.0          | 73.2          |
 | [earthgecko Skyline](https://github.com/earthgecko/skyline) | 58.2 | 46.2 | 63.9 |

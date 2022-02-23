@@ -1,0 +1,11 @@
+{
+    "julia": "1.7.0",
+    "packages": {
+        "ARTime": {
+            "uuid": "9badb8af-59cb-4d48-a775-3f35cfcfd143",
+            "compat": "~0",
+            "dev": true,
+            "path": "/home/mark/ARTimeNAB.jl"
+        }
+    }
+}

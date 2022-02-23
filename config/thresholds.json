@@ -1,4 +1,18 @@
 {
+    "ARTime": {
+        "reward_low_FN_rate": {
+            "score": 47.66075157860638,
+            "threshold": 0.317486
+        },
+        "reward_low_FP_rate": {
+            "score": 35.1572804170157,
+            "threshold": 0.317585
+        },
+        "standard": {
+            "score": 57.66075157860638,
+            "threshold": 0.317486
+        }
+    },
     "bayesChangePt": {
         "reward_low_FN_rate": {
             "score": -119.7471580442638,

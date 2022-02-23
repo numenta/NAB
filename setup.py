@@ -20,6 +20,9 @@
 
 import os
 from setuptools import setup, find_packages
+import site
+import sys
+site.ENABLE_USER_SITE = "--user" in sys.argv[1:]
 
 REPO_DIR = os.path.dirname(os.path.realpath(__file__))
 
