@@ -4,8 +4,8 @@
         "ARTime": {
             "uuid": "9badb8af-59cb-4d48-a775-3f35cfcfd143",
             "compat": "~0",
-            "dev": true,
-            "path": "/home/mark/ARTimeNAB.jl"
+            "dev": false,
+            "url": "https://github.com/markNZed/ARTimeNAB.jl"
         }
     }
 }
