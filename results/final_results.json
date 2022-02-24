@@ -1,4 +1,9 @@
 {
+    "ARTime": {
+        "reward_low_FN_rate": 80.36228493638114,
+        "reward_low_FP_rate": 65.15400017974811,
+        "standard": 74.85377223215792
+    },
     "contextOSE": {
         "reward_low_FN_rate": 73.18167250416667,
         "reward_low_FP_rate": 66.97713919047413,
@@ -35,9 +40,9 @@
         "standard": 70.10105611943965
     },
     "numentaTM": {
-        "reward_low_FN_rate": 69.185068229060349,
+        "reward_low_FN_rate": 69.18506822906035,
         "reward_low_FP_rate": 56.665308225043105,
-        "standard": 64.553464412543107
+        "standard": 64.55346441254311
     },
     "random": {
         "reward_low_FN_rate": 25.876351314080456,
