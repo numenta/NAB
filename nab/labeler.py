@@ -421,8 +421,8 @@ class LabelCombiner(object):
 
       windows = []
       for a in anomalies:
-        front = max(a - windowLength/2, 0)
-        back = min(a + windowLength/2, length-1)
+        front = int(round(max(a - windowLength/2, 0)))
+        back = int(round(min(a + windowLength/2, length-1)))
 
         windowLimit = [strf(data["timestamp"][front]),
                        strf(data["timestamp"][back])]
