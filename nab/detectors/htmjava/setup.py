@@ -92,7 +92,7 @@ if __name__ == "__main__":
     author_email="nab@numenta.org",
     description=(
       "Numenta Anomaly Benchmark: A benchmark for streaming anomaly prediction"),
-    license="AGPL",
+    license="MIT",
     packages=find_packages(),
     long_description=read("README.md"),
     install_requires=requirements,
