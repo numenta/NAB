@@ -2,7 +2,7 @@
     "description": "The Numenta Anomaly Benchmark",
     "access_right": "open",
     "license": {
-        "id": "AGPL-3.0"
+        "id": "MIT"
     },
     "upload_type": "software",
     "creators": [
