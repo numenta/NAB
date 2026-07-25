@@ -12,6 +12,7 @@ import itertools
 import numpy
 import os
 import pandas
+import numpy as np
 try:
   import simplejson as json
 except ImportError:
@@ -195,7 +196,7 @@ class CorpusLabel(object):
           moreThanT1 = labels[labels["timestamp"] >= t1]
           betweenT1AndT2 = moreThanT1[moreThanT1["timestamp"] <= t2]
           indices = betweenT1AndT2.loc[:,"label"].index
-          labels["label"].values[indices.values] = 1
+          labels.loc[indices, "label"] = 1
 
         self.labels[relativePath] = labels
 

@@ -17,6 +17,7 @@ except ImportError:
 
 from nab.runner import Runner
 from nab.util import (detectorNameToClass, checkInputs)
+from nab.detectors.Sentis.sentis import SentisDetector
 
 
 
@@ -188,6 +189,8 @@ if __name__ == "__main__":
     from nab.detectors.earthgecko_skyline.earthgecko_skyline_detector import EarthgeckoSkylineDetector
   if "ARTime" in args.detectors:
     from nab.detectors.ARTime.ARTime_detector import ARTimeDetector
+  if "sentisExperimental" in args.detectors:
+    from nab.detectors.Sentis.sentis_experimental import SentisExperimentalDetector
 
   if args.skipConfirmation or checkInputs(args):
     main(args)
