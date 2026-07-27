@@ -181,6 +181,20 @@
             "threshold": 0.5
         }
     },
+    "sentis": {
+        "reward_low_FN_rate": {
+            "score": 50.436299186958856,
+            "threshold": 0.9259574867307824
+        },
+        "reward_low_FP_rate": {
+            "score": 30.493516157797952,
+            "threshold": 0.9259574867307824
+        },
+        "standard": {
+            "score": 58.436299186958856,
+            "threshold": 0.9259574867307824
+        }
+    },
     "skyline": {
         "reward_low_FN_rate": {
             "score": -77.20605964639174,

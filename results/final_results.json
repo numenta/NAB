@@ -59,6 +59,11 @@
         "reward_low_FP_rate": 47.598351759844824,
         "standard": 54.64274893469828
     },
+    "sentis": {
+        "reward_low_FN_rate": 81.15985608820654,
+        "reward_low_FP_rate": 63.14375696456803,
+        "standard": 75.18805999437878
+    },
     "skyline": {
         "reward_low_FN_rate": 44.4810173429885,
         "reward_low_FP_rate": 27.08121005969828,
