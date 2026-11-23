@@ -139,6 +139,20 @@
             "threshold": 0.5126953125
         }
     },
+    "omnisim": {
+        "reward_low_FN_rate": {
+            "score": 50.43629918695888,
+            "threshold": 0.925957495496136
+        },
+        "reward_low_FP_rate": {
+            "score": 30.49351615779797,
+            "threshold": 0.925957495496136
+        },
+        "standard": {
+            "score": 58.43629918695888,
+            "threshold": 0.925957495496136
+        }
+    },
     "random": {
         "reward_low_FN_rate": {
             "score": -45.889252239141754,

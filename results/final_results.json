@@ -44,6 +44,11 @@
         "reward_low_FP_rate": 56.665308225043105,
         "standard": 64.55346441254311
     },
+    "omnisim": {
+        "reward_low_FN_rate": 81.15985608820655,
+        "reward_low_FP_rate": 63.14375696456803,
+        "standard": 75.18805999437879
+    },
     "random": {
         "reward_low_FN_rate": 25.876351314080456,
         "reward_low_FP_rate": 5.763682319827586,

@@ -37,6 +37,7 @@ The NAB scores are normalized such that the maximum possible is 100.0 (i.e. the 
 | Detector      | Standard Profile | Reward Low FP | Reward Low FN |
 |---------------|------------------|---------------|---------------|
 | Perfect       | 100.0            | 100.0         | 100.0         |
+| [OmniSim](https://github.com/Deeven-Seru/omnisim) | 75.2     | 63.1     | 81.2     |
 | [ARTime](https://github.com/markNZed/ARTimeNAB.jl) | 74.9     | 65.1     | 80.4     |
 | [Numenta HTM](https://github.com/numenta/nupic)* | 70.5-69.7     | 62.6-61.7     | 75.2-74.2     |
 | [CAD OSE](https://github.com/smirmik/CAD)&dagger; | 69.9          | 67.0          | 73.2          |
